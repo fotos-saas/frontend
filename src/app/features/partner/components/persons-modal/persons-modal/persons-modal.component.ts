@@ -6,9 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
 import { ElectronService } from '../../../../../core/services/electron.service';
-import { forkJoin } from 'rxjs';
-import { PartnerTeacherService } from '../../../services/partner-teacher.service';
-import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../../../models/teacher.models';
 import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
@@ -27,15 +24,7 @@ import {
 import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { getPersonCategory, getCategoryOrder } from '../person-category.util';
-
-/** Szerkesztési sor state */
-interface EditRow {
-  name: string;
-  title: string;
-  note: string;
-  dirty: boolean;
-  saving: boolean;
-}
+import { PersonsModalActionsService } from '../persons-modal-actions.service';
 
 /**
  * Persons Modal - Személyek listája (grid + szerkesztő lista nézet + lightbox).
@@ -44,7 +33,7 @@ interface EditRow {
   selector: 'app-persons-modal',
   standalone: true,
   imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
-  providers: [BatchPortraitActionsService],
+  providers: [BatchPortraitActionsService, PersonsModalActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,12 +49,12 @@ export class PersonsModalComponent implements OnInit {
   readonly openUploadWizard = output<TypeFilter>();
   readonly addPersonsRequested = output<'student' | 'teacher'>();
 
-  private partnerService = inject(PartnerService);
-  private projectService = inject(PartnerProjectService);
-  private electronService = inject(ElectronService);
-  private teacherService = inject(PartnerTeacherService);
-  private destroyRef = inject(DestroyRef);
+  private readonly partnerService = inject(PartnerService);
+  private readonly projectService = inject(PartnerProjectService);
+  private readonly electronService = inject(ElectronService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly batchActions = inject(BatchPortraitActionsService);
+  readonly actions = inject(PersonsModalActionsService);
 
   loading = signal(true);
   allPersons = signal<TabloPersonItem[]>([]);
@@ -76,52 +65,21 @@ export class PersonsModalComponent implements OnInit {
   searchQuery = signal('');
   filtersOpen = signal(false);
 
-  // Szerkesztés mód
-  editMode = signal(false);
-  editData = signal<Map<number, EditRow>>(new Map());
-
-  // Személy szerkesztő dialógus
-  inlineEditPersonId = signal<number | null>(null);
-  inlineEditData = signal<{ name: string; title: string; note: string } | null>(null);
-  inlineEditSaving = signal(false);
-  readonly inlineEditPerson = computed(() => {
-    const id = this.inlineEditPersonId();
-    return id ? this.allPersons().find(p => p.id === id) ?? null : null;
-  });
-
   // Lightbox
   lightboxPerson = signal<TabloPersonItem | null>(null);
 
   // Fotó feltöltés dialógus
   photoUploadPerson = signal<PhotoUploadPerson | null>(null);
 
-  // Törlés megerősítés
-  deleteConfirmPerson = signal<TabloPersonItem | null>(null);
-
-  // Batch törlés megerősítés
-  batchDeleteConfirm = signal(false);
-  batchDeleting = signal(false);
-
-  // Batch portrait dialógus
-  batchPortraitPersons = signal<TabloPersonItem[] | null>(null);
-
-  // Batch crop dialógus
-  batchCropPersons = signal<TabloPersonItem[] | null>(null);
+  // Crop beállítás
   cropEnabled = signal(false);
-
-  // Teacher link & photo chooser dialog
-  showTeacherLinkDialog = signal(false);
-  showPhotoChooserDialog = signal(false);
-  linkDialogTeacher = signal<TeacherListItem | null>(null);
-  linkDialogAllTeachers = signal<TeacherListItem[]>([]);
-  photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
-  photoChooserMode = signal<PhotoChooserMode | null>(null);
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
   extraNamesDirty = signal(false);
   extraNamesSaving = signal(false);
-  /** Aktuális formátum: a szöveg tartalom alapján automatikusan meghatározzuk */
+  extraNamesCopied = signal(false);
+
   readonly extraNamesInline = computed(() => {
     const text = this.currentExtraText();
     return !text || !text.includes('\n');
@@ -140,14 +98,19 @@ export class PersonsModalComponent implements OnInit {
   readonly teacherCount = computed(() => this.allPersons().filter(p => p.type === 'teacher').length);
   readonly withoutPhotoCount = computed(() => this.allPersons().filter(p => !p.hasPhoto).length);
 
-  /** Az aktív tab (typeFilter) személyeinek száma */
   readonly activeGroupCount = computed(() =>
     this.allPersons().filter(p => p.type === this.typeFilter()).length
   );
-  /** Az aktív tab kép nélküli személyeinek száma */
   readonly activeGroupWithoutPhotoCount = computed(() =>
     this.allPersons().filter(p => p.type === this.typeFilter() && !p.hasPhoto).length
   );
+
+  readonly inlineEditPerson = computed(() => {
+    const id = this.actions.inlineEditPersonId();
+    return id ? this.allPersons().find(p => p.id === id) ?? null : null;
+  });
+
+  readonly hasDirtyEdits = computed(() => this.actions.hasDirtyEdits());
 
   readonly filteredPersons = computed(() => {
     let result = this.allPersons();
@@ -161,7 +124,6 @@ export class PersonsModalComponent implements OnInit {
     if (this.showOnlyWithoutPhoto()) {
       result = result.filter(p => !p.hasPhoto);
     }
-    // Tanár tab: kategória szerinti rendezés (vezetőség → osztályfőnök → többi)
     if (isTeacherTab) {
       result = [...result].sort((a, b) =>
         getCategoryOrder(getPersonCategory(a.title)) - getCategoryOrder(getPersonCategory(b.title))
@@ -183,13 +145,7 @@ export class PersonsModalComponent implements OnInit {
     return this.typeFilter() === 'teacher' ? en.teachers : en.students;
   });
 
-  readonly hasDirtyEdits = computed(() => {
-    const data = this.editData();
-    for (const row of data.values()) {
-      if (row.dirty) return true;
-    }
-    return false;
-  });
+  get isElectron(): boolean { return this.electronService.isElectron; }
 
   ngOnInit(): void {
     const initial = this.initialTypeFilter();
@@ -214,92 +170,7 @@ export class PersonsModalComponent implements OnInit {
     });
   }
 
-  toggleEditMode(): void {
-    if (this.editMode()) { this.editMode.set(false); this.editData.set(new Map()); return; }
-    const map = new Map<number, EditRow>();
-    for (const p of this.filteredPersons()) map.set(p.id, { name: p.name, title: p.title || '', note: p.note || '', dirty: false, saving: false });
-    this.editData.set(map);
-    this.editMode.set(true);
-  }
-
-  private isDirty(row: EditRow, person: TabloPersonItem | undefined): boolean {
-    if (!person) return false;
-    return row.name !== person.name || row.title !== (person.title || '') || row.note !== (person.note || '');
-  }
-
-  onEditFieldChange(personId: number, field: 'name' | 'title' | 'note', value: string): void {
-    const data = new Map(this.editData());
-    const row = data.get(personId);
-    if (!row) return;
-    const person = this.allPersons().find(p => p.id === personId);
-    const updated = { ...row, [field]: value };
-    data.set(personId, { ...updated, dirty: this.isDirty(updated, person) });
-    this.editData.set(data);
-  }
-
-  getEditRow(personId: number): EditRow | undefined {
-    return this.editData().get(personId);
-  }
-
-  saveRow(personId: number): void {
-    const row = this.editData().get(personId);
-    if (!row?.dirty || row.saving || !row.name.trim()) return;
-
-    this.setEditRow(personId, { ...row, saving: true });
-    this.projectService.updatePerson(this.projectId(), personId, {
-      name: row.name.trim(), title: row.title.trim() || null, note: row.note.trim() || null,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.updatePersonInList(personId, { name: res.data.name, title: res.data.title, note: res.data.note });
-        this.setEditRow(personId, { name: res.data.name, title: res.data.title || '', note: res.data.note || '', dirty: false, saving: false });
-      },
-      error: () => {
-        const r = this.editData().get(personId);
-        if (r) this.setEditRow(personId, { ...r, saving: false });
-      },
-    });
-  }
-
-  private setEditRow(personId: number, row: EditRow): void {
-    const data = new Map(this.editData());
-    data.set(personId, row);
-    this.editData.set(data);
-  }
-
-  saveAllDirty(): void {
-    for (const [id, row] of this.editData()) { if (row.dirty && !row.saving) this.saveRow(id); }
-  }
-
-  // --- Inline edit (grid nézetben) ---
-
-  onInlineEdit(person: TabloPersonItem): void {
-    this.inlineEditPersonId.set(person.id);
-    this.inlineEditData.set({ name: person.name, title: person.title || '', note: person.note || '' });
-    this.inlineEditSaving.set(false);
-  }
-
-  closeInlineEdit(): void {
-    this.inlineEditPersonId.set(null);
-    this.inlineEditData.set(null);
-    this.inlineEditSaving.set(false);
-  }
-
-  saveInlineEdit(): void {
-    const personId = this.inlineEditPersonId();
-    const data = this.inlineEditData();
-    if (!personId || !data || !data.name.trim() || this.inlineEditSaving()) return;
-
-    this.inlineEditSaving.set(true);
-    this.projectService.updatePerson(this.projectId(), personId, {
-      name: data.name.trim(), title: data.title.trim() || null, note: data.note.trim() || null,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.updatePersonInList(personId, { name: res.data.name, title: res.data.title, note: res.data.note });
-        this.closeInlineEdit();
-      },
-      error: () => this.inlineEditSaving.set(false),
-    });
-  }
+  // --- Fotó feltöltés / lightbox ---
 
   openPhotoUploadDialog(person: TabloPersonItem): void {
     this.photoUploadPerson.set({ id: person.id, name: person.name, type: person.type as 'student' | 'teacher', archiveId: person.archiveId ?? null });
@@ -326,33 +197,12 @@ export class PersonsModalComponent implements OnInit {
     }
   }
 
-  private updatePersonInList(personId: number, patch: Partial<TabloPersonItem>): void {
+  updatePersonInList(personId: number, patch: Partial<TabloPersonItem>): void {
     this.allPersons.set(this.allPersons().map(p => p.id === personId ? { ...p, ...patch } : p));
   }
 
-  // --- Személy törlés ---
-  deletePerson(person: TabloPersonItem): void {
-    this.deleteConfirmPerson.set(person);
-  }
+  // --- Extra nevek ---
 
-  confirmDeletePerson(): void {
-    const person = this.deleteConfirmPerson();
-    if (!person) return;
-    this.projectService.deletePerson(this.projectId(), person.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.allPersons.set(this.allPersons().filter(p => p.id !== person.id));
-          const data = new Map(this.editData()); data.delete(person.id); this.editData.set(data);
-          this.deleteConfirmPerson.set(null);
-        },
-        error: () => this.deleteConfirmPerson.set(null),
-      });
-  }
-
-  cancelDeletePerson(): void { this.deleteConfirmPerson.set(null); }
-
-  // --- Extra nevek (tanítottak még) ---
   onExtraNamesChange(field: 'students' | 'teachers', value: string): void {
     this.extraNames.set({ ...this.extraNames(), [field]: value });
     this.extraNamesDirty.set(true);
@@ -382,15 +232,11 @@ export class PersonsModalComponent implements OnInit {
     const field = this.typeFilter() === 'teacher' ? 'teachers' : 'students';
     const text = this.extraNames()[field];
     if (inline) {
-      // Egymás alá → sorba (vesszővel)
       this.onExtraNamesChange(field, text.split('\n').map(n => n.trim()).filter(Boolean).join(', '));
     } else {
-      // Sorba → egymás alá (newline-nal)
       this.onExtraNamesChange(field, text.split(',').map(n => n.trim()).filter(Boolean).join('\n'));
     }
   }
-
-  extraNamesCopied = signal(false);
 
   copyExtraNames(): void {
     const text = this.currentExtraText();
@@ -400,14 +246,11 @@ export class PersonsModalComponent implements OnInit {
     setTimeout(() => this.extraNamesCopied.set(false), 1500);
   }
 
-  // --- Batch portré háttércsere (CMD/Ctrl+kattintás kijelölés) ---
+  // --- Kijelölés / kártya kattintás ---
 
-  get isElectron(): boolean { return this.electronService.isElectron; }
-
-  /** CMD/Ctrl+A → összes kijelölése (vagy kijelölés törlése ha már mind ki van jelölve) */
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'a' && !this.editMode()) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'a' && !this.actions.editMode()) {
       event.preventDefault();
       this.selectAll();
     }
@@ -420,12 +263,10 @@ export class PersonsModalComponent implements OnInit {
     if (allSelected) {
       this.batchActions.resetSelection();
     } else {
-      const ids = new Set(persons.map(p => p.id));
-      this.batchActions.selectedPersonIds.set(ids);
+      this.batchActions.selectedPersonIds.set(new Set(persons.map(p => p.id)));
     }
   }
 
-  /** Kártya kattintás: CMD/Ctrl → kijelölés, sima kattintás → lightbox (vagy kijelölés törlése) */
   onCardClick(person: TabloPersonItem, event: MouseEvent): void {
     if (event.metaKey || event.ctrlKey) {
       this.batchActions.togglePersonSelection(person.id);
@@ -434,162 +275,5 @@ export class PersonsModalComponent implements OnInit {
     } else {
       this.openLightbox(person);
     }
-  }
-
-  // --- Batch törlés ---
-
-  batchDeletePersons(): void {
-    if (this.batchActions.selectedCount() === 0) return;
-    this.batchDeleteConfirm.set(true);
-  }
-
-  confirmBatchDelete(): void {
-    const ids = Array.from(this.batchActions.selectedPersonIds());
-    if (ids.length === 0) return;
-    this.batchDeleting.set(true);
-    this.projectService.deletePersonsBatch(this.projectId(), ids)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          const deletedSet = new Set(ids);
-          this.allPersons.set(this.allPersons().filter(p => !deletedSet.has(p.id)));
-          this.batchActions.resetSelection();
-          this.batchDeleteConfirm.set(false);
-          this.batchDeleting.set(false);
-        },
-        error: () => {
-          this.batchDeleteConfirm.set(false);
-          this.batchDeleting.set(false);
-        },
-      });
-  }
-
-  cancelBatchDelete(): void {
-    this.batchDeleteConfirm.set(false);
-  }
-
-  startBatchPortrait(): void {
-    const selectedIds = this.batchActions.selectedPersonIds();
-    const persons = this.filteredPersons().filter(p => selectedIds.has(p.id));
-    if (persons.length === 0) return;
-    this.batchPortraitPersons.set(persons);
-  }
-
-  onBatchPortraitCompleted(): void {
-    this.batchPortraitPersons.set(null);
-    this.batchActions.resetSelection();
-    this.loadPersons(true);
-  }
-
-  // --- Batch crop (automatikus vágás) ---
-
-  startBatchCrop(): void {
-    const selectedIds = this.batchActions.selectedPersonIds();
-    const persons = this.filteredPersons().filter(p => selectedIds.has(p.id));
-    if (persons.length === 0) return;
-    this.batchCropPersons.set(persons);
-  }
-
-  onBatchCropCompleted(): void {
-    this.batchCropPersons.set(null);
-    this.batchActions.resetSelection();
-    this.loadPersons(true);
-  }
-
-  // --- Teacher link & photo chooser ---
-
-  openLinkDialog(person: TabloPersonItem): void {
-    const doOpen = (archiveId: number) => {
-      forkJoin({
-        teacher: this.teacherService.getTeacher(archiveId),
-        allTeachers: this.teacherService.getAllTeachers(),
-      }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: ({ teacher: res, allTeachers }) => {
-          const t = res.data;
-          const teacherListItem: TeacherListItem = {
-            id: t.id,
-            canonicalName: t.canonicalName,
-            titlePrefix: t.titlePrefix,
-            position: t.position ?? null,
-            fullDisplayName: t.fullDisplayName,
-            schoolId: t.schoolId,
-            schoolName: t.schoolName ?? null,
-            isActive: true,
-            photoThumbUrl: t.photoThumbUrl ?? null,
-            photoMiniThumbUrl: t.photoThumbUrl ?? null,
-            photoUrl: t.photoUrl ?? null,
-            aliasesCount: t.aliases?.length ?? 0,
-            photosCount: t.photos?.length ?? 0,
-            linkedGroup: t.linkedGroup ?? null,
-            groupSize: 0,
-            projectsCount: t.projects?.length ?? 0,
-          };
-          const enriched = allTeachers.some(at => at.id === teacherListItem.id)
-            ? allTeachers
-            : [teacherListItem, ...allTeachers];
-          this.linkDialogTeacher.set(teacherListItem);
-          this.linkDialogAllTeachers.set(enriched);
-          this.showTeacherLinkDialog.set(true);
-        },
-      });
-    };
-
-    if (person.archiveId) {
-      doOpen(person.archiveId);
-    } else {
-      // Archív bejegyzés automatikus létrehozása
-      this.projectService.ensurePersonArchive(this.projectId(), person.id)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (res) => {
-            person.archiveId = res.data.archiveId;
-            doOpen(res.data.archiveId);
-          },
-        });
-    }
-  }
-
-  onTeacherLinked(): void {
-    this.showTeacherLinkDialog.set(false);
-    this.loadPersons(true);
-  }
-
-  openPhotoChooser(person: TabloPersonItem): void {
-    if (person.linkedGroup) {
-      // Linked group flow — csoport összes fotója
-      const group = person.linkedGroup;
-      this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (res) => {
-          this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: group });
-          this.showPhotoChooserDialog.set(true);
-        },
-      });
-    } else if (person.archiveId && (person.photosCount ?? 0) > 1) {
-      // Egyedi tanár flow — saját fotói
-      this.teacherService.getTeacherPhotos(person.archiveId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (res) => {
-          this.photoChooserPhotos.set(res.data || []);
-          this.photoChooserMode.set({ kind: 'individual', archiveId: person.archiveId!, teacherName: person.name });
-          this.showPhotoChooserDialog.set(true);
-        },
-      });
-    }
-  }
-
-  onOpenPhotoChooserFromLink(groupId: string): void {
-    this.showTeacherLinkDialog.set(false);
-    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.photoChooserPhotos.set(res.data || []);
-        this.photoChooserMode.set({ kind: 'linkedGroup', linkedGroup: groupId });
-        this.showPhotoChooserDialog.set(true);
-      },
-    });
-  }
-
-  onPhotoChosen(): void {
-    this.showPhotoChooserDialog.set(false);
-    this.loadPersons(true);
   }
 }

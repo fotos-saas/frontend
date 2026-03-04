@@ -278,6 +278,22 @@
           </button>
         </div>
 
+        <!-- Elrendezés gomb -->
+        <button
+          class="toolbar-btn toolbar-btn--relocate"
+          [disabled]="relocating() || (!state.hasChanges() && !state.hasSelection())"
+          [class.is-relocating]="relocating()"
+          (click)="relocateClicked.emit()"
+          matTooltip="Kijelölt layerek áthelyezése a Photoshopban"
+        >
+          <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="16" />
+          @if (!relocating()) {
+            <span>Elrendezés</span>
+          } @else {
+            <span>Áthelyezés...</span>
+          }
+        </button>
+
         <!-- Pozíciók gomb + beállítások -->
         <div class="names-group">
           <button

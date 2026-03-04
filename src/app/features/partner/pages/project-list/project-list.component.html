@@ -13,20 +13,20 @@
         <button
           type="button"
           class="btn-secondary btn-with-badge"
-          [disabled]="syncing()"
-          (click)="triggerSync()"
-          [matTooltip]="pendingSyncCount() !== null && pendingSyncCount()! > 0
-            ? pendingSyncCount() + ' új projekt szinkronizálható'
+          [disabled]="actions.syncing()"
+          (click)="actions.triggerSync()"
+          [matTooltip]="actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0
+            ? actions.pendingSyncCount() + ' új projekt szinkronizálható'
             : 'Megrendeléses projektek szinkronizálása a régi rendszerből'"
         >
-          @if (syncing()) {
+          @if (actions.syncing()) {
             <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
           } @else {
             <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
           }
-          @if (pendingSyncCount() !== null && pendingSyncCount()! > 0) {
+          @if (actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0) {
             Szinkronizálás indítása
-            <span class="btn-badge">{{ pendingSyncCount() }}</span>
+            <span class="btn-badge">{{ actions.pendingSyncCount() }}</span>
           } @else {
             Szinkronizálás
           }
@@ -34,7 +34,7 @@
         <button
           type="button"
           class="btn-secondary btn-with-badge"
-          (click)="openCreatePreliminaryModal()"
+          (click)="actions.openCreatePreliminaryModal()"
         >
           <lucide-icon [name]="ICONS.CLOCK" [size]="18" />
           Új előzetes
@@ -48,7 +48,7 @@
         class="btn-primary"
         [disabled]="projectLimits() && !projectLimits()!.can_create"
         [matTooltip]="projectLimits() && !projectLimits()!.can_create ? 'Elérted a csomagodban elérhető maximum projektszámot' : ''"
-        (click)="openCreateModal()"
+        (click)="actions.openCreateModal(projectCreationMode())"
       >
         <lucide-icon [name]="ICONS.PLUS" [size]="18" />
         Új projekt
@@ -116,7 +116,7 @@
         <p>Próbálj más keresési feltételekkel!</p>
       } @else {
         <p>Még nincsenek projektek. Hozz létre egyet!</p>
-        <button type="button" class="btn-primary mt-4" (click)="openCreateModal()">
+        <button type="button" class="btn-primary mt-4" (click)="actions.openCreateModal(projectCreationMode())">
           <lucide-icon [name]="ICONS.PLUS" [size]="18" />
           Új projekt létrehozása
         </button>
@@ -137,18 +137,18 @@
       @for (project of projects(); track project.id; let i = $index) {
         <app-partner-project-card
           [project]="project"
-          [selected]="selectedProjectIds().has(project.id)"
+          [selected]="actions.selectedProjectIds().has(project.id)"
           [style.animation-delay]="i * 0.05 + 's'"
-          (cardClick)="onCardSelect($event.project, $event.event, i)"
-          (samplesClick)="openSamplesModal($event)"
-          (missingClick)="openMissingModal($event)"
-          (qrClick)="openQrModal($event)"
-          (awareClick)="toggleAware($event)"
-          (photosUploadedClick)="togglePhotosUploaded($event)"
+          (cardClick)="actions.onCardSelect($event.project, $event.event, i, projects())"
+          (samplesClick)="actions.openSamplesModal($event)"
+          (missingClick)="actions.openMissingModal($event)"
+          (qrClick)="actions.openQrModal($event)"
+          (awareClick)="actions.toggleAware($event)"
+          (photosUploadedClick)="actions.togglePhotosUploaded($event)"
           (orderDataClick)="openOrderDataDialog($event)"
-          (linkClick)="openLinkDialog($event)"
-          (deleteClick)="confirmDeleteProject($event)"
-          (statusChangeClick)="onStatusChange($event)"
+          (linkClick)="actions.openLinkDialog($event)"
+          (deleteClick)="actions.confirmDeleteProject($event)"
+          (statusChangeClick)="actions.onStatusChange($event)"
         />
       }
     </div>
@@ -166,92 +166,92 @@
 </div>
 
 <!-- Bulk akció sáv (multi-select) -->
-@if (selectedProjectIds().size > 0) {
+@if (actions.selectedProjectIds().size > 0) {
   <div class="bulk-action-bar">
     <div class="bulk-action-bar__info">
       <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-      <span>{{ selectedProjectIds().size }} projekt kijelölve</span>
+      <span>{{ actions.selectedProjectIds().size }} projekt kijelölve</span>
     </div>
     @if (isElectron) {
       <div class="bulk-action-bar__actions">
         @if (canBulkGeneratePsd()) {
-          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('generate-psd')">
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('generate-psd', projects())">
             PSD generálás
           </button>
         }
         @if (canBulkGenerateSample()) {
-          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('generate-sample')">
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('generate-sample', projects())">
             Minta
           </button>
         }
         @if (canBulkFinalize()) {
-          <button type="button" class="bulk-btn" (click)="addSelectedToBatch('finalize')">
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('finalize', projects())">
             Végl.
           </button>
         }
       </div>
     }
-    <button type="button" class="bulk-action-bar__close" (click)="clearSelection()">
+    <button type="button" class="bulk-action-bar__close" (click)="actions.clearSelection()">
       <lucide-icon [name]="ICONS.X" [size]="16" />
     </button>
   </div>
 }
 
 <!-- Samples Lightbox -->
-@if (samplesLightboxIndex() !== null) {
+@if (actions.samplesLightboxIndex() !== null) {
   <app-samples-lightbox
-    [samples]="lightboxSamples()"
-    [currentIndex]="samplesLightboxIndex()!"
-    (close)="closeSamplesLightbox()"
-    (navigate)="samplesLightboxIndex.set($event)"
+    [samples]="actions.lightboxSamples()"
+    [currentIndex]="actions.samplesLightboxIndex()!"
+    (close)="actions.closeSamplesLightbox()"
+    (navigate)="actions.samplesLightboxIndex.set($event)"
   />
 }
 
 <!-- Persons Modal -->
-@if (showMissingModal()) {
+@if (actions.showMissingModal()) {
   <app-persons-modal
-    [projectId]="selectedProject()!.id"
-    [projectName]="selectedProject()!.name"
-    (close)="closeMissingModal()"
-    (openUploadWizard)="openUploadWizardFromMissing($event)"
+    [projectId]="actions.selectedProject()!.id"
+    [projectName]="actions.selectedProject()!.name"
+    (close)="actions.closeMissingModal()"
+    (openUploadWizard)="actions.openUploadWizardFromMissing($event)"
   />
 }
 
 <!-- Photo Upload Wizard -->
-@if (showUploadWizard()) {
+@if (actions.showUploadWizard()) {
   <app-photo-upload-wizard
-    [projectId]="selectedProject()!.id"
-    [projectName]="selectedProject()!.name"
-    [initialAlbum]="uploadWizardAlbum()"
-    (close)="closeUploadWizard()"
-    (completed)="onUploadWizardCompleted($event)"
+    [projectId]="actions.selectedProject()!.id"
+    [projectName]="actions.selectedProject()!.name"
+    [initialAlbum]="actions.uploadWizardAlbum()"
+    (close)="actions.closeUploadWizard()"
+    (completed)="actions.onUploadWizardCompleted()"
   />
 }
 
 <!-- Create Project Modal (egyszerű mód) -->
-@if (showCreateModal()) {
+@if (actions.showCreateModal()) {
   <app-create-project-modal
-    (close)="closeCreateModal()"
-    (projectCreated)="onProjectCreated($event)"
+    (close)="actions.closeCreateModal()"
+    (projectCreated)="actions.onProjectCreated()"
   />
 }
 
 <!-- Create Project Wizard (varázsló mód) -->
-@if (showCreateWizard()) {
+@if (actions.showCreateWizard()) {
   <app-create-project-wizard-dialog
-    (close)="closeCreateWizard()"
-    (projectCreated)="onProjectCreated($event)"
+    (close)="actions.closeCreateWizard()"
+    (projectCreated)="actions.onProjectCreated()"
   />
 }
 
 <!-- QR Code Modal -->
-@if (showQrModal()) {
+@if (actions.showQrModal()) {
   <app-shared-qr-code-modal
-    [projectId]="selectedProject()!.id"
-    [projectName]="selectedProject()!.name"
+    [projectId]="actions.selectedProject()!.id"
+    [projectName]="actions.selectedProject()!.name"
     [qrService]="qrService"
-    (close)="closeQrModal()"
-    (qrCodeChanged)="onQrCodeChanged()"
+    (close)="actions.closeQrModal()"
+    (qrCodeChanged)="actions.onQrCodeChanged()"
   />
 }
 
@@ -259,29 +259,29 @@
 <ng-container #orderDataContainer></ng-container>
 
 <!-- Delete Project Confirmation -->
-@if (showDeleteConfirm()) {
+@if (actions.showDeleteConfirm()) {
   <app-confirm-dialog
     title="Projekt törlése"
-    [message]="'Biztosan törölni szeretnéd a \'' + deletingProjectName() + '\' projektet? Ez a művelet nem visszavonható, minden adat (képek, galéria, fórum) véglegesen törlődik!'"
+    [message]="'Biztosan törölni szeretnéd a \'' + actions.deletingProjectName() + '\' projektet? Ez a művelet nem visszavonható, minden adat (képek, galéria, fórum) véglegesen törlődik!'"
     confirmText="Végleges törlés"
-    [isSubmitting]="isDeleting()"
-    (resultEvent)="onDeleteResult($event)"
+    [isSubmitting]="actions.isDeleting()"
+    (resultEvent)="actions.onDeleteResult($event)"
   />
 }
 
 <!-- Create Preliminary Modal -->
-@if (showCreatePreliminaryModal()) {
+@if (actions.showCreatePreliminaryModal()) {
   <app-create-preliminary-modal
-    (close)="closeCreatePreliminaryModal()"
-    (created)="onPreliminaryCreated()"
+    (close)="actions.closeCreatePreliminaryModal()"
+    (created)="actions.onPreliminaryCreated()"
   />
 }
 
 <!-- Link Preliminary Dialog -->
-@if (showLinkDialog() && linkingProject()) {
+@if (actions.showLinkDialog() && actions.linkingProject()) {
   <app-link-preliminary-dialog
-    [project]="linkingProject()!"
-    (close)="closeLinkDialog()"
-    (linked)="onPreliminaryLinked()"
+    [project]="actions.linkingProject()!"
+    (close)="actions.closeLinkDialog()"
+    (linked)="actions.onPreliminaryLinked()"
   />
 }

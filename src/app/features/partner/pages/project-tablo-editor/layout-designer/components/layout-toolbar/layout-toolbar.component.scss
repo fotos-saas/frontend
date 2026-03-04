@@ -8,6 +8,11 @@
       flex-shrink: 0;
       position: relative;
       z-index: 20;
+      -webkit-app-region: drag;
+
+      button, select, input, .source-badge {
+        -webkit-app-region: no-drag;
+      }
     }
 
     .layout-toolbar__left {
@@ -299,6 +304,15 @@
         border-radius: 0 6px 6px 0;
         border-left: 1px solid rgba(167, 139, 250, 0.3);
         &:hover { background: rgba(167, 139, 250, 0.25); color: #c4b5fd; }
+      }
+
+      &--relocate {
+        padding: 0 10px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        &:hover:not(:disabled) { background: rgba(59, 130, 246, 0.25); color: #60a5fa; }
+        &:disabled { opacity: 0.4; }
+        &.is-relocating lucide-icon { animation: spin 1s linear infinite; }
       }
 
       &--positions {

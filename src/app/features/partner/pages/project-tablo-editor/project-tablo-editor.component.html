@@ -47,11 +47,11 @@
     @if (activeTab() === 'commands') {
       <div class="tab-content" role="tabpanel">
         <!-- PSD útvonal infó -->
-        @if (currentPsdPath() || resolvedPsdPath()) {
+        @if (actions.currentPsdPath() || actions.resolvedPsdPath()) {
           <div class="psd-path-info">
             <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
-            <span class="psd-path-info__path">{{ currentPsdPath() || resolvedPsdPath() }}</span>
-            @if (psdExists()) {
+            <span class="psd-path-info__path">{{ actions.currentPsdPath() || actions.resolvedPsdPath() }}</span>
+            @if (actions.psdExists()) {
               <span class="psd-path-info__status psd-path-info__status--ok">
                 <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" />
                 Létezik
@@ -67,7 +67,7 @@
 
         <!-- Tabló generálása / Projekt megnyitása -->
         <div class="command-card">
-          @if (psdExists()) {
+          @if (actions.psdExists()) {
             <!-- PSD már létezik → megnyitás gombok -->
             <div class="command-card__header">
               <lucide-icon [name]="ICONS.FILE_CHECK" [size]="20" />
@@ -101,10 +101,10 @@
               <div class="command-card__actions">
                 <button
                   class="btn btn--primary"
-                  [disabled]="!currentPsdPath() || opening()"
-                  (click)="openPsdFile()"
+                  [disabled]="!actions.currentPsdPath() || actions.opening()"
+                  (click)="actions.openPsdFile()"
                 >
-                  @if (opening()) {
+                  @if (actions.opening()) {
                     <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                     Megnyitás...
                   } @else {
@@ -114,8 +114,8 @@
                 </button>
                 <button
                   class="btn btn--outline"
-                  [disabled]="!currentPsdPath()"
-                  (click)="openProjectFolder()"
+                  [disabled]="!actions.currentPsdPath()"
+                  (click)="actions.openProjectFolder()"
                 >
                   <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
                   Projekt mappa megnyitása
@@ -123,18 +123,18 @@
                 @if (snapshotService.snapshots().length > 0) {
                   <button
                     class="btn btn--outline"
-                    (click)="openLayoutDesigner()"
+                    (click)="actions.openLayoutDesigner(selectedSize(), project())"
                   >
                     <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
                     Vizuális szerkesztő
                   </button>
-                } @else if (psdExists() && psdHasLayouts()) {
+                } @else if (actions.psdExists() && actions.psdHasLayouts()) {
                   <button
                     class="btn btn--outline"
-                    [disabled]="generatingInitialSnapshot()"
-                    (click)="generateSnapshotFromExistingPsd()"
+                    [disabled]="actions.generatingInitialSnapshot()"
+                    (click)="actions.generateSnapshotFromExistingPsd(selectedSize(), project(), actions.openLayoutDesigner.bind(actions, selectedSize(), project()))"
                   >
-                    @if (generatingInitialSnapshot()) {
+                    @if (actions.generatingInitialSnapshot()) {
                       <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                       Kiolvasás...
                     } @else {
@@ -185,10 +185,10 @@
 
               <button
                 class="btn btn--primary btn--generate"
-                [disabled]="!selectedSize() || generating()"
-                (click)="generatePsd()"
+                [disabled]="!selectedSize() || actions.generating()"
+                (click)="actions.generatePsd()"
               >
-                @if (generating()) {
+                @if (actions.generating()) {
                   <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                   Generálás...
                 } @else {
@@ -223,7 +223,7 @@
               <button
                 class="btn btn--primary"
                 [disabled]="snapshotService.updatingSnapshot() || snapshotService.savingSnapshot()"
-                (click)="updateSnapshot()"
+                (click)="actions.updateSnapshot(selectedSize(), project())"
               >
                 @if (snapshotService.updatingSnapshot()) {
                   <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
@@ -257,7 +257,7 @@
                 <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
                 Pillanatképek betöltése...
               </div>
-            } @else if (snapshotService.snapshots().length === 0 && psdExists() && !psdHasLayouts()) {
+            } @else if (snapshotService.snapshots().length === 0 && actions.psdExists() && !actions.psdHasLayouts()) {
               <div class="command-card__action">
                 <p class="command-card__hint">
                   A PSD fájl megvan, de még nincs pillanatkép.
@@ -265,10 +265,10 @@
                 </p>
                 <button
                   class="btn btn--primary btn--generate"
-                  [disabled]="generatingInitialSnapshot()"
-                  (click)="generateSnapshotFromExistingPsd()"
+                  [disabled]="actions.generatingInitialSnapshot()"
+                  (click)="actions.generateSnapshotFromExistingPsd(selectedSize(), project(), actions.openLayoutDesigner.bind(actions, selectedSize(), project()))"
                 >
-                  @if (generatingInitialSnapshot()) {
+                  @if (actions.generatingInitialSnapshot()) {
                     <span class="spinner"></span> Elrendezés kiolvasása...
                   } @else {
                     <lucide-icon [name]="ICONS.SCAN" [size]="16" />
@@ -307,9 +307,9 @@
                           class="snapshot-item__edit-input"
                           [value]="snapshotService.editingName()"
                           (input)="snapshotService.editingName.set($any($event.target).value)"
-                          (keydown.enter)="commitSnapshotRename()"
+                          (keydown.enter)="actions.commitSnapshotRename(selectedSize(), project())"
                           (keydown.escape)="snapshotService.cancelEditing()"
-                          (blur)="commitSnapshotRename()"
+                          (blur)="actions.commitSnapshotRename(selectedSize(), project())"
                         />
                       } @else {
                         <span
@@ -334,7 +334,7 @@
                       <button
                         class="btn btn--sm btn--primary"
                         [disabled]="snapshotService.restoringSnapshotPath() !== null"
-                        (click)="restoreSnapshot(group.original)"
+                        (click)="actions.restoreSnapshot(group.original)"
                         matTooltip="Visszaállítás"
                 matTooltipPosition="right"
                       >
@@ -346,7 +346,7 @@
                       </button>
                       <button
                         class="btn btn--sm btn--outline"
-                        (click)="deleteSnapshot(group.original)"
+                        (click)="actions.deleteSnapshot(group.original, selectedSize(), project())"
                         matTooltip="Törlés"
                 matTooltipPosition="right"
                       >
@@ -367,9 +367,9 @@
                               class="snapshot-item__edit-input"
                               [value]="snapshotService.editingName()"
                               (input)="snapshotService.editingName.set($any($event.target).value)"
-                              (keydown.enter)="commitSnapshotRename()"
+                              (keydown.enter)="actions.commitSnapshotRename(selectedSize(), project())"
                               (keydown.escape)="snapshotService.cancelEditing()"
-                              (blur)="commitSnapshotRename()"
+                              (blur)="actions.commitSnapshotRename(selectedSize(), project())"
                             />
                           } @else {
                             <span
@@ -389,7 +389,7 @@
                           <button
                             class="btn btn--sm btn--primary"
                             [disabled]="snapshotService.restoringSnapshotPath() !== null"
-                            (click)="restoreSnapshot(snap)"
+                            (click)="actions.restoreSnapshot(snap)"
                             matTooltip="Visszaállítás"
                 matTooltipPosition="right"
                           >
@@ -401,7 +401,7 @@
                           </button>
                           <button
                             class="btn btn--sm btn--outline"
-                            (click)="deleteSnapshot(snap)"
+                            (click)="actions.deleteSnapshot(snap, selectedSize(), project())"
                             matTooltip="Törlés"
                 matTooltipPosition="right"
                           >
@@ -445,7 +445,7 @@
           @if (!isConfigured() && !checking()) {
             <div class="settings-path">
               <div class="settings-path__empty">Nincs beállítva</div>
-              <button class="btn btn--outline" (click)="selectPsPath()">
+              <button class="btn btn--outline" (click)="actions.selectPsPath()">
                 <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
                 Tallózás
               </button>
@@ -692,17 +692,17 @@
     }
 
     <!-- Üzenetek -->
-    @if (error()) {
+    @if (actions.error()) {
       <div class="message message--error">
         <lucide-icon [name]="ICONS.X_CIRCLE" [size]="16" />
-        {{ error() }}
+        {{ actions.error() }}
       </div>
     }
 
-    @if (successMessage()) {
+    @if (actions.successMessage()) {
       <div class="message message--success">
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16" />
-        {{ successMessage() }}
+        {{ actions.successMessage() }}
       </div>
     }
   } @else {
@@ -741,7 +741,7 @@
           <button
             class="snapshot-picker-item"
             [disabled]="snapshotService.updatingSnapshot()"
-            (click)="updateSnapshotWithPick(snap)"
+            (click)="actions.updateSnapshotWithPick(snap, selectedSize(), project())"
           >
             <div class="snapshot-picker-item__info">
               <span class="snapshot-picker-item__name">{{ snap.snapshotName }}</span>
@@ -780,7 +780,7 @@
     variant="create"
     [isSubmitting]="snapshotService.savingSnapshot()"
     (closeEvent)="snapshotService.closeSaveDialog()"
-    (submitEvent)="snapshotService.snapshotName().trim() ? saveSnapshotFromDialog() : null"
+    (submitEvent)="snapshotService.snapshotName().trim() ? actions.saveSnapshotFromDialog(selectedSize(), project()) : null"
   >
     <div dialogBody>
       <input
@@ -799,7 +799,7 @@
       <button
         class="btn btn--primary"
         [disabled]="!snapshotService.snapshotName().trim() || snapshotService.savingSnapshot()"
-        (click)="saveSnapshotFromDialog()"
+        (click)="actions.saveSnapshotFromDialog(selectedSize(), project())"
       >
         @if (snapshotService.savingSnapshot()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
@@ -819,7 +819,7 @@
     [layers]="snapshotService.restoreDialogLayers()"
     [isRestoring]="snapshotService.restoringSnapshotPath() !== null"
     (closeEvent)="snapshotService.closeRestoreDialog()"
-    (restoreEvent)="restoreWithGroups($event)"
+    (restoreEvent)="actions.restoreWithGroups($event, selectedSize(), project())"
   />
 }
 
@@ -835,26 +835,26 @@
 }
 
 <!-- Vizuális szerkesztő (page-card KÍVÜL) -->
-@if (showLayoutDesigner() && designerSnapshotPath() && designerPsdPath() && designerBoardConfig() && projectData()) {
+@if (actions.showLayoutDesigner() && actions.designerSnapshotPath() && actions.designerPsdPath() && actions.designerBoardConfig() && projectData()) {
   <app-layout-designer
-    [snapshotPath]="designerSnapshotPath()!"
-    [psdPath]="designerPsdPath()!"
+    [snapshotPath]="actions.designerSnapshotPath()!"
+    [psdPath]="actions.designerPsdPath()!"
     [persons]="persons()"
-    [boardConfig]="designerBoardConfig()!"
+    [boardConfig]="actions.designerBoardConfig()!"
     [projectId]="projectData()!.id"
     [projectName]="projectData()!.name"
     [schoolName]="projectData()!.school?.name ?? null"
     [className]="projectData()!.className ?? null"
     [extraNames]="projectExtraNames()"
-    (closeEvent)="closeLayoutDesigner()"
-    (saveEvent)="onDesignerSave($event)"
-    (autoSaveEvent)="onDesignerAutoSave($event)"
+    (closeEvent)="actions.closeLayoutDesigner()"
+    (saveEvent)="actions.onDesignerSave($event)"
+    (autoSaveEvent)="actions.onDesignerAutoSave($event, selectedSize(), project(), loadSnapshots.bind(this))"
     (extraNamesUpdated)="onExtraNamesUpdated($event)"
   />
 }
 
 <!-- Vizuális szerkesztő mentés elnevezés dialógus (page-card KÍVÜL) -->
-@if (showDesignerSaveDialog()) {
+@if (actions.showDesignerSaveDialog()) {
   <app-dialog-wrapper
     headerStyle="flat"
     theme="purple"
@@ -863,30 +863,30 @@
     description="Add meg a pillanatkép nevét. A szerkesztett elrendezés új pillanatképként kerül mentésre."
     size="sm"
     variant="create"
-    [isSubmitting]="designerSaving()"
-    (closeEvent)="cancelDesignerSave()"
-    (submitEvent)="designerSaveName().trim() ? confirmDesignerSave() : null"
+    [isSubmitting]="actions.designerSaving()"
+    (closeEvent)="actions.cancelDesignerSave()"
+    (submitEvent)="actions.designerSaveName().trim() ? actions.confirmDesignerSave(selectedSize(), project(), loadSnapshots.bind(this)) : null"
   >
     <div dialogBody>
       <input
         type="text"
         class="snapshot-dialog__input"
         placeholder="pl. Végleges elrendezés"
-        [value]="designerSaveName()"
-        (input)="designerSaveName.set($any($event.target).value)"
+        [value]="actions.designerSaveName()"
+        (input)="actions.designerSaveName.set($any($event.target).value)"
       />
     </div>
 
     <div dialogFooter>
-      <button class="btn btn--outline" (click)="cancelDesignerSave()">
+      <button class="btn btn--outline" (click)="actions.cancelDesignerSave()">
         Mégse
       </button>
       <button
         class="btn btn--primary"
-        [disabled]="!designerSaveName().trim() || designerSaving()"
-        (click)="confirmDesignerSave()"
+        [disabled]="!actions.designerSaveName().trim() || actions.designerSaving()"
+        (click)="actions.confirmDesignerSave(selectedSize(), project(), loadSnapshots.bind(this))"
       >
-        @if (designerSaving()) {
+        @if (actions.designerSaving()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
           Mentés...
         } @else {
@@ -899,14 +899,14 @@
 }
 
 <!-- Elrendezési minta dialógus (page-card KÍVÜL) -->
-@if (showLayoutDialog()) {
+@if (actions.showLayoutDialog()) {
   <app-tablo-layout-dialog
-    [initialConfig]="lastLayoutConfig()"
+    [initialConfig]="actions.lastLayoutConfig()"
     [studentCount]="studentCountForDialog()"
     [teacherCount]="teacherCountForDialog()"
     [boardDimensions]="boardDimensionsForDialog()"
-    (apply)="onLayoutConfigApplyInternal($event)"
-    (close)="closeLayoutDialog()"
+    (apply)="actions.onLayoutConfigApply($event, selectedSize(), project(), persons())"
+    (close)="actions.closeLayoutDialog()"
   />
 }
 

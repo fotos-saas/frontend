@@ -80,11 +80,11 @@
           <h3>{{ emptyState().title }}</h3>
           <p>{{ emptyState().text }}</p>
         </div>
-      } @else if (editMode()) {
+      } @else if (actions.editMode()) {
         <!-- Szerkesztő lista nézet -->
         <div class="edit-list">
           @for (person of filteredPersons(); track person.id; let i = $index) {
-            @let row = getEditRow(person.id);
+            @let row = actions.getEditRow(person.id);
             <div class="edit-row" [class.edit-row--dirty]="row?.dirty" [class.edit-row--saving]="row?.saving">
               <!-- Thumb + kamera feltöltés -->
               <div class="edit-thumb-wrap">
@@ -111,8 +111,8 @@
                   class="edit-field edit-field--name"
                   placeholder="Név"
                   [value]="row?.name ?? person.name"
-                  (input)="onEditFieldChange(person.id, 'name', $any($event.target).value)"
-                  (keydown.enter)="saveRow(person.id)"
+                  (input)="actions.onEditFieldChange(person.id, 'name', $any($event.target).value, allPersons())"
+                  (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
                 />
                 <!-- Title input (csak tanárnál) -->
                 @if (person.type === 'teacher') {
@@ -121,8 +121,8 @@
                     class="edit-field edit-field--title"
                     placeholder="Pozíció/tantárgy"
                     [value]="row?.title ?? (person.title || '')"
-                    (input)="onEditFieldChange(person.id, 'title', $any($event.target).value)"
-                    (keydown.enter)="saveRow(person.id)"
+                    (input)="actions.onEditFieldChange(person.id, 'title', $any($event.target).value, allPersons())"
+                    (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
                   />
                 }
                 <!-- Megjegyzés -->
@@ -131,8 +131,8 @@
                   class="edit-field edit-field--note"
                   placeholder="Megjegyzés..."
                   [value]="row?.note ?? (person.note || '')"
-                  (input)="onEditFieldChange(person.id, 'note', $any($event.target).value)"
-                  (keydown.enter)="saveRow(person.id)"
+                  (input)="actions.onEditFieldChange(person.id, 'note', $any($event.target).value, allPersons())"
+                  (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
                 />
               </div>
 
@@ -140,7 +140,7 @@
               @if (row?.dirty) {
                 <button
                   class="edit-save-btn"
-                  (click)="saveRow(person.id)"
+                  (click)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
                   [disabled]="row?.saving"
                   matTooltip="Mentés"
                 >
@@ -155,7 +155,7 @@
               <!-- Törlés gomb -->
               <button
                 class="edit-delete-btn"
-                (click)="deletePerson(person)"
+                (click)="actions.deletePerson(person)"
                 matTooltip="Személy törlése"
               >
                 <lucide-icon [name]="ICONS.DELETE" [size]="14" />
@@ -167,7 +167,7 @@
         <!-- Összes mentése gomb -->
         @if (hasDirtyEdits()) {
           <div class="save-all-bar">
-            <button type="button" class="save-all-btn" (click)="saveAllDirty()">
+            <button type="button" class="save-all-btn" (click)="actions.saveAllDirty(projectId(), updatePersonInList.bind(this))">
               <lucide-icon [name]="ICONS.SAVE" [size]="16" />
               Összes módosítás mentése
             </button>
@@ -192,10 +192,10 @@
                 [person]="person"
                 [animationDelay]="i * 0.05 + 's'"
                 (cardClick)="$event"
-                (editClick)="onInlineEdit($event)"
+                (editClick)="actions.onInlineEdit($event)"
                 (photoUploadClick)="openPhotoUploadDialog($event)"
-                (linkClick)="openLinkDialog($event)"
-                (photoChooserClick)="openPhotoChooser($event)"
+                (linkClick)="actions.openLinkDialog($event, projectId())"
+                (photoChooserClick)="actions.openPhotoChooser($event)"
               />
             </div>
           }
@@ -204,7 +204,7 @@
 
       <!-- Tanítottak még / Egyéb nevek szekció -->
       @if (!loading() && !searchQuery()) {
-        @if (editMode()) {
+        @if (actions.editMode()) {
           <div class="extra-names-section">
             <div class="extra-names-header">
               <label class="extra-names-label">
@@ -273,17 +273,17 @@
         </button>
 
         @if (batchActions.selectedCount() > 0) {
-          <button type="button" class="btn btn--danger" (click)="batchDeletePersons()">
+          <button type="button" class="btn btn--danger" (click)="actions.batchDeletePersons(batchActions.selectedCount())">
             <lucide-icon [name]="ICONS.DELETE" [size]="14" />
             Törlés ({{ batchActions.selectedCount() }})
           </button>
           @if (isElectron) {
-            <button type="button" class="btn btn--purple" (click)="startBatchPortrait()">
+            <button type="button" class="btn btn--purple" (click)="actions.startBatchPortrait(batchActions.selectedPersonIds(), filteredPersons())">
               <lucide-icon [name]="ICONS.SCAN_FACE" [size]="14" />
               Háttércsere ({{ batchActions.selectedCount() }})
             </button>
             @if (cropEnabled()) {
-              <button type="button" class="btn btn--primary" (click)="startBatchCrop()">
+              <button type="button" class="btn btn--primary" (click)="actions.startBatchCrop(batchActions.selectedPersonIds(), filteredPersons())">
                 <lucide-icon [name]="ICONS.CROP" [size]="14" />
                 Vágás ({{ batchActions.selectedCount() }})
               </button>
@@ -298,14 +298,14 @@
           <button
             type="button"
             class="btn btn--outline"
-            (click)="toggleEditMode()"
+            (click)="actions.toggleEditMode(filteredPersons())"
           >
-            <lucide-icon [name]="editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
-            {{ editMode() ? 'Kész' : 'Szerkesztés' }}
+            <lucide-icon [name]="actions.editMode() ? ICONS.X : ICONS.EDIT" [size]="14" />
+            {{ actions.editMode() ? 'Kész' : 'Szerkesztés' }}
           </button>
         }
 
-        @if (withoutPhotoCount() > 0 && !editMode()) {
+        @if (withoutPhotoCount() > 0 && !actions.editMode()) {
           <button type="button" class="btn btn--purple" (click)="openUploadWizard.emit(typeFilter())">
             <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
             Tovább a fényképek feltöltéséhez
@@ -327,8 +327,8 @@
 />
 
 <!-- Személy szerkesztő dialógus -->
-@if (inlineEditPersonId(); as editPersonId) {
-  @let editData = inlineEditData();
+@if (actions.inlineEditPersonId(); as editPersonId) {
+  @let editData = actions.inlineEditData();
   @let editPerson = inlineEditPerson();
   <app-dialog-wrapper
     variant="info"
@@ -339,7 +339,7 @@
     [description]="editPerson?.name ?? ''"
     size="sm"
     [closable]="true"
-    (closeEvent)="closeInlineEdit()"
+    (closeEvent)="actions.closeInlineEdit()"
   >
     <div dialogBody class="edit-dialog__fields">
       <label class="edit-dialog__label">Név</label>
@@ -348,8 +348,8 @@
         class="edit-dialog__input"
         placeholder="Név"
         [value]="editData?.name ?? ''"
-        (input)="inlineEditData.set({ ...editData!, name: $any($event.target).value })"
-        (keydown.enter)="saveInlineEdit()"
+        (input)="actions.inlineEditData.set({ ...editData!, name: $any($event.target).value })"
+        (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
       />
       @if (editPerson?.type === 'teacher') {
         <label class="edit-dialog__label">Pozíció / tantárgy</label>
@@ -358,8 +358,8 @@
           class="edit-dialog__input"
           placeholder="Pozíció/tantárgy"
           [value]="editData?.title ?? ''"
-          (input)="inlineEditData.set({ ...editData!, title: $any($event.target).value })"
-          (keydown.enter)="saveInlineEdit()"
+          (input)="actions.inlineEditData.set({ ...editData!, title: $any($event.target).value })"
+          (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
         />
       }
       <label class="edit-dialog__label">Megjegyzés</label>
@@ -368,16 +368,16 @@
         class="edit-dialog__input"
         placeholder="Megjegyzés"
         [value]="editData?.note ?? ''"
-        (input)="inlineEditData.set({ ...editData!, note: $any($event.target).value })"
-        (keydown.enter)="saveInlineEdit()"
+        (input)="actions.inlineEditData.set({ ...editData!, note: $any($event.target).value })"
+        (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
       />
     </div>
     <div dialogFooter class="edit-dialog__actions">
-      <button type="button" class="btn btn--outline" (click)="closeInlineEdit()">
+      <button type="button" class="btn btn--outline" (click)="actions.closeInlineEdit()">
         Mégse
       </button>
-      <button type="button" class="btn btn--primary" (click)="saveInlineEdit()" [disabled]="inlineEditSaving()">
-        @if (inlineEditSaving()) {
+      <button type="button" class="btn btn--primary" (click)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))" [disabled]="actions.inlineEditSaving()">
+        @if (actions.inlineEditSaving()) {
           <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
         } @else {
           <lucide-icon [name]="ICONS.CHECK" [size]="14" />
@@ -399,62 +399,62 @@
 }
 
 <!-- Törlés megerősítő dialógus -->
-@if (deleteConfirmPerson(); as person) {
+@if (actions.deleteConfirmPerson(); as person) {
   <app-confirm-dialog
     [title]="'Személy törlése'"
     [message]="'Biztosan törlöd: ' + person.name + '?'"
     confirmText="Törlés"
     confirmType="danger"
-    (resultEvent)="$event.action === 'confirm' ? confirmDeletePerson() : cancelDeletePerson()"
+    (resultEvent)="$event.action === 'confirm' ? actions.confirmDeletePerson(projectId(), allPersons) : actions.cancelDeletePerson()"
   />
 }
 
 <!-- Batch törlés megerősítő dialógus -->
-@if (batchDeleteConfirm()) {
+@if (actions.batchDeleteConfirm()) {
   <app-confirm-dialog
     [title]="'Személyek törlése'"
     [message]="'Biztosan törlöd a kijelölt ' + batchActions.selectedCount() + ' személyt?'"
     confirmText="Törlés"
     confirmType="danger"
-    (resultEvent)="$event.action === 'confirm' ? confirmBatchDelete() : cancelBatchDelete()"
+    (resultEvent)="$event.action === 'confirm' ? actions.confirmBatchDelete(projectId(), batchActions.selectedPersonIds(), allPersons, batchActions.resetSelection.bind(batchActions)) : actions.cancelBatchDelete()"
   />
 }
 
 <!-- Batch portré háttércsere dialógus -->
-@if (batchPortraitPersons(); as batchPersons) {
+@if (actions.batchPortraitPersons(); as batchPersons) {
   <app-batch-portrait-dialog
     [persons]="batchPersons"
     [projectId]="projectId()"
-    (close)="onBatchPortraitCompleted()"
+    (close)="actions.onBatchPortraitCompleted(batchActions.resetSelection.bind(batchActions), loadPersons.bind(this, true))"
   />
 }
 
 <!-- Batch crop (automatikus vágás) dialógus -->
-@if (batchCropPersons(); as cropPersons) {
+@if (actions.batchCropPersons(); as cropPersons) {
   <app-batch-crop-dialog
     [persons]="cropPersons"
     [projectId]="projectId()"
-    (close)="onBatchCropCompleted()"
+    (close)="actions.onBatchCropCompleted(batchActions.resetSelection.bind(batchActions), loadPersons.bind(this, true))"
   />
 }
 
 <!-- Tanár összekapcsolás dialógus -->
-@if (showTeacherLinkDialog() && linkDialogTeacher()) {
+@if (actions.showTeacherLinkDialog() && actions.linkDialogTeacher()) {
   <app-teacher-link-dialog
-    [teacher]="linkDialogTeacher()!"
-    [allTeachers]="linkDialogAllTeachers()"
-    (closeEvent)="showTeacherLinkDialog.set(false)"
-    (savedEvent)="onTeacherLinked()"
-    (photoChooserEvent)="onOpenPhotoChooserFromLink($event)"
+    [teacher]="actions.linkDialogTeacher()!"
+    [allTeachers]="actions.linkDialogAllTeachers()"
+    (closeEvent)="actions.showTeacherLinkDialog.set(false)"
+    (savedEvent)="actions.onTeacherLinked(loadPersons.bind(this, true))"
+    (photoChooserEvent)="actions.onOpenPhotoChooserFromLink($event)"
   />
 }
 
 <!-- Fotó csere archívumból dialógus -->
-@if (showPhotoChooserDialog() && photoChooserPhotos().length > 0 && photoChooserMode(); as mode) {
+@if (actions.showPhotoChooserDialog() && actions.photoChooserPhotos().length > 0 && actions.photoChooserMode(); as mode) {
   <app-teacher-photo-chooser-dialog
-    [photos]="photoChooserPhotos()"
+    [photos]="actions.photoChooserPhotos()"
     [mode]="mode"
-    (closeEvent)="showPhotoChooserDialog.set(false)"
-    (savedEvent)="onPhotoChosen()"
+    (closeEvent)="actions.showPhotoChooserDialog.set(false)"
+    (savedEvent)="actions.onPhotoChosen(loadPersons.bind(this, true))"
   />
 }

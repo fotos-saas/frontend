@@ -1,20 +1,14 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy, ViewContainerRef, viewChild, ComponentRef, HostListener } from '@angular/core';
 import { LoggerService } from '@core/services/logger.service';
-import { ToastService } from '@core/services/toast.service';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
+import { PartnerService, PartnerProjectListItem, ProjectLimits } from '../../services/partner.service';
 import { PartnerTagService } from '../../services/partner-tag.service';
 import { PsdStatusService } from '../../services/psd-status.service';
-import { BatchWorkspaceService } from '../../services/batch-workspace.service';
-import { BatchWorkflowType } from '../../models/batch.types';
 import { ElectronService } from '../../../../core/services/electron.service';
 import { AuthService } from '@core/services/auth.service';
-import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
-import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { CreatePreliminaryModalComponent } from '../../components/create-preliminary-modal/create-preliminary-modal.component';
 import { LinkPreliminaryDialogComponent } from '../../components/link-preliminary-dialog/link-preliminary-dialog.component';
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
@@ -24,9 +18,9 @@ import { CreateProjectWizardDialogComponent } from '../../components/create-proj
 import { SharedQrCodeModalComponent } from '../../../../shared/components/qr-code-modal/qr-code-modal.component';
 import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface';
 import { PhotoUploadWizardComponent } from '../../components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component';
-import { SamplesLightboxComponent, SampleLightboxItem } from '../../../../shared/components/samples-lightbox';
-import { FilterConfig, FilterChangeEvent } from '../../../../shared/components/expandable-filters';
-import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SamplesLightboxComponent } from '../../../../shared/components/samples-lightbox';
+import { FilterConfig } from '../../../../shared/components/expandable-filters';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
 import { generateYearOptions, getCurrentGraduationYear } from '../../../../shared/utils/year-options.util';
@@ -35,6 +29,7 @@ import { TableHeaderComponent, TableColumn } from '../../../../shared/components
 import { SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
+import { ProjectListActionsService } from './project-list-actions.service';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -60,23 +55,22 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     CreatePreliminaryModalComponent,
     LinkPreliminaryDialogComponent,
   ],
+  providers: [ProjectListActionsService],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PartnerProjectListComponent implements OnInit {
   private readonly logger = inject(LoggerService);
-  private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
   private readonly tagService = inject(PartnerTagService);
-  private readonly preliminaryService = inject(PartnerPreliminaryService);
-  private readonly orderSyncService = inject(PartnerOrderSyncService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly router = inject(Router);
   private readonly psdStatusService = inject(PsdStatusService);
-  private readonly batchWorkspaceService = inject(BatchWorkspaceService);
   private readonly electronService = inject(ElectronService);
   private readonly authService = inject(AuthService);
+
+  /** Kiemelt akciók service */
+  readonly actions = inject(ProjectListActionsService);
 
   readonly ICONS = ICONS;
   readonly isDevPartner = computed(() => this.authService.currentUserSignal()?.partner_id === 24);
@@ -125,8 +119,6 @@ export class PartnerProjectListComponent implements OnInit {
   totalPages = signal(1);
   totalProjects = signal(0);
   projectLimits = signal<ProjectLimits | null>(null);
-  syncing = signal(false);
-  pendingSyncCount = signal<number | null>(null);
 
   // Státusz opciók
   readonly statusOptions = [
@@ -177,99 +169,37 @@ export class PartnerProjectListComponent implements OnInit {
     { value: 'last_activity_at', label: 'Módosítva' },
   ];
 
-  readonly sortDef: SortDef = {
-    options: this.sortOptions,
-  };
+  readonly sortDef: SortDef = { options: this.sortOptions };
 
   // Projekt létrehozás módja
   projectCreationMode = signal<'simple' | 'wizard'>('simple');
-  showCreateWizard = signal(false);
-
-  // Modals
-  showMissingModal = signal(false);
-  showCreateModal = signal(false);
-  showQrModal = signal(false);
-  showUploadWizard = signal(false);
-  uploadWizardAlbum = signal<'students' | 'teachers' | undefined>(undefined);
-  selectedProject = signal<PartnerProjectListItem | null>(null);
-
-  // Multi-select
-  readonly selectedProjectIds = signal<Set<number>>(new Set());
-  private lastSelectedIndex: number | null = null;
-
-  readonly selectedProjects = computed(() => {
-    const ids = this.selectedProjectIds();
-    return this.projects().filter(p => ids.has(p.id));
-  });
-
-  readonly canBulkGeneratePsd = computed(() =>
-    this.selectedProjects().some(p => !this.psdStatusService.getStatus(p.id)?.exists)
-  );
-
-  readonly canBulkGenerateSample = computed(() =>
-    this.selectedProjects().some(p => this.psdStatusService.getStatus(p.id)?.exists)
-  );
-
-  readonly canBulkFinalize = computed(() =>
-    this.selectedProjects().some(p => this.psdStatusService.getStatus(p.id)?.exists)
-  );
-
-  // Delete Confirm
-  showDeleteConfirm = signal(false);
-  deletingProjectName = signal('');
-  isDeleting = signal(false);
-  private deletingProjectId = signal<number | null>(null);
-
-  // Preliminary Project Modals
-  showCreatePreliminaryModal = signal(false);
-  showLinkDialog = signal(false);
-  linkingProject = signal<PartnerProjectListItem | null>(null);
 
   // Order Data Dialog
   private orderDataContainer = viewChild('orderDataContainer', { read: ViewContainerRef });
   private orderDataRef: ComponentRef<OrderDataDialogComponent> | null = null;
 
-  // Samples Lightbox
-  samplesLightboxIndex = signal<number | null>(null);
-  private samplesData = signal<SampleItem[]>([]);
-  readonly lightboxSamples = computed<SampleLightboxItem[]>(() =>
-    this.samplesData().map(s => ({
-      id: s.id,
-      url: s.url,
-      thumbUrl: s.thumbnailUrl,
-      fileName: s.name,
-      createdAt: s.createdAt || new Date().toISOString(),
-      description: s.description
-    }))
-  );
+  // Computed-ok amik a service-t hívják
+  readonly selectedProjects = computed(() => this.actions.selectedProjects(this.projects()));
+  readonly canBulkGeneratePsd = computed(() => this.actions.canBulkGeneratePsd(this.projects()));
+  readonly canBulkGenerateSample = computed(() => this.actions.canBulkGenerateSample(this.projects()));
+  readonly canBulkFinalize = computed(() => this.actions.canBulkGenerateSample(this.projects()));
 
   toggleOrderSort(): void {
-    if (this.filterState.sortBy() === 'order_submitted_at') {
-      this.filterState.setSortBy('created_at');
-    } else {
-      this.filterState.setSortBy('order_submitted_at');
-    }
+    this.filterState.setSortBy(this.filterState.sortBy() === 'order_submitted_at' ? 'created_at' : 'order_submitted_at');
   }
 
   toggleContentSort(): void {
-    if (this.filterState.sortBy() === 'last_content_update') {
-      this.filterState.setSortBy('created_at');
-    } else {
-      this.filterState.setSortBy('last_content_update');
-    }
+    this.filterState.setSortBy(this.filterState.sortBy() === 'last_content_update' ? 'created_at' : 'last_content_update');
   }
 
   toggleActivitySort(): void {
-    if (this.filterState.sortBy() === 'last_activity_at') {
-      this.filterState.setSortBy('created_at');
-    } else {
-      this.filterState.setSortBy('last_activity_at');
-    }
+    this.filterState.setSortBy(this.filterState.sortBy() === 'last_activity_at' ? 'created_at' : 'last_activity_at');
   }
 
   ngOnInit(): void {
+    this.actions.init(this.projects, this.totalProjects, () => this.loadProjects());
     this.loadProjects();
-    this.checkSyncInBackground();
+    this.actions.checkSyncInBackground();
     this.loadTagsForFilter();
     this.loadProjectCreationMode();
   }
@@ -278,9 +208,7 @@ export class PartnerProjectListComponent implements OnInit {
     this.partnerService.getGlobalSettings()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.projectCreationMode.set(res.data.project_creation_mode ?? 'simple');
-        },
+        next: (res) => this.projectCreationMode.set(res.data.project_creation_mode ?? 'simple'),
       });
   }
 
@@ -295,9 +223,7 @@ export class PartnerProjectListComponent implements OnInit {
               id: 'tag_ids',
               label: 'Címke',
               icon: 'tag',
-              options: [
-                ...tags.map(t => ({ value: t.id.toString(), label: t.name })),
-              ],
+              options: tags.map(t => ({ value: t.id.toString(), label: t.name })),
             };
             this.filterConfigs.update(configs => [...configs, tagFilter]);
           }
@@ -306,7 +232,7 @@ export class PartnerProjectListComponent implements OnInit {
   }
 
   loadProjects(): void {
-    this.clearSelection();
+    this.actions.clearSelection();
     this.filterState.loading.set(true);
 
     const filters = this.filterState.filters();
@@ -342,213 +268,17 @@ export class PartnerProjectListComponent implements OnInit {
       });
   }
 
-  viewProject(project: PartnerProjectListItem): void {
-    this.router.navigate(['/partner/projects', project.id]);
-  }
-
-  // Multi-select handlers
-  onCardSelect(project: PartnerProjectListItem, event: MouseEvent, index: number): void {
-    if (event.metaKey || event.ctrlKey) {
-      // Cmd/Ctrl+klikk → toggle
-      this.selectedProjectIds.update(ids => {
-        const next = new Set(ids);
-        if (next.has(project.id)) {
-          next.delete(project.id);
-        } else {
-          next.add(project.id);
-        }
-        return next;
-      });
-      this.lastSelectedIndex = index;
-    } else if (event.shiftKey && this.lastSelectedIndex !== null) {
-      // Shift+klikk → tartomány
-      const start = Math.min(this.lastSelectedIndex, index);
-      const end = Math.max(this.lastSelectedIndex, index);
-      const rangeIds = this.projects().slice(start, end + 1).map(p => p.id);
-      this.selectedProjectIds.update(ids => {
-        const next = new Set(ids);
-        rangeIds.forEach(id => next.add(id));
-        return next;
-      });
-    } else {
-      // Sima klikk → ha van kijelölés, töröljük; egyébként navigáció
-      if (this.selectedProjectIds().size > 0) {
-        this.clearSelection();
-      } else {
-        this.viewProject(project);
-      }
-    }
-  }
-
-  clearSelection(): void {
-    this.selectedProjectIds.set(new Set());
-    this.lastSelectedIndex = null;
-  }
-
-  addSelectedToBatch(workflowType: BatchWorkflowType): void {
-    const selected = this.selectedProjects();
-    let filtered: PartnerProjectListItem[];
-
-    if (workflowType === 'generate-psd') {
-      filtered = selected.filter(p => !this.psdStatusService.getStatus(p.id)?.exists);
-    } else {
-      filtered = selected.filter(p => this.psdStatusService.getStatus(p.id)?.exists);
-    }
-
-    if (filtered.length > 0) {
-      this.batchWorkspaceService.addTasks(filtered, workflowType);
-      this.batchWorkspaceService.panelOpen.set(true);
-    }
-    this.clearSelection();
-  }
-
   @HostListener('document:keydown.escape')
   onEscapePress(): void {
-    if (this.selectedProjectIds().size > 0) {
-      this.clearSelection();
+    if (this.actions.selectedProjectIds().size > 0) {
+      this.actions.clearSelection();
     }
-  }
-
-  // Samples Lightbox handlers
-  openSamplesModal(project: PartnerProjectListItem): void {
-    this.selectedProject.set(project);
-    this.partnerService.getProjectSamples(project.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (response.data && response.data.length > 0) {
-            this.samplesData.set(response.data);
-            this.samplesLightboxIndex.set(0);
-          }
-        },
-        error: (err) => this.logger.error('Failed to load samples', err)
-      });
-  }
-
-  closeSamplesLightbox(): void {
-    this.samplesLightboxIndex.set(null);
-    this.samplesData.set([]);
-    this.selectedProject.set(null);
-  }
-
-  // Modal handlers
-  openMissingModal(project: PartnerProjectListItem): void {
-    this.selectedProject.set(project);
-    this.showMissingModal.set(true);
-  }
-
-  closeMissingModal(): void {
-    this.showMissingModal.set(false);
-    this.selectedProject.set(null);
-    this.loadProjects();
-  }
-
-  openCreateModal(): void {
-    if (this.projectCreationMode() === 'wizard') {
-      this.showCreateWizard.set(true);
-    } else {
-      this.showCreateModal.set(true);
-    }
-  }
-
-  closeCreateModal(): void {
-    this.showCreateModal.set(false);
-  }
-
-  closeCreateWizard(): void {
-    this.showCreateWizard.set(false);
-  }
-
-  onProjectCreated(project: PartnerProjectListItem): void {
-    this.closeCreateModal();
-    this.closeCreateWizard();
-    this.loadProjects();
-  }
-
-  openQrModal(project: PartnerProjectListItem): void {
-    this.selectedProject.set(project);
-    this.showQrModal.set(true);
-  }
-
-  closeQrModal(): void {
-    this.showQrModal.set(false);
-    this.selectedProject.set(null);
-  }
-
-  onQrCodeChanged(): void {
-    this.loadProjects();
-  }
-
-  openUploadWizardFromMissing(personType: 'student' | 'teacher'): void {
-    this.showMissingModal.set(false);
-    this.uploadWizardAlbum.set(personType === 'student' ? 'students' : 'teachers');
-    this.showUploadWizard.set(true);
-  }
-
-  closeUploadWizard(): void {
-    this.showUploadWizard.set(false);
-    this.uploadWizardAlbum.set(undefined);
-    this.selectedProject.set(null);
-  }
-
-  onUploadWizardCompleted(result: { assignedCount: number }): void {
-    this.closeUploadWizard();
-    this.loadProjects();
-  }
-
-  onStatusChange(event: { projectId: number; status: string; label: string; color: string }): void {
-    this.partnerService.updateProject(event.projectId, { status: event.status })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.projects.update(projects =>
-            projects.map(p =>
-              p.id === event.projectId
-                ? { ...p, status: event.status, statusLabel: event.label, statusColor: event.color }
-                : p
-            )
-          );
-        },
-        error: (err) => this.logger.error('Failed to update status', err)
-      });
-  }
-
-  toggleAware(project: PartnerProjectListItem): void {
-    this.partnerService.toggleProjectAware(project.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.projects.update(projects =>
-            projects.map(p =>
-              p.id === project.id ? { ...p, isAware: response.isAware } : p
-            )
-          );
-        },
-        error: (err) => this.logger.error('Failed to toggle aware', err)
-      });
-  }
-
-  togglePhotosUploaded(project: PartnerProjectListItem): void {
-    const prev = project.photosUploaded;
-    this.projects.update(projects =>
-      projects.map(p => p.id === project.id ? { ...p, photosUploaded: !prev } : p)
-    );
-    this.partnerService.togglePhotosUploaded(project.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        error: () => {
-          this.projects.update(projects =>
-            projects.map(p => p.id === project.id ? { ...p, photosUploaded: prev } : p)
-          );
-        }
-      });
   }
 
   // Order Data Dialog
   openOrderDataDialog(project: PartnerProjectListItem): void {
     const container = this.orderDataContainer();
     if (!container) return;
-
     container.clear();
     this.orderDataRef = container.createComponent(OrderDataDialogComponent);
     this.orderDataRef.setInput('projectId', project.id);
@@ -558,141 +288,5 @@ export class PartnerProjectListComponent implements OnInit {
   closeOrderDataDialog(): void {
     this.orderDataRef?.destroy();
     this.orderDataRef = null;
-  }
-
-  // Delete Project
-  confirmDeleteProject(project: PartnerProjectListItem): void {
-    this.deletingProjectId.set(project.id);
-    this.deletingProjectName.set(project.name || project.schoolName || 'Ismeretlen');
-    this.showDeleteConfirm.set(true);
-  }
-
-  onDeleteResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      this.executeDeleteProject();
-    } else {
-      this.showDeleteConfirm.set(false);
-      this.deletingProjectId.set(null);
-    }
-  }
-
-  private executeDeleteProject(): void {
-    const projectId = this.deletingProjectId();
-    if (!projectId) return;
-
-    this.isDeleting.set(true);
-    this.partnerService.deleteProject(projectId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isDeleting.set(false);
-          this.showDeleteConfirm.set(false);
-          this.projects.update(list => list.filter(p => p.id !== projectId));
-          this.totalProjects.update(t => t - 1);
-          this.deletingProjectId.set(null);
-          this.toast.success('Törölve', 'A projekt sikeresen törölve.');
-        },
-        error: (err) => {
-          this.isDeleting.set(false);
-          this.showDeleteConfirm.set(false);
-          this.logger.error('Failed to delete project', err);
-          this.toast.error('Hiba', 'Nem sikerült törölni a projektet.');
-        }
-      });
-  }
-
-  // Preliminary Project handlers
-  openCreatePreliminaryModal(): void {
-    this.showCreatePreliminaryModal.set(true);
-  }
-
-  closeCreatePreliminaryModal(): void {
-    this.showCreatePreliminaryModal.set(false);
-  }
-
-  onPreliminaryCreated(): void {
-    this.closeCreatePreliminaryModal();
-    this.loadProjects();
-    this.toast.success('Létrehozva', 'Előzetes projekt sikeresen létrehozva.');
-  }
-
-  openLinkDialog(project: PartnerProjectListItem): void {
-    this.linkingProject.set(project);
-    this.showLinkDialog.set(true);
-  }
-
-  closeLinkDialog(): void {
-    this.showLinkDialog.set(false);
-    this.linkingProject.set(null);
-  }
-
-  onPreliminaryLinked(): void {
-    this.closeLinkDialog();
-    this.loadProjects();
-    this.toast.success('Összekapcsolva', 'Az előzetes projekt sikeresen összekapcsolva.');
-  }
-
-  private checkSyncInBackground(): void {
-    this.orderSyncService.checkSync()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.pendingSyncCount.set(res.data?.pending_count ?? 0);
-        },
-        error: () => {
-          this.pendingSyncCount.set(0);
-        },
-      });
-  }
-
-  triggerSync(): void {
-    if (this.syncing()) return;
-
-    const pending = this.pendingSyncCount();
-
-    // Ha nincs pending vagy 0 → frissítsd a check-et
-    if (pending === null || pending === 0) {
-      this.syncing.set(true);
-      this.orderSyncService.checkSync()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (res) => {
-            this.syncing.set(false);
-            const count = res.data?.pending_count ?? 0;
-            this.pendingSyncCount.set(count);
-            if (count === 0) {
-              this.toast.info('Naprakész', 'Nincs új szinkronizálandó projekt');
-            }
-          },
-          error: () => {
-            this.syncing.set(false);
-            this.toast.error('Hiba', 'Nem sikerült ellenőrizni a régi rendszert');
-          },
-        });
-      return;
-    }
-
-    // Ha van pending → szinkronizálás
-    this.syncing.set(true);
-    this.orderSyncService.triggerSync()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.syncing.set(false);
-          this.pendingSyncCount.set(0);
-          if (res.data?.created > 0) {
-            this.toast.success('Szinkronizálva', res.message);
-            this.loadProjects();
-          } else {
-            this.toast.info('Kész', res.message);
-          }
-        },
-        error: (err) => {
-          this.syncing.set(false);
-          this.pendingSyncCount.set(null);
-          this.toast.error('Hiba', err.error?.message || 'Szinkronizálás sikertelen');
-          this.logger.error('Sync trigger error', err);
-        },
-      });
   }
 }

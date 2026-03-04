@@ -209,7 +209,30 @@ export class LayoutDesignerPsBridgeService {
     } finally { this.linking.set(false); }
   }
 
-  private getLinkedLayerNames(): string[] {
+  /** Kijelolt image layerekhez tartozo szemelyek */
+  getSelectedImagePersons(allPersons: TabloPersonItem[]): PhotoUploadPerson[] {
+    const selected = this.state.selectedLayers();
+    const persons: PhotoUploadPerson[] = [];
+    const seenIds = new Set<number>();
+
+    for (const l of selected) {
+      if ((l.category === 'student-image' || l.category === 'teacher-image') && l.personMatch) {
+        if (!seenIds.has(l.personMatch.id)) {
+          seenIds.add(l.personMatch.id);
+          const fullPerson = allPersons.find(p => p.id === l.personMatch!.id);
+          persons.push({
+            id: l.personMatch.id,
+            name: l.personMatch.name,
+            type: l.category === 'teacher-image' ? 'teacher' : 'student',
+            archiveId: fullPerson?.archiveId ?? null,
+          });
+        }
+      }
+    }
+    return persons;
+  }
+
+  getLinkedLayerNames(): string[] {
     const nameSet = new Set<string>();
     for (const l of this.state.layers()) { if (l.linked) nameSet.add(l.layerName); }
     return Array.from(nameSet);

@@ -54,11 +54,8 @@ export const TOOLBAR_GROUPS: ToolbarGroup[] = [
   {
     id: 'photoshop',
     items: [
-      { id: 'upload-photo', icon: ICONS.CAMERA, label: 'Fotó feltöltése', accent: 'green' },
       { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
       { id: 'refresh-placed-json', icon: ICONS.REFRESH, label: 'Placed JSON frissítése', tooltip: 'Placed-photos.json újragenerálása az aktuális API adatokból (Photoshop nem kell)', accent: 'blue' },
-      { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID frissítés', tooltip: 'Régi layer ID-k cseréje az új DB ID-kra', accent: 'amber' },
-      { id: 'refresh-roster', icon: ICONS.USERS, label: 'Névsor frissítés', tooltip: 'Új személyek hozzáadása, régiek törlése a PSD-ből', accent: 'blue' },
       { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
       { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
       { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },

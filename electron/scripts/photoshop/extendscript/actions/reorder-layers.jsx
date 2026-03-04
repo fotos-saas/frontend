@@ -4,7 +4,7 @@
  * 1:1 a fotocms-admin.prod PRODUCTION logikaja:
  *   Fazis 1: moveLayersToBottomInGroup — CSAK Images layer STACK sorrend (Names-t NEM!)
  *   Fazis 2: rearrangeGroupLayersAndPositions — fizikai poziciok atrendezese
- *            (production: exact Y compare, nem threshold; translate sima szammal)
+ *            (ROW_THRESHOLD: 20px — azonos sorban levo layerek csoportositasa)
  *
  * CONFIG bemenet:
  *   ORDERED_NAMES = JSON string tomb: ["slug1---123", "slug2---456", ...]
@@ -71,9 +71,10 @@ function rearrangeGroupLayersAndPositions(imageLayerGroup) {
     layerPositions.push({ x: bounds.left, y: bounds.top });
   }
 
-  // 2. Rendezzuk Y, majd X szerint (production: EXACT Y compare, nem threshold!)
+  // 2. Rendezzuk Y, majd X szerint (ROW_THRESHOLD: 20px sor csoportositas)
+  var ROW_THRESHOLD = 20;
   layerPositions.sort(function (a, b) {
-    if (a.y === b.y) return a.x - b.x;
+    if (Math.abs(a.y - b.y) <= ROW_THRESHOLD) return a.x - b.x;
     return a.y - b.y;
   });
 

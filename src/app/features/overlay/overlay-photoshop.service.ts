@@ -103,6 +103,29 @@ export class OverlayPhotoshopService {
   }
 
   /**
+   * Positions csoport text layerek nevét és szöveges tartalmát olvassa ki.
+   * layerName slug → position/title szöveg (pl. "igazgató")
+   */
+  async getPositionsTextContent(): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (!window.electronAPI) return map;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-positions-text-content.jsx',
+      });
+      if (!result.success || !result.output) return map;
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return map;
+      const data = JSON.parse(cleaned);
+      for (const item of data.items || []) {
+        const text = (item.textContent || '').replace(/[\r\n]+/g, ' ').trim();
+        if (text) map.set(item.layerName, text);
+      }
+      return map;
+    } catch { return map; }
+  }
+
+  /**
    * PS-ből frissen lekéri a kijelölt layerek neveit (get-active-doc.jsx).
    * Visszaadja a nyers parsed doc-ot is a caller-nek.
    */

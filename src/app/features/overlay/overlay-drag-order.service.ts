@@ -57,6 +57,7 @@ export class OverlayDragOrderService {
       await this.projectService.fetchPersons(pid);
     }
     this.refreshList();
+    this.enrichTitlesFromPS();
   }
 
   closePanel(): void {
@@ -71,9 +72,10 @@ export class OverlayDragOrderService {
     this.scope.set(scope);
     this.selected.set(new Set());
     this.refreshList();
+    this.enrichTitlesFromPS();
   }
 
-  /** DB-ből újratölti a személyeket és frissíti a listát */
+  /** DB-ből újratölti a személyeket, frissíti a listát, majd PS-ből kiegészíti a title-ket */
   async refreshFromDb(): Promise<void> {
     const pid = this.projectIdResolver();
     if (!pid) return;
@@ -81,6 +83,7 @@ export class OverlayDragOrderService {
     try {
       await this.projectService.fetchPersons(pid);
       this.refreshList();
+      await this.enrichTitlesFromPS();
     } finally {
       this.ngZone.run(() => this.refreshing.set(false));
     }
@@ -92,6 +95,31 @@ export class OverlayDragOrderService {
     const filtered = s === 'teachers' ? all.filter(p => p.type === 'teacher')
       : s === 'students' ? all.filter(p => p.type === 'student') : all;
     this.list.set([...filtered]);
+  }
+
+  /** PS Positions layerekből kiszedi a title-ket és felülírja a lista értékeit */
+  private async enrichTitlesFromPS(): Promise<void> {
+    const posMap = await this.ps.getPositionsTextContent();
+    if (posMap.size === 0) return;
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    // slug → title mapping
+    const slugToTitle = new Map<string, string>();
+    for (const [slug, title] of posMap) {
+      slugToTitle.set(normalize(this.sortService.slugToHumanName(slug)), title);
+    }
+    const items = this.list();
+    let changed = false;
+    const updated = items.map(p => {
+      const psTitle = slugToTitle.get(normalize(p.name));
+      if (psTitle !== undefined && psTitle !== p.title) {
+        changed = true;
+        return { ...p, title: psTitle };
+      }
+      return p;
+    });
+    if (changed) {
+      this.ngZone.run(() => this.list.set(updated));
+    }
   }
 
   // === Kijelölés ===

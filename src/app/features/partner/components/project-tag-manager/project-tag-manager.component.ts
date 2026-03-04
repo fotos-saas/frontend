@@ -29,10 +29,6 @@ export class ProjectTagManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
-  readonly addBtnRef = viewChild<ElementRef<HTMLButtonElement>>('addBtn');
-
-  /** Dropdown fixed pozíció (nem ugrál toggle-nél) */
-  dropdownPos = signal<{ top: number; left: number }>({ top: 0, left: 0 });
 
   /** Projekt ID */
   readonly projectId = input.required<number>();
@@ -102,24 +98,12 @@ export class ProjectTagManagerComponent {
     if (this.dropdownState()) {
       this.closeDropdown();
     } else {
-      // Pozíció rögzítése MEGNYITÁSKOR — utána nem változik
-      this.updateDropdownPosition();
       this.dropdownState.set('list');
       this.searchQuery.set('');
       this.activeIndex.set(-1);
       this.loadAllTags();
       setTimeout(() => this.searchInput()?.nativeElement.focus());
     }
-  }
-
-  private updateDropdownPosition(): void {
-    const btn = this.addBtnRef()?.nativeElement;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    this.dropdownPos.set({
-      top: rect.bottom + 8,
-      left: rect.left + rect.width / 2 - 150, // 150 = fél dropdown szélesség (300/2)
-    });
   }
 
   closeDropdown(): void {

@@ -12,14 +12,15 @@ export interface BookingFormData {
   session_type_id: number;
   date: string;
   start_time: string;
-  contact_name: string;
-  contact_email: string;
+  contact_name?: string;
+  contact_email?: string;
   contact_phone?: string;
   school_name?: string;
   class_name?: string;
   student_count?: number;
   notes?: string;
   questionnaire_answers?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 /** Varolista feliratkozas adatok */

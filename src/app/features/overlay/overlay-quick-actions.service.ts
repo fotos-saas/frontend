@@ -11,6 +11,12 @@ interface JsxResult {
   success?: boolean;
   output?: string;
   error?: string;
+  arranged?: number;
+  refreshed?: number;
+  nameMapCount?: number;
+  linked?: number;
+  unlinked?: number;
+  reordered?: number;
 }
 
 /** Photoshop link/unlink muvelet parse-olt valasza */
@@ -165,7 +171,7 @@ export class OverlayQuickActionsService {
     const label = this.targetLabel(target);
     const typeLabel = doNames && doPositions ? 'név+pozíció' : doNames ? 'név' : 'pozíció';
     this.handleJsxResult(result,
-      data => `${data.arranged} ${typeLabel} rendezve (${label})`,
+      data => `${data['arranged']} ${typeLabel} rendezve (${label})`,
       `Rendezés kész (${label})`,
     );
   }
@@ -195,7 +201,7 @@ export class OverlayQuickActionsService {
 
     const label = this.targetLabel(target);
     this.handleJsxResult(result,
-      r => `${r.refreshed} felirat frissítve (${label}) [map:${r.nameMapCount}]`,
+      r => `${r['refreshed']} felirat frissítve (${label}) [map:${r['nameMapCount']}]`,
       `Frissítés kész (${label})`,
     );
   }

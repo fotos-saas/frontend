@@ -32,7 +32,7 @@ import { ProjectListResponse, TabloPersonItem } from '../../../models/partner.mo
 
 interface ClassGroup {
   name: string;
-  persons: { id: number; name: string; guest_session_id?: number }[];
+  persons: { id: number; name: string; guest_session_id?: number | null }[];
   selected: boolean;
 }
 
@@ -182,7 +182,7 @@ export class BulkPrepaymentDialogComponent implements OnInit {
       .flatMap((g) =>
         g.persons.map((p) => ({
           person_id: p.id,
-          guest_session_id: p.guest_session_id,
+          guest_session_id: p.guest_session_id ?? undefined,
         }))
       );
 

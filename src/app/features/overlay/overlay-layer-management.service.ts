@@ -60,7 +60,8 @@ export class OverlayLayerManagementService {
 
       if (person) {
         usedPersonIds.add(person.id);
-        const newName = `${slug}---${person.id}`;
+        const personSlug = this.toLayerSlug(person.name);
+        const newName = `${personSlug}---${person.id}`;
         if (newName !== layerName) {
           matched.push({ old: layerName, new: newName, personName: person.name });
         }
@@ -84,8 +85,8 @@ export class OverlayLayerManagementService {
             available.find(p => this.levenshtein(this.normalize(p.name), normalizedText) <= 2);
           if (person) {
             usedPersonIds.add(person.id);
-            const slug = um.layerName.replace(/---\d+$/, '');
-            const newName = `${slug}---${person.id}`;
+            const personSlug = this.toLayerSlug(person.name);
+            const newName = `${personSlug}---${person.id}`;
             if (newName !== um.layerName) {
               matched.push({ old: um.layerName, new: newName, personName: person.name });
             }
@@ -271,6 +272,11 @@ export class OverlayLayerManagementService {
       jsonData: { renameMap },
     });
     console.log('[RENAME] result:', result);
+  }
+
+  /** DB person névből layer slug: ékezet eltávolítás + lowercase + alulvonás szeparátor */
+  private toLayerSlug(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
   }
 
   private normalize(s: string): string {

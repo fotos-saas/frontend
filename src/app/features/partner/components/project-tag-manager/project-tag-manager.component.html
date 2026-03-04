@@ -1,5 +1,4 @@
 <div class="tag-manager">
-  <!-- Aktuális címkék pill-ként -->
   <div class="tag-pills">
     @for (tag of tags(); track tag.id) {
       <span class="tag-pill tag-pill--{{ tag.color }}">
@@ -10,90 +9,88 @@
       </span>
     }
 
-    <!-- Hozzáadás gomb -->
     <div class="tag-add-wrapper">
-      <button type="button" class="tag-add-btn" (click)="toggleDropdown()">
+      <button #addBtn type="button" class="tag-add-btn" (click)="toggleDropdown()">
         <lucide-icon [name]="ICONS.TAG" [size]="12" />
       </button>
-
-      <!-- Command Palette Dropdown -->
-      @if (dropdownState(); as state) {
-        <div class="cmd" (click)="$event.stopPropagation()">
-          @switch (state) {
-            @case ('list') {
-              <!-- Keresőmező (mindig látható) -->
-              <div class="cmd__search">
-                <lucide-icon [name]="ICONS.SEARCH" [size]="15" class="cmd__search-icon" />
-                <input
-                  #searchInput
-                  type="text"
-                  class="cmd__search-input"
-                  placeholder="Címke keresése..."
-                  [ngModel]="searchQuery()"
-                  (ngModelChange)="searchQuery.set($event); activeIndex.set(-1)"
-                  (keydown)="onSearchKeydown($event)"
-                  autocomplete="off"
-                />
-              </div>
-
-              <!-- Tag lista -->
-              @if (filteredTags().length > 0) {
-                <div class="cmd__list">
-                  @for (tag of filteredTags(); track tag.id; let i = $index) {
-                    <div
-                      class="cmd__row"
-                      [class.cmd__row--active]="activeIndex() === i"
-                      (mouseenter)="activeIndex.set(i)"
-                    >
-                      <button type="button" class="cmd__row-main" (click)="toggleTag(tag)">
-                        <span class="cmd__dot cmd__dot--{{ tag.color }}"></span>
-                        <span class="cmd__label">{{ tag.name }}</span>
-                        @if (assignedTagIds().has(tag.id)) {
-                          <span class="cmd__check">
-                            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-                          </span>
-                        }
-                      </button>
-                      <button type="button" class="cmd__row-edit" (click)="startEdit(tag, $event)" title="Szerkesztés">
-                        <lucide-icon [name]="ICONS.EDIT" [size]="12" />
-                      </button>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <div class="cmd__empty">
-                  @if (searchQuery()) {
-                    Nincs találat
-                  } @else {
-                    Nincs még címke
-                  }
-                </div>
-              }
-
-              <!-- Keyboard hints -->
-              <div class="cmd__footer">
-                <span class="cmd__hint">
-                  <kbd>Enter</kbd> toggle
-                </span>
-                <span class="cmd__hint">
-                  <kbd>Tab</kbd> @if (canCreateFromSearch()) { "{{ searchQuery().trim() }}" létrehozása } @else { új címke }
-                </span>
-              </div>
-            }
-
-            <!-- CREATE / EDIT form -->
-            @case ('create') {
-              <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Új címke' }" />
-            }
-            @case ('edit') {
-              <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Szerkesztés' }" />
-            }
-          }
-        </div>
-      }
     </div>
   </div>
 </div>
+
+<!-- Command Palette (fixed pozíció — nem ugrál toggle-nél) -->
+@if (dropdownState(); as state) {
+  <div
+    class="cmd"
+    [style.top.px]="dropdownPos().top"
+    [style.left.px]="dropdownPos().left"
+    (click)="$event.stopPropagation()"
+  >
+    @switch (state) {
+      @case ('list') {
+        <div class="cmd__search">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="15" class="cmd__search-icon" />
+          <input
+            #searchInput
+            type="text"
+            class="cmd__search-input"
+            placeholder="Címke keresése..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event); activeIndex.set(-1)"
+            (keydown)="onSearchKeydown($event)"
+            autocomplete="off"
+          />
+        </div>
+
+        @if (filteredTags().length > 0) {
+          <div class="cmd__list">
+            @for (tag of filteredTags(); track tag.id; let i = $index) {
+              <div
+                class="cmd__row"
+                [class.cmd__row--active]="activeIndex() === i"
+                (mouseenter)="activeIndex.set(i)"
+              >
+                <button type="button" class="cmd__row-main" (click)="toggleTag(tag)">
+                  <span class="cmd__dot cmd__dot--{{ tag.color }}"></span>
+                  <span class="cmd__label">{{ tag.name }}</span>
+                  @if (assignedTagIds().has(tag.id)) {
+                    <span class="cmd__check">
+                      <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                    </span>
+                  }
+                </button>
+                <button type="button" class="cmd__row-edit" (click)="startEdit(tag, $event)" title="Szerkesztés">
+                  <lucide-icon [name]="ICONS.EDIT" [size]="12" />
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="cmd__empty">
+            @if (searchQuery()) {
+              Nincs találat
+            } @else {
+              Nincs még címke
+            }
+          </div>
+        }
+
+        <div class="cmd__footer">
+          <span class="cmd__hint"><kbd>Enter</kbd> toggle</span>
+          <span class="cmd__hint">
+            <kbd>Tab</kbd> @if (canCreateFromSearch()) { "{{ searchQuery().trim() }}" létrehozása } @else { új címke }
+          </span>
+        </div>
+      }
+
+      @case ('create') {
+        <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Új címke' }" />
+      }
+      @case ('edit') {
+        <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Szerkesztés' }" />
+      }
+    }
+  </div>
+}
 
 <!-- Közös form template -->
 <ng-template #tagForm let-title>
@@ -105,7 +102,6 @@
       <span class="cmd__form-title">{{ title }}</span>
     </div>
 
-    <!-- Preview pill -->
     @if (formName().trim()) {
       <div class="cmd__preview">
         <span class="tag-pill tag-pill--{{ formColor() }}">{{ formName().trim() }}</span>
@@ -122,7 +118,6 @@
       maxlength="100"
     />
 
-    <!-- Szín grid -->
     <div class="cmd__colors">
       @for (c of TAG_COLORS; track c.value) {
         <button

@@ -60,10 +60,7 @@ export class OverlayLayerManagementService {
 
       if (person) {
         usedPersonIds.add(person.id);
-        const normalizedNameSlug = person.name
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-        const newName = `${normalizedNameSlug}---${person.id}`;
+        const newName = `${slug}---${person.id}`;
         if (newName !== layerName) {
           matched.push({ old: layerName, new: newName, personName: person.name });
         }
@@ -87,10 +84,8 @@ export class OverlayLayerManagementService {
             available.find(p => this.levenshtein(this.normalize(p.name), normalizedText) <= 2);
           if (person) {
             usedPersonIds.add(person.id);
-            const normalizedNameSlug = person.name
-              .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-              .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            const newName = `${normalizedNameSlug}---${person.id}`;
+            const slug = um.layerName.replace(/---\d+$/, '');
+            const newName = `${slug}---${person.id}`;
             if (newName !== um.layerName) {
               matched.push({ old: um.layerName, new: newName, personName: person.name });
             }
@@ -142,9 +137,7 @@ export class OverlayLayerManagementService {
       for (const u of this.renameUnmatched()) {
         const id = u.newId.trim();
         if (id) {
-          const slug = u.layerName.replace(/---\d+$/, '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+          const slug = u.layerName.replace(/---\d+$/, '');
           renameMap.push({ old: u.layerName, new: `${slug}---${id}` });
         }
       }

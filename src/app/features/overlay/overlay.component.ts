@@ -346,7 +346,6 @@ export class OverlayComponent implements OnInit {
       moveItemInArray(list, draggedIndex, targetIndex);
       this.dragOrderList.set(list);
     }
-    this.dragOrderSelected.set(new Set());
   }
 
   async saveDragOrder(): Promise<void> {

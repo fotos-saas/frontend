@@ -1262,6 +1262,23 @@
   margin-left: 6px;
 }
 
+.drag-order-panel__sel-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: 2px;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+}
+
 .drag-order-panel__close {
   -webkit-app-region: no-drag;
   margin-left: auto;

@@ -1,7 +1,7 @@
 @use 'styles/colors' as *;
 
 // ============================================
-// TAG MANAGER CONTAINER
+// TAG MANAGER
 // ============================================
 
 .tag-manager {
@@ -17,13 +17,11 @@
   flex-wrap: wrap;
   margin: -3px;
 
-  > * {
-    margin: 3px;
-  }
+  > * { margin: 3px; }
 }
 
 // ============================================
-// TAG PILL (nagyobb, 6px radius)
+// TAG PILL
 // ============================================
 
 .tag-pill {
@@ -32,17 +30,12 @@
   font-size: 0.75rem;
   font-weight: 600;
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: 100px;
   white-space: nowrap;
   transition: opacity 0.15s ease;
-  // Safari compat: gap → margin
-  > *:not(:last-child) {
-    margin-right: 4px;
-  }
 
-  &:hover {
-    opacity: 0.85;
-  }
+  > *:not(:last-child) { margin-right: 4px; }
+  &:hover { opacity: 0.85; }
 }
 
 .tag-pill__remove {
@@ -66,7 +59,7 @@
   }
 }
 
-// Szín variánsok (pill)
+// Pill szín variánsok
 .tag-pill--slate { background: #e2e8f0; color: #475569; }
 .tag-pill--red { background: #fecaca; color: #991b1b; }
 .tag-pill--orange { background: #fed7aa; color: #9a3412; }
@@ -78,7 +71,7 @@
 .tag-pill--pink { background: #fbcfe8; color: #9d174d; }
 
 // ============================================
-// ADD BUTTON
+// ADD BUTTON (kompakt, kör)
 // ============================================
 
 .tag-add-wrapper {
@@ -88,55 +81,55 @@
 .tag-add-btn {
   display: inline-flex;
   align-items: center;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  padding: 3px 10px;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   border: 1px dashed get-color('slate', 300);
-  border-radius: 6px;
+  border-radius: 50%;
   background: transparent;
-  color: get-color('slate', 500);
+  color: get-color('slate', 400);
   cursor: pointer;
   transition: all 0.15s ease;
-  // Safari compat: gap → margin
-  > *:first-child {
-    margin-right: 3px;
-  }
+  padding: 0;
 
   &:hover {
-    border-color: get-color('slate', 400);
-    color: get-color('slate', 700);
-    background: get-color('slate', 50);
+    border-color: get-color('primary', 400);
+    color: get-color('primary', 500);
+    background: get-color('primary', 50);
+    border-style: solid;
   }
 }
 
 // ============================================
-// DROPDOWN (fadeIn + slideDown animáció)
+// COMMAND PALETTE DROPDOWN
 // ============================================
 
-.tag-dropdown {
+.cmd {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 220px;
-  max-width: 280px;
+  width: 300px;
   background: #ffffff;
   border: 1px solid get-color('slate', 200);
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.08);
   z-index: 50;
-  padding: 4px 0;
-  animation: dropdownEnter 0.15s ease-out;
+  overflow: hidden;
+  animation: cmdEnter 0.12s ease-out;
 }
 
-@keyframes dropdownEnter {
+@keyframes cmdEnter {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-4px);
+    transform: translateX(-50%) translateY(-6px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 
@@ -144,180 +137,174 @@
 // KERESŐMEZŐ
 // ============================================
 
-.tag-dropdown__search {
+.cmd__search {
   display: flex;
   align-items: center;
-  padding: 6px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid get-color('slate', 100);
 }
 
-.tag-dropdown__search-icon {
+.cmd__search-icon {
   color: get-color('slate', 400);
   flex-shrink: 0;
-  margin-right: 6px;
+  margin-right: 8px;
 }
 
-.tag-dropdown__search-input {
+.cmd__search-input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.75rem;
-  color: get-color('slate', 700);
+  font-size: 0.8125rem;
+  color: get-color('slate', 800);
   background: transparent;
+  font-weight: 500;
 
   &::placeholder {
     color: get-color('slate', 400);
+    font-weight: 400;
   }
 }
 
 // ============================================
-// TAG LISTA (toggle checkmark-kal)
+// TAG LISTA
 // ============================================
 
-.tag-dropdown__list {
-  max-height: 200px;
+.cmd__list {
+  max-height: 220px;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: 4px;
 }
 
-.tag-dropdown__item {
+.cmd__row {
   display: flex;
   align-items: center;
-  padding: 0 4px;
+  border-radius: 8px;
+  transition: background 0.08s ease;
 
-  &:hover {
-    .tag-dropdown__item-menu {
-      opacity: 1;
-    }
+  &:hover,
+  &--active {
+    background: get-color('slate', 50);
+
+    .cmd__row-edit { opacity: 1; }
+  }
+
+  &--active {
+    background: get-color('primary', 50);
   }
 }
 
-.tag-dropdown__item-main {
+.cmd__row-main {
   flex: 1;
   display: flex;
   align-items: center;
   border: none;
   background: transparent;
-  padding: 5px 8px;
-  border-radius: 6px;
+  padding: 7px 10px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.1s ease;
-  // Safari compat: gap → margin
-  > *:not(:last-child) {
-    margin-right: 8px;
-  }
 
-  &:hover {
-    background: get-color('slate', 50);
-  }
+  > *:not(:last-child) { margin-right: 10px; }
 }
 
-.tag-dropdown__check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  border: 1.5px solid get-color('slate', 300);
-  color: transparent;
+// Szín pont
+.cmd__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   flex-shrink: 0;
-  transition: all 0.15s ease;
-
-  &--active {
-    background: get-color('primary', 600);
-    border-color: get-color('primary', 600);
-    color: #ffffff;
-  }
 }
 
-.tag-dropdown__item-menu {
+.cmd__dot--slate { background: #94a3b8; }
+.cmd__dot--red { background: #ef4444; }
+.cmd__dot--orange { background: #f97316; }
+.cmd__dot--amber { background: #f59e0b; }
+.cmd__dot--green { background: #22c55e; }
+.cmd__dot--blue { background: #3b82f6; }
+.cmd__dot--indigo { background: #6366f1; }
+.cmd__dot--purple { background: #a855f7; }
+.cmd__dot--pink { background: #ec4899; }
+
+.cmd__label {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: get-color('slate', 700);
+  font-weight: 500;
+}
+
+.cmd__check {
+  display: flex;
+  align-items: center;
+  color: get-color('primary', 600);
+  flex-shrink: 0;
+}
+
+.cmd__row-edit {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   color: get-color('slate', 400);
   opacity: 0;
-  transition: all 0.1s ease;
+  transition: all 0.08s ease;
   flex-shrink: 0;
   padding: 0;
+  margin-right: 4px;
 
   &:hover {
-    background: get-color('slate', 100);
+    background: get-color('slate', 200);
     color: get-color('slate', 600);
   }
 }
 
-// Preview pill a listában
-.tag-preview-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-.tag-preview-pill--animated {
-  animation: pillPop 0.2s ease-out;
-}
-
-@keyframes pillPop {
-  from { transform: scale(0.9); opacity: 0.5; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-// Szín variánsok (preview pill)
-.tag-preview-pill--slate { background: #e2e8f0; color: #475569; }
-.tag-preview-pill--red { background: #fecaca; color: #991b1b; }
-.tag-preview-pill--orange { background: #fed7aa; color: #9a3412; }
-.tag-preview-pill--amber { background: #fde68a; color: #92400e; }
-.tag-preview-pill--green { background: #bbf7d0; color: #166534; }
-.tag-preview-pill--blue { background: #bfdbfe; color: #1e40af; }
-.tag-preview-pill--indigo { background: #c7d2fe; color: #3730a3; }
-.tag-preview-pill--purple { background: #ddd6fe; color: #5b21b6; }
-.tag-preview-pill--pink { background: #fbcfe8; color: #9d174d; }
-
-.tag-dropdown__empty {
-  padding: 12px;
-  font-size: 0.6875rem;
+.cmd__empty {
+  padding: 20px 12px;
+  font-size: 0.8125rem;
   color: get-color('slate', 400);
   text-align: center;
 }
 
-.tag-dropdown__divider {
-  height: 1px;
-  background: get-color('slate', 100);
-  margin: 2px 0;
-}
+// ============================================
+// KEYBOARD HINTS FOOTER
+// ============================================
 
-.tag-dropdown__create-btn {
+.cmd__footer {
   display: flex;
   align-items: center;
-  width: 100%;
   padding: 6px 12px;
-  border: none;
-  background: transparent;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: get-color('primary', 600);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.1s ease;
-  // Safari compat: gap → margin
-  > *:first-child {
-    margin-right: 6px;
-  }
+  border-top: 1px solid get-color('slate', 100);
+  background: get-color('slate', 50);
 
-  &:hover {
-    background: get-color('primary', 50);
+  > *:not(:last-child) { margin-right: 12px; }
+}
+
+.cmd__hint {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  color: get-color('slate', 400);
+
+  > *:not(:last-child) { margin-right: 4px; }
+
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 4px;
+    background: #ffffff;
+    border: 1px solid get-color('slate', 200);
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-family: inherit;
+    color: get-color('slate', 500);
+    box-shadow: 0 1px 0 get-color('slate', 200);
+    margin-right: 4px;
   }
 }
 
@@ -325,86 +312,83 @@
 // FORM (create / edit)
 // ============================================
 
-.tag-dropdown__form {
-  padding: 8px 12px;
+.cmd__form {
+  padding: 12px;
 }
 
-.tag-dropdown__form-header {
+.cmd__form-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  // Safari compat: gap → margin
-  > *:first-child {
-    margin-right: 6px;
-  }
+  margin-bottom: 12px;
+
+  > *:first-child { margin-right: 8px; }
 }
 
-.tag-dropdown__back-btn {
+.cmd__back {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: none;
-  background: transparent;
-  border-radius: 6px;
+  background: get-color('slate', 100);
+  border-radius: 8px;
   cursor: pointer;
   color: get-color('slate', 500);
   padding: 0;
   transition: all 0.1s ease;
 
   &:hover {
-    background: get-color('slate', 100);
+    background: get-color('slate', 200);
     color: get-color('slate', 700);
   }
 }
 
-.tag-dropdown__form-title {
-  font-size: 0.75rem;
+.cmd__form-title {
+  font-size: 0.8125rem;
   font-weight: 600;
   color: get-color('slate', 700);
 }
 
-.tag-dropdown__preview {
+.cmd__preview {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.tag-dropdown__input {
+.cmd__input {
   width: 100%;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
+  background: get-color('slate', 50);
 
   &:focus {
     border-color: get-color('primary', 400);
-    box-shadow: 0 0 0 2px rgba(get-color('primary', 400), 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #ffffff;
   }
 }
 
 // ============================================
-// SZÍN GRID (3×3, 28px swatch-ek)
+// SZÍN GRID
 // ============================================
 
-.tag-dropdown__color-grid {
+.cmd__colors {
   display: flex;
   flex-wrap: wrap;
-  margin: 10px -3px 0;
+  margin: 12px -3px 0;
 
-  // 3 oszlopos grid Safari compat
-  > * {
-    margin: 3px;
-  }
+  > * { margin: 3px; }
 }
 
-.tag-color-swatch {
-  width: 28px;
-  height: 28px;
+.cmd__swatch {
+  width: 26px;
+  height: 26px;
   border-radius: 8px;
   border: 2px solid transparent;
   cursor: pointer;
@@ -412,58 +396,53 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  position: relative;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 
-  &:hover {
-    transform: scale(1.1);
-  }
+  &:hover { transform: scale(1.12); }
 
   &--active {
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px get-color('slate', 400);
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px get-color('slate', 400);
   }
 }
 
-.tag-color-swatch__check {
+.cmd__swatch-check {
   color: #ffffff;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
 }
 
 // Swatch szín variánsok
-.tag-color-swatch--slate { background: #94a3b8; }
-.tag-color-swatch--red { background: #ef4444; }
-.tag-color-swatch--orange { background: #f97316; }
-.tag-color-swatch--amber { background: #f59e0b; }
-.tag-color-swatch--green { background: #22c55e; }
-.tag-color-swatch--blue { background: #3b82f6; }
-.tag-color-swatch--indigo { background: #6366f1; }
-.tag-color-swatch--purple { background: #a855f7; }
-.tag-color-swatch--pink { background: #ec4899; }
+.cmd__swatch--slate { background: #94a3b8; }
+.cmd__swatch--red { background: #ef4444; }
+.cmd__swatch--orange { background: #f97316; }
+.cmd__swatch--amber { background: #f59e0b; }
+.cmd__swatch--green { background: #22c55e; }
+.cmd__swatch--blue { background: #3b82f6; }
+.cmd__swatch--indigo { background: #6366f1; }
+.cmd__swatch--purple { background: #a855f7; }
+.cmd__swatch--pink { background: #ec4899; }
 
 // ============================================
 // FORM ACTIONS
 // ============================================
 
-.tag-dropdown__actions {
+.cmd__form-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 10px;
-  // Safari compat: gap → margin
-  > *:not(:last-child) {
-    margin-right: 6px;
-  }
+  margin-top: 12px;
+
+  > *:not(:last-child) { margin-right: 8px; }
 }
 
-.tag-dropdown__delete-btn {
+.cmd__delete {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   color: get-color('slate', 400);
   padding: 0;
@@ -476,25 +455,19 @@
   }
 }
 
-.tag-dropdown__save {
-  padding: 5px 14px;
+.cmd__save {
+  padding: 6px 16px;
   border: none;
   background: get-color('primary', 600);
   color: #ffffff;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s ease;
 
-  &:hover {
-    background: get-color('primary', 700);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:hover { background: get-color('primary', 700); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 // ============================================
@@ -508,14 +481,16 @@
 }
 
 // ============================================
-// A11Y - prefers-reduced-motion
+// A11Y
 // ============================================
 
 @media (prefers-reduced-motion: reduce) {
-  .tag-dropdown,
-  .tag-preview-pill--animated,
-  .tag-color-swatch {
+  .cmd {
     animation: none !important;
+  }
+
+  .cmd__swatch,
+  .tag-pill {
     transition-duration: 0.01ms !important;
   }
 }

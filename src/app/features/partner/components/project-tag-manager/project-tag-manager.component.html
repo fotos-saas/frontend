@@ -13,51 +13,55 @@
     <!-- Hozzáadás gomb -->
     <div class="tag-add-wrapper">
       <button type="button" class="tag-add-btn" (click)="toggleDropdown()">
-        <lucide-icon [name]="ICONS.PLUS" [size]="12" />
-        Címke
+        <lucide-icon [name]="ICONS.TAG" [size]="12" />
       </button>
 
-      <!-- Dropdown -->
+      <!-- Command Palette Dropdown -->
       @if (dropdownState(); as state) {
-        <div class="tag-dropdown" (click)="$event.stopPropagation()">
+        <div class="cmd" (click)="$event.stopPropagation()">
           @switch (state) {
-            <!-- === LIST állapot === -->
             @case ('list') {
-              <!-- Keresőmező (5+ tagnél) -->
-              @if (showSearch()) {
-                <div class="tag-dropdown__search">
-                  <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="tag-dropdown__search-icon" />
-                  <input
-                    type="text"
-                    class="tag-dropdown__search-input"
-                    placeholder="Keresés..."
-                    [ngModel]="searchQuery()"
-                    (ngModelChange)="searchQuery.set($event)"
-                  />
-                </div>
-              }
+              <!-- Keresőmező (mindig látható) -->
+              <div class="cmd__search">
+                <lucide-icon [name]="ICONS.SEARCH" [size]="15" class="cmd__search-icon" />
+                <input
+                  #searchInput
+                  type="text"
+                  class="cmd__search-input"
+                  placeholder="Címke keresése..."
+                  [ngModel]="searchQuery()"
+                  (ngModelChange)="searchQuery.set($event); activeIndex.set(-1)"
+                  (keydown)="onSearchKeydown($event)"
+                  autocomplete="off"
+                />
+              </div>
 
-              <!-- Tag lista toggle checkmark-kal -->
+              <!-- Tag lista -->
               @if (filteredTags().length > 0) {
-                <div class="tag-dropdown__list">
-                  @for (tag of filteredTags(); track tag.id) {
-                    <div class="tag-dropdown__item">
-                      <button type="button" class="tag-dropdown__item-main" (click)="toggleTag(tag)">
-                        <span class="tag-dropdown__check" [class.tag-dropdown__check--active]="assignedTagIds().has(tag.id)">
-                          @if (assignedTagIds().has(tag.id)) {
-                            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-                          }
-                        </span>
-                        <span class="tag-preview-pill tag-preview-pill--{{ tag.color }}">{{ tag.name }}</span>
+                <div class="cmd__list">
+                  @for (tag of filteredTags(); track tag.id; let i = $index) {
+                    <div
+                      class="cmd__row"
+                      [class.cmd__row--active]="activeIndex() === i"
+                      (mouseenter)="activeIndex.set(i)"
+                    >
+                      <button type="button" class="cmd__row-main" (click)="toggleTag(tag)">
+                        <span class="cmd__dot cmd__dot--{{ tag.color }}"></span>
+                        <span class="cmd__label">{{ tag.name }}</span>
+                        @if (assignedTagIds().has(tag.id)) {
+                          <span class="cmd__check">
+                            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                          </span>
+                        }
                       </button>
-                      <button type="button" class="tag-dropdown__item-menu" (click)="startEdit(tag)" title="Szerkesztés">
-                        <lucide-icon [name]="ICONS.MORE_HORIZONTAL" [size]="14" />
+                      <button type="button" class="cmd__row-edit" (click)="startEdit(tag, $event)" title="Szerkesztés">
+                        <lucide-icon [name]="ICONS.EDIT" [size]="12" />
                       </button>
                     </div>
                   }
                 </div>
               } @else {
-                <div class="tag-dropdown__empty">
+                <div class="cmd__empty">
                   @if (searchQuery()) {
                     Nincs találat
                   } @else {
@@ -66,21 +70,23 @@
                 </div>
               }
 
-              <div class="tag-dropdown__divider"></div>
-              <button type="button" class="tag-dropdown__create-btn" (click)="startCreate()">
-                <lucide-icon [name]="ICONS.PLUS" [size]="12" />
-                Új címke létrehozása
-              </button>
+              <!-- Keyboard hints -->
+              <div class="cmd__footer">
+                <span class="cmd__hint">
+                  <kbd>Enter</kbd> toggle
+                </span>
+                <span class="cmd__hint">
+                  <kbd>Tab</kbd> @if (canCreateFromSearch()) { "{{ searchQuery().trim() }}" létrehozása } @else { új címke }
+                </span>
+              </div>
             }
 
-            <!-- === CREATE állapot === -->
+            <!-- CREATE / EDIT form -->
             @case ('create') {
               <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Új címke' }" />
             }
-
-            <!-- === EDIT állapot === -->
             @case ('edit') {
-              <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Címke szerkesztése' }" />
+              <ng-container *ngTemplateOutlet="tagForm; context: { $implicit: 'Szerkesztés' }" />
             }
           }
         </div>
@@ -89,30 +95,26 @@
   </div>
 </div>
 
-<!-- Form template (create + edit közös) -->
+<!-- Közös form template -->
 <ng-template #tagForm let-title>
-  <div class="tag-dropdown__form">
-    <!-- Header: vissza nyíl + cím -->
-    <div class="tag-dropdown__form-header">
-      <button type="button" class="tag-dropdown__back-btn" (click)="backToList()">
+  <div class="cmd__form">
+    <div class="cmd__form-header">
+      <button type="button" class="cmd__back" (click)="backToList()">
         <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="14" />
       </button>
-      <span class="tag-dropdown__form-title">{{ title }}</span>
+      <span class="cmd__form-title">{{ title }}</span>
     </div>
 
-    <!-- Élő preview pill -->
+    <!-- Preview pill -->
     @if (formName().trim()) {
-      <div class="tag-dropdown__preview">
-        <span class="tag-preview-pill tag-preview-pill--{{ formColor() }} tag-preview-pill--animated">
-          {{ formName().trim() }}
-        </span>
+      <div class="cmd__preview">
+        <span class="tag-pill tag-pill--{{ formColor() }}">{{ formName().trim() }}</span>
       </div>
     }
 
-    <!-- Név input -->
     <input
       type="text"
-      class="tag-dropdown__input"
+      class="cmd__input"
       placeholder="Címke neve..."
       [ngModel]="formName()"
       (ngModelChange)="formName.set($event)"
@@ -120,47 +122,42 @@
       maxlength="100"
     />
 
-    <!-- 3×3 szín grid -->
-    <div class="tag-dropdown__color-grid">
+    <!-- Szín grid -->
+    <div class="cmd__colors">
       @for (c of TAG_COLORS; track c.value) {
         <button
           type="button"
-          class="tag-color-swatch tag-color-swatch--{{ c.value }}"
-          [class.tag-color-swatch--active]="formColor() === c.value"
+          class="cmd__swatch cmd__swatch--{{ c.value }}"
+          [class.cmd__swatch--active]="formColor() === c.value"
           [title]="c.label"
           (click)="formColor.set(c.value)"
         >
           @if (formColor() === c.value) {
-            <lucide-icon [name]="ICONS.CHECK" [size]="14" class="tag-color-swatch__check" />
+            <lucide-icon [name]="ICONS.CHECK" [size]="13" class="cmd__swatch-check" />
           }
         </button>
       }
     </div>
 
-    <!-- Gombok -->
-    <div class="tag-dropdown__actions">
+    <div class="cmd__form-actions">
       @if (dropdownState() === 'edit') {
-        <button type="button" class="tag-dropdown__delete-btn" (click)="requestDelete()" title="Címke törlése">
+        <button type="button" class="cmd__delete" (click)="requestDelete()" title="Törlés">
           <lucide-icon [name]="ICONS.DELETE" [size]="14" />
         </button>
       }
       <button
         type="button"
-        class="tag-dropdown__save"
+        class="cmd__save"
         [disabled]="!formName().trim()"
         (click)="saveForm()"
       >
-        @if (dropdownState() === 'edit') {
-          Mentés
-        } @else {
-          Létrehozás
-        }
+        {{ dropdownState() === 'edit' ? 'Mentés' : 'Létrehozás' }}
       </button>
     </div>
   </div>
 </ng-template>
 
-<!-- Backdrop a dropdown bezárásához (szövegkijelölés-safe) -->
+<!-- Backdrop -->
 @if (dropdownState()) {
   <div
     class="tag-backdrop"
@@ -169,7 +166,7 @@
   ></div>
 }
 
-<!-- Törlés megerősítő dialógus -->
+<!-- Törlés megerősítő -->
 @if (showDeleteConfirm()) {
   <app-confirm-dialog
     title="Címke törlése"

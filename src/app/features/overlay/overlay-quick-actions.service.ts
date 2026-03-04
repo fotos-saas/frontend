@@ -1,4 +1,4 @@
-import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { Injectable, inject, NgZone, DestroyRef, signal } from '@angular/core';
 import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlaySettingsService } from './overlay-settings.service';
@@ -17,6 +17,7 @@ export class OverlayQuickActionsService {
   private readonly settings = inject(OverlaySettingsService);
   private readonly sortService = inject(OverlaySortService);
   private readonly ngZone = inject(NgZone);
+  private readonly destroyRef = inject(DestroyRef);
 
   private static readonly RESULT_TIMEOUT_MS = 3000;
 
@@ -29,9 +30,14 @@ export class OverlayQuickActionsService {
   readonly confirm = signal<{ action: string; target: string } | null>(null);
   readonly loading = signal(false);
   readonly reorderTarget = signal<QaTarget>('all');
-  readonly reorderText = signal('');
   readonly result = signal<{ success: boolean; message: string } | null>(null);
   private resultTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.resultTimer) clearTimeout(this.resultTimer);
+    });
+  }
 
   // Projekt ID resolver — komponens állítja be init-kor
   private projectIdResolver: () => number | undefined = () => undefined;
@@ -77,17 +83,6 @@ export class OverlayQuickActionsService {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  async executeReorder(): Promise<void> {
-    const text = this.reorderText().trim();
-    if (!text || this.sortService.sorting()) return;
-    const target = this.reorderTarget();
-    const slugNames = await this.getLayerNames(target);
-    if (slugNames.length < 2) { this.setResult(false, 'Legalább 2 layer kell.'); return; }
-
-    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
-    if (result.message) this.ngZone.run(() => this.setResult(result.success, result.message));
   }
 
   // === Eredmény megjelenítés ===

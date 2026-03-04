@@ -276,7 +276,7 @@ export class OverlayLayerManagementService {
 
   /** DB person névből layer slug: ékezet eltávolítás + lowercase + alulvonás szeparátor */
   private toLayerSlug(name: string): string {
-    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
+    return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
   }
 
   private normalize(s: string): string {

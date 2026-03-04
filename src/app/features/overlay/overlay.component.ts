@@ -265,7 +265,7 @@ export class OverlayComponent implements OnInit {
   dragOrderSortGender(): Promise<void> { return this.dragOrder.sortGender(); }
   dragOrderSortLeadership(): void { this.dragOrder.sortLeadership(); }
   onDragOrderDrop(event: CdkDragDrop<PersonItem[]>): void { this.dragOrder.onDrop(event); }
-  saveDragOrder(): Promise<void> { console.log('[OVERLAY] saveDragOrder called'); return this.dragOrder.save(); }
+  saveDragOrder(): Promise<void> { return this.dragOrder.save(); }
   refreshDragOrder(): Promise<void> { return this.dragOrder.refreshFromDb(); }
   setDragOrderSearch(value: string): void { this.dragOrder.searchQuery.set(value); }
   createDragOrderGroup(): void { this.dragOrder.createGroup('Új csoport'); }

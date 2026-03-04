@@ -7,6 +7,7 @@ import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlaySortService } from './overlay-sort.service';
 import { OverlayPollingService } from './overlay-polling.service';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { LoggerService } from '../../core/services/logger.service';
 
 type DragOrderScope = 'all' | 'teachers' | 'students';
 
@@ -39,6 +40,7 @@ export class OverlayDragOrderService {
   private readonly ps = inject(OverlayPhotoshopService);
   private readonly sortService = inject(OverlaySortService);
   private readonly polling = inject(OverlayPollingService);
+  private readonly logger = inject(LoggerService);
 
   // === Signals ===
   readonly panelOpen = signal(false);
@@ -594,7 +596,7 @@ export class OverlayDragOrderService {
         this.rebuildFlatList();
       });
     } catch (err) {
-      console.error('[DRAG-ORDER] loadFromJson error:', err);
+      this.logger.error('[DRAG-ORDER] loadFromJson error:', err);
       this.ungrouped.set([...this.list()]);
       this.groups.set([]);
     }
@@ -622,22 +624,22 @@ export class OverlayDragOrderService {
     try {
       await window.electronAPI.photoshop.saveDragOrder({ psdPath, dragOrderData: json as unknown as Record<string, unknown> });
     } catch (err) {
-      console.error('[DRAG-ORDER] saveToJson error:', err);
+      this.logger.error('[DRAG-ORDER] saveToJson error:', err);
     }
   }
 
   // === Mentés ===
 
   async save(): Promise<void> {
-    console.log('[DRAG-ORDER] save() called');
+    this.logger.info('[DRAG-ORDER] save() called');
     const pid = this.projectIdResolver();
-    console.log('[DRAG-ORDER] pid:', pid, 'groups:', this.groups().length, 'ungrouped:', this.ungrouped().length);
-    if (!pid) { console.log('[DRAG-ORDER] ABORT: no pid'); return; }
+    this.logger.info('[DRAG-ORDER] pid:', pid, 'groups:', this.groups().length, 'ungrouped:', this.ungrouped().length);
+    if (!pid) { this.logger.warn('[DRAG-ORDER] ABORT: no pid'); return; }
 
     // Flat lista a csoportok sorrendjéből
     const items = this.buildFlatList();
-    console.log('[DRAG-ORDER] flat list items:', items.length, items.map(p => p.name).slice(0, 5));
-    if (items.length === 0) { console.log('[DRAG-ORDER] ABORT: empty list'); return; }
+    this.logger.info('[DRAG-ORDER] flat list items:', items.length, items.map(p => p.name).slice(0, 5));
+    if (items.length === 0) { this.logger.warn('[DRAG-ORDER] ABORT: empty list'); return; }
 
     this.saving.set(true);
     try {
@@ -678,7 +680,7 @@ export class OverlayDragOrderService {
         this.closePanel();
       });
     } catch (err) {
-      console.error('[DRAG-ORDER] save error:', err);
+      this.logger.error('[DRAG-ORDER] save error:', err);
       this.ngZone.run(() => this.saving.set(false));
     }
   }

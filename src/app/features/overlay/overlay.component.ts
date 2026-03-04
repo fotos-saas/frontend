@@ -456,15 +456,24 @@ export class OverlayComponent implements OnInit {
           const human = this.sortService.slugToHumanName(slug);
           humanToSlug.set(normalize(human), slug);
         }
-        const orderedSlugs = list.map(p => {
-          const key = normalize(p.name);
-          const slug = humanToSlug.get(key);
-          if (!slug) console.warn('[DRAG-ORDER] NEM MATCHELT:', p.name, '→ key:', key);
-          return slug || p.name;
-        });
-        console.log('[DRAG-ORDER] slugNames (PS):', slugNames);
-        console.log('[DRAG-ORDER] orderedSlugs:', orderedSlugs);
-        console.log('[DRAG-ORDER] humanToSlug map:', [...humanToSlug.entries()]);
+        // Rendezett slugok: panel sorrend alapján + nem matchelt PS slugok a végére
+        const usedSlugs = new Set<string>();
+        const orderedSlugs: string[] = [];
+        for (const p of list) {
+          const slug = humanToSlug.get(normalize(p.name));
+          if (slug && !usedSlugs.has(slug)) {
+            orderedSlugs.push(slug);
+            usedSlugs.add(slug);
+          }
+        }
+        // PS-ben lévő, de panelről hiányzó slugok a végére (pl. eltérő DB/PS állapot)
+        for (const slug of slugNames) {
+          if (!usedSlugs.has(slug)) {
+            orderedSlugs.push(slug);
+            usedSlugs.add(slug);
+          }
+        }
+        console.log('[DRAG-ORDER] PS:', slugNames.length, '| Panel:', list.length, '| Ordered:', orderedSlugs.length);
         const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }

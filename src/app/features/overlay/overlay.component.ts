@@ -470,6 +470,15 @@ export class OverlayComponent implements OnInit {
         console.log('[DRAG-ORDER] PS:', slugNames.length, '| Panel:', list.length, '| Ordered:', orderedSlugs.length);
         const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
+
+        // 2b. Nevek újrapozícionálása az image layerek alá (production updateNamesAndPositions helyett)
+        const targetGroup = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : '';
+        await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
+          TEXT_ALIGN: 'center',
+          BREAK_AFTER: String(this.settings.nameBreakAfter()),
+          NAME_GAP_CM: String(this.settings.nameGapCm()),
+          ...(targetGroup ? { TARGET_GROUP: targetGroup } : {}),
+        });
       }
 
       // 3. Személylista újratöltés

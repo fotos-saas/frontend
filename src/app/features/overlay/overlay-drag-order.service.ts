@@ -192,6 +192,7 @@ export class OverlayDragOrderService {
     try {
       const positions = items.map((p, i) => ({ id: p.id, position: i + 1 }));
       const currentScope = this.scope();
+      console.log('[DRAG-ORDER] save start, pid:', pid, 'scope:', currentScope, 'items:', items.length);
 
       // 1. Backend position mentés
       await firstValueFrom(
@@ -200,11 +201,13 @@ export class OverlayDragOrderService {
           { positions },
         ),
       );
+      console.log('[DRAG-ORDER] backend OK');
 
       // 2. PS layer átrendezés — slug mapping
       const data = await this.ps.getImageLayerData();
       const slugNames = currentScope === 'teachers' ? data.teachers
         : currentScope === 'students' ? data.students : data.names;
+      console.log('[DRAG-ORDER] PS slugNames:', slugNames.length, 'data:', { students: data.students.length, teachers: data.teachers.length, names: data.names.length });
 
       if (slugNames.length >= 2) {
         const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -228,6 +231,7 @@ export class OverlayDragOrderService {
             usedSlugs.add(slug);
           }
         }
+        console.log('[DRAG-ORDER] orderedSlugs:', orderedSlugs.length, 'first 3:', orderedSlugs.slice(0, 3));
         const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
 
@@ -249,7 +253,8 @@ export class OverlayDragOrderService {
         this.saving.set(false);
         this.closePanel();
       });
-    } catch {
+    } catch (err) {
+      console.error('[DRAG-ORDER] save error:', err);
       this.ngZone.run(() => this.saving.set(false));
     }
   }

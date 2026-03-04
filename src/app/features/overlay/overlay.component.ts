@@ -1040,16 +1040,14 @@ export class OverlayComponent implements OnInit {
       return;
     }
 
-    // 3. Layer nevek → person adatok (title + name + group)
-    const personById = new Map(persons.map(p => [p.id, p]));
+    // 3. Layer nevek → person adatok (slug→humanName matching, NEM ID alapján)
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const personByNorm = new Map(persons.map(p => [normalize(p.name), p]));
     const personsData: { layerName: string; displayText: string; position: string | null; group: string }[] = [];
 
     for (const ln of layerNames) {
-      const sepIdx = ln.indexOf('---');
-      if (sepIdx === -1) continue;
-      const pid = parseInt(ln.substring(sepIdx + 3), 10);
-      if (pid <= 0) continue;
-      const person = personById.get(pid);
+      const humanName = this.sortService.slugToHumanName(ln);
+      const person = personByNorm.get(normalize(humanName));
       if (!person) continue;
       personsData.push({
         layerName: ln,

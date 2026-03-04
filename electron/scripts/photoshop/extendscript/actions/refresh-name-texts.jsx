@@ -70,7 +70,8 @@ function doRefreshNameTexts() {
   var doc = app.activeDocument;
 
   var breakAfter = typeof CONFIG !== "undefined" && CONFIG.BREAK_AFTER ? parseInt(CONFIG.BREAK_AFTER, 10) : 0;
-  var targetGroup = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+  var targetGroupRaw = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+  var targetGroup = targetGroupRaw.toLowerCase();
 
   // NAME_MAP parse
   var nameMap = null;

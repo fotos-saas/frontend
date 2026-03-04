@@ -192,7 +192,6 @@ export class OverlayDragOrderService {
     try {
       const positions = items.map((p, i) => ({ id: p.id, position: i + 1 }));
       const currentScope = this.scope();
-      console.log('[DRAG-ORDER] save start, pid:', pid, 'scope:', currentScope, 'items:', items.length);
 
       // 1. Backend position mentés
       await firstValueFrom(
@@ -201,14 +200,10 @@ export class OverlayDragOrderService {
           { positions },
         ),
       );
-      console.log('[DRAG-ORDER] backend OK');
-
       // 2. PS layer átrendezés — slug mapping
       const data = await this.ps.getImageLayerData();
       const slugNames = currentScope === 'teachers' ? data.teachers
         : currentScope === 'students' ? data.students : data.names;
-      console.log('[DRAG-ORDER] PS slugNames:', slugNames.length, 'data:', { students: data.students.length, teachers: data.teachers.length, names: data.names.length });
-
       if (slugNames.length >= 2) {
         const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const humanToSlug = new Map<string, string>();
@@ -231,7 +226,6 @@ export class OverlayDragOrderService {
             usedSlugs.add(slug);
           }
         }
-        console.log('[DRAG-ORDER] orderedSlugs:', orderedSlugs.length, 'first 3:', orderedSlugs.slice(0, 3));
         const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
         const layerNamesParam = orderedSlugs.join('|');
 
@@ -242,12 +236,12 @@ export class OverlayDragOrderService {
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
 
         // 2c. Nevek újrapozícionálása az image layerek alá
-        const targetGroup = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : '';
+        const targetGroup = currentScope === 'teachers' ? 'teachers' : currentScope === 'students' ? 'students' : 'all';
         await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
           TEXT_ALIGN: 'center',
           BREAK_AFTER: String(this.settings.nameBreakAfter()),
           NAME_GAP_CM: String(this.settings.nameGapCm()),
-          ...(targetGroup ? { TARGET_GROUP: targetGroup } : {}),
+          TARGET_GROUP: targetGroup,
         });
 
         // 2d. Link — visszalinkelés

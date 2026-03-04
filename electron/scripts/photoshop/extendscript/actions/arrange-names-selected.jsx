@@ -464,7 +464,9 @@ function doArrangeNames() {
   var imageNames = (selected.length > 0) ? getImageSelectionNames(doc, selected) : [];
 
   // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
-  var targetGroup = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+  // toLowerCase: a hivo kod "Students"/"Teachers" nagybetut kuld, de itt kisbetut varunk
+  var targetGroupRaw = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
+  var targetGroup = targetGroupRaw.toLowerCase();
 
   if (imageNames.length > 0) {
     // Csak a kijelolt kepek nevparjait rendezzuk

@@ -1495,15 +1495,19 @@
 }
 
 .drag-order-panel__name {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .drag-order-panel__title {
-  color: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
   font-size: 9px;
   margin-left: 4px;
+  white-space: nowrap;
 }
 
 .drag-order-panel__empty {

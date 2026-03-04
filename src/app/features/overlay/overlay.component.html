@@ -705,6 +705,19 @@
         <lucide-icon [name]="ICONS.X" [size]="10" />
       </button>
     }
+    <button
+      class="drag-order-panel__refresh"
+      (click)="refreshDragOrder()"
+      [disabled]="dragOrderRefreshing()"
+      type="button"
+      matTooltip="Adatok frissítése adatbázisból"
+    >
+      @if (dragOrderRefreshing()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+      } @else {
+        <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+      }
+    </button>
     <button class="drag-order-panel__close" (click)="closeDragOrderPanel()" type="button">
       <lucide-icon [name]="ICONS.X" [size]="14" />
     </button>
@@ -735,17 +748,37 @@
         </div>
       </div>
     </div>
-    <div class="drag-order-panel__list" cdkDropList (cdkDropListDropped)="onDragOrderDrop($event)">
+    <!-- Keresősáv -->
+    <div class="drag-order-panel__search">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="12" class="drag-order-panel__search-icon" />
+      <input
+        class="drag-order-panel__search-input"
+        type="text"
+        placeholder="Keresés név alapján..."
+        [value]="dragOrderSearchQuery()"
+        (input)="setDragOrderSearch($any($event.target).value)"
+      />
+      @if (dragOrderSearchQuery()) {
+        <button class="drag-order-panel__search-clear" (click)="setDragOrderSearch('')" type="button">
+          <lucide-icon [name]="ICONS.X" [size]="10" />
+        </button>
+      }
+    </div>
+
+    <div class="drag-order-panel__list" cdkDropList [cdkDropListDisabled]="!!dragOrderSearchQuery()" (cdkDropListDropped)="onDragOrderDrop($event)">
       @for (person of dragOrderList(); track person.id; let i = $index) {
         <div
           class="drag-order-panel__item"
           [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
           cdkDrag
+          [cdkDragDisabled]="!!dragOrderSearchQuery()"
           (click)="toggleDragOrderSelect(person.id, $event)"
         >
-          <div class="drag-order-panel__handle">
-            <lucide-icon [name]="ICONS.GRIP" [size]="12" />
-          </div>
+          @if (!dragOrderSearchQuery()) {
+            <div class="drag-order-panel__handle">
+              <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+            </div>
+          }
           <span class="drag-order-panel__index">{{ i + 1 }}.</span>
           <div class="drag-order-panel__avatar">
             @if (person.photoThumbUrl) {

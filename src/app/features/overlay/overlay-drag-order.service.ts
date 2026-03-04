@@ -1,4 +1,4 @@
-import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { Injectable, inject, NgZone, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -26,10 +26,20 @@ export class OverlayDragOrderService {
   // === Signals ===
   readonly panelOpen = signal(false);
   readonly saving = signal(false);
+  readonly refreshing = signal(false);
   readonly scope = signal<DragOrderScope>('students');
   readonly list = signal<PersonItem[]>([]);
+  readonly searchQuery = signal('');
   readonly selected = signal<Set<number>>(new Set());
   readonly genderLoading = signal(false);
+
+  /** Szűrt lista — keresés alapján (drag & drop a teljes listán működik, a keresés csak vizuálisan szűr) */
+  readonly filteredList = computed(() => {
+    const items = this.list();
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return items;
+    return items.filter(p => p.name.toLowerCase().includes(q) || (p.title && p.title.toLowerCase().includes(q)));
+  });
 
   // Projekt ID resolver — komponens állítja be init-kor
   private projectIdResolver: () => number | null = () => null;
@@ -51,6 +61,7 @@ export class OverlayDragOrderService {
 
   closePanel(): void {
     this.panelOpen.set(false);
+    this.searchQuery.set('');
     this.clearSelection();
   }
 
@@ -60,6 +71,19 @@ export class OverlayDragOrderService {
     this.scope.set(scope);
     this.selected.set(new Set());
     this.refreshList();
+  }
+
+  /** DB-ből újratölti a személyeket és frissíti a listát */
+  async refreshFromDb(): Promise<void> {
+    const pid = this.projectIdResolver();
+    if (!pid) return;
+    this.refreshing.set(true);
+    try {
+      await this.projectService.fetchPersons(pid);
+      this.refreshList();
+    } finally {
+      this.ngZone.run(() => this.refreshing.set(false));
+    }
   }
 
   private refreshList(): void {

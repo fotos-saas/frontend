@@ -110,8 +110,10 @@ export class OverlayComponent implements OnInit {
   // Drag order panel — alias-ok a service signal-ekre
   readonly dragOrderPanelOpen = this.dragOrder.panelOpen;
   readonly dragOrderSaving = this.dragOrder.saving;
+  readonly dragOrderRefreshing = this.dragOrder.refreshing;
   readonly dragOrderScope = this.dragOrder.scope;
-  readonly dragOrderList = this.dragOrder.list;
+  readonly dragOrderList = this.dragOrder.filteredList;
+  readonly dragOrderSearchQuery = this.dragOrder.searchQuery;
   readonly dragOrderSelected = this.dragOrder.selected;
   readonly dragOrderGenderLoading = this.dragOrder.genderLoading;
 
@@ -258,6 +260,8 @@ export class OverlayComponent implements OnInit {
   dragOrderSortLeadership(): void { this.dragOrder.sortLeadership(); }
   onDragOrderDrop(event: CdkDragDrop<PersonItem[]>): void { this.dragOrder.onDrop(event); }
   saveDragOrder(): Promise<void> { return this.dragOrder.save(); }
+  refreshDragOrder(): Promise<void> { return this.dragOrder.refreshFromDb(); }
+  setDragOrderSearch(value: string): void { this.dragOrder.searchQuery.set(value); }
 
   async submitCustomOrder(): Promise<void> {
     const text = this.customOrderText().trim();

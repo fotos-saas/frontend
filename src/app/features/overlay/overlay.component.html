@@ -701,7 +701,7 @@
     <span>Drag & Drop sorrend</span>
     @if (dragOrderSelected().size > 0) {
       <span class="drag-order-panel__sel-badge">{{ dragOrderSelected().size }} kijelölve</span>
-      <button class="drag-order-panel__sel-clear" (click)="dragOrderSelected.set(new Set())" type="button" matTooltip="Kijelölés törlése">
+      <button class="drag-order-panel__sel-clear" (click)="clearDragOrderSelection()" type="button" matTooltip="Kijelölés törlése">
         <lucide-icon [name]="ICONS.X" [size]="10" />
       </button>
     }

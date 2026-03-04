@@ -282,8 +282,10 @@ export class OverlayComponent implements OnInit {
 
   closeDragOrderPanel(): void {
     this.dragOrderPanelOpen.set(false);
-    this.dragOrderSelected.set(new Set());
+    this.clearDragOrderSelection();
   }
+
+  clearDragOrderSelection(): void { this.dragOrderSelected.set(new Set()); }
 
   setDragOrderScope(scope: 'all' | 'teachers' | 'students'): void {
     this.dragOrderScope.set(scope);

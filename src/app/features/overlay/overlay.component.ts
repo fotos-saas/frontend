@@ -126,6 +126,7 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderSaving = signal(false);
   readonly dragOrderScope = signal<'all' | 'teachers' | 'students'>('students');
   readonly dragOrderList = signal<PersonItem[]>([]);
+  readonly dragOrderSelected = signal<Set<number>>(new Set());
 
   // Link/unlink eredmény visszajelzés
   readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
@@ -279,10 +280,14 @@ export class OverlayComponent implements OnInit {
     }
   }
 
-  closeDragOrderPanel(): void { this.dragOrderPanelOpen.set(false); }
+  closeDragOrderPanel(): void {
+    this.dragOrderPanelOpen.set(false);
+    this.dragOrderSelected.set(new Set());
+  }
 
   setDragOrderScope(scope: 'all' | 'teachers' | 'students'): void {
     this.dragOrderScope.set(scope);
+    this.dragOrderSelected.set(new Set());
     this.refreshDragOrderList();
   }
 
@@ -294,10 +299,54 @@ export class OverlayComponent implements OnInit {
     this.dragOrderList.set([...filtered]);
   }
 
+  /** Cmd/Ctrl+klikk: toggle kijelölés */
+  toggleDragOrderSelect(personId: number, event: MouseEvent): void {
+    if (!event.metaKey && !event.ctrlKey) return;
+    event.preventDefault();
+    const sel = new Set(this.dragOrderSelected());
+    if (sel.has(personId)) { sel.delete(personId); } else { sel.add(personId); }
+    this.dragOrderSelected.set(sel);
+  }
+
+  isDragOrderSelected(personId: number): boolean {
+    return this.dragOrderSelected().has(personId);
+  }
+
   onDragOrderDrop(event: CdkDragDrop<PersonItem[]>): void {
     const list = [...this.dragOrderList()];
-    moveItemInArray(list, event.previousIndex, event.currentIndex);
-    this.dragOrderList.set(list);
+    const selected = this.dragOrderSelected();
+    const draggedIndex = event.previousIndex;
+    const targetIndex = event.currentIndex;
+
+    if (selected.size > 1 && selected.has(list[draggedIndex].id)) {
+      // Csoportos mozgatás: kijelöltek együtt mozognak
+      const selectedItems = list.filter(p => selected.has(p.id));
+      const remaining = list.filter(p => !selected.has(p.id));
+
+      // A cél pozíció a remaining listában
+      // Ha lefelé húzunk, a cél a nem-kijelöltek közül az, ami a targetIndex-en volt
+      let insertAt: number;
+      if (targetIndex >= list.length) {
+        insertAt = remaining.length;
+      } else {
+        const targetItem = list[targetIndex];
+        if (selected.has(targetItem.id)) {
+          // A target is kijelölt — a cél a dragged elem utáni nem-kijelölt pozíció
+          insertAt = remaining.length;
+        } else {
+          insertAt = remaining.indexOf(targetItem);
+          if (targetIndex > draggedIndex) insertAt++;
+        }
+      }
+
+      remaining.splice(insertAt, 0, ...selectedItems);
+      this.dragOrderList.set(remaining);
+    } else {
+      // Egyszerű egyedi mozgatás
+      moveItemInArray(list, draggedIndex, targetIndex);
+      this.dragOrderList.set(list);
+    }
+    this.dragOrderSelected.set(new Set());
   }
 
   async saveDragOrder(): Promise<void> {

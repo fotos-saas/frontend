@@ -699,6 +699,9 @@
   <div class="drag-order-panel__header">
     <lucide-icon [name]="ICONS.GRIP" [size]="14" />
     <span>Drag & Drop sorrend</span>
+    @if (dragOrderSelected().size > 0) {
+      <span class="drag-order-panel__sel-badge">{{ dragOrderSelected().size }} kijelölve</span>
+    }
     <button class="drag-order-panel__close" (click)="closeDragOrderPanel()" type="button">
       <lucide-icon [name]="ICONS.X" [size]="14" />
     </button>
@@ -714,7 +717,12 @@
     </div>
     <div class="drag-order-panel__list" cdkDropList (cdkDropListDropped)="onDragOrderDrop($event)">
       @for (person of dragOrderList(); track person.id; let i = $index) {
-        <div class="drag-order-panel__item" cdkDrag>
+        <div
+          class="drag-order-panel__item"
+          [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
+          cdkDrag
+          (click)="toggleDragOrderSelect(person.id, $event)"
+        >
           <div class="drag-order-panel__handle" cdkDragHandle>
             <lucide-icon [name]="ICONS.GRIP" [size]="12" />
           </div>

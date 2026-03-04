@@ -24,7 +24,7 @@ import { PartnerTeacherService } from '../partner/services/partner-teacher.servi
 import { TeacherLinkDialogComponent } from '../partner/components/teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../partner/components/teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
-import { DragOrderPanelComponent, DragOrderSavedEvent } from './drag-order-panel/drag-order-panel.component';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 interface UploadResult {
   success: boolean;
@@ -38,7 +38,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 @Component({
   selector: 'app-overlay',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent, DragOrderPanelComponent],
+  imports: [LucideAngularModule, MatTooltipModule, DragDropModule, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [
     OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
     OverlayPollingService, OverlaySettingsService, OverlaySortService,
@@ -124,6 +124,8 @@ export class OverlayComponent implements OnInit {
   // Drag order panel state
   readonly dragOrderPanelOpen = signal(false);
   readonly dragOrderSaving = signal(false);
+  readonly dragOrderScope = signal<'all' | 'teachers' | 'students'>('students');
+  readonly dragOrderList = signal<PersonItem[]>([]);
 
   // Link/unlink eredmény visszajelzés
   readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
@@ -264,6 +266,7 @@ export class OverlayComponent implements OnInit {
       this.closeDragOrderPanel();
     } else {
       this.dragOrderPanelOpen.set(true);
+      this.refreshDragOrderList();
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
@@ -273,39 +276,55 @@ export class OverlayComponent implements OnInit {
 
   closeDragOrderPanel(): void { this.dragOrderPanelOpen.set(false); }
 
-  async onDragOrderSaved(event: DragOrderSavedEvent): Promise<void> {
+  setDragOrderScope(scope: 'all' | 'teachers' | 'students'): void {
+    this.dragOrderScope.set(scope);
+    this.refreshDragOrderList();
+  }
+
+  private refreshDragOrderList(): void {
+    const all = this.persons();
+    const s = this.dragOrderScope();
+    const filtered = s === 'teachers' ? all.filter(p => p.type === 'teacher')
+      : s === 'students' ? all.filter(p => p.type === 'student') : all;
+    this.dragOrderList.set([...filtered]);
+  }
+
+  onDragOrderDrop(event: CdkDragDrop<PersonItem[]>): void {
+    const list = [...this.dragOrderList()];
+    moveItemInArray(list, event.previousIndex, event.currentIndex);
+    this.dragOrderList.set(list);
+  }
+
+  async saveDragOrder(): Promise<void> {
     const pid = this.pid;
-    if (!pid) return;
+    const list = this.dragOrderList();
+    if (!pid || list.length === 0) return;
 
     this.dragOrderSaving.set(true);
     try {
+      const positions = list.map((p, i) => ({ id: p.id, position: i + 1 }));
+
       // 1. Backend position mentés
       await firstValueFrom(
         this.http.patch<any>(
           `${environment.apiUrl}/partner/projects/${pid}/persons/reorder`,
-          { positions: event.positions },
+          { positions },
         ),
       );
 
       // 2. PS layer átrendezés — slug mapping
-      const scope = event.scope;
+      const scope = this.dragOrderScope();
       const data = await this.ps.getImageLayerData();
       const slugNames = scope === 'teachers' ? data.teachers
         : scope === 'students' ? data.students : data.names;
 
       if (slugNames.length >= 2) {
-        // Human-to-slug map építése
         const humanToSlug = new Map<string, string>();
         for (const slug of slugNames) {
           const human = this.sortService.slugToHumanName(slug);
           humanToSlug.set(human.toLowerCase(), slug);
         }
-
-        // Rendezett nevek slug-okra konvertálása
-        const orderedSlugs = event.orderedNames.map(name =>
-          humanToSlug.get(name.toLowerCase()) || name,
-        );
-
+        const orderedSlugs = list.map(p => humanToSlug.get(p.name.toLowerCase()) || p.name);
         const groupLabel = scope === 'teachers' ? 'Teachers' : scope === 'students' ? 'Students' : 'All';
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
       }

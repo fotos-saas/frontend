@@ -695,12 +695,59 @@
 
 <!-- Drag Order Panel -->
 @if (dragOrderPanelOpen()) {
-  <app-drag-order-panel
-    [persons]="persons()"
-    [saving]="dragOrderSaving()"
-    (close)="closeDragOrderPanel()"
-    (saved)="onDragOrderSaved($event)"
-  />
+<div class="drag-order-panel">
+  <div class="drag-order-panel__header">
+    <lucide-icon [name]="ICONS.GRIP" [size]="14" />
+    <span>Drag & Drop sorrend</span>
+    <button class="drag-order-panel__close" (click)="closeDragOrderPanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+  <div class="drag-order-panel__body">
+    <div class="drag-order-panel__scope">
+      <span class="drag-order-panel__scope-label">Célcsoport</span>
+      <div class="drag-order-panel__scope-buttons">
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'students'" (click)="setDragOrderScope('students')">Diákok</button>
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'teachers'" (click)="setDragOrderScope('teachers')">Tanárok</button>
+        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'all'" (click)="setDragOrderScope('all')">Mind</button>
+      </div>
+    </div>
+    <div class="drag-order-panel__list" cdkDropList (cdkDropListDropped)="onDragOrderDrop($event)">
+      @for (person of dragOrderList(); track person.id; let i = $index) {
+        <div class="drag-order-panel__item" cdkDrag>
+          <div class="drag-order-panel__handle" cdkDragHandle>
+            <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+          </div>
+          <span class="drag-order-panel__index">{{ i + 1 }}.</span>
+          <span class="drag-order-panel__name">{{ person.name }}</span>
+          @if (person.title) {
+            <span class="drag-order-panel__title">{{ person.title }}</span>
+          }
+          <div class="drag-order-panel__placeholder" *cdkDragPlaceholder></div>
+        </div>
+      }
+      @if (dragOrderList().length === 0) {
+        <div class="drag-order-panel__empty">Nincs személy ebben a csoportban</div>
+      }
+    </div>
+  </div>
+  <div class="drag-order-panel__footer">
+    <button
+      class="drag-order-panel__btn drag-order-panel__btn--submit"
+      [disabled]="dragOrderSaving() || dragOrderList().length === 0"
+      (click)="saveDragOrder()"
+      type="button"
+    >
+      @if (dragOrderSaving()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+        Mentés...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        Mentés
+      }
+    </button>
+  </div>
+</div>
 }
 
 <!-- Rename Layer IDs Dialog -->

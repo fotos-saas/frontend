@@ -1223,6 +1223,208 @@
   &--error { color: #ef4444; }
 }
 
+// ============ Drag Order Panel ============
+.drag-order-panel {
+  pointer-events: auto;
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e3a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  animation: panel-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.drag-order-panel__header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #22c55e;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-app-region: no-drag;
+
+  lucide-icon { margin-right: 6px; }
+}
+
+.drag-order-panel__close {
+  -webkit-app-region: no-drag;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+}
+
+.drag-order-panel__body {
+  padding: 8px 12px;
+  -webkit-app-region: no-drag;
+}
+
+.drag-order-panel__scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.drag-order-panel__scope-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.drag-order-panel__scope-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.drag-order-panel__list {
+  max-height: 350px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+  }
+}
+
+.drag-order-panel__item {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  margin-bottom: 2px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background 0.15s;
+  cursor: grab;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.drag-order-panel__placeholder {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px dashed rgba(34, 197, 94, 0.4);
+  border-radius: 5px;
+  min-height: 28px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-order-panel__handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: grab;
+  flex-shrink: 0;
+  margin-right: 4px;
+
+  &:active { cursor: grabbing; }
+}
+
+.drag-order-panel__index {
+  width: 20px;
+  text-align: right;
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-right: 5px;
+}
+
+.drag-order-panel__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drag-order-panel__title {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.drag-order-panel__empty {
+  padding: 12px 8px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+}
+
+.drag-order-panel__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 12px 8px;
+  -webkit-app-region: no-drag;
+}
+
+.drag-order-panel__btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.12s;
+
+  &--submit {
+    background: #22c55e;
+    color: #fff;
+
+    &:hover:not(:disabled) { background: #16a34a; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+// CDK drag preview (felülírt globális stílus)
+.cdk-drag-preview.drag-order-panel__item {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #22c55e;
+  border-radius: 5px;
+  font-size: 11px;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 // ============ Rename Panel ============
 .rename-panel {
   pointer-events: auto;

@@ -16,6 +16,7 @@ import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlayPollingService } from './overlay-polling.service';
 import { OverlaySettingsService } from './overlay-settings.service';
 import { OverlaySortService } from './overlay-sort.service';
+import { OverlayQuickActionsService } from './overlay-quick-actions.service';
 import { OverlaySyncService } from './overlay-sync.service';
 import { OverlayLayerManagementService } from './overlay-layer-management.service';
 import { OverlayGenerateService } from './overlay-generate.service';
@@ -43,6 +44,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
     OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
     OverlayPollingService, OverlaySettingsService, OverlaySortService,
     OverlaySyncService, OverlayLayerManagementService, OverlayGenerateService,
+    OverlayQuickActionsService,
   ],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
@@ -68,6 +70,7 @@ export class OverlayComponent implements OnInit {
   readonly syncService = inject(OverlaySyncService);
   readonly layerMgmt = inject(OverlayLayerManagementService);
   readonly generateService = inject(OverlayGenerateService);
+  readonly qa = inject(OverlayQuickActionsService);
 
   // ============ Service signal alias-ok (template backward compat) ============
   readonly context = signal<OverlayContext>({ mode: 'normal' });
@@ -106,17 +109,6 @@ export class OverlayComponent implements OnInit {
     return this.renameUnmatched().some(u => u.newId.trim().length > 0);
   });
 
-  // Quick actions panel state
-  readonly quickActionsPanelOpen = signal(false);
-  readonly qaRefreshNames = signal(true);
-  readonly qaRefreshPositions = signal(false);
-  readonly qaPositionNames = signal(true);
-  readonly qaPositionPositions = signal(false);
-  readonly qaConfirm = signal<{ action: string; target: string } | null>(null);
-  readonly qaLoading = signal(false);
-  readonly qaReorderTarget = signal<'all' | 'students' | 'teachers'>('all');
-  readonly qaReorderText = signal('');
-
   // Custom order panel state
   readonly customOrderPanelOpen = signal(false);
   readonly customOrderText = signal('');
@@ -130,9 +122,8 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderSelected = signal<Set<number>>(new Set());
   readonly dragOrderGenderLoading = signal(false);
 
-  // Link/unlink eredmény visszajelzés
-  readonly linkResult = signal<{ success: boolean; message: string } | null>(null);
-  private linkResultTimer: ReturnType<typeof setTimeout> | null = null;
+  // Link/unlink eredmény — delegálva qa service-be, alias a template-hez
+  readonly linkResult = this.qa.result;
 
   // Teacher link & photo chooser dialog state
   readonly showTeacherLinkDialog = signal(false);
@@ -207,6 +198,7 @@ export class OverlayComponent implements OnInit {
     this.polling.listenVisibility(this.destroyRef);
     this.settings.loadSettings(this.context().projectId || this.projectService.getLastProjectId());
     this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(this.context().projectId));
+    this.qa.setProjectIdResolver(() => this.context().projectId);
   }
 
   // ============ Command router ============
@@ -272,7 +264,7 @@ export class OverlayComponent implements OnInit {
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
-      if (this.quickActionsPanelOpen()) this.closeQuickActions();
+      if (this.qa.panelOpen()) this.closeQuickActions();
       // Személylista betöltése ha üres
       const pid = this.pid;
       if (pid && this.persons().length === 0) {
@@ -498,7 +490,7 @@ export class OverlayComponent implements OnInit {
   async submitCustomOrder(): Promise<void> {
     const text = this.customOrderText().trim();
     if (!text || this.sortService.sorting()) return;
-    const target = this.qaReorderTarget();
+    const target = this.qa.reorderTarget();
     const data = await this.ps.getImageLayerData();
     const slugNames = target === 'teachers' ? data.teachers
       : target === 'students' ? data.students : data.names;
@@ -781,48 +773,9 @@ export class OverlayComponent implements OnInit {
     });
   }
 
-  // ============ Quick actions ============
-  toggleQuickActions(): void { this.quickActionsPanelOpen.update(v => !v); }
-  closeQuickActions(): void { this.quickActionsPanelOpen.set(false); }
-  toggleQaType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
-    if (action === 'refresh') { if (type === 'names') this.qaRefreshNames.update(v => !v); else this.qaRefreshPositions.update(v => !v); }
-    else { if (type === 'names') this.qaPositionNames.update(v => !v); else this.qaPositionPositions.update(v => !v); }
-  }
-  onQuickAction(action: string, target: string): void { this.qaConfirm.set({ action, target }); }
-  async confirmQuickAction(): Promise<void> {
-    const c = this.qaConfirm();
-    if (!c || this.qaLoading()) return;
-    this.qaConfirm.set(null);
-    this.qaLoading.set(true);
-
-    try {
-      if (c.action === 'link') {
-        await this.executeLinkQuickAction(c.target);
-      } else if (c.action === 'position-labels') {
-        await this.executeArrangeQuickAction(c.target, this.qaPositionNames(), this.qaPositionPositions());
-      } else if (c.action === 'refresh-labels') {
-        await this.executeRefreshLabelsAction(c.target, this.qaRefreshNames(), this.qaRefreshPositions());
-      } else if (c.action === 'sync-positions') {
-        await this.executeSyncPositionsAction(c.target);
-      }
-    } finally {
-      this.qaLoading.set(false);
-    }
-  }
-  cancelQuickAction(): void { this.qaConfirm.set(null); }
-
-  async executeReorderQuickAction(): Promise<void> {
-    const text = this.qaReorderText().trim();
-    if (!text || this.sortService.sorting()) return;
-    const target = this.qaReorderTarget();
-    const data = await this.ps.getImageLayerData();
-    const slugNames = target === 'teachers' ? data.teachers
-      : target === 'students' ? data.students : data.names;
-    if (slugNames.length < 2) { this.setLinkResult(false, 'Legalább 2 layer kell.'); return; }
-
-    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
-    if (result.message) this.ngZone.run(() => this.setLinkResult(result.success, result.message));
-  }
+  // ============ Quick actions (delegálva: OverlayQuickActionsService) ============
+  toggleQuickActions(): void { this.qa.togglePanel(); }
+  closeQuickActions(): void { this.qa.closePanel(); }
 
   // ============ Turbo & UI ============
   toggleTurbo(): void { this.polling.toggleTurbo(); }
@@ -898,214 +851,9 @@ export class OverlayComponent implements OnInit {
 
   // ============ Private helpers ============
 
-  private async executeLinkQuickAction(target: string): Promise<void> {
-    const data = await this.ps.getImageLayerData();
-    const layerNames = target === 'teachers' ? data.teachers
-      : target === 'students' ? data.students
-      : data.names;
-
-    if (layerNames.length === 0) {
-      const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'image';
-      this.setLinkResult(false, `Nincsenek ${label} layerek`);
-      return;
-    }
-
-    const result = await this.ps.runJsx(
-      'link-layers',
-      'actions/link-selected.jsx',
-      { LAYER_NAMES: layerNames.join('|') },
-    );
-    this.showLinkResult(result, 'link');
-  }
-
-  private async executeArrangeQuickAction(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
-    if (!doNames && !doPositions) { this.setLinkResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
-    const targetGroup = target === 'teachers' ? 'teachers' : target === 'students' ? 'students' : 'all';
-
-    // NAME_MAP: layer név → DB-beli helyes név (person ID alapján)
-    let nameMapJson = '';
-    if (doNames) {
-      let persons = this.projectService.persons();
-      if (persons.length === 0) {
-        const pid = this.projectService.getLastProjectId() || this.context().projectId;
-        if (pid) persons = await this.projectService.fetchPersons(pid);
-      }
-      const personById = new Map(persons.map(p => [p.id, p.name]));
-      const data = await this.ps.getImageLayerData();
-      const layerNames = target === 'teachers' ? data.teachers
-        : target === 'students' ? data.students : data.names;
-      const nameMap: Record<string, string> = {};
-      for (const ln of layerNames) {
-        const sepIdx = ln.indexOf('---');
-        if (sepIdx === -1) continue;
-        const pid = parseInt(ln.substring(sepIdx + 3), 10);
-        if (pid > 0 && personById.has(pid)) nameMap[ln] = personById.get(pid)!;
-      }
-      nameMapJson = JSON.stringify(nameMap);
-    }
-
-    const result = await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
-      TEXT_ALIGN: 'center',
-      BREAK_AFTER: String(this.settings.nameBreakAfter()),
-      NAME_GAP_CM: String(this.settings.nameGapCm()),
-      TARGET_GROUP: targetGroup,
-      SKIP_NAMES: doNames ? 'false' : 'true',
-      SKIP_POSITIONS: doPositions ? 'false' : 'true',
-      NAME_MAP: nameMapJson,
-    });
-    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
-    const typeLabel = doNames && doPositions ? 'név+pozíció' : doNames ? 'név' : 'pozíció';
-    try {
-      if (result?.output) {
-        const data = JSON.parse(result.output.trim());
-        if (data.error) { this.setLinkResult(false, data.error); return; }
-        this.setLinkResult(true, `${data.arranged} ${typeLabel} rendezve (${label})`);
-      } else {
-        this.setLinkResult(true, `Rendezés kész (${label})`);
-      }
-    } catch { this.setLinkResult(true, `Rendezés kész (${label})`); }
-  }
-
-  private async executeRefreshLabelsAction(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
-    if (!doNames && !doPositions) { this.setLinkResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
-    const targetGroup = target === 'teachers' ? 'teachers' : target === 'students' ? 'students' : 'all';
-
-    // Ha pozíciók is kellenek → az arrange script csinálja (pozícionálással)
-    if (doPositions) {
-      await this.executeArrangeQuickAction(target, doNames, doPositions);
-      return;
-    }
-
-    // CSAK nevek frissítése — új script, NEM pozícionál
-    let persons = this.projectService.persons();
-    if (persons.length === 0) {
-      // Persons nincs betöltve — megpróbáljuk lekérni
-      const pid = this.projectService.getLastProjectId() || this.context().projectId;
-      if (pid) {
-        persons = await this.projectService.fetchPersons(pid);
-      }
-      if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
-    }
-
-    const personById = new Map(persons.map(p => [p.id, p.name]));
-    const data = await this.ps.getImageLayerData();
-    const layerNames = target === 'teachers' ? data.teachers
-      : target === 'students' ? data.students : data.names;
-
-    const nameMap: Record<string, string> = {};
-    for (const ln of layerNames) {
-      const sepIdx = ln.indexOf('---');
-      if (sepIdx === -1) continue;
-      const pid = parseInt(ln.substring(sepIdx + 3), 10);
-      if (pid > 0 && personById.has(pid)) nameMap[ln] = personById.get(pid)!;
-    }
-
-    if (Object.keys(nameMap).length === 0) { this.setLinkResult(false, 'Nem találtam párosítható neveket'); return; }
-
-    const result = await this.ps.runJsx('refresh-names', 'actions/refresh-name-texts.jsx', {
-      NAME_MAP: JSON.stringify(nameMap),
-      TARGET_GROUP: targetGroup,
-      BREAK_AFTER: String(this.settings.nameBreakAfter()),
-    });
-
-    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
-    try {
-      if (result?.output) {
-        const r = JSON.parse(result.output.trim());
-        if (r.error) { this.setLinkResult(false, r.error); return; }
-        this.setLinkResult(true, `${r.refreshed} felirat frissítve (${label}) [map:${r.nameMapCount}]`);
-      } else {
-        this.setLinkResult(true, `Frissítés kész (${label})`);
-      }
-    } catch { this.setLinkResult(true, `Frissítés kész (${label})`); }
-  }
-
-  private async executeSyncPositionsAction(target: string): Promise<void> {
-    // 1. Persons betöltés ha üres
-    let persons = this.projectService.persons();
-    if (persons.length === 0) {
-      const pid = this.projectService.getLastProjectId() || this.context().projectId;
-      if (pid) persons = await this.projectService.fetchPersons(pid);
-      if (persons.length === 0) { this.setLinkResult(false, 'Nincsenek személyek betöltve'); return; }
-    }
-
-    // 2. Image layer nevek lekérése PS-ből
-    const data = await this.ps.getImageLayerData();
-    const layerNames = target === 'teachers' ? data.teachers
-      : target === 'students' ? data.students : data.names;
-
-    if (layerNames.length === 0) {
-      const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'image';
-      this.setLinkResult(false, `Nincsenek ${label} layerek`);
-      return;
-    }
-
-    // 3. Layer nevek → person adatok (slug→humanName matching, NEM ID alapján)
-    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const personByNorm = new Map(persons.map(p => [normalize(p.name), p]));
-    const personsData: { layerName: string; displayText: string; position: string | null; group: string }[] = [];
-
-    for (const ln of layerNames) {
-      const humanName = this.sortService.slugToHumanName(ln);
-      const person = personByNorm.get(normalize(humanName));
-      if (!person) continue;
-      personsData.push({
-        layerName: ln,
-        displayText: person.name,
-        position: person.title || null,
-        group: person.type === 'teacher' ? 'Teachers' : 'Students',
-      });
-    }
-
-    if (personsData.length === 0) { this.setLinkResult(false, 'Nem találtam párosítható személyeket'); return; }
-
-    // 4. JSX futtatás
-    const jsonData = {
-      persons: personsData,
-      nameBreakAfter: this.settings.nameBreakAfter(),
-      textAlign: 'center',
-      nameGapCm: this.settings.nameGapCm(),
-      positionGapCm: 0.15,
-      positionFontSize: 18,
-    };
-
-    const result = await this.ps.runJsx('sync-positions', 'actions/update-positions.jsx', jsonData);
-    const label = target === 'teachers' ? 'tanár' : target === 'students' ? 'diák' : 'összes';
-    try {
-      if (result?.output) {
-        const lines = result.output.trim().split('\n');
-        const lastLine = lines[lines.length - 1];
-        this.setLinkResult(true, `Pozíciók frissítve (${label}): ${lastLine}`);
-      } else {
-        this.setLinkResult(true, `Pozíciók frissítve (${label})`);
-      }
-    } catch { this.setLinkResult(true, `Pozíciók frissítve (${label})`); }
-  }
-
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {
     const result = await this.ps.runJsx(commandId, script);
-    this.showLinkResult(result, type);
-  }
-
-  private showLinkResult(result: any, type: 'link' | 'unlink'): void {
-    if (this.linkResultTimer) { clearTimeout(this.linkResultTimer); this.linkResultTimer = null; }
-    try {
-      if (!result?.output) { this.setLinkResult(false, 'Nincs válasz a Photoshoptól'); return; }
-      const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) { this.setLinkResult(false, 'Érvénytelen válasz'); return; }
-      const data = JSON.parse(cleaned);
-      if (data.error) { this.setLinkResult(false, data.error); return; }
-      const count = type === 'link' ? data.linked : data.unlinked;
-      const verb = type === 'link' ? 'linkelve' : 'szétlinkelve';
-      const nameCount = data.names?.length || 0;
-      if (count === 0) { this.setLinkResult(false, 'Nem találtam linkelhető layereket'); return; }
-      this.setLinkResult(true, `${count} layer ${verb} (${nameCount} név)`);
-    } catch { this.setLinkResult(false, 'Hiba a válasz feldolgozásában'); }
-  }
-
-  private setLinkResult(success: boolean, message: string): void {
-    this.ngZone.run(() => this.linkResult.set({ success, message }));
-    this.linkResultTimer = setTimeout(() => this.ngZone.run(() => this.linkResult.set(null)), 3000);
+    this.qa.showLinkResult(result, type);
   }
 
   private closeSubmenu(): void { if (this.openSubmenu()) { this.openSubmenu.set(null); this.clearCollapseTimer(); } }

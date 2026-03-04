@@ -1,0 +1,317 @@
+import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { OverlayPhotoshopService } from './overlay-photoshop.service';
+import { OverlayProjectService, PersonItem } from './overlay-project.service';
+import { OverlaySettingsService } from './overlay-settings.service';
+import { OverlaySortService } from './overlay-sort.service';
+
+type QaTarget = 'all' | 'students' | 'teachers';
+
+/**
+ * Gyors akciók üzleti logikája (link, arrange, refresh, sync-positions, reorder).
+ * Kiemelve az overlay.component.ts-ből a redundancia csökkentése érdekében.
+ */
+@Injectable()
+export class OverlayQuickActionsService {
+  private readonly ps = inject(OverlayPhotoshopService);
+  private readonly projectService = inject(OverlayProjectService);
+  private readonly settings = inject(OverlaySettingsService);
+  private readonly sortService = inject(OverlaySortService);
+  private readonly ngZone = inject(NgZone);
+
+  private static readonly RESULT_TIMEOUT_MS = 3000;
+
+  // === Signals ===
+  readonly panelOpen = signal(false);
+  readonly refreshNames = signal(true);
+  readonly refreshPositions = signal(false);
+  readonly positionNames = signal(true);
+  readonly positionPositions = signal(false);
+  readonly confirm = signal<{ action: string; target: string } | null>(null);
+  readonly loading = signal(false);
+  readonly reorderTarget = signal<QaTarget>('all');
+  readonly reorderText = signal('');
+  readonly result = signal<{ success: boolean; message: string } | null>(null);
+  private resultTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Projekt ID resolver — komponens állítja be init-kor
+  private projectIdResolver: () => number | undefined = () => undefined;
+
+  setProjectIdResolver(fn: () => number | undefined): void {
+    this.projectIdResolver = fn;
+  }
+
+  // === Panel kezelés ===
+
+  togglePanel(): void { this.panelOpen.update(v => !v); }
+  closePanel(): void { this.panelOpen.set(false); }
+
+  toggleType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
+    if (action === 'refresh') {
+      if (type === 'names') this.refreshNames.update(v => !v);
+      else this.refreshPositions.update(v => !v);
+    } else {
+      if (type === 'names') this.positionNames.update(v => !v);
+      else this.positionPositions.update(v => !v);
+    }
+  }
+
+  onAction(action: string, target: string): void { this.confirm.set({ action, target }); }
+  cancelAction(): void { this.confirm.set(null); }
+
+  async confirmAction(): Promise<void> {
+    const c = this.confirm();
+    if (!c || this.loading()) return;
+    this.confirm.set(null);
+    this.loading.set(true);
+
+    try {
+      if (c.action === 'link') {
+        await this.executeLink(c.target);
+      } else if (c.action === 'position-labels') {
+        await this.executeArrange(c.target, this.positionNames(), this.positionPositions());
+      } else if (c.action === 'refresh-labels') {
+        await this.executeRefreshLabels(c.target, this.refreshNames(), this.refreshPositions());
+      } else if (c.action === 'sync-positions') {
+        await this.executeSyncPositions(c.target);
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async executeReorder(): Promise<void> {
+    const text = this.reorderText().trim();
+    if (!text || this.sortService.sorting()) return;
+    const target = this.reorderTarget();
+    const slugNames = await this.getLayerNames(target);
+    if (slugNames.length < 2) { this.setResult(false, 'Legalább 2 layer kell.'); return; }
+
+    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
+    if (result.message) this.ngZone.run(() => this.setResult(result.success, result.message));
+  }
+
+  // === Eredmény megjelenítés ===
+
+  setResult(success: boolean, message: string): void {
+    if (this.resultTimer) clearTimeout(this.resultTimer);
+    this.ngZone.run(() => this.result.set({ success, message }));
+    this.resultTimer = setTimeout(
+      () => this.ngZone.run(() => this.result.set(null)),
+      OverlayQuickActionsService.RESULT_TIMEOUT_MS,
+    );
+  }
+
+  showLinkResult(result: any, type: 'link' | 'unlink'): void {
+    try {
+      if (!result?.output) { this.setResult(false, 'Nincs válasz a Photoshoptól'); return; }
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) { this.setResult(false, 'Érvénytelen válasz'); return; }
+      const data = JSON.parse(cleaned);
+      if (data.error) { this.setResult(false, data.error); return; }
+      const count = type === 'link' ? data.linked : data.unlinked;
+      const verb = type === 'link' ? 'linkelve' : 'szétlinkelve';
+      const nameCount = data.names?.length || 0;
+      if (count === 0) { this.setResult(false, 'Nem találtam linkelhető layereket'); return; }
+      this.setResult(true, `${count} layer ${verb} (${nameCount} név)`);
+    } catch { this.setResult(false, 'Hiba a válasz feldolgozásában'); }
+  }
+
+  // === Private: Execute metódusok ===
+
+  private async executeLink(target: string): Promise<void> {
+    const layerNames = await this.getLayerNames(target);
+    if (layerNames.length === 0) {
+      this.setResult(false, `Nincsenek ${this.targetLabel(target, 'image')} layerek`);
+      return;
+    }
+    const result = await this.ps.runJsx(
+      'link-layers', 'actions/link-selected.jsx',
+      { LAYER_NAMES: layerNames.join('|') },
+    );
+    this.showLinkResult(result, 'link');
+  }
+
+  private async executeArrange(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
+    if (!doNames && !doPositions) { this.setResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
+
+    let nameMapJson = '';
+    if (doNames) {
+      const persons = await this.ensurePersons();
+      const layerNames = await this.getLayerNames(target);
+      const nameMap = this.buildNameMap(layerNames, persons);
+      nameMapJson = JSON.stringify(nameMap);
+    }
+
+    const result = await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
+      TEXT_ALIGN: 'center',
+      BREAK_AFTER: String(this.settings.nameBreakAfter()),
+      NAME_GAP_CM: String(this.settings.nameGapCm()),
+      TARGET_GROUP: this.targetGroup(target),
+      SKIP_NAMES: doNames ? 'false' : 'true',
+      SKIP_POSITIONS: doPositions ? 'false' : 'true',
+      NAME_MAP: nameMapJson,
+    });
+
+    const label = this.targetLabel(target);
+    const typeLabel = doNames && doPositions ? 'név+pozíció' : doNames ? 'név' : 'pozíció';
+    this.handleJsxResult(result,
+      data => `${data.arranged} ${typeLabel} rendezve (${label})`,
+      `Rendezés kész (${label})`,
+    );
+  }
+
+  private async executeRefreshLabels(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
+    if (!doNames && !doPositions) { this.setResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
+
+    // Ha pozíciók is kellenek → az arrange script csinálja
+    if (doPositions) {
+      await this.executeArrange(target, doNames, doPositions);
+      return;
+    }
+
+    // CSAK nevek frissítése
+    const persons = await this.ensurePersons();
+    if (persons.length === 0) { this.setResult(false, 'Nincsenek személyek betöltve'); return; }
+
+    const layerNames = await this.getLayerNames(target);
+    const nameMap = this.buildNameMap(layerNames, persons);
+    if (Object.keys(nameMap).length === 0) { this.setResult(false, 'Nem találtam párosítható neveket'); return; }
+
+    const result = await this.ps.runJsx('refresh-names', 'actions/refresh-name-texts.jsx', {
+      NAME_MAP: JSON.stringify(nameMap),
+      TARGET_GROUP: this.targetGroup(target),
+      BREAK_AFTER: String(this.settings.nameBreakAfter()),
+    });
+
+    const label = this.targetLabel(target);
+    this.handleJsxResult(result,
+      r => `${r.refreshed} felirat frissítve (${label}) [map:${r.nameMapCount}]`,
+      `Frissítés kész (${label})`,
+    );
+  }
+
+  private async executeSyncPositions(target: string): Promise<void> {
+    const persons = await this.ensurePersons();
+    if (persons.length === 0) { this.setResult(false, 'Nincsenek személyek betöltve'); return; }
+
+    const layerNames = await this.getLayerNames(target);
+    if (layerNames.length === 0) {
+      this.setResult(false, `Nincsenek ${this.targetLabel(target, 'image')} layerek`);
+      return;
+    }
+
+    // Slug→person matching
+    const matches = this.matchLayerToPersons(layerNames, persons);
+    const personsData = Array.from(matches.entries()).map(([ln, person]) => ({
+      layerName: ln,
+      displayText: person.name,
+      position: person.title || null,
+      group: person.type === 'teacher' ? 'Teachers' : 'Students',
+    }));
+
+    if (personsData.length === 0) { this.setResult(false, 'Nem találtam párosítható személyeket'); return; }
+
+    const result = await this.ps.runJsx('sync-positions', 'actions/update-positions.jsx', {
+      persons: personsData,
+      nameBreakAfter: this.settings.nameBreakAfter(),
+      textAlign: 'center',
+      nameGapCm: this.settings.nameGapCm(),
+      positionGapCm: 0.15,
+      positionFontSize: 18,
+    });
+
+    const label = this.targetLabel(target);
+    try {
+      if (result?.output) {
+        const lines = result.output.trim().split('\n');
+        this.setResult(true, `Pozíciók frissítve (${label}): ${lines[lines.length - 1]}`);
+      } else {
+        this.setResult(true, `Pozíciók frissítve (${label})`);
+      }
+    } catch { this.setResult(true, `Pozíciók frissítve (${label})`); }
+  }
+
+  // === Private: Közös helperek ===
+
+  /** Persons lazy-load: signal-ból vagy API-ból */
+  private async ensurePersons(): Promise<PersonItem[]> {
+    let persons = this.projectService.persons();
+    if (persons.length === 0) {
+      const pid = this.projectService.getLastProjectId() || this.projectIdResolver();
+      if (pid) persons = await this.projectService.fetchPersons(pid);
+    }
+    return persons;
+  }
+
+  /** PS Image layer nevek target alapján */
+  private async getLayerNames(target: string): Promise<string[]> {
+    const data = await this.ps.getImageLayerData();
+    if (target === 'teachers') return data.teachers;
+    if (target === 'students') return data.students;
+    return data.names;
+  }
+
+  /** Target → magyar label */
+  private targetLabel(target: string, fallback = 'összes'): string {
+    if (target === 'teachers') return 'tanár';
+    if (target === 'students') return 'diák';
+    return fallback;
+  }
+
+  /** Target → JSX TARGET_GROUP érték */
+  private targetGroup(target: string): string {
+    return target === 'teachers' || target === 'students' ? target : 'all';
+  }
+
+  /** Layer név → Person matching: ID-elő, slug-fallback */
+  private matchLayerToPersons(layerNames: string[], persons: PersonItem[]): Map<string, PersonItem> {
+    const result = new Map<string, PersonItem>();
+    const personById = new Map(persons.map(p => [p.id, p]));
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const personByNorm = new Map(persons.map(p => [normalize(p.name), p]));
+
+    for (const ln of layerNames) {
+      // 1. ID-alapú matching
+      const sepIdx = ln.indexOf('---');
+      if (sepIdx !== -1) {
+        const pid = parseInt(ln.substring(sepIdx + 3), 10);
+        if (pid > 0 && personById.has(pid)) {
+          result.set(ln, personById.get(pid)!);
+          continue;
+        }
+      }
+      // 2. Slug→humanName fallback
+      const humanName = this.sortService.slugToHumanName(ln);
+      const person = personByNorm.get(normalize(humanName));
+      if (person) result.set(ln, person);
+    }
+    return result;
+  }
+
+  /** NAME_MAP építés: layer név → person.name (ID-elő + slug-fallback) */
+  private buildNameMap(layerNames: string[], persons: PersonItem[]): Record<string, string> {
+    const matches = this.matchLayerToPersons(layerNames, persons);
+    const nameMap: Record<string, string> = {};
+    for (const [layerName, person] of matches) {
+      nameMap[layerName] = person.name;
+    }
+    return nameMap;
+  }
+
+  /** JSX eredmény feldolgozás egységes mintával */
+  private handleJsxResult(
+    result: any,
+    formatSuccess: (data: any) => string,
+    fallbackMessage: string,
+  ): void {
+    try {
+      if (result?.output) {
+        const data = JSON.parse(result.output.trim());
+        if (data.error) { this.setResult(false, data.error); return; }
+        this.setResult(true, formatSuccess(data));
+      } else {
+        this.setResult(true, fallbackMessage);
+      }
+    } catch { this.setResult(true, fallbackMessage); }
+  }
+}

@@ -227,25 +227,11 @@ export class OverlayDragOrderService {
           }
         }
         const groupLabel = currentScope === 'teachers' ? 'Teachers' : currentScope === 'students' ? 'Students' : 'All';
-        const layerNamesParam = orderedSlugs.join('|');
 
-        // 2a. Unlink — linkelt Names/Positions layerek leválasztása
-        await this.ps.runJsx('unlink-layers', 'actions/unlink-selected.jsx', { LAYER_NAMES: layerNamesParam });
-
-        // 2b. Reorder — image layerek stack + pozíció átrendezés
+        // 2a. Reorder — image layerek stack + pozíció átrendezés
+        // Ha linkelve vannak → translate() magával viszi a Names/Positions layereket is
+        // NEM kell arrange-names, mert az egyedi elrendezést felülírná!
         await this.sortService.reorderLayersByNamesScoped(orderedSlugs, groupLabel);
-
-        // 2c. Nevek újrapozícionálása az image layerek alá
-        const targetGroup = currentScope === 'teachers' ? 'teachers' : currentScope === 'students' ? 'students' : 'all';
-        await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
-          TEXT_ALIGN: 'center',
-          BREAK_AFTER: String(this.settings.nameBreakAfter()),
-          NAME_GAP_CM: String(this.settings.nameGapCm()),
-          TARGET_GROUP: targetGroup,
-        });
-
-        // 2d. Link — visszalinkelés
-        await this.ps.runJsx('link-layers', 'actions/link-selected.jsx', { LAYER_NAMES: layerNamesParam });
       }
 
       // 3. Személylista újratöltés

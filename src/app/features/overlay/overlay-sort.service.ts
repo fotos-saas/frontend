@@ -209,24 +209,18 @@ export class OverlaySortService {
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket */
   private async reorderLayersByNames(orderedNames: string[]): Promise<any> {
-    console.log('[REORDER] orderedNames:', orderedNames);
-    const result = await this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
+    return this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
       ORDERED_NAMES: JSON.stringify(orderedNames),
       GROUP: 'All',
     });
-    console.log('[REORDER] JSX result:', result);
-    return result;
   }
 
   /** JSX-et futtat ami a megadott névsorrendbe rendezi a layereket (scope-olt GROUP-pal) */
   async reorderLayersByNamesScoped(orderedNames: string[], group: string): Promise<any> {
-    console.log('[REORDER-SCOPED] orderedNames:', orderedNames, 'group:', group);
-    const result = await this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
+    return this.ps.runJsx('reorder-layers', 'actions/reorder-layers.jsx', {
       ORDERED_NAMES: JSON.stringify(orderedNames),
       GROUP: group,
     });
-    console.log('[REORDER-SCOPED] JSX result:', result);
-    return result;
   }
 
   /** Két tömb váltogatásos összefűzése */

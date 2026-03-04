@@ -454,22 +454,21 @@ function doArrangeNames() {
   var oldRulerUnits = app.preferences.rulerUnits;
   app.preferences.rulerUnits = Units.PIXELS;
 
-  // Kijelolt layerek
-  var selected = getSelectedLayerInfo();
+  // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
+  // toLowerCase: a hivo kod "Students"/"Teachers" nagybetut kuld, de itt kisbetut varunk
+  var targetGroupRaw = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "";
+  var targetGroup = targetGroupRaw.toLowerCase();
+  var hasExplicitTarget = targetGroup === "students" || targetGroup === "teachers" || targetGroup === "all";
+
+  // Kijelolt layerek — CSAK ha nincs explicit TARGET_GROUP
+  var selected = hasExplicitTarget ? [] : getSelectedLayerInfo();
 
   var nameLayers = [];
 
-  // Csak ha Images csoportbeli layer van kijelolve → szukites
-  // Egyebkent (nincs kijeloles VAGY nem Images layer) → mindenkit rendez
   var imageNames = (selected.length > 0) ? getImageSelectionNames(doc, selected) : [];
 
-  // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
-  // toLowerCase: a hivo kod "Students"/"Teachers" nagybetut kuld, de itt kisbetut varunk
-  var targetGroupRaw = typeof CONFIG !== "undefined" && CONFIG.TARGET_GROUP ? CONFIG.TARGET_GROUP : "all";
-  var targetGroup = targetGroupRaw.toLowerCase();
-
   if (imageNames.length > 0) {
-    // Csak a kijelolt kepek nevparjait rendezzuk
+    // Nincs explicit target, kijelolt kepek nevparjait rendezzuk
     for (var i = 0; i < imageNames.length; i++) {
       var nameLayer = findNameLayerByName(doc, imageNames[i]);
       if (nameLayer) {
@@ -483,7 +482,7 @@ function doArrangeNames() {
     var tGrp = getGroupByPath(doc, ["Names", "Teachers"]);
     if (tGrp) { for (var ti2 = 0; ti2 < tGrp.artLayers.length; ti2++) nameLayers.push(tGrp.artLayers[ti2]); }
   } else {
-    // all — osszes nev layer
+    // all VAGY nincs target es nincs kijeloles — osszes nev layer
     nameLayers = getAllNameLayers(doc);
   }
 

@@ -59,6 +59,7 @@ import { GuestSession, SamplePackage } from '../../../../features/partner/servic
 import { PartnerFinalizationService } from '../../../../features/partner/services/partner-finalization.service';
 import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
 import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persistence.util';
+import { ExpandedTeacherViewComponent } from '../../../../features/partner/components/expanded-teacher-view/expanded-teacher-view.component';
 
 /**
  * Generikus Project Detail Wrapper - kozos smart wrapper komponens.
@@ -84,6 +85,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
     ProjectTagManagerComponent,
+    ExpandedTeacherViewComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -330,6 +332,12 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   private personsModalRef: { instance: { loadPersons: (silent?: boolean) => void } } | null = null;
 
+  // Bővített tanári nézet
+  showExpandedTeacherView = signal(false);
+  expandedTeacherViewSchoolId = signal<number | null>(null);
+  expandedTeacherViewClassYear = signal<string | undefined>(undefined);
+  expandedTeacherViewProjectId = signal<number | null>(null);
+
   async openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): Promise<void> {
     const container = this.personsModalContainer();
     if (!container || !this.projectData()) return;
@@ -358,6 +366,19 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     ref.instance.addPersonsRequested.subscribe((type) => {
       this.openAddPersonsDialog(type);
     });
+    ref.instance.expandedViewRequested.subscribe((data) => {
+      container.clear();
+      this.personsModalRef = null;
+      this.expandedTeacherViewSchoolId.set(data.schoolId);
+      this.expandedTeacherViewClassYear.set(data.classYear);
+      this.expandedTeacherViewProjectId.set(this.projectData()!.id);
+      this.showExpandedTeacherView.set(true);
+    });
+  }
+
+  closeExpandedTeacherView(): void {
+    this.showExpandedTeacherView.set(false);
+    this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
   }
 
   async openAddPersonsDialog(type: 'student' | 'teacher'): Promise<void> {

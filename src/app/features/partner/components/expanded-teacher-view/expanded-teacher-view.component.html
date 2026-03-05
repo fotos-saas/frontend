@@ -24,20 +24,35 @@
           }
         </div>
       }
-      <div class="expanded-view__add-school">
-        <button class="expanded-view__add-btn" (click)="toggleDropdown()" matTooltip="Iskola hozzáadása">
+      <div class="expanded-view__add-school" (click)="$event.stopPropagation()">
+        <button class="expanded-view__add-btn" (click)="toggleDropdown(); $event.stopPropagation()" matTooltip="Iskola hozzáadása">
           <lucide-icon [name]="ICONS.PLUS" [size]="16" />
           <span>Hozzáadás</span>
         </button>
         @if (showDropdown) {
-          <div class="expanded-view__dropdown">
-            @for (school of availableSchools(); track school.id) {
-              <button class="expanded-view__dropdown-item" (click)="addSchool(school)">
-                {{ school.name }}
-              </button>
-            } @empty {
-              <div class="expanded-view__dropdown-empty">Nincs több iskola</div>
-            }
+          <div class="expanded-view__dropdown" (click)="$event.stopPropagation()">
+            <div class="expanded-view__dropdown-search">
+              <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="expanded-view__dropdown-search-icon" />
+              <input
+                #dropdownSearchInput
+                type="text"
+                class="expanded-view__dropdown-search-input"
+                placeholder="Iskola keresése..."
+                [ngModel]="dropdownSearch()"
+                (ngModelChange)="dropdownSearch.set($event)"
+              />
+            </div>
+            <div class="expanded-view__dropdown-list">
+              @for (school of filteredAvailableSchools(); track school.id) {
+                <button class="expanded-view__dropdown-item" (click)="addSchool(school)">
+                  {{ school.name }}
+                </button>
+              } @empty {
+                <div class="expanded-view__dropdown-empty">
+                  {{ dropdownSearch() ? 'Nincs találat' : 'Nincs több iskola' }}
+                </div>
+              }
+            </div>
           </div>
         }
       </div>

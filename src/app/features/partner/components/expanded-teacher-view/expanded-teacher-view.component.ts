@@ -2,12 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   HostListener,
   inject,
   input,
   OnInit,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -22,6 +26,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
   selector: 'app-expanded-teacher-view',
   standalone: true,
   imports: [
+    FormsModule,
     LucideAngularModule,
     MatTooltipModule,
     ExpandedArchivePanelComponent,
@@ -54,6 +59,15 @@ export class ExpandedTeacherViewComponent implements OnInit {
   readonly similarityGroups = computed(() => this.dataService.similarityGroups());
 
   showDropdown = false;
+  dropdownSearch = signal('');
+  private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('dropdownSearchInput');
+
+  readonly filteredAvailableSchools = computed(() => {
+    const query = this.dropdownSearch().trim().toLowerCase();
+    const schools = this.availableSchools();
+    if (!query) return schools;
+    return schools.filter(s => s.name.toLowerCase().includes(query));
+  });
 
   readonly hasSimilarityIssues = computed(() => this.similarityGroups().length > 0);
 
@@ -63,20 +77,36 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (this.selectedPersonId()) {
+    if (this.showDropdown) {
+      this.showDropdown = false;
+      this.dropdownSearch.set('');
+    } else if (this.selectedPersonId()) {
       this.dataService.onTeacherSelect(null);
     } else {
       this.close.emit();
     }
   }
 
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showDropdown) {
+      this.showDropdown = false;
+      this.dropdownSearch.set('');
+    }
+  }
+
   toggleDropdown(): void {
     this.showDropdown = !this.showDropdown;
+    this.dropdownSearch.set('');
+    if (this.showDropdown) {
+      setTimeout(() => this.searchInput()?.nativeElement.focus(), 0);
+    }
   }
 
   addSchool(school: ExpandedSchoolInfo): void {
     this.dataService.addSchool(school.id);
     this.showDropdown = false;
+    this.dropdownSearch.set('');
     this.dataService.loadData(this.schoolId(), this.classYear());
   }
 

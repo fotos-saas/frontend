@@ -11,6 +11,24 @@
   (closeEvent)="close.emit()"
 >
   <div dialogBody>
+    <!-- Bővített nézet gomb (fejléc mellé pozícionálva) -->
+    @if (typeFilter() === 'teacher') {
+      <button
+        type="button"
+        class="expanded-view-btn"
+        (click)="openExpandedView()"
+        [disabled]="expandedViewLoading()"
+        matTooltip="Iskolák közötti tanár összehasonlítás"
+      >
+        <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
+        @if (expandedViewLoading()) {
+          <span>Betöltés...</span>
+        } @else {
+          <span>Bővített nézet</span>
+        }
+      </button>
+    }
+
     <!-- Rövid projektnév (csak mobilon) -->
     <p class="mobile-desc">{{ shortProjectName() }}</p>
 
@@ -62,22 +80,6 @@
               }
             </button>
           </div>
-        }
-        @if (typeFilter() === 'teacher') {
-          <button
-            type="button"
-            class="expanded-view-btn"
-            (click)="openExpandedView()"
-            [disabled]="expandedViewLoading()"
-            matTooltip="Iskolák közötti tanár összehasonlítás"
-          >
-            <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
-            @if (expandedViewLoading()) {
-              <span>Betöltés...</span>
-            } @else {
-              <span>Bővített nézet</span>
-            }
-          </button>
         }
       </div>
     </div>
@@ -475,13 +477,3 @@
   />
 }
 
-<!-- Bővített tanári nézet dialógus -->
-@if (showExpandedView() && expandedViewSchoolId()) {
-  <app-expanded-teacher-view
-    [schoolId]="expandedViewSchoolId()!"
-    [classYear]="expandedViewClassYear()"
-    [projectId]="projectId()"
-    (close)="closeExpandedView()"
-    (teacherUpdated)="loadPersons(true)"
-  />
-}

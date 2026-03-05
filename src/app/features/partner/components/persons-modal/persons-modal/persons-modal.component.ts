@@ -26,7 +26,6 @@ import {
 } from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
-import { ExpandedTeacherViewComponent } from '../../expanded-teacher-view/expanded-teacher-view.component';
 import { getPersonCategory, getCategoryOrder } from '../person-category.util';
 
 /** Szerkesztési sor state */
@@ -44,7 +43,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent, ExpandedTeacherViewComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
   providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
@@ -60,6 +59,7 @@ export class PersonsModalComponent implements OnInit {
   readonly close = output<void>();
   readonly openUploadWizard = output<TypeFilter>();
   readonly addPersonsRequested = output<'student' | 'teacher'>();
+  readonly expandedViewRequested = output<{ schoolId: number; classYear?: string }>();
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
@@ -119,9 +119,6 @@ export class PersonsModalComponent implements OnInit {
   photoChooserMode = signal<PhotoChooserMode | null>(null);
 
   // Bővített nézet
-  showExpandedView = signal(false);
-  expandedViewSchoolId = signal<number | null>(null);
-  expandedViewClassYear = signal<string | undefined>(undefined);
   expandedViewLoading = signal(false);
 
   // Extra nevek (tanítottak még)
@@ -610,18 +607,15 @@ export class PersonsModalComponent implements OnInit {
         next: (details) => {
           const schoolId = details.school?.id;
           if (schoolId) {
-            this.expandedViewSchoolId.set(schoolId);
-            this.expandedViewClassYear.set(details.classYear ?? undefined);
-            this.showExpandedView.set(true);
+            this.expandedViewRequested.emit({
+              schoolId,
+              classYear: details.classYear ?? undefined,
+            });
+            this.close.emit();
           }
           this.expandedViewLoading.set(false);
         },
         error: () => this.expandedViewLoading.set(false),
       });
-  }
-
-  closeExpandedView(): void {
-    this.showExpandedView.set(false);
-    this.loadPersons(true);
   }
 }

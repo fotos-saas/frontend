@@ -35,6 +35,7 @@ import { TableHeaderComponent, TableColumn } from '../../../../shared/components
 import { SortOption } from './components/project-mobile-sort/project-mobile-sort.component';
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
+import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -59,6 +60,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
     ListPaginationComponent,
     CreatePreliminaryModalComponent,
     LinkPreliminaryDialogComponent,
+    ExpandedTeacherViewComponent,
   ],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',
@@ -476,6 +478,24 @@ export class PartnerProjectListComponent implements OnInit {
   }
 
   onQrCodeChanged(): void {
+    this.loadProjects();
+  }
+
+  // Bővített tanári nézet
+  showExpandedTeacherView = signal(false);
+  expandedTeacherViewSchoolId = signal<number | null>(null);
+  expandedTeacherViewClassYear = signal<string | undefined>(undefined);
+
+  openExpandedTeacherView(data: { schoolId: number; classYear?: string }): void {
+    this.showMissingModal.set(false);
+    this.expandedTeacherViewSchoolId.set(data.schoolId);
+    this.expandedTeacherViewClassYear.set(data.classYear);
+    this.showExpandedTeacherView.set(true);
+  }
+
+  closeExpandedTeacherView(): void {
+    this.showExpandedTeacherView.set(false);
+    this.selectedProject.set(null);
     this.loadProjects();
   }
 

@@ -100,7 +100,7 @@ function startNetworkMonitoring(): void {
       log.info(`Network status changed: ${isOnline ? 'online' : 'offline'}`);
       mainWindow?.webContents.send('online-status-changed', isOnline);
     }
-  }, 3000); // Check every 3 seconds
+  }, isDev ? 10000 : 3000); // Dev: 10s (CPU kímélés), Prod: 3s
 }
 
 // Auto-update state tracking
@@ -436,9 +436,9 @@ function createWindow(): void {
     minHeight: 768,
     titleBarStyle: 'hidden', // Mac: traffic lights always visible
     trafficLightPosition: { x: 20, y: 18 },
-    vibrancy: 'under-window', // Mac frosted glass effect
-    visualEffectState: 'active',
-    backgroundColor: '#00000000', // Transparent for vibrancy
+    vibrancy: isDev ? undefined : 'under-window', // Mac frosted glass — dev-ben kikapcsolva (CPU)
+    visualEffectState: isDev ? undefined : 'active',
+    backgroundColor: isDev ? '#1a1a2e' : '#00000000', // Dev: solid szín, Prod: transparent for vibrancy
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -447,6 +447,7 @@ function createWindow(): void {
       // Security settings
       webSecurity: true,
       allowRunningInsecureContent: false,
+      backgroundThrottling: isDev, // Dev: háttérbe tett ablak CPU-t spórol
     },
     show: false, // Don't show until ready
   });
@@ -509,8 +510,8 @@ async function loadApp(): Promise<void> {
 
     await mainWindow.loadURL(targetUrl);
 
-    // Open DevTools only in development
-    if (isDev) {
+    // DevTools: csak ELECTRON_DEVTOOLS=1 env var-ral nyílik (F12-vel kézzel is megnyitható)
+    if (isDev && process.env['ELECTRON_DEVTOOLS'] === '1') {
       mainWindow.webContents.openDevTools();
     }
   } catch (error) {

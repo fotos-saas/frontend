@@ -58,7 +58,14 @@
       @if (photos().length > 0) {
         <div class="upload-panel__grid">
           @for (photo of photos(); track photo.id) {
-            <div class="upload-photo" [matTooltip]="photo.filename">
+            <div
+              class="upload-photo"
+              [class.upload-photo--dragging]="draggedPhoto()?.id === photo.id"
+              [matTooltip]="photo.filename"
+              draggable="true"
+              (dragstart)="onPhotoDragStart($event, photo)"
+              (dragend)="onPhotoDragEnd()"
+            >
               <div class="upload-photo__image">
                 <img [src]="photo.thumbUrl" [alt]="photo.filename" loading="lazy" />
                 <button

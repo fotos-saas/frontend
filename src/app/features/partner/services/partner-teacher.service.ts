@@ -86,6 +86,13 @@ export class PartnerTeacherService implements ArchiveService {
     });
   }
 
+  assignPhotoToTeacher(sessionId: number, photoId: number, personId: number): Observable<{ success: boolean; data: { personId: number; photoThumbUrl: string; hasOverride: boolean } }> {
+    return this.http.post<{ success: boolean; data: { personId: number; photoThumbUrl: string; hasOverride: boolean } }>(
+      `${this.baseUrl}/expanded-view/assign-photo`,
+      { session_id: sessionId, photo_id: photoId, person_id: personId },
+    );
+  }
+
   getGroupMembers(linkedGroup: string): Observable<TeacherListItem[]> {
     return this.http.get<TeacherListItem[]>(`${this.baseUrl}/group/${linkedGroup}`);
   }

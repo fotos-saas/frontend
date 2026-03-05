@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -21,6 +21,9 @@ export class ExpandedTeacherCardComponent {
 
   readonly hover = output<{ normalizedName: string; personId: number } | null>();
   readonly select = output<number>();
+  readonly drop = output<number>();
+
+  readonly isDragTarget = signal(false);
 
   readonly initials = computed(() => {
     const name = this.teacher().name;
@@ -42,5 +45,24 @@ export class ExpandedTeacherCardComponent {
 
   onClick(): void {
     this.select.emit(this.teacher().personId);
+  }
+
+  onDragOver(event: DragEvent): void {
+    if (event.dataTransfer?.types.includes('application/x-photo-id')) {
+      event.preventDefault();
+      this.isDragTarget.set(true);
+    }
+  }
+
+  onDragLeave(): void {
+    this.isDragTarget.set(false);
+  }
+
+  onDropPhoto(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragTarget.set(false);
+    if (event.dataTransfer?.types.includes('application/x-photo-id')) {
+      this.drop.emit(this.teacher().personId);
+    }
   }
 }

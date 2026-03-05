@@ -3,6 +3,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
+import { ExpandedUploadedPhoto } from '../expanded-teacher-view.types';
 
 @Component({
   selector: 'app-expanded-upload-panel',
@@ -23,6 +24,7 @@ export class ExpandedUploadPanelComponent {
   readonly collapsed = computed(() => this.dataService.uploadPanelCollapsed());
   readonly uploading = computed(() => this.dataService.uploading());
   readonly syncing = computed(() => this.dataService.syncing());
+  readonly draggedPhoto = computed(() => this.dataService.draggedPhoto());
 
   readonly summaryText = computed(() => {
     const count = this.photos().length;
@@ -82,5 +84,14 @@ export class ExpandedUploadPanelComponent {
 
   onSync(): void {
     this.dataService.syncPhotos();
+  }
+
+  onPhotoDragStart(event: DragEvent, photo: ExpandedUploadedPhoto): void {
+    event.dataTransfer?.setData('application/x-photo-id', String(photo.id));
+    this.dataService.draggedPhoto.set(photo);
+  }
+
+  onPhotoDragEnd(): void {
+    this.dataService.draggedPhoto.set(null);
   }
 }

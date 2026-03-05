@@ -139,8 +139,17 @@
   align-items: center;
   padding: 6px;
   border-radius: 8px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
   margin: 4px;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &--dragging {
+    opacity: 0.5;
+  }
 
   &:hover {
     background-color: rgb(243 244 246);

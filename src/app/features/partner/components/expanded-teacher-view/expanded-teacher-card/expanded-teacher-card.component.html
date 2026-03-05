@@ -4,9 +4,13 @@
   [class.teacher-card--exact]="highlightType() === 'exact'"
   [class.teacher-card--similar]="highlightType() === 'similar'"
   [class.teacher-card--missing]="highlightType() === 'missing'"
+  [class.teacher-card--drop-target]="isDragTarget()"
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()"
   (click)="onClick()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave()"
+  (drop)="onDropPhoto($event)"
 >
   <div class="teacher-card__photo">
     @if (teacher().hasPhoto && teacher().photoThumbUrl) {

@@ -20,6 +20,10 @@ export class ExpandedTeacherViewDataService {
   readonly syncing = signal(false);
   readonly data = signal<ExpandedViewResponse | null>(null);
 
+  // Drag & drop
+  readonly draggedPhoto = signal<ExpandedUploadedPhoto | null>(null);
+  readonly assigning = signal(false);
+
   // Hover/kijelölés
   readonly hoveredPersonId = signal<number | null>(null);
   readonly hoveredNormalizedName = signal<string | null>(null);
@@ -180,6 +184,38 @@ export class ExpandedTeacherViewDataService {
       error: (err) => {
         this.logger.error('Szinkronizálási hiba', err);
         this.syncing.set(false);
+      },
+    });
+  }
+
+  assignPhotoToTeacher(photoId: number, personId: number): void {
+    const sid = this.sessionId();
+    if (!sid || this.assigning()) return;
+
+    this.assigning.set(true);
+    this.teacherService.assignPhotoToTeacher(sid, photoId, personId).subscribe({
+      next: (response) => {
+        const result = response.data;
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            classes: current.classes.map(cls => ({
+              ...cls,
+              teachers: cls.teachers.map(t =>
+                t.personId === result.personId
+                  ? { ...t, hasPhoto: true, photoThumbUrl: result.photoThumbUrl, hasOverride: result.hasOverride }
+                  : t
+              ),
+            })),
+          });
+        }
+        this.assigning.set(false);
+        this.draggedPhoto.set(null);
+      },
+      error: (err) => {
+        this.logger.error('Fotó hozzárendelési hiba', err);
+        this.assigning.set(false);
       },
     });
   }

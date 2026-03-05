@@ -33,6 +33,13 @@
     background-color: rgb(254 226 226) !important;
   }
 
+  &--drop-target {
+    border: 2px dashed rgb(59 130 246);
+    background-color: rgb(219 234 254) !important;
+    transform: scale(1.02);
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+
   &__photo {
     flex-shrink: 0;
     width: 40px;

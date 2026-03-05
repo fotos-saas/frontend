@@ -209,11 +209,21 @@ export class ExpandedTeacherPopupComponent {
     this.dataService.setOverrideFromArchive(personId, activePhoto.mediaId);
   }
 
-  applyOverrideToAll(): void {
+  applyArchiveToAll(): void {
     const activePhoto = this.activeArchivePhoto();
     if (!activePhoto) return;
-    const personIds = this.occurrences().map(o => o.personId);
-    this.dataService.setOverrideFromArchiveForAll(personIds, activePhoto.mediaId);
+
+    const mode = this.photoChooserMode();
+    if (!mode) return;
+
+    // Archívum szinten állítjuk be az aktív fotót — NEM override-ként
+    const request$ = mode.kind === 'linkedGroup'
+      ? this.teacherService.setGroupActivePhoto(mode.linkedGroup, activePhoto.mediaId)
+      : this.teacherService.setActivePhotoByMedia(mode.archiveId, activePhoto.mediaId);
+
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => this.dataService.reloadData(),
+    });
   }
 
   removeOverride(personId: number): void {

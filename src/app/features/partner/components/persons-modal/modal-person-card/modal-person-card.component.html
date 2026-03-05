@@ -19,10 +19,10 @@
       <div class="card-zoom-icon">
         <lucide-icon [name]="ICONS.ZOOM_IN" [size]="16" />
       </div>
-      <button type="button" class="card-camera" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
+      <button type="button" class="card-camera" matTooltip="Kép feltöltése" aria-label="Kép feltöltése" (click)="onPhotoUploadClick($event)">
         <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
       </button>
-      <button type="button" class="card-edit-icon" matTooltip="Szerkesztés" (click)="onEditClick($event)">
+      <button type="button" class="card-edit-icon" matTooltip="Szerkesztés" aria-label="Szerkesztés" (click)="onEditClick($event)">
         <lucide-icon [name]="ICONS.SETTINGS" [size]="12" />
       </button>
 
@@ -40,16 +40,16 @@
       <div class="card-placeholder">
         <lucide-icon [name]="ICONS.USER_X" [size]="24" />
       </div>
-      <button type="button" class="card-camera card-camera--always" matTooltip="Kép feltöltése" (click)="onPhotoUploadClick($event)">
+      <button type="button" class="card-camera card-camera--always" matTooltip="Kép feltöltése" aria-label="Kép feltöltése" (click)="onPhotoUploadClick($event)">
         <lucide-icon [name]="ICONS.CAMERA" [size]="12" />
       </button>
-      <button type="button" class="card-edit-icon card-edit-icon--always" matTooltip="Szerkesztés" (click)="onEditClick($event)">
+      <button type="button" class="card-edit-icon card-edit-icon--always" matTooltip="Szerkesztés" aria-label="Szerkesztés" (click)="onEditClick($event)">
         <lucide-icon [name]="ICONS.SETTINGS" [size]="12" />
       </button>
     }
   </div>
 
-  <div class="card-info" (click)="onEditClick($event)">
+  <div class="card-info" role="button" tabindex="0" (click)="onEditClick($event)" (keydown.enter)="onEditClick($event)" (keydown.space)="onEditClick($event); $event.preventDefault()">
     <span class="card-name">{{ person().name }}</span>
     <div class="card-meta">
       @if (person().type === 'student' || person().title) {
@@ -72,12 +72,13 @@
           class="card-action-btn"
           [class.card-action-btn--linked]="person().linkedGroup"
           [matTooltip]="person().linkedGroup ? 'Összekapcsolva' : 'Összekapcsolás'"
+          [attr.aria-label]="person().linkedGroup ? 'Összekapcsolva' : 'Összekapcsolás'"
           (click)="onLinkClick($event)"
         >
           <lucide-icon [name]="ICONS.LINK" [size]="12" />
         </button>
         @if (person().linkedGroup || (person().photosCount ?? 0) > 1) {
-          <button type="button" class="card-action-btn" matTooltip="Fotó csere archívumból" (click)="onPhotoChooserClick($event)">
+          <button type="button" class="card-action-btn" matTooltip="Fotó csere archívumból" aria-label="Fotó csere archívumból" (click)="onPhotoChooserClick($event)">
             <lucide-icon [name]="ICONS.IMAGE" [size]="12" />
           </button>
         }

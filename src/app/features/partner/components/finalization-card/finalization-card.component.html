@@ -1,4 +1,4 @@
-<div class="finalization-row" (click)="cardClick.emit(item())">
+<div class="finalization-row" role="button" tabindex="0" (click)="cardClick.emit(item())" (keydown.enter)="cardClick.emit(item())" (keydown.space)="$event.preventDefault(); cardClick.emit(item())">
   <!-- Col 1: Minta kép -->
   <div class="col col-sample">
     @if (item().sampleThumbUrl) {

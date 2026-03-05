@@ -103,7 +103,7 @@
         </h2>
         <div class="attachments-grid">
           @for (att of r.attachments; track att.id) {
-            <div class="attachment-card" (click)="openLightbox(att.url)">
+            <div class="attachment-card" role="button" tabindex="0" (click)="openLightbox(att.url)" (keydown.enter)="openLightbox(att.url)" (keydown.space)="openLightbox(att.url); $event.preventDefault()">
               <img [src]="att.url" [alt]="att.original_filename" loading="lazy" />
               <span class="attachment-info">{{ att.original_filename }} ({{ att.formatted_size }})</span>
             </div>

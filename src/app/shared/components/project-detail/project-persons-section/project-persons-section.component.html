@@ -59,7 +59,7 @@
       <!-- 2 oszlopos layout -->
       <div class="persons-grid">
         <!-- Diákok oszlop -->
-        <div class="persons-column" (click)="openPersonsModal.emit('student')">
+        <div class="persons-column" role="button" tabindex="0" (click)="openPersonsModal.emit('student')" (keydown.enter)="openPersonsModal.emit('student')" (keydown.space)="openPersonsModal.emit('student'); $event.preventDefault()">
           <div class="column-header">
             <div class="flex items-center gap-2">
               <lucide-icon [name]="ICONS.USER" [size]="14" class="text-blue-500" />
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Tanárok oszlop -->
-        <div class="persons-column" (click)="openPersonsModal.emit('teacher')">
+        <div class="persons-column" role="button" tabindex="0" (click)="openPersonsModal.emit('teacher')" (keydown.enter)="openPersonsModal.emit('teacher')" (keydown.space)="openPersonsModal.emit('teacher'); $event.preventDefault()">
           <div class="column-header">
             <div class="flex items-center gap-2">
               <lucide-icon [name]="ICONS.GRADUATION_CAP" [size]="14" class="text-amber-500" />

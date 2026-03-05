@@ -29,7 +29,7 @@
         <div class="thumb-grid">
           <!-- Meglévő képek (edit mód) -->
           @for (img of facade.existingImages(); track img.id; let i = $index) {
-            <div class="thumb-item" (click)="openLightbox(i)">
+            <div class="thumb-item" role="button" tabindex="0" (click)="openLightbox(i)" (keydown.enter)="openLightbox(i)" (keydown.space)="openLightbox(i); $event.preventDefault()">
               <img [src]="img.thumbUrl" [alt]="'Kép ' + (i + 1)"  loading="lazy" />
               <button class="thumb-remove" (click)="$event.stopPropagation(); facade.removeExistingImage(img.id)">
                 <lucide-icon [name]="ICONS.X" [size]="12" />
@@ -38,7 +38,7 @@
           }
           <!-- Új képek -->
           @for (url of facade.previewUrls(); track url; let i = $index) {
-            <div class="thumb-item thumb-item--new" (click)="openLightbox(facade.existingImages().length + i)">
+            <div class="thumb-item thumb-item--new" role="button" tabindex="0" (click)="openLightbox(facade.existingImages().length + i)" (keydown.enter)="openLightbox(facade.existingImages().length + i)" (keydown.space)="openLightbox(facade.existingImages().length + i); $event.preventDefault()">
               <img [src]="url" alt="Új kép"  loading="lazy" />
               <span class="thumb-new-badge">Új</span>
               <button class="thumb-remove" (click)="$event.stopPropagation(); facade.removeNewFile(i)">

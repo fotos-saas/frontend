@@ -1,6 +1,7 @@
 @if (loading()) {
   <div class="teacher-detail-page page-card">
-    <div class="loading-state">
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       @for (i of [1, 2, 3]; track i) {
         <div class="skeleton-row skeleton-shimmer"></div>
       }
@@ -95,7 +96,7 @@
               (keydown.escape)="cancelNoteEdit()"
             ></textarea>
           } @else {
-            <div class="notes-display" (click)="startNoteEdit()">
+            <div class="notes-display" role="button" tabindex="0" (click)="startNoteEdit()" (keydown.enter)="startNoteEdit()" (keydown.space)="$event.preventDefault(); startNoteEdit()">
               @if (t.notes) {
                 <span class="notes-text">{{ t.notes }}</span>
               } @else {
@@ -161,7 +162,7 @@
             <div class="photos-grid">
               @for (photo of t.photos; track photo.id) {
                 <div class="photo-card" [class.photo-card--active]="photo.isActive">
-                  <div class="photo-image" (click)="openLightbox(photo)">
+                  <div class="photo-image" role="button" tabindex="0" (click)="openLightbox(photo)" (keydown.enter)="openLightbox(photo)" (keydown.space)="$event.preventDefault(); openLightbox(photo)">
                     <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year"  loading="lazy" />
                     @if (photo.isActive) {
                       <span class="active-indicator" matTooltip="Aktív fotó">

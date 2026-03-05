@@ -1,7 +1,8 @@
 <div class="max-w-3xl mx-auto page-card" [class.page-card--preliminary]="facade.projectData()?.isPreliminary">
   <!-- Loading -->
   @if (facade.loading()) {
-    <div class="flex flex-col items-center justify-center py-16">
+    <div class="flex flex-col items-center justify-center py-16" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
       <p class="mt-4 text-gray-500">Betöltés...</p>
     </div>

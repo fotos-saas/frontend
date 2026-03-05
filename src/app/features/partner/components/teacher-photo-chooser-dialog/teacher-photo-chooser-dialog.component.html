@@ -21,7 +21,7 @@
             [class.photo-card--selected]="isSelected(photo.mediaId)"
             (click)="selectPhoto(photo.mediaId)"
           >
-            <div class="photo-card__image" (click)="openLightbox(photo, $event)">
+            <div class="photo-card__image" role="button" tabindex="0" (click)="openLightbox(photo, $event)" (keydown.enter)="openLightbox(photo, $event)" (keydown.space)="$event.preventDefault(); openLightbox(photo, $event)">
               @if (photo.thumbUrl) {
                 <img [src]="photo.thumbUrl" [alt]="photo.teacherName" loading="lazy" />
               } @else {

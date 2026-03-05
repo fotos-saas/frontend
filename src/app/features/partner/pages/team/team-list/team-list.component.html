@@ -14,7 +14,8 @@
 
   <!-- Loading State -->
   @if (loading()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       <div class="skeleton-row"></div>
       <div class="skeleton-row"></div>
       <div class="skeleton-row"></div>
@@ -90,7 +91,7 @@
         <div class="invitation-list">
           @for (invitation of pendingInvitations(); track invitation.id) {
             <div class="invitation-item" [class.expanded]="isExpanded(invitation.id)">
-              <div class="invitation-row" (click)="toggleExpand(invitation.id)">
+              <div class="invitation-row" role="button" tabindex="0" (click)="toggleExpand(invitation.id)" (keydown.enter)="toggleExpand(invitation.id)" (keydown.space)="$event.preventDefault(); toggleExpand(invitation.id)">
                 <div class="invitation-icon">
                   <lucide-icon [name]="ICONS.MAIL" [size]="20" />
                 </div>

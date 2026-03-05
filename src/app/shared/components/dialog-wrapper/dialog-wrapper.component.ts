@@ -9,6 +9,7 @@ import {
   AfterViewInit,
   DestroyRef,
 } from '@angular/core';
+import { A11yModule, FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import {
@@ -23,7 +24,7 @@ import {
 
 @Component({
   selector: 'app-dialog-wrapper',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, A11yModule],
   templateUrl: './dialog-wrapper.component.html',
   styleUrls: ['./dialog-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +71,8 @@ export class DialogWrapperComponent implements AfterViewInit {
   // === INTERNALS ===
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly focusTrapFactory = inject(FocusTrapFactory);
+  private focusTrap: FocusTrap | null = null;
   private mouseDownOnBackdrop = false;
   private scrollPosition = 0;
   private previousActiveElement: HTMLElement | null = null;
@@ -81,6 +84,7 @@ export class DialogWrapperComponent implements AfterViewInit {
     this.destroyRef.onDestroy(() => {
       const idx = DialogWrapperComponent.openStack.indexOf(this);
       if (idx !== -1) DialogWrapperComponent.openStack.splice(idx, 1);
+      this.focusTrap?.destroy();
       this.unlockBodyScroll();
       if (this.previousActiveElement?.focus) {
         setTimeout(() => this.previousActiveElement?.focus(), 100);
@@ -95,6 +99,13 @@ export class DialogWrapperComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.lockBodyScroll();
     this.previousActiveElement = document.activeElement as HTMLElement;
+
+    // Focus trap létrehozása a dialógus containerén
+    const dialogEl = this.elementRef.nativeElement.querySelector('.dw');
+    if (dialogEl) {
+      this.focusTrap = this.focusTrapFactory.create(dialogEl);
+    }
+
     this.focusFirstInput();
   }
 

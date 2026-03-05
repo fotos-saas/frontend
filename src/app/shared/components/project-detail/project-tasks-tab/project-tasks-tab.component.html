@@ -14,7 +14,8 @@
 
 <!-- Loading -->
 @if (loading()) {
-  <div class="flex justify-center py-8">
+  <div class="flex justify-center py-8" role="status">
+    <span class="sr-only">Betöltés folyamatban...</span>
     <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
   </div>
 } @else if (totalCount() === 0) {

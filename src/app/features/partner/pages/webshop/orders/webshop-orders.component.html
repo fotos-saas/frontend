@@ -54,7 +54,7 @@
 
     <div class="row-grid">
       @for (order of orders(); track order.id; let i = $index) {
-        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" (click)="openDetail(order)">
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" role="button" tabindex="0" (click)="openDetail(order)" (keydown.enter)="openDetail(order)" (keydown.space)="openDetail(order); $event.preventDefault()">
           <span class="td td-number">
             <strong>{{ order.order_number }}</strong>
             <span class="items-count">{{ order.items_count }} tétel</span>

@@ -39,7 +39,8 @@
 
   <!-- Lista -->
   @if (filterState.loading()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <div class="skeleton-row skeleton-shimmer"></div>
       }
@@ -67,7 +68,7 @@
 
     <!-- Sor sablon -->
     <ng-template #schoolRowTpl let-school let-isGroupHeader="isGroupHeader" let-isChild="isChild" let-memberCount="memberCount">
-      <div class="school-info" (click)="openSchoolDetail(school)">
+      <div class="school-info" role="button" tabindex="0" (click)="openSchoolDetail(school)" (keydown.enter)="openSchoolDetail(school)" (keydown.space)="openSchoolDetail(school); $event.preventDefault()">
         <lucide-icon [name]="ICONS.SCHOOL" [size]="20" class="school-icon" />
         <div class="school-details">
           <div class="school-name-row">
@@ -93,7 +94,7 @@
         </div>
       </div>
 
-      <div class="school-projects" (click)="openSchoolDetail(school)">
+      <div class="school-projects" role="button" tabindex="0" (click)="openSchoolDetail(school)" (keydown.enter)="openSchoolDetail(school)" (keydown.space)="openSchoolDetail(school); $event.preventDefault()">
         <span
           class="projects-badge"
           [class.projects-badge--active]="school.hasActiveProjects"

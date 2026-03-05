@@ -82,7 +82,7 @@
           <div class="photo-section">
             <label>Profilkép</label>
             <div class="photo-row">
-              <div class="photo-thumb" (click)="photoInput.click()">
+              <div class="photo-thumb" role="button" tabindex="0" aria-label="Fotó módosítása" (click)="photoInput.click()" (keydown.enter)="photoInput.click()" (keydown.space)="photoInput.click(); $event.preventDefault()">
                 @if (photoPreviewUrl()) {
                   <img [src]="photoPreviewUrl()" alt="Új fotó" loading="lazy" />
                   <button type="button" class="photo-remove" (click)="$event.stopPropagation(); removeSelectedPhoto()">

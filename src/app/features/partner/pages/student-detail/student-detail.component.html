@@ -141,7 +141,7 @@
             <div class="photos-grid">
               @for (photo of s.photos; track photo.id) {
                 <div class="photo-card" [class.photo-card--active]="photo.isActive">
-                  <div class="photo-image" (click)="openLightbox(photo)">
+                  <div class="photo-image" role="button" tabindex="0" (click)="openLightbox(photo)" (keydown.enter)="openLightbox(photo)" (keydown.space)="$event.preventDefault(); openLightbox(photo)">
                     <img [src]="photo.thumbUrl || photo.url" [alt]="'Fotó ' + photo.year" loading="lazy" />
                     @if (photo.isActive) {
                       <span class="active-indicator" matTooltip="Aktív fotó">

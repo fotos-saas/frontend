@@ -55,7 +55,7 @@
       <h2>Legutóbbi projektek</h2>
       <div class="recent-list">
         @for (project of recentProjects(); track project.id) {
-          <div class="recent-item" (click)="navigateTo(routePrefix + '/projects/' + project.id)">
+          <div class="recent-item" role="button" tabindex="0" (click)="navigateTo(routePrefix + '/projects/' + project.id)" (keydown.enter)="navigateTo(routePrefix + '/projects/' + project.id)" (keydown.space)="navigateTo(routePrefix + '/projects/' + project.id); $event.preventDefault()">
             <div class="recent-info">
               <span class="recent-name">{{ project.name }}</span>
               <span class="recent-school">{{ project.schoolName ?? 'Ismeretlen iskola' }}</span>

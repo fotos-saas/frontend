@@ -1,4 +1,4 @@
-<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" (click)="cardClick.emit({ project: project(), event: $event })">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" role="button" tabindex="0" (click)="cardClick.emit({ project: project(), event: $event })" (keydown.enter)="cardClick.emit({ project: project(), event: $event })" (keydown.space)="$event.preventDefault(); cardClick.emit({ project: project(), event: $event })">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"
@@ -150,6 +150,7 @@
             class="action-btn action-btn--ps"
             (click)="onOpenPsClick($event)"
             matTooltip="Megnyitás Photoshopban"
+            aria-label="Megnyitás Photoshopban"
           >
             <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
           </button>
@@ -162,6 +163,7 @@
           class="action-btn action-btn--folder"
           (click)="onOpenFolderClick($event)"
           matTooltip="Mappa megnyitása"
+          aria-label="Mappa megnyitása"
         >
           <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
         </button>
@@ -181,6 +183,7 @@
         class="action-btn action-btn--link"
         (click)="onLinkClick($event)"
         matTooltip="Összekapcsolás"
+        aria-label="Összekapcsolás"
       >
         <lucide-icon [name]="ICONS.LINK" [size]="14" />
       </button>
@@ -191,6 +194,7 @@
         class="action-btn"
         (click)="onQrClick($event)"
         matTooltip="QR kód"
+        aria-label="QR kód"
       >
         <lucide-icon [name]="ICONS.QR_CODE" [size]="14" />
       </button>
@@ -201,6 +205,7 @@
       class="action-btn action-btn--delete"
       (click)="onDeleteClick($event)"
       matTooltip="Projekt törlése"
+      aria-label="Projekt törlése"
     >
       <lucide-icon [name]="ICONS.DELETE" [size]="14" />
     </button>

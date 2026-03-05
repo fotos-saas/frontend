@@ -59,7 +59,8 @@
 
   <!-- Lista -->
   @if (filterState.loading()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <div class="skeleton-row skeleton-row--tall skeleton-shimmer"></div>
       }

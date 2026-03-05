@@ -20,7 +20,7 @@
 
   <!-- Gradient fade - kattintható a kinyitáshoz -->
   @if (!isExpanded() && needsExpansion()) {
-    <div class="expandable-content__fade" (click)="expand()"></div>
+    <div class="expandable-content__fade" role="button" tabindex="0" aria-label="Tartalom kibontása" (click)="expand()" (keydown.enter)="expand()" (keydown.space)="expand(); $event.preventDefault()"></div>
   }
 
   <!-- Toggle gomb -->

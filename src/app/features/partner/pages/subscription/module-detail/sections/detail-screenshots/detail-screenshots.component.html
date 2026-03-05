@@ -2,7 +2,7 @@
   <h2 class="section-title">Képernyőképek</h2>
   <div class="screenshots-grid">
     @for (screenshot of screenshots(); track screenshot.alt; let i = $index) {
-      <div class="screenshot-card" (click)="openLightbox.emit(i)">
+      <div class="screenshot-card" role="button" tabindex="0" (click)="openLightbox.emit(i)" (keydown.enter)="openLightbox.emit(i)" (keydown.space)="$event.preventDefault(); openLightbox.emit(i)">
         @if (screenshot.src) {
           <img [src]="screenshot.src" [alt]="screenshot.alt" loading="lazy" />
         } @else {

@@ -12,7 +12,7 @@
 >
   <ng-container dialogBody>
     <!-- Fotó előnézet / választó -->
-    <div class="photo-preview" (click)="fileInput.click()">
+    <div class="photo-preview" role="button" tabindex="0" aria-label="Fotó feltöltése" (click)="fileInput.click()" (keydown.enter)="fileInput.click()" (keydown.space)="fileInput.click(); $event.preventDefault()">
       @if (previewUrl()) {
         <img [src]="previewUrl()" alt="Előnézet" loading="lazy" />
       } @else {

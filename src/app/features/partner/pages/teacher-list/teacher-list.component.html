@@ -99,7 +99,7 @@
 
     <!-- Sor sablon: ng-template a duplikáció elkerüléséhez -->
     <ng-template #teacherRowTpl let-teacher let-isGroupHeader="isGroupHeader" let-isChild="isChild" let-schoolCount="schoolCount">
-      <div class="teacher-info" (click)="viewTeacher(teacher)">
+      <div class="teacher-info" role="button" tabindex="0" (click)="viewTeacher(teacher)" (keydown.enter)="viewTeacher(teacher)" (keydown.space)="viewTeacher(teacher); $event.preventDefault()">
         <div
           class="teacher-avatar"
           [class.teacher-avatar--clickable]="!!teacher.photoUrl"
@@ -129,7 +129,7 @@
         </div>
       </div>
 
-      <div class="teacher-school" (click)="viewTeacher(teacher)" [matTooltip]="teacher.schoolName ?? ''" matTooltipPosition="above">
+      <div class="teacher-school" role="button" tabindex="0" (click)="viewTeacher(teacher)" (keydown.enter)="viewTeacher(teacher)" (keydown.space)="viewTeacher(teacher); $event.preventDefault()" [matTooltip]="teacher.schoolName ?? ''" matTooltipPosition="above">
         <span class="school-name-text">{{ teacher.schoolName }}</span>
       </div>
 
@@ -146,6 +146,7 @@
           <button
             class="action-btn action-btn--linked"
             matTooltip="Leválasztás csoportról"
+            aria-label="Leválasztás csoportról"
             (click)="unlinkTeacher(teacher)"
           >
             <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
@@ -154,6 +155,7 @@
         <button
           class="action-btn"
           [matTooltip]="teacher.linkedGroup ? 'Csoport szerkesztése' : 'Összekapcsolás'"
+          [attr.aria-label]="teacher.linkedGroup ? 'Csoport szerkesztése' : 'Összekapcsolás'"
           (click)="openLinkDialog(teacher)"
         >
           <lucide-icon [name]="ICONS.LINK" [size]="16" />
@@ -161,6 +163,7 @@
         <button
           class="action-btn"
           matTooltip="Szerkesztés"
+          aria-label="Szerkesztés"
           (click)="editTeacher(teacher)"
         >
           <lucide-icon [name]="ICONS.EDIT" [size]="16" />
@@ -168,6 +171,7 @@
         <button
           class="action-btn action-btn--danger"
           matTooltip="Törlés"
+          aria-label="Törlés"
           (click)="confirmDeleteTeacher(teacher)"
         >
           <lucide-icon [name]="ICONS.DELETE" [size]="16" />

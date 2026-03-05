@@ -43,7 +43,7 @@
 
     <div class="row-grid">
       @for (item of items(); track item.id; let i = $index) {
-        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" (click)="goToDetail(item)">
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'" role="button" tabindex="0" (click)="goToDetail(item)" (keydown.enter)="goToDetail(item)" (keydown.space)="goToDetail(item); $event.preventDefault()">
           <span class="cell cell-project">{{ item.project_name }}</span>
           <span class="cell cell-type">
             <span class="type-badge">{{ getTypeLabel(item.type) }}</span>

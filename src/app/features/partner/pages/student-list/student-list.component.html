@@ -46,7 +46,8 @@
 
   <!-- Lista -->
   @if (filterState.loading()) {
-    <div class="loading-state">
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <div class="skeleton-row skeleton-shimmer"></div>
       }
@@ -77,7 +78,7 @@
           class="student-row"
           [style.animation-delay]="i * 0.03 + 's'"
         >
-          <div class="student-info" (click)="viewStudent(student)">
+          <div class="student-info" role="button" tabindex="0" (click)="viewStudent(student)" (keydown.enter)="viewStudent(student)" (keydown.space)="viewStudent(student); $event.preventDefault()">
             <div
               class="student-avatar"
               [class.student-avatar--clickable]="!!student.photoUrl"
@@ -94,11 +95,11 @@
             </div>
           </div>
 
-          <div class="student-class" (click)="viewStudent(student)">
+          <div class="student-class" role="button" tabindex="0" (click)="viewStudent(student)" (keydown.enter)="viewStudent(student)" (keydown.space)="viewStudent(student); $event.preventDefault()">
             <span class="class-name-text">{{ student.className ?? '-' }}</span>
           </div>
 
-          <div class="student-school" (click)="viewStudent(student)">
+          <div class="student-school" role="button" tabindex="0" (click)="viewStudent(student)" (keydown.enter)="viewStudent(student)" (keydown.space)="viewStudent(student); $event.preventDefault()">
             <span class="school-name-text">{{ student.schoolName }}</span>
           </div>
 
@@ -106,6 +107,7 @@
             <button
               class="action-btn"
               matTooltip="Szerkesztés"
+              aria-label="Szerkesztés"
               (click)="editStudent(student)"
             >
               <lucide-icon [name]="ICONS.EDIT" [size]="16" />
@@ -113,6 +115,7 @@
             <button
               class="action-btn action-btn--danger"
               matTooltip="Törlés"
+              aria-label="Törlés"
               (click)="confirmDeleteStudent(student)"
             >
               <lucide-icon [name]="ICONS.DELETE" [size]="16" />

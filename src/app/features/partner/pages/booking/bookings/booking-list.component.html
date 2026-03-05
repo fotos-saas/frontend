@@ -1,0 +1,102 @@
+<div class="booking-list page-card">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Foglalások</h1>
+      <p class="subtitle">Foglalások kezelése és áttekintése</p>
+    </div>
+    <button class="btn btn--primary" (click)="newBooking.emit()">
+      <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+      Új foglalás
+    </button>
+  </div>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="18" class="search-icon" />
+      <input type="text" class="search-input"
+        placeholder="Keresés név, iskola, azonosító..."
+        [ngModel]="filterState.search()"
+        (ngModelChange)="filterState.setSearch($event)" />
+      @if (filterState.search()) {
+        <button class="clear-btn" (click)="filterState.clearSearch()">
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      }
+    </div>
+    <select class="filter-select" [ngModel]="filterState.filters().status"
+      (ngModelChange)="filterState.setFilter('status', $event)">
+      <option value="">Minden státusz</option>
+      @for (s of statusOptions; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+    <select class="filter-select" [ngModel]="filterState.filters().source"
+      (ngModelChange)="filterState.setFilter('source', $event)">
+      <option value="">Minden forrás</option>
+      @for (s of sourceOptions; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (filterState.loading()) {
+    <div class="loading-state">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (bookings().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.CALENDAR" [size]="48" class="empty-icon" />
+      <h3>Nincs foglalás</h3>
+      <p>A szűrési feltételeknek megfelelő foglalás nem található.</p>
+    </div>
+  } @else {
+    <div class="table-header" [style.--table-cols]="gridTemplate">
+      <span class="th">Azonosító</span>
+      <span class="th">Típus</span>
+      <span class="th">Dátum</span>
+      <span class="th">Időpont</span>
+      <span class="th">Kapcsolattartó</span>
+      <span class="th">Iskola</span>
+      <span class="th">Státusz</span>
+    </div>
+    <div class="row-grid">
+      @for (booking of bookings(); track booking.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'"
+          [style.--table-cols]="gridTemplate"
+          (click)="selectBooking.emit(booking)">
+          <span class="cell cell--id">{{ booking.booking_number }}</span>
+          <span class="cell">
+            <span class="type-dot" [style.background]="booking.session_type.color"></span>
+            {{ booking.session_type.name }}
+          </span>
+          <span class="cell">{{ booking.date }}</span>
+          <span class="cell">{{ booking.start_time }}</span>
+          <span class="cell cell--name">{{ booking.contact_name }}</span>
+          <span class="cell cell--school">{{ booking.school_name ?? '-' }}</span>
+          <span class="cell">
+            <span class="status-badge status-badge--{{ BOOKING_STATUS_CONFIG[booking.status].color }}">
+              {{ BOOKING_STATUS_CONFIG[booking.status].label }}
+            </span>
+          </span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="filterState.page() <= 1"
+          (click)="filterState.setPage(filterState.page() - 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" /> Előző
+        </button>
+        <span class="page-info">{{ filterState.page() }} / {{ totalPages() }}</span>
+        <button class="page-btn" [disabled]="filterState.page() >= totalPages()"
+          (click)="filterState.setPage(filterState.page() + 1)">
+          Következő <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+      </div>
+    }
+  }
+</div>

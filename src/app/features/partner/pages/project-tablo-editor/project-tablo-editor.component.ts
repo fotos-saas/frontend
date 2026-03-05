@@ -22,6 +22,8 @@ import { TemplateApplyDialogComponent } from './template-apply-dialog.component'
 import { LayoutDesignerComponent } from './layout-designer/layout-designer.component';
 import { TabloLayoutDialogComponent, BoardDimensions } from './tablo-layout-dialog/tablo-layout-dialog.component';
 import { TabloEditorActionsService } from './tablo-editor-actions.service';
+import { TabloEditorPsdService } from './tablo-editor-psd.service';
+import { TabloEditorDesignerActionsService } from './tablo-editor-designer-actions.service';
 
 type EditorTab = 'commands' | 'settings';
 
@@ -29,7 +31,7 @@ type EditorTab = 'commands' | 'settings';
   selector: 'app-project-tablo-editor',
   standalone: true,
   imports: [LucideAngularModule, ProjectDetailHeaderComponent, MatTooltipModule, DialogWrapperComponent, SnapshotRestoreDialogComponent, TemplateSaveDialogComponent, TemplateApplyDialogComponent, LayoutDesignerComponent, TabloLayoutDialogComponent],
-  providers: [TabloEditorSnapshotService, TabloEditorTemplateService, TabloEditorActionsService],
+  providers: [TabloEditorSnapshotService, TabloEditorTemplateService, TabloEditorPsdService, TabloEditorDesignerActionsService, TabloEditorActionsService],
   templateUrl: './project-tablo-editor.component.html',
   styleUrl: './project-tablo-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

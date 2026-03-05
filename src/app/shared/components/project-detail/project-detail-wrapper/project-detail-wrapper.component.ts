@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ElectronService } from '../../../../core/services/electron.service';
@@ -20,9 +19,6 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService } from '../../../../features/partner/services/partner.service';
 import { PartnerGalleryService } from '../../../../features/partner/services/partner-gallery.service';
 import { PartnerAlbumService } from '../../../../features/partner/services/partner-album.service';
-import { SelectionDownloadResult } from '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component';
-import { saveFile } from '../../../utils/file.util';
-import { projectShortName } from '../../../utils/string.util';
 import { ProjectDetailHeaderComponent } from '../project-detail-header/project-detail-header.component';
 import { ProjectDetailViewComponent } from '../project-detail-view/project-detail-view.component';
 import { ProjectDetailTabsComponent, ProjectDetailTab } from '../project-detail-tabs/project-detail-tabs.component';
@@ -41,11 +37,10 @@ import {
 } from '../project-samples-tab/project-samples-tab.component';
 import { SamplePackageDialogComponent } from '../sample-package-dialog/sample-package-dialog.component';
 import { SampleVersionDialogComponent } from '../sample-version-dialog/sample-version-dialog.component';
-import { ProjectDetailData, ProjectContact, QrCode } from '../project-detail.types';
+import { ProjectDetailData, ProjectContact } from '../project-detail.types';
 import {
   PROJECT_DETAIL_SERVICE,
   PROJECT_BACK_ROUTE,
-  PROJECT_QR_MODAL_COMPONENT,
   PROJECT_CONTACT_MODAL_COMPONENT,
   PROJECT_EDIT_MODAL_COMPONENT,
   PROJECT_ORDER_DATA_DIALOG_COMPONENT,
@@ -58,11 +53,16 @@ import { ProjectTagManagerComponent } from '../../../../features/partner/compone
 import { GuestSession, SamplePackage } from '../../../../features/partner/services/partner.service';
 import { PartnerFinalizationService } from '../../../../features/partner/services/partner-finalization.service';
 import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-facade.service';
+import { ProjectDetailDynamicDialogsService } from './project-detail-dynamic-dialogs.service';
+import { ProjectDetailPrintActionsService } from './project-detail-print-actions.service';
 import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persistence.util';
 
 /**
  * Generikus Project Detail Wrapper - kozos smart wrapper komponens.
- * Az uzleti logika a ProjectDetailWrapperFacadeService-ben van.
+ * Az uzleti logika 3 service-be van kiemelve:
+ * - ProjectDetailWrapperFacadeService: alap CRUD, modal, QR, contact, project, gallery
+ * - ProjectDetailDynamicDialogsService: lazy-loaded dialogusok (persons, upload, order, selection)
+ * - ProjectDetailPrintActionsService: print fajl muveletek, pending ZIP, task muveletek
  */
 @Component({
   selector: 'app-project-detail-wrapper',
@@ -87,7 +87,11 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ProjectDetailWrapperFacadeService],
+  providers: [
+    ProjectDetailWrapperFacadeService,
+    ProjectDetailDynamicDialogsService,
+    ProjectDetailPrintActionsService,
+  ],
 })
 export class ProjectDetailWrapperComponent<T> implements OnInit {
   mapToDetailData = input.required<ProjectDataMapper<T>>();
@@ -110,6 +114,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly electronService = inject(ElectronService);
 
   readonly facade = inject(ProjectDetailWrapperFacadeService<T>);
+  readonly dialogs = inject(ProjectDetailDynamicDialogsService<T>);
+  readonly printActions = inject(ProjectDetailPrintActionsService);
 
   // ViewChild references for dynamic component creation
   private readonly qrModalContainer = viewChild('qrModalContainer', { read: ViewContainerRef });
@@ -128,7 +134,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   /** Tab badge-ek (pl. Feladatok tab-on a pending count) */
   readonly tabBadges = computed<Partial<Record<ProjectDetailTab, number>>>(() => {
-    const data = this.projectData();
+    const data = this.facade.projectData();
     const badges: Partial<Record<ProjectDetailTab, number>> = {};
     if (data?.pendingTaskCount) badges['tasks'] = data.pendingTaskCount;
     return badges;
@@ -138,35 +144,10 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   hiddenTabs = computed<ProjectDetailTab[]>(() => {
     const hidden: ProjectDetailTab[] = [];
     if (this.isMarketer()) hidden.push('settings');
-    const status = this.projectData()?.status;
+    const status = this.facade.projectData()?.status;
     if (status !== 'in_print' && status !== 'done') hidden.push('print');
     return hidden;
   });
-
-  // Delegate state signals from facade - direct signal references
-  readonly loading = this.facade.loading;
-  readonly project = this.facade.project;
-  readonly projectData = this.facade.projectData;
-  readonly showQrModal = this.facade.showQrModal;
-  readonly showContactModal = this.facade.showContactModal;
-  readonly editingContact = this.facade.editingContact;
-  readonly showDeleteConfirm = this.facade.showDeleteConfirm;
-  readonly deletingContact = this.facade.deletingContact;
-  readonly deleting = this.facade.deleting;
-  readonly showDeleteUserConfirm = this.facade.showDeleteUserConfirm;
-  readonly deletingUser = this.facade.deletingUser;
-  readonly showPackageDialog = this.facade.showPackageDialog;
-  readonly packageDialogData = this.facade.packageDialogData;
-  readonly showVersionDialog = this.facade.showVersionDialog;
-  readonly versionDialogData = this.facade.versionDialogData;
-  readonly showDeletePackageConfirm = this.facade.showDeletePackageConfirm;
-  readonly deletingPackageData = this.facade.deletingPackageData;
-  readonly showDeleteVersionConfirm = this.facade.showDeleteVersionConfirm;
-  readonly deletingVersionData = this.facade.deletingVersionData;
-  readonly showDeleteProjectConfirm = this.facade.showDeleteProjectConfirm;
-  readonly deletingProject = this.facade.deletingProject;
-  readonly showDeletePrintFileConfirm = this.facade.showDeletePrintFileConfirm;
-  readonly deletingPrintFileType = this.facade.deletingPrintFileType;
 
   // Tab references
   private readonly usersTab = viewChild(ProjectUsersTabComponent);
@@ -175,6 +156,11 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly tasksTab = viewChild(ProjectTasksTabComponent);
 
   ngOnInit(): void {
+    const reloadProject = () => this.facade.loadProject(
+      this.facade.projectData()!.id,
+      this.mapToDetailData(),
+    );
+
     this.facade.init({
       projectService: this.projectService,
       backRoute: this.backRoute,
@@ -186,8 +172,24 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       router: this.router,
       toast: this.toast,
     });
-
     this.facade.setMapFn(this.mapToDetailData());
+
+    this.dialogs.init({
+      destroyRef: this.destroyRef,
+      toast: this.toast,
+      galleryService: this.galleryService,
+      getProjectData: () => this.facade.projectData(),
+      reloadProject,
+    });
+
+    this.printActions.init({
+      destroyRef: this.destroyRef,
+      toast: this.toast,
+      finalizationService: this.finalizationService,
+      albumService: this.albumService,
+      getProjectData: () => this.facade.projectData(),
+      reloadProject,
+    });
 
     initTabFromFragment(this.activeTab, this.location, ['overview', 'emails', 'users', 'samples', 'tasks', 'settings', 'print', 'activity'] as const, 'overview');
 
@@ -202,7 +204,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   goBack(): void { this.facade.goBack(); }
 
   navigateToTabloEditor(): void {
-    const id = this.projectData()?.id;
+    const id = this.facade.projectData()?.id;
     if (!id) return;
     this.router.navigate(['tablo-editor'], { relativeTo: this.route });
   }
@@ -222,26 +224,19 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     setTabFragment(this.activeTab, this.location, tab, 'overview');
   }
 
-  // === MODAL DELEGATIONS ===
+  // === MODAL DELEGATIONS (facade) ===
 
   openQrModal(): void {
     const container = this.qrModalContainer();
-    if (!container || !this.project()) return;
+    if (!container || !this.facade.project()) return;
     this.facade.openQrModal(container);
   }
 
-  closeQrModal(): void { this.facade.closeQrModal(); }
-
   openContactModal(contact: ProjectContact | null): void {
     const container = this.contactModalContainer();
-    if (!container || !this.project()) return;
+    if (!container || !this.facade.project()) return;
     this.facade.openContactModal(container, contact);
   }
-
-  closeContactModal(): void { this.facade.closeContactModal(); }
-
-  confirmDeleteContact(contact: ProjectContact): void { this.facade.confirmDeleteContact(contact); }
-  onDeleteContactResult(result: ConfirmDialogResult): void { this.facade.onDeleteContactResult(result); }
 
   openEditProjectModal(): void {
     const container = this.projectEditModalContainer();
@@ -249,315 +244,93 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     this.facade.openEditProjectModal(container);
   }
 
-  closeEditProjectModal(): void { this.facade.closeEditProjectModal(); }
-
-  confirmDeleteProject(): void { this.facade.confirmDeleteProject(); }
-  onDeleteProjectResult(result: ConfirmDialogResult): void { this.facade.onDeleteProjectResult(result); }
-
   openOrderDataDialog(): void {
     const container = this.orderDataDialogContainer();
     if (!container) return;
     this.facade.openOrderDataDialog(container);
   }
 
-  closeOrderDataDialog(): void { this.facade.closeOrderDataDialog(); }
+  // === SAMPLES DELEGATIONS (facade) ===
 
-  // === SAMPLES DELEGATIONS ===
-
-  openPackageDialog(request: PackageDialogRequest): void { this.facade.openPackageDialog(request); }
-  closePackageDialog(): void { this.facade.closePackageDialog(); }
   onPackageSaved(): void { this.facade.closePackageDialog(); this.samplesTab()?.onDialogSaved(); }
-
-  openVersionDialog(request: VersionDialogRequest): void { this.facade.openVersionDialog(request); }
-  closeVersionDialog(): void { this.facade.closeVersionDialog(); }
   onVersionSaved(): void { this.facade.closeVersionDialog(); this.samplesTab()?.onDialogSaved(); }
 
-  confirmDeletePackage(pkg: SamplePackage): void { this.facade.confirmDeletePackage(pkg); }
   onDeletePackageResult(result: ConfirmDialogResult): void {
     this.facade.onDeletePackageResult(result, (p) => this.samplesTab()?.executeDeletePackage(p));
   }
 
-  confirmDeleteVersion(request: DeleteVersionRequest): void { this.facade.confirmDeleteVersion(request); }
   onDeleteVersionResult(result: ConfirmDialogResult): void {
     this.facade.onDeleteVersionResult(result, (pkgId, vId) => this.samplesTab()?.executeDeleteVersion(pkgId, vId));
   }
 
-  // === USER DELEGATIONS ===
+  // === USER DELEGATIONS (facade) ===
 
-  confirmDeleteUser(session: GuestSession): void { this.facade.confirmDeleteUser(session); }
   onDeleteUserResult(result: ConfirmDialogResult): void {
     this.facade.onDeleteUserResult(result, (s) => this.usersTab()?.executeDelete(s));
   }
 
-  // === TASK DELEGATIONS ===
+  // === DYNAMIC DIALOG DELEGATIONS ===
 
-  readonly showTaskDialog = signal(false);
-  readonly editingTaskData = signal<ProjectTask | null>(null);
-  readonly showTaskDeleteConfirm = signal(false);
-  readonly deletingTask = signal<ProjectTask | null>(null);
-
-  openTaskDialog(task: ProjectTask | null): void {
-    this.editingTaskData.set(task);
-    this.showTaskDialog.set(true);
-  }
-
-  closeTaskDialog(): void {
-    this.showTaskDialog.set(false);
-    this.editingTaskData.set(null);
-  }
-
-  onTaskSaved(task: ProjectTask): void {
-    const wasEdit = !!this.editingTaskData();
-    this.closeTaskDialog();
-    this.tasksTab()?.onTaskSaved(task, wasEdit);
-  }
-
-  confirmDeleteTask(task: ProjectTask): void {
-    this.deletingTask.set(task);
-    this.showTaskDeleteConfirm.set(true);
-  }
-
-  onTaskDeleteResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      const task = this.deletingTask();
-      if (task) this.tasksTab()?.executeDelete(task);
-    }
-    this.showTaskDeleteConfirm.set(false);
-    this.deletingTask.set(null);
-  }
-
-  // === PERSONS MODAL ===
-
-  private personsModalRef: { instance: { loadPersons: (silent?: boolean) => void } } | null = null;
-
-  async openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): Promise<void> {
+  openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): void {
     const container = this.personsModalContainer();
-    if (!container || !this.projectData()) return;
-
-    container.clear();
-    const { PersonsModalComponent } = await import(
-      '../../../../features/partner/components/persons-modal/persons-modal/persons-modal.component'
+    if (!container) return;
+    this.dialogs.openPersonsModal(
+      container,
+      typeFilter,
+      (album) => this.openUploadWizardDialog(album),
+      (type) => this.openAddPersonsDialog(type),
     );
-    const ref = container.createComponent(PersonsModalComponent);
-    ref.setInput('projectId', this.projectData()!.id);
-    ref.setInput('projectName', this.projectData()!.name);
-    if (typeFilter) {
-      ref.setInput('initialTypeFilter', typeFilter);
-    }
-    this.personsModalRef = ref;
-    ref.instance.close.subscribe(() => {
-      container.clear();
-      this.personsModalRef = null;
-      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
-    });
-    ref.instance.openUploadWizard.subscribe((personType) => {
-      container.clear();
-      this.personsModalRef = null;
-      this.openUploadWizardDialog(personType === 'student' ? 'students' : 'teachers');
-    });
-    ref.instance.addPersonsRequested.subscribe((type) => {
-      this.openAddPersonsDialog(type);
-    });
   }
 
-  async openAddPersonsDialog(type: 'student' | 'teacher'): Promise<void> {
+  openAddPersonsDialog(type: 'student' | 'teacher'): void {
     const container = this.addPersonsDialogContainer();
-    if (!container || !this.projectData()) return;
-
-    container.clear();
-    const { AddPersonsDialogComponent } = await import(
-      '../../../../features/partner/components/add-persons-dialog/add-persons-dialog.component'
-    );
-    const ref = container.createComponent(AddPersonsDialogComponent);
-    ref.setInput('projectId', this.projectData()!.id);
-    ref.setInput('type', type);
-    ref.instance.close.subscribe(() => container.clear());
-    ref.instance.personsAdded.subscribe(() => {
-      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
-      this.personsModalRef?.instance.loadPersons(true);
-    });
+    if (!container) return;
+    this.dialogs.openAddPersonsDialog(container, type);
   }
 
-  async openUploadWizardDialog(initialAlbum?: 'students' | 'teachers'): Promise<void> {
+  openUploadWizardDialog(initialAlbum?: 'students' | 'teachers'): void {
     const container = this.uploadWizardContainer();
-    if (!container || !this.projectData()) return;
-
-    container.clear();
-    const { PhotoUploadWizardComponent } = await import(
-      '../../../../features/partner/components/photo-upload-wizard/photo-upload-wizard/photo-upload-wizard.component'
-    );
-    const ref = container.createComponent(PhotoUploadWizardComponent);
-    ref.setInput('projectId', this.projectData()!.id);
-    if (initialAlbum) {
-      ref.setInput('initialAlbum', initialAlbum);
-    }
-    if (this.projectData()?.isPreliminary) {
-      ref.setInput('isPreliminary', true);
-    }
-    ref.instance.close.subscribe(() => {
-      container.clear();
-    });
-    ref.instance.completed.subscribe(() => {
-      container.clear();
-      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
-    });
+    if (!container) return;
+    this.dialogs.openUploadWizard(container, initialAlbum);
   }
 
-  // === ORDER WIZARD ===
-
-  async openOrderWizardDialog(): Promise<void> {
+  openOrderWizardDialog(): void {
     const container = this.orderWizardContainer();
-    if (!container || !this.projectData()) return;
-
-    container.clear();
-    const { PartnerOrderWizardDialogComponent } = await import(
-      '../../../../features/partner/components/partner-order-wizard-dialog/partner-order-wizard-dialog.component'
-    );
-    const ref = container.createComponent(PartnerOrderWizardDialogComponent);
-    ref.setInput('projectId', this.projectData()!.id);
-    ref.setInput('projectName', this.projectData()!.name);
-    ref.instance.close.subscribe(() => {
-      container.clear();
-    });
-    ref.instance.saved.subscribe(() => {
-      container.clear();
-      this.facade.loadProject(this.projectData()!.id, this.mapToDetailData());
-    });
+    if (!container) return;
+    this.dialogs.openOrderWizard(container);
   }
 
-  // === PRINT TAB ===
-
-  downloadPrintFile(event: PrintFileDownloadEvent): void {
-    const project = this.projectData();
-    if (!project || !this.finalizationService) return;
-
-    const file = event.type === 'small_tablo' ? project.printSmallTablo : project.printFlat;
-    if (!file) return;
-
-    this.finalizationService.downloadPrintReady(project.id, event.type)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => saveFile(blob, file.fileName),
-        error: () => this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.'),
-      });
+  openSelectionDownloadDialog(): void {
+    const container = this.selectionDownloadContainer();
+    if (!container) return;
+    this.dialogs.openSelectionDownloadDialog(container);
   }
+
+  // === PRINT DELEGATIONS ===
+
+  downloadPrintFile(event: PrintFileDownloadEvent): void { this.printActions.downloadPrintFile(event); }
 
   uploadPrintFile(event: PrintFileUploadEvent): void {
-    const project = this.projectData();
-    if (!project || !this.finalizationService) return;
-
-    const tabState = this.printTab()?.state;
-    tabState?.uploading.set(true);
-    tabState?.uploadError.set(null);
-
-    this.finalizationService.uploadPrintReady(project.id, event.file, event.type)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          tabState?.uploading.set(false);
-          this.toast.success('Siker', 'Nyomdakész fájl feltöltve.');
-          this.facade.loadProject(project.id, this.mapToDetailData());
-        },
-        error: () => {
-          tabState?.uploading.set(false);
-          tabState?.uploadError.set('Hiba történt a feltöltés során.');
-          this.toast.error('Hiba', 'Nem sikerült feltölteni a fájlt.');
-        },
-      });
+    this.printActions.uploadPrintFile(event, this.printTab()?.state);
   }
 
-  confirmDeletePrintFile(event: PrintFileDeleteEvent): void {
-    this.facade.deletingPrintFileType.set(event.type);
-    this.facade.showDeletePrintFileConfirm.set(true);
+  confirmDeletePrintFile(event: PrintFileDeleteEvent): void { this.printActions.confirmDeletePrintFile(event); }
+  onDeletePrintFileResult(result: ConfirmDialogResult): void { this.printActions.onDeletePrintFileResult(result); }
+
+  downloadPendingPhotosZip(): void { this.printActions.downloadPendingPhotosZip(); }
+
+  // === TASK DELEGATIONS ===
+
+  openTaskDialog(task: ProjectTask | null): void { this.printActions.openTaskDialog(task); }
+  closeTaskDialog(): void { this.printActions.closeTaskDialog(); }
+
+  onTaskSaved(task: ProjectTask): void {
+    this.printActions.onTaskSaved(task, (t, wasEdit) => this.tasksTab()?.onTaskSaved(t, wasEdit));
   }
 
-  onDeletePrintFileResult(result: ConfirmDialogResult): void {
-    if (result.action === 'confirm') {
-      const project = this.projectData();
-      const type = this.facade.deletingPrintFileType();
-      if (!project || !type || !this.finalizationService) return;
+  confirmDeleteTask(task: ProjectTask): void { this.printActions.confirmDeleteTask(task); }
 
-      this.finalizationService.deletePrintReady(project.id, type)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.toast.success('Siker', 'Fájl sikeresen törölve.');
-            this.facade.loadProject(project.id, this.mapToDetailData());
-          },
-          error: () => this.toast.error('Hiba', 'Nem sikerült törölni a fájlt.'),
-        });
-    }
-    this.facade.showDeletePrintFileConfirm.set(false);
-    this.facade.deletingPrintFileType.set(null);
-  }
-
-  // === PENDING ZIP DOWNLOAD ===
-
-  downloadPendingPhotosZip(): void {
-    const projectId = this.projectData()?.id;
-    if (!projectId || !this.albumService) return;
-
-    this.albumService.downloadPendingZip(projectId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (blob) => {
-          const name = projectShortName(this.projectData()?.name ?? '', projectId);
-          saveFile(blob, `${name}_elozetes.zip`);
-          this.toast.success('Siker', 'ZIP letöltve');
-        },
-        error: () => this.toast.error('Hiba', 'A letöltés nem sikerült'),
-      });
-  }
-
-  // === GALLERY ===
-
-  extendGalleryDeadline(days: number): void { this.facade.extendGalleryDeadline(days); }
-  createGallery(): void { this.facade.createGallery(); }
-
-  // === SELECTION DOWNLOAD ===
-
-  readonly downloadingSelections = signal(false);
-
-  async openSelectionDownloadDialog(): Promise<void> {
-    const container = this.selectionDownloadContainer();
-    if (!container || !this.projectData()?.tabloGalleryId) return;
-
-    container.clear();
-    const { SelectionDownloadDialogComponent } = await import(
-      '../../../../features/partner/components/selection-download-dialog/selection-download-dialog.component'
-    );
-    const ref = container.createComponent(SelectionDownloadDialogComponent);
-    ref.instance.close.subscribe(() => container.clear());
-    ref.instance.download.subscribe((result: SelectionDownloadResult) => {
-      container.clear();
-      this.downloadSelections(result);
-    });
-  }
-
-  private downloadSelections(result: SelectionDownloadResult): void {
-    const projectId = this.projectData()?.id;
-    if (!projectId || !this.galleryService) return;
-
-    this.downloadingSelections.set(true);
-    this.galleryService.downloadMonitoringZip(projectId, {
-      zipContent: 'all',
-      fileNaming: result.fileNaming,
-      includeExcel: false,
-      personType: result.personType === 'both' ? undefined : result.personType,
-      effectiveOnly: true,
-    }).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (blob) => {
-        const name = projectShortName(this.projectData()?.name ?? '', projectId);
-        saveFile(blob, `${name}.zip`);
-        this.downloadingSelections.set(false);
-        this.toast.success('Siker', 'ZIP letöltve');
-      },
-      error: () => {
-        this.downloadingSelections.set(false);
-        this.toast.error('Hiba', 'A ZIP letöltés nem sikerült');
-      },
-    });
+  onTaskDeleteResult(result: ConfirmDialogResult): void {
+    this.printActions.onTaskDeleteResult(result, (t) => this.tasksTab()?.executeDelete(t));
   }
 }

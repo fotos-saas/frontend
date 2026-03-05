@@ -1,0 +1,104 @@
+<div class="subscription-actions">
+  @switch (info().status) {
+    @case ('active') {
+      <div class="action-group">
+        <button
+          class="btn btn--warning"
+          (click)="onPause.emit()"
+          [disabled]="isActionLoading()"
+        >
+          <lucide-icon [name]="ICONS.PAUSE_CIRCLE" [size]="18" />
+          Szüneteltetés
+        </button>
+        <p class="action-hint">
+          Szüneteltetés alatt csökkentett árat fizetsz, de nem tudsz új projekteket létrehozni.
+        </p>
+      </div>
+
+      <div class="action-group">
+        <button
+          class="btn btn--outline-danger"
+          (click)="onCancel.emit()"
+          [disabled]="isActionLoading()"
+        >
+          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="18" />
+          Előfizetés lemondása
+        </button>
+        <p class="action-hint">
+          Az előfizetés a jelenlegi időszak végéig aktív marad.
+        </p>
+      </div>
+    }
+
+    @case ('paused') {
+      <div class="action-group">
+        <button
+          class="btn btn--primary"
+          (click)="onUnpause.emit()"
+          [disabled]="isActionLoading()"
+        >
+          <lucide-icon [name]="ICONS.PLAY_CIRCLE" [size]="18" />
+          Szüneteltetés feloldása
+        </button>
+        <p class="action-hint">
+          Az előfizetésed újra teljes funkcionalitással fog működni.
+        </p>
+      </div>
+
+      <div class="action-group">
+        <button
+          class="btn btn--outline-danger"
+          (click)="onCancel.emit()"
+          [disabled]="isActionLoading()"
+        >
+          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="18" />
+          Előfizetés lemondása
+        </button>
+      </div>
+    }
+
+    @case ('canceling') {
+      <div class="action-group">
+        <div class="info-box info-box--warning">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="20" />
+          <div>
+            <strong>Előfizetés lemondva</strong>
+            <p>Az előfizetésed a jelenlegi időszak végén lejár.</p>
+          </div>
+        </div>
+        <button
+          class="btn btn--primary"
+          (click)="onResume.emit()"
+          [disabled]="isActionLoading()"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+          Lemondás visszavonása
+        </button>
+      </div>
+    }
+
+    @case ('trial') {
+      <div class="action-group">
+        <div class="info-box info-box--info">
+          <lucide-icon [name]="ICONS.INFO" [size]="20" />
+          <div>
+            <strong>Próbaidőszak</strong>
+            <p>A próbaidőszak végén automatikusan aktiválódik az előfizetésed.</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    @case ('canceled') {
+      <div class="action-group">
+        <div class="info-box info-box--danger">
+          <lucide-icon [name]="ICONS.X_CIRCLE" [size]="20" />
+          <div>
+            <strong>Előfizetés lejárt</strong>
+            <p>Az előfizetésed lejárt. Új csomag aktiválásához kattints az alábbi gombra.</p>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

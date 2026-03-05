@@ -1,0 +1,117 @@
+<div class="settings-page page-card">
+  <header class="page-header">
+    <h1>Beállítások</h1>
+  </header>
+
+  <!-- Előfizetés szekció -->
+  <section class="settings-section">
+    <h2>
+      <lucide-icon [name]="ICONS.CREDIT_CARD" [size]="20" />
+      Előfizetés
+    </h2>
+
+    @if (isLoading()) {
+      <div class="loading-skeleton">
+        <div class="skeleton-card"></div>
+      </div>
+    } @else if (subscriptionInfo()) {
+      <app-subscription-card
+        [info]="subscriptionInfo()!"
+        (openPortal)="handleOpenPortal()"
+      />
+
+      <app-subscription-actions
+        [info]="subscriptionInfo()!"
+        [isActionLoading]="isActionLoading()"
+        (onPause)="handlePause()"
+        (onUnpause)="handleUnpause()"
+        (onCancel)="handleCancel()"
+        (onResume)="handleResume()"
+      />
+    } @else {
+      <div class="empty-state">
+        <p>Előfizetési adatok nem elérhetők.</p>
+      </div>
+    }
+  </section>
+
+  <!-- Tárhely szekció -->
+  <section class="settings-section">
+    <h2>
+      <lucide-icon [name]="ICONS.HARD_DRIVE" [size]="20" />
+      Tárhely
+    </h2>
+
+    @if (isStorageLoading()) {
+      <div class="loading-skeleton">
+        <div class="skeleton-card skeleton-card--small"></div>
+      </div>
+    } @else if (storageUsage()) {
+      <app-storage-usage-card
+        [usage]="storageUsage()!"
+        (openPurchase)="openStoragePurchaseDialog()"
+      />
+    } @else {
+      <div class="empty-state">
+        <p>Tárhely adatok nem elérhetők.</p>
+      </div>
+    }
+  </section>
+
+  <!-- LAN szinkronizálás szekció (csak Electron) -->
+  @if (isElectron) {
+    <section class="settings-section">
+      <app-sync-settings-card />
+    </section>
+  }
+
+  <!-- Kiegészítők szekció -->
+  <section class="settings-section">
+    <h2>
+      <lucide-icon [name]="ICONS.PACKAGE" [size]="20" />
+      Kiegészítők
+    </h2>
+    <p class="section-description">
+      Bővítsd a funkcionalitást kiegészítő csomagokkal. Az aktív addonok azonnal elérhetők lesznek.
+    </p>
+
+    <app-addons-card (addonChanged)="onAddonChanged()" />
+  </section>
+
+  <!-- Veszélyes zóna szekció -->
+  <section class="settings-section settings-section--danger">
+    <h2>
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20" />
+      Veszélyes zóna
+    </h2>
+    <p class="section-description">
+      A fiók törlése visszavonhatatlan. Minden adatod véglegesen törlődik 30 napon belül.
+    </p>
+    <button
+      class="btn btn--danger"
+      (click)="openDeleteDialog()"
+      [disabled]="isActionLoading()"
+    >
+      <lucide-icon [name]="ICONS.DELETE" [size]="18" />
+      Fiók törlése
+    </button>
+  </section>
+</div>
+
+<!-- Dialógusok - page-card KÍVÜL! -->
+@if (showDeleteDialog()) {
+  <app-delete-account-dialog
+    [isSubmitting]="isDeleting()"
+    (close)="closeDeleteDialog()"
+    (confirm)="handleDeleteAccount()"
+  />
+}
+
+@if (showStoragePurchaseDialog()) {
+  <app-storage-purchase-dialog
+    [usage]="storageUsage()!"
+    [isSubmitting]="isStorageSubmitting()"
+    (close)="closeStoragePurchaseDialog()"
+    (confirm)="handleStoragePurchase($event)"
+  />
+}

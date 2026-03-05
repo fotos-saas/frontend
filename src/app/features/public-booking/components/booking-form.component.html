@@ -1,0 +1,117 @@
+<div class="form-header">
+  <button class="back-btn" (click)="back.emit()">
+    <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18" />
+    Vissza
+  </button>
+  <h2 class="section-title">Kapcsolattartó adatai</h2>
+  <p class="section-desc">Kérjük, adja meg adatait a foglalás véglegesítéséhez.</p>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="booking-form">
+  <div class="form-group">
+    <label for="contact_name">Név *</label>
+    <input id="contact_name" type="text" formControlName="contact_name"
+           placeholder="Teljes név" class="form-input" />
+    @if (form.get('contact_name')?.touched && form.get('contact_name')?.hasError('required')) {
+      <span class="field-error">A név megadása kötelező.</span>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="contact_email">Email *</label>
+    <input id="contact_email" type="email" formControlName="contact_email"
+           placeholder="pelda@email.com" class="form-input" />
+    @if (form.get('contact_email')?.touched && form.get('contact_email')?.hasError('required')) {
+      <span class="field-error">Az email cím megadása kötelező.</span>
+    }
+    @if (form.get('contact_email')?.touched && form.get('contact_email')?.hasError('email')) {
+      <span class="field-error">Érvénytelen email cím.</span>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="contact_phone">Telefon</label>
+    <input id="contact_phone" type="tel" formControlName="contact_phone"
+           placeholder="+36 30 123 4567" class="form-input" />
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="school_name">Iskola neve</label>
+      <input id="school_name" type="text" formControlName="school_name"
+             placeholder="Iskola" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label for="class_name">Osztály</label>
+      <input id="class_name" type="text" formControlName="class_name"
+             placeholder="pl. 12.A" class="form-input" />
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="student_count">Létszám</label>
+    <input id="student_count" type="number" formControlName="student_count"
+           placeholder="Diákok száma" class="form-input" min="1" />
+  </div>
+
+  <!-- Dinamikus kérdőív mezők -->
+  @for (field of questionnaire(); track field.field_key) {
+    <div class="form-group">
+      <label [for]="'q_' + field.field_key">
+        {{ field.label }}
+        @if (field.is_required) { <span>*</span> }
+      </label>
+
+      @switch (field.field_type) {
+        @case ('text') {
+          <input [id]="'q_' + field.field_key" type="text"
+                 [formControlName]="'q_' + field.field_key"
+                 [placeholder]="field.placeholder ?? ''" class="form-input" />
+        }
+        @case ('number') {
+          <input [id]="'q_' + field.field_key" type="number"
+                 [formControlName]="'q_' + field.field_key"
+                 [placeholder]="field.placeholder ?? ''" class="form-input" />
+        }
+        @case ('textarea') {
+          <textarea [id]="'q_' + field.field_key"
+                    [formControlName]="'q_' + field.field_key"
+                    [placeholder]="field.placeholder ?? ''" class="form-input form-textarea"
+                    rows="3"></textarea>
+        }
+        @case ('select') {
+          <select [id]="'q_' + field.field_key"
+                  [formControlName]="'q_' + field.field_key" class="form-input">
+            <option value="">Válasszon...</option>
+            @for (opt of field.options ?? []; track opt) {
+              <option [value]="opt">{{ opt }}</option>
+            }
+          </select>
+        }
+        @case ('checkbox') {
+          <label class="checkbox-label">
+            <input type="checkbox" [formControlName]="'q_' + field.field_key" />
+            {{ field.placeholder ?? field.label }}
+          </label>
+        }
+      }
+    </div>
+  }
+
+  <div class="form-group">
+    <label for="notes">Megjegyzés</label>
+    <textarea id="notes" formControlName="notes"
+              placeholder="Egyéb megjegyzés, kérdés..." class="form-input form-textarea"
+              rows="3"></textarea>
+  </div>
+
+  <button type="submit" class="submit-btn" [disabled]="form.invalid || submitting()">
+    @if (submitting()) {
+      <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+      Foglalás folyamatban...
+    } @else {
+      <lucide-icon [name]="ICONS.CHECK" [size]="18" />
+      Foglalás véglegesítése
+    }
+  </button>
+</form>

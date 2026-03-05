@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { LoggerService } from '../../../../../../core/services/logger.service';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '@shared/components/smart-filter-bar';
 import { FilterConfig } from '@shared/components/expandable-filters';
 import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
@@ -32,6 +33,7 @@ export class ActivitySummaryTabComponent implements OnInit {
   private teamService = inject(TeamService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private logger = inject(LoggerService);
   readonly ICONS = ICONS;
 
   items = signal<ProjectActivitySummary[]>([]);
@@ -182,7 +184,7 @@ export class ActivitySummaryTabComponent implements OnInit {
           this.selectedIds.set(new Set());
           this.loadData();
         },
-        error: (err) => console.error('[ActivitySummary] markReviewed hiba:', err),
+        error: (err) => this.logger.error('[ActivitySummary] markReviewed hiba:', err),
       });
   }
 
@@ -194,7 +196,7 @@ export class ActivitySummaryTabComponent implements OnInit {
           this.selectedIds.set(new Set());
           this.loadData();
         },
-        error: (err) => console.error('[ActivitySummary] unmarkReviewed hiba:', err),
+        error: (err) => this.logger.error('[ActivitySummary] unmarkReviewed hiba:', err),
       });
   }
 

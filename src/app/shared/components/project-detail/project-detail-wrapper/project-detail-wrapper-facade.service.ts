@@ -88,10 +88,6 @@ export class ProjectDetailWrapperFacadeService<T> {
   readonly showDeleteVersionConfirm = signal(false);
   readonly deletingVersionData = signal<DeleteVersionRequest | null>(null);
 
-  // Delete print file confirmation
-  readonly showDeletePrintFileConfirm = signal(false);
-  readonly deletingPrintFileType = signal<'small_tablo' | 'flat' | null>(null);
-
   // Delete project confirmation
   readonly showDeleteProjectConfirm = signal(false);
   readonly deletingProject = signal(false);

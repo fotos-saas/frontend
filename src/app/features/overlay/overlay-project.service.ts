@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OverlayContext } from '../../core/services/electron.types';
+import { LoggerService } from '../../core/services/logger.service';
 
 export interface PersonItem {
   id: number;
@@ -24,6 +25,7 @@ export interface PersonItem {
 export class OverlayProjectService {
   private readonly http = inject(HttpClient);
   private readonly ngZone = inject(NgZone);
+  private readonly logger = inject(LoggerService);
 
   /** Utolsó ismert projectId (fallback ha a context frissül közben) */
   private lastProjectId: number | null = null;
@@ -66,7 +68,7 @@ export class OverlayProjectService {
       this.ngZone.run(() => this.persons.set(list));
       return list;
     } catch (e) {
-      console.error('[PROJECT] fetch persons error:', e);
+      this.logger.error('[PROJECT] fetch persons error:', e);
       return [];
     }
   }

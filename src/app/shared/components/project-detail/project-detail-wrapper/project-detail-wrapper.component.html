@@ -1,19 +1,19 @@
-<div class="max-w-3xl mx-auto page-card" [class.page-card--preliminary]="projectData()?.isPreliminary">
+<div class="max-w-3xl mx-auto page-card" [class.page-card--preliminary]="facade.projectData()?.isPreliminary">
   <!-- Loading -->
-  @if (loading()) {
+  @if (facade.loading()) {
     <div class="flex flex-col items-center justify-center py-16">
       <div class="w-10 h-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
       <p class="mt-4 text-gray-500">Betöltés...</p>
     </div>
-  } @else if (projectData()) {
+  } @else if (facade.projectData()) {
     <!-- Header (mindig látszik) -->
     <app-project-detail-header
-      [project]="projectData()"
+      [project]="facade.projectData()"
       [isMarketer]="isMarketer()"
       [showTabloEditor]="showTabloEditorBtn()"
       (back)="goBack()"
       (editProject)="openEditProjectModal()"
-      (deleteProject)="confirmDeleteProject()"
+      (deleteProject)="facade.confirmDeleteProject()"
       (downloadSelections)="openSelectionDownloadDialog()"
       (openTabloEditor)="navigateToTabloEditor()"
       (statusChange)="onStatusChange($event)"
@@ -23,8 +23,8 @@
     @if (!isMarketer()) {
       <div class="mb-3">
         <app-project-tag-manager
-          [projectId]="projectData()!.id"
-          [tags]="projectData()?.tags ?? []"
+          [projectId]="facade.projectData()!.id"
+          [tags]="facade.projectData()?.tags ?? []"
           (tagsChanged)="onTagsChanged($event)"
         />
       </div>
@@ -42,51 +42,51 @@
     @switch (activeTab()) {
       @case ('overview') {
         <app-project-detail-view
-          [project]="projectData()"
+          [project]="facade.projectData()"
           [isMarketer]="isMarketer()"
           (openPersonsModal)="openPersonsModalDialog($event)"
           (openUploadWizard)="openUploadWizardDialog($event)"
           (downloadPendingZip)="downloadPendingPhotosZip()"
           (openQrModal)="openQrModal()"
           (openContactModal)="openContactModal($event)"
-          (deleteContact)="confirmDeleteContact($event)"
+          (deleteContact)="facade.confirmDeleteContact($event)"
           (openOrderData)="openOrderDataDialog()"
           (openOrderWizard)="openOrderWizardDialog()"
-          (createGallery)="createGallery()"
-          (galleryDeadlineExtend)="extendGalleryDeadline($event)"
+          (createGallery)="facade.createGallery()"
+          (galleryDeadlineExtend)="facade.extendGalleryDeadline($event)"
           (addPersons)="openAddPersonsDialog($event)"
         />
       }
       @case ('emails') {
         @defer {
           <app-project-emails-tab
-            [projectId]="projectData()?.id ?? 0"
+            [projectId]="facade.projectData()?.id ?? 0"
           />
         }
       }
       @case ('users') {
         @defer {
           <app-project-users-tab
-            [projectId]="projectData()?.id ?? 0"
-            (deleteRequested)="confirmDeleteUser($event)"
+            [projectId]="facade.projectData()?.id ?? 0"
+            (deleteRequested)="facade.confirmDeleteUser($event)"
           />
         }
       }
       @case ('samples') {
         @defer {
           <app-project-samples-tab
-            [projectId]="projectData()?.id ?? 0"
-            (packageDialogRequested)="openPackageDialog($event)"
-            (versionDialogRequested)="openVersionDialog($event)"
-            (deletePackageRequested)="confirmDeletePackage($event)"
-            (deleteVersionRequested)="confirmDeleteVersion($event)"
+            [projectId]="facade.projectData()?.id ?? 0"
+            (packageDialogRequested)="facade.openPackageDialog($event)"
+            (versionDialogRequested)="facade.openVersionDialog($event)"
+            (deletePackageRequested)="facade.confirmDeletePackage($event)"
+            (deleteVersionRequested)="facade.confirmDeleteVersion($event)"
           />
         }
       }
       @case ('print') {
         @defer {
           <app-project-print-tab
-            [project]="projectData()"
+            [project]="facade.projectData()"
             (downloadClick)="downloadPrintFile($event)"
             (uploadFile)="uploadPrintFile($event)"
             (deleteClick)="confirmDeletePrintFile($event)"
@@ -96,7 +96,7 @@
       @case ('tasks') {
         @defer {
           <app-project-tasks-tab
-            [projectId]="projectData()?.id ?? 0"
+            [projectId]="facade.projectData()?.id ?? 0"
             (dialogRequested)="openTaskDialog($event)"
             (deleteRequested)="confirmDeleteTask($event)"
           />
@@ -105,14 +105,14 @@
       @case ('activity') {
         @defer {
           <app-project-activity-tab
-            [projectId]="projectData()?.id ?? 0"
+            [projectId]="facade.projectData()?.id ?? 0"
           />
         }
       }
       @case ('settings') {
         @defer {
           <app-project-settings-tab
-            [projectId]="projectData()?.id ?? 0"
+            [projectId]="facade.projectData()?.id ?? 0"
           />
         }
       }
@@ -164,104 +164,104 @@
 <ng-container #orderWizardContainer></ng-container>
 
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
-@if (showDeleteUserConfirm()) {
+@if (facade.showDeleteUserConfirm()) {
   <app-confirm-dialog
     title="Felhasználó törlése"
-    [message]="'Biztosan törölni szeretnéd ' + (deletingUser()?.guestName ?? '') + ' felhasználót?'"
+    [message]="'Biztosan törölni szeretnéd ' + (facade.deletingUser()?.guestName ?? '') + ' felhasználót?'"
     confirmText="Törlés"
     (resultEvent)="onDeleteUserResult($event)"
   />
 }
 
 <!-- Delete Contact Confirmation - page-card-on KÍVÜL -->
-@if (showDeleteConfirm()) {
+@if (facade.showDeleteConfirm()) {
   <app-confirm-dialog
     title="Kapcsolattartó törlése"
-    [message]="'Biztosan törölni szeretnéd ' + (deletingContact()?.name ?? '') + ' kapcsolattartót?'"
+    [message]="'Biztosan törölni szeretnéd ' + (facade.deletingContact()?.name ?? '') + ' kapcsolattartót?'"
     confirmText="Törlés"
-    [isSubmitting]="deleting()"
-    (resultEvent)="onDeleteContactResult($event)"
+    [isSubmitting]="facade.deleting()"
+    (resultEvent)="facade.onDeleteContactResult($event)"
   />
 }
 
 <!-- Delete Project Confirmation - page-card-on KÍVÜL -->
-@if (showDeleteProjectConfirm()) {
+@if (facade.showDeleteProjectConfirm()) {
   <app-confirm-dialog
     title="Projekt törlése"
-    [message]="'Biztosan törölni szeretnéd a ' + (projectData()?.name ?? '') + ' projektet? Ez a művelet nem visszavonható!'"
+    [message]="'Biztosan törölni szeretnéd a ' + (facade.projectData()?.name ?? '') + ' projektet? Ez a művelet nem visszavonható!'"
     confirmText="Törlés"
-    [isSubmitting]="deletingProject()"
-    (resultEvent)="onDeleteProjectResult($event)"
+    [isSubmitting]="facade.deletingProject()"
+    (resultEvent)="facade.onDeleteProjectResult($event)"
   />
 }
 
 <!-- Sample Package Dialog - page-card-on KÍVÜL -->
-@if (showPackageDialog()) {
+@if (facade.showPackageDialog()) {
   <app-sample-package-dialog
-    [projectId]="projectData()?.id ?? 0"
-    [editId]="packageDialogData()?.editId ?? null"
-    [initialTitle]="packageDialogData()?.initialTitle ?? ''"
-    (close)="closePackageDialog()"
+    [projectId]="facade.projectData()?.id ?? 0"
+    [editId]="facade.packageDialogData()?.editId ?? null"
+    [initialTitle]="facade.packageDialogData()?.initialTitle ?? ''"
+    (close)="facade.closePackageDialog()"
     (saved)="onPackageSaved()"
   />
 }
 
 <!-- Sample Version Dialog - page-card-on KÍVÜL -->
-@if (showVersionDialog()) {
+@if (facade.showVersionDialog()) {
   <app-sample-version-dialog
-    [projectId]="projectData()?.id ?? 0"
-    [packageId]="versionDialogData()?.packageId ?? null"
-    [editVersion]="versionDialogData()?.editVersion ?? null"
-    (close)="closeVersionDialog()"
+    [projectId]="facade.projectData()?.id ?? 0"
+    [packageId]="facade.versionDialogData()?.packageId ?? null"
+    [editVersion]="facade.versionDialogData()?.editVersion ?? null"
+    (close)="facade.closeVersionDialog()"
     (saved)="onVersionSaved()"
   />
 }
 
 <!-- Delete Package Confirmation - page-card-on KÍVÜL -->
-@if (showDeletePackageConfirm()) {
+@if (facade.showDeletePackageConfirm()) {
   <app-confirm-dialog
     title="Csomag törlése"
-    [message]="'Biztosan törölni szeretnéd a ' + (deletingPackageData()?.title ?? '') + ' csomagot? Az összes verzió is törlődik!'"
+    [message]="'Biztosan törölni szeretnéd a ' + (facade.deletingPackageData()?.title ?? '') + ' csomagot? Az összes verzió is törlődik!'"
     confirmText="Törlés"
     (resultEvent)="onDeletePackageResult($event)"
   />
 }
 
 <!-- Delete Version Confirmation - page-card-on KÍVÜL -->
-@if (showDeleteVersionConfirm()) {
+@if (facade.showDeleteVersionConfirm()) {
   <app-confirm-dialog
     title="Verzió törlése"
-    [message]="'Biztosan törölni szeretnéd a v' + (deletingVersionData()?.version?.versionNumber ?? '') + ' verziót?'"
+    [message]="'Biztosan törölni szeretnéd a v' + (facade.deletingVersionData()?.version?.versionNumber ?? '') + ' verziót?'"
     confirmText="Törlés"
     (resultEvent)="onDeleteVersionResult($event)"
   />
 }
 
 <!-- Delete Print File Confirmation - page-card-on KÍVÜL -->
-@if (showDeletePrintFileConfirm()) {
+@if (printActions.showDeletePrintFileConfirm()) {
   <app-confirm-dialog
     title="Nyomdai fájl törlése"
-    [message]="'Biztosan törölni szeretnéd a ' + (deletingPrintFileType() === 'small_tablo' ? 'Kistabló' : 'Nyomdai flat') + ' fájlt?'"
+    [message]="'Biztosan törölni szeretnéd a ' + (printActions.deletingPrintFileType() === 'small_tablo' ? 'Kistabló' : 'Nyomdai flat') + ' fájlt?'"
     confirmText="Törlés"
     (resultEvent)="onDeletePrintFileResult($event)"
   />
 }
 
 <!-- Task Dialog - page-card-on KÍVÜL -->
-@if (showTaskDialog()) {
+@if (printActions.showTaskDialog()) {
   <app-project-task-dialog
-    [projectId]="projectData()?.id ?? 0"
-    [editTask]="editingTaskData()"
+    [projectId]="facade.projectData()?.id ?? 0"
+    [editTask]="printActions.editingTaskData()"
     (close)="closeTaskDialog()"
     (saved)="onTaskSaved($event)"
   />
 }
 
 <!-- Task Delete Confirmation - page-card-on KÍVÜL -->
-@if (showTaskDeleteConfirm()) {
+@if (printActions.showTaskDeleteConfirm()) {
   <app-confirm-dialog
     title="Feladat törlése"
-    [message]="'Biztosan törölni szeretnéd a \'' + (deletingTask()?.title ?? '') + '\' feladatot?'"
+    [message]="'Biztosan törölni szeretnéd a \'' + (printActions.deletingTask()?.title ?? '') + '\' feladatot?'"
     confirmText="Törlés"
     (resultEvent)="onTaskDeleteResult($event)"
   />

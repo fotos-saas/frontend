@@ -77,7 +77,7 @@ export class TeacherPhotoChooserDialogComponent {
   );
   lightboxIndex = signal(-1);
 
-  openLightbox(photo: LinkedGroupPhoto, event: MouseEvent): void {
+  openLightbox(photo: LinkedGroupPhoto, event: Event): void {
     event.stopPropagation();
     const idx = this.lightboxMedia().findIndex(m => m.id === photo.mediaId);
     if (idx >= 0) this.lightboxIndex.set(idx);

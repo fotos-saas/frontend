@@ -6,7 +6,6 @@ import { ProjectListComponent } from './project-list.component';
 import { LoggerService } from '@core/services/logger.service';
 import { MarketerService } from '../../services/marketer.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('ProjectListComponent', () => {
   let component: ProjectListComponent;

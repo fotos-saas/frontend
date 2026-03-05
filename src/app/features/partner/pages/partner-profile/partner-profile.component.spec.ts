@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { PartnerProfileComponent } from './partner-profile.component';
-import { FormBuilder } from '@angular/forms';
 import { PartnerProfileService } from '../../services/partner-profile.service';
 import { AuthService } from '@core/services/auth.service';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';

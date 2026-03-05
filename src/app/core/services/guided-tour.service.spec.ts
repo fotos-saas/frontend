@@ -14,9 +14,9 @@ vi.mock('../../shared/components/guided-tour/guided-tour-filter.util', () => ({
 describe('GuidedTourService', () => {
   let service: GuidedTourService;
 
-  const createTour = (id = 'test-tour', steps: Partial<TourStep>[] = [{ title: 'Step 1', content: 'Content 1' }]): Tour => ({
+  const createTour = (id = 'test-tour', steps: Partial<TourStep>[] = [{ title: 'Step 1', description: 'Content 1' }]): Tour => ({
     id,
-    title: 'Test Tour',
+    name: 'Test Tour',
     steps: steps as TourStep[],
   });
 
@@ -43,8 +43,8 @@ describe('GuidedTourService', () => {
     it('következő lépésre lép', () => {
       vi.useFakeTimers();
       service.start(createTour('t', [
-        { title: 'S1', content: 'C1' } as TourStep,
-        { title: 'S2', content: 'C2' } as TourStep,
+        { title: 'S1', description: 'C1' } as TourStep,
+        { title: 'S2', description: 'C2' } as TourStep,
       ]));
 
       service.next();
@@ -80,8 +80,8 @@ describe('GuidedTourService', () => {
   describe('computed signals', () => {
     it('stepCounter helyes formátum', () => {
       service.start(createTour('t', [
-        { title: 'S1', content: 'C1' } as TourStep,
-        { title: 'S2', content: 'C2' } as TourStep,
+        { title: 'S1', description: 'C1' } as TourStep,
+        { title: 'S2', description: 'C2' } as TourStep,
       ]));
       expect(service.stepCounter()).toBe('1/2');
     });

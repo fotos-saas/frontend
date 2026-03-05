@@ -5,7 +5,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { WorkflowListComponent } from './workflow-list.component';
 import { PartnerWorkflowService } from '../../services/partner-workflow.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('WorkflowListComponent', () => {
   let component: WorkflowListComponent;

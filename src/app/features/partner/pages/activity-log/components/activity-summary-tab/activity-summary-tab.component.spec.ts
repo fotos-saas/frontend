@@ -7,7 +7,6 @@ import { PartnerActivityService } from '../../../../services/partner-activity.se
 import { TeamService } from '../../../../services/team.service';
 import { Router } from '@angular/router';
 import { LoggerService } from '../../../../../../core/services/logger.service';
-import { of } from 'rxjs';
 
 describe('ActivitySummaryTabComponent', () => {
   let component: ActivitySummaryTabComponent;

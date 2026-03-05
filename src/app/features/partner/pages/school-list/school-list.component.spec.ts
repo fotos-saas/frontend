@@ -8,7 +8,6 @@ import { PartnerSchoolService } from '../../services/partner-school.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../../core/services/toast.service';
 import { GuidedTourService } from '../../../../core/services/guided-tour.service';
-import { of } from 'rxjs';
 
 describe('PartnerSchoolListComponent', () => {
   let component: PartnerSchoolListComponent;

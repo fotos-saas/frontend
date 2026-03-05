@@ -48,7 +48,7 @@ describe('AuthGuard', () => {
   });
 
   /** Segédfüggvény: functional guard futtatása injection context-ben */
-  function runGuard(): boolean | Observable<boolean> {
+  function runGuard() {
     return TestBed.runInInjectionContext(() => authGuard(mockRoute, mockState));
   }
 

@@ -32,23 +32,26 @@ describe('PhotoSelectionComponent', () => {
   const mockProject = {
     id: 1,
     name: 'Tesztprojekt',
-    hasGallery: true,
-    tabloGalleryId: 100,
+    schoolName: null,
+    className: null,
+    classYear: null,
   };
 
   const mockStepData: StepData = {
     current_step: 'claiming' as WorkflowStep,
     visible_photos: [
-      { id: 1, url: '/photo1.jpg', thumbUrl: '/thumb1.jpg', originalName: 'photo1.jpg', isSelected: false },
-      { id: 2, url: '/photo2.jpg', thumbUrl: '/thumb2.jpg', originalName: 'photo2.jpg', isSelected: true },
+      { id: 1, url: '/photo1.jpg', thumbnailUrl: '/thumb1.jpg', filename: 'photo1.jpg' },
+      { id: 2, url: '/photo2.jpg', thumbnailUrl: '/thumb2.jpg', filename: 'photo2.jpg' },
     ],
     selected_photos: [2],
     step_metadata: {
       allow_multiple: true,
       max_selection: 5,
+      description: 'Jelöld ki az összes képet, amelyen te szerepelsz.',
     },
-    workflow_completed: false,
-    is_finalized: false,
+    album_id: 1,
+    progress: null,
+    work_session: { id: 1, max_retouch_photos: null },
   };
 
   beforeEach(() => {

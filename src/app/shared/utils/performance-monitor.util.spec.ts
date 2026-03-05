@@ -75,7 +75,7 @@ describe('performance-monitor.util', () => {
 
     it('should return metrics when performance.memory is available', () => {
       // Mock performance.memory
-      const originalMemory = (performance as unknown as Record<string, unknown>).memory;
+      const originalMemory = (performance as unknown as Record<string, unknown>)['memory'];
       Object.defineProperty(performance, 'memory', {
         value: {
           usedJSHeapSize: 10 * 1024 * 1024,
@@ -95,7 +95,7 @@ describe('performance-monitor.util', () => {
 
       // Cleanup
       if (originalMemory === undefined) {
-        delete (performance as unknown as Record<string, unknown>).memory;
+        delete (performance as unknown as Record<string, unknown>)['memory'];
       } else {
         Object.defineProperty(performance, 'memory', {
           value: originalMemory,

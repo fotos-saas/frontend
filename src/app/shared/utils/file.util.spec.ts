@@ -16,7 +16,7 @@ describe('file.util', () => {
         download: '',
         click: vi.fn(),
       };
-      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as unknown as HTMLAnchorElement);
+      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as never);
 
       const blob = new Blob(['teszt'], { type: 'text/plain' });
       saveFile(blob, 'teszt.txt');

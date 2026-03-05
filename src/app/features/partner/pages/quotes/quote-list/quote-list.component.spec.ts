@@ -5,7 +5,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { QuoteListComponent } from './quote-list.component';
 import { QuoteListActionsService } from './quote-list-actions.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('QuoteListComponent', () => {
   let component: QuoteListComponent;

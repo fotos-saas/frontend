@@ -6,7 +6,6 @@ import { SubscribersListComponent } from './subscribers-list.component';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { Router } from '@angular/router';
 import { PlansService } from '../../../../shared/services/plans.service';
-import { of } from 'rxjs';
 
 describe('SubscribersListComponent', () => {
   let component: SubscribersListComponent;

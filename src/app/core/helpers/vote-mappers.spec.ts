@@ -66,6 +66,9 @@ describe('vote-mappers', () => {
       const apiOption: ApiPollOptionResponse = {
         id: 2,
         label: 'Option 2',
+        description: null,
+        image_url: null,
+        template_id: null,
         votes_count: 0,
         percentage: 0
       };
@@ -103,7 +106,7 @@ describe('vote-mappers', () => {
         unique_voters: 8,
         options_count: 3,
         options: [
-          { id: 1, label: 'Opt 1', votes_count: 5, percentage: 50 }
+          { id: 1, label: 'Opt 1', description: null, image_url: null, template_id: null, votes_count: 5, percentage: 50 }
         ],
         participation_rate: 80,
         created_at: '2025-01-01T10:00:00Z'
@@ -138,6 +141,9 @@ describe('vote-mappers', () => {
       const apiPoll: ApiPollResponse = {
         id: 2,
         title: 'Empty Poll',
+        description: null,
+        cover_image_url: null,
+        close_at: null,
         type: 'template',
         is_active: true,
         is_multiple_choice: false,
@@ -173,8 +179,8 @@ describe('vote-mappers', () => {
         unique_voters: 15,
         participation_rate: 75,
         options: [
-          { id: 1, label: 'Winner', votes_count: 12, percentage: 60 },
-          { id: 2, label: 'Runner-up', votes_count: 8, percentage: 40 }
+          { id: 1, label: 'Winner', description: null, image_url: null, template_id: null, votes_count: 12, percentage: 60 },
+          { id: 2, label: 'Runner-up', description: null, image_url: null, template_id: null, votes_count: 8, percentage: 40 }
         ]
       };
 

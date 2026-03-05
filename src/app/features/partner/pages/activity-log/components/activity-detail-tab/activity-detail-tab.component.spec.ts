@@ -6,7 +6,6 @@ import { ActivityDetailTabComponent } from './activity-detail-tab.component';
 import { PartnerActivityService } from '../../../../services/partner-activity.service';
 import { PartnerService } from '../../../../services/partner.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('ActivityDetailTabComponent', () => {
   let component: ActivityDetailTabComponent;

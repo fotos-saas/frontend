@@ -305,7 +305,7 @@ describe('TabloStorageSessionService', () => {
       const call = crudSpy.setItem.mock.calls.find(
         (c: string[]) => c[0] === 'tablo:sessions'
       );
-      const saved = JSON.parse(call[1]);
+      const saved = JSON.parse(call![1]);
       expect(saved).toHaveLength(1);
       expect(saved[0].userName).toBe('Nagy Béla');
     });
@@ -317,7 +317,7 @@ describe('TabloStorageSessionService', () => {
       const call = crudSpy.setItem.mock.calls.find(
         (c: string[]) => c[0] === 'tablo:sessions'
       );
-      const saved = JSON.parse(call[1]);
+      const saved = JSON.parse(call![1]);
       expect(saved).toHaveLength(0);
     });
 
@@ -328,7 +328,7 @@ describe('TabloStorageSessionService', () => {
       const call = crudSpy.setItem.mock.calls.find(
         (c: string[]) => c[0] === 'tablo:sessions'
       );
-      const saved = JSON.parse(call[1]);
+      const saved = JSON.parse(call![1]);
       expect(new Date(saved[0].lastUsed).getTime()).toBeGreaterThan(
         new Date('2025-01-01T00:00:00.000Z').getTime()
       );
@@ -341,7 +341,7 @@ describe('TabloStorageSessionService', () => {
       const call = crudSpy.setItem.mock.calls.find(
         (c: string[]) => c[0] === 'tablo:sessions'
       );
-      const saved = JSON.parse(call[1]);
+      const saved = JSON.parse(call![1]);
       expect(saved[0].userName).toBe('Új Név');
     });
 

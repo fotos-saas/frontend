@@ -55,11 +55,11 @@ describe('ForumDiscussionService', () => {
     });
 
     it('szűrőket átadja paraméterként', () => {
-      service.loadDiscussions({ search: 'test', templateId: 5, sortBy: 'popular' }).subscribe();
+      service.loadDiscussions({ search: 'test', templateId: 5, sortBy: 'most_posts' }).subscribe();
       const req = httpMock.expectOne((r) => r.url.includes('/discussions'));
       expect(req.request.params.get('search')).toBe('test');
       expect(req.request.params.get('template_id')).toBe('5');
-      expect(req.request.params.get('sort_by')).toBe('popular');
+      expect(req.request.params.get('sort_by')).toBe('most_posts');
       req.flush({ data: [] });
     });
 

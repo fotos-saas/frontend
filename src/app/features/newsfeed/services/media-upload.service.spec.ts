@@ -24,8 +24,8 @@ describe('MediaUploadService', () => {
 
   it('filterRemainingMedia should filter out deleted ids', () => {
     const media = [
-      { id: 1, type: 'image' as const, url: '/a.jpg', thumbnailUrl: '/a_t.jpg' },
-      { id: 2, type: 'image' as const, url: '/b.jpg', thumbnailUrl: '/b_t.jpg' },
+      { id: 1, url: '/a.jpg', fileName: 'a.jpg', isImage: true },
+      { id: 2, url: '/b.jpg', fileName: 'b.jpg', isImage: true },
     ];
     const result = service.filterRemainingMedia(media, [1]);
     expect(result.length).toBe(1);

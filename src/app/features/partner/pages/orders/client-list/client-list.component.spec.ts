@@ -5,7 +5,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { PartnerClientListComponent } from './client-list.component';
 import { PartnerOrdersService } from '../../../services/partner-orders.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('PartnerClientListComponent', () => {
   let component: PartnerClientListComponent;

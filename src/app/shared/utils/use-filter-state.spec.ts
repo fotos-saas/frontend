@@ -469,17 +469,17 @@ describe('useFilterState', () => {
       const api = createFilterState();
       const params = api.apiParams();
 
-      expect(params.search).toBeUndefined();
-      expect(params.sort_by).toBe('created_at');
-      expect(params.sort_dir).toBe('desc');
-      expect(params.page).toBe(1);
+      expect(params['search']).toBeUndefined();
+      expect(params['sort_by']).toBe('created_at');
+      expect(params['sort_dir']).toBe('desc');
+      expect(params['page']).toBe(1);
     });
 
     it('should include search when set', () => {
       const api = createFilterState();
       api.setSearch('teszt');
 
-      expect(api.apiParams().search).toBe('teszt');
+      expect(api.apiParams()['search']).toBe('teszt');
     });
 
     it('should include custom filters', () => {
@@ -488,16 +488,16 @@ describe('useFilterState', () => {
       api.setFilter('city', 'Budapest');
 
       const params = api.apiParams();
-      expect(params.status).toBe('active');
-      expect(params.city).toBe('Budapest');
+      expect(params['status']).toBe('active');
+      expect(params['city']).toBe('Budapest');
     });
 
     it('should not include empty filter values', () => {
       const api = createFilterState();
       const params = api.apiParams();
 
-      expect(params.status).toBeUndefined();
-      expect(params.city).toBeUndefined();
+      expect(params['status']).toBeUndefined();
+      expect(params['city']).toBeUndefined();
     });
 
     it('should convert boolean-like filter values', () => {
@@ -514,10 +514,10 @@ describe('useFilterState', () => {
       });
 
       api.setFilter('status', 'true');
-      expect(api.apiParams().status).toBe(true);
+      expect(api.apiParams()['status']).toBe(true);
 
       api.setFilter('status', 'false');
-      expect(api.apiParams().status).toBe(false);
+      expect(api.apiParams()['status']).toBe(false);
     });
   });
 

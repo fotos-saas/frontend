@@ -7,7 +7,6 @@ import { LoggerService } from '@core/services/logger.service';
 import { ToastService } from '@core/services/toast.service';
 import { PartnerFinalizationService } from '../../services/partner-finalization.service';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
 describe('FinalizationListComponent', () => {
   let component: FinalizationListComponent;

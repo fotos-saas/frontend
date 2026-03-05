@@ -23,8 +23,8 @@ describe('DashboardWrapperComponent', () => {
     };
     const mockDASHBOARD_ROUTE_PREFIX = '/dashboard';
     const mockDASHBOARD_SUBTITLE = 'Test';
-    const mockDASHBOARD_STAT_CARDS = [];
-    const mockDASHBOARD_QUICK_ACTIONS = [];
+    const mockDASHBOARD_STAT_CARDS: never[] = [];
+    const mockDASHBOARD_QUICK_ACTIONS: never[] = [];
 
     await TestBed.configureTestingModule({
       imports: [DashboardWrapperComponent],

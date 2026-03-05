@@ -7,7 +7,6 @@ import { PartnerService } from '../../services/partner.service';
 import { Router } from '@angular/router';
 import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
-import { of } from 'rxjs';
 
 describe('PartnerContactListComponent', () => {
   let component: PartnerContactListComponent;

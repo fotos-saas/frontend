@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { ScheduleCardComponent } from './schedule-card.component';
-import { action } from '@storybook/addon-actions';
+
+const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
 
 /**
  * Schedule Card Stories
@@ -163,13 +164,13 @@ export const DarkModeEmpty: Story = {
     backgrounds: { default: 'dark' },
   },
   decorators: [
-    (story) => ({
+    (story: Record<string, unknown>) => ({
       template: `
         <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem; min-height: 150px; display: flex; align-items: center;">
-          ${story.template}
+          ${story['template']}
         </div>
       `,
-      props: story.props,
+      props: story['props'],
     }),
   ],
 };
@@ -183,13 +184,13 @@ export const DarkModeSelected: Story = {
     backgrounds: { default: 'dark' },
   },
   decorators: [
-    (story) => ({
+    (story: Record<string, unknown>) => ({
       template: `
         <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem; min-height: 150px; display: flex; align-items: center;">
-          ${story.template}
+          ${story['template']}
         </div>
       `,
-      props: story.props,
+      props: story['props'],
     }),
   ],
 };
@@ -310,13 +311,13 @@ export const CustomStatusText: Story = {
 export const Compact: Story = {
   args: WithSelection.args,
   decorators: [
-    (story) => ({
+    (story: Record<string, unknown>) => ({
       template: `
         <div class="schedule-card--compact">
-          ${story.template}
+          ${story['template']}
         </div>
       `,
-      props: story.props,
+      props: story['props'],
     }),
   ],
 };

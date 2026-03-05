@@ -1,5 +1,5 @@
-<div class="expanded-view dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (mouseup)="backdropHandler.onMouseUp($event)">
-  <div class="expanded-view__panel" (mousedown)="$event.stopPropagation()" (mouseup)="$event.stopPropagation()">
+<div class="expanded-view dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="expanded-view__panel" (click)="$event.stopPropagation()">
     <!-- Fejléc -->
     <div class="expanded-view__header">
       <div class="expanded-view__header-left">

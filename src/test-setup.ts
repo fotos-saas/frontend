@@ -36,6 +36,20 @@ export function initializeAngularTesting() {
   hasBootstraped = true;
 }
 
+// jsdom polyfill: window.matchMedia (ElectronService használja a konstruktorban)
+if (typeof window !== 'undefined' && !window.matchMedia) {
+  window.matchMedia = (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }) as MediaQueryList;
+}
+
 // Automatikus inicializálás ha Vitest globals aktív
 if (typeof beforeAll !== 'undefined') {
   beforeAll(() => {

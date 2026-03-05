@@ -30,6 +30,7 @@ import { SortOption } from './components/project-mobile-sort/project-mobile-sort
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 import { ProjectListActionsService } from './project-list-actions.service';
+import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -54,6 +55,7 @@ import { ProjectListActionsService } from './project-list-actions.service';
     ListPaginationComponent,
     CreatePreliminaryModalComponent,
     LinkPreliminaryDialogComponent,
+    ExpandedTeacherViewComponent,
   ],
   providers: [ProjectListActionsService],
   templateUrl: './project-list.component.html',
@@ -273,6 +275,22 @@ export class PartnerProjectListComponent implements OnInit {
     if (this.actions.selectedProjectIds().size > 0) {
       this.actions.clearSelection();
     }
+  }
+
+
+  // Bővített tanári nézet
+  showExpandedTeacherView = signal(false);
+  expandedTeacherViewProjectId = signal<number | null>(null);
+
+  openExpandedTeacherView(data: { projectId: number }): void {
+    this.actions.closeMissingModal();
+    this.expandedTeacherViewProjectId.set(data.projectId);
+    this.showExpandedTeacherView.set(true);
+  }
+
+  closeExpandedTeacherView(): void {
+    this.showExpandedTeacherView.set(false);
+    this.loadProjects();
   }
 
   // Order Data Dialog

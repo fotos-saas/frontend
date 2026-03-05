@@ -11,6 +11,19 @@
   (closeEvent)="close.emit()"
 >
   <div dialogBody>
+    <!-- Bővített nézet gomb (fejléc mellé pozícionálva) -->
+    @if (typeFilter() === 'teacher') {
+      <button
+        type="button"
+        class="expanded-view-btn"
+        (click)="openExpandedView()"
+        matTooltip="Osztályok közötti tanár összehasonlítás"
+      >
+        <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
+        <span>Bővített nézet</span>
+      </button>
+    }
+
     <!-- Rövid projektnév (csak mobilon) -->
     <p class="mobile-desc">{{ shortProjectName() }}</p>
 
@@ -458,3 +471,4 @@
     (savedEvent)="actions.onPhotoChosen(loadPersons.bind(this, true))"
   />
 }
+

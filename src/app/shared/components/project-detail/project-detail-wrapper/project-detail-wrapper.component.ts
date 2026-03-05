@@ -56,6 +56,7 @@ import { ProjectDetailWrapperFacadeService } from './project-detail-wrapper-faca
 import { ProjectDetailDynamicDialogsService } from './project-detail-dynamic-dialogs.service';
 import { ProjectDetailPrintActionsService } from './project-detail-print-actions.service';
 import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persistence.util';
+import { ExpandedTeacherViewComponent } from '../../../../features/partner/components/expanded-teacher-view/expanded-teacher-view.component';
 
 /**
  * Generikus Project Detail Wrapper - kozos smart wrapper komponens.
@@ -84,6 +85,7 @@ import { initTabFromFragment, setTabFragment } from '../../../utils/tab-persiste
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
     ProjectTagManagerComponent,
+    ExpandedTeacherViewComponent,
   ],
   templateUrl: './project-detail-wrapper.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -271,6 +273,15 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   // === DYNAMIC DIALOG DELEGATIONS ===
 
+  // Bővített tanári nézet
+  showExpandedTeacherView = signal(false);
+  expandedTeacherViewProjectId = signal<number | null>(null);
+
+  closeExpandedTeacherView(): void {
+    this.showExpandedTeacherView.set(false);
+    this.facade.loadProject(this.facade.projectData()!.id, this.mapToDetailData());
+  }
+
   openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): void {
     const container = this.personsModalContainer();
     if (!container) return;
@@ -279,6 +290,10 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       typeFilter,
       (album) => this.openUploadWizardDialog(album),
       (type) => this.openAddPersonsDialog(type),
+      (data) => {
+        this.expandedTeacherViewProjectId.set(data.projectId);
+        this.showExpandedTeacherView.set(true);
+      },
     );
   }
 

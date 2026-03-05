@@ -49,6 +49,7 @@ export class PersonsModalComponent implements OnInit {
   readonly close = output<void>();
   readonly openUploadWizard = output<TypeFilter>();
   readonly addPersonsRequested = output<'student' | 'teacher'>();
+  readonly expandedViewRequested = output<{ projectId: number }>();
 
   private readonly partnerService = inject(PartnerService);
   private readonly projectService = inject(PartnerProjectService);
@@ -276,5 +277,12 @@ export class PersonsModalComponent implements OnInit {
     } else {
       this.openLightbox(person);
     }
+  }
+
+  // --- Bővített tanári nézet ---
+
+  openExpandedView(): void {
+    this.expandedViewRequested.emit({ projectId: this.projectId() });
+    this.close.emit();
   }
 }

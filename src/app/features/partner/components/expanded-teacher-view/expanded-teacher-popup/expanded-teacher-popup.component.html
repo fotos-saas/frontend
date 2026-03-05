@@ -1,0 +1,169 @@
+<div class="popup-backdrop" (click)="onClose()"></div>
+
+<div class="popup-panel">
+  <div class="popup-header">
+    <h3 class="popup-title">{{ teacherName() }} — Előfordulások</h3>
+    <button class="popup-close" (click)="onClose()">
+      <lucide-icon [name]="ICONS.X" [size]="18" />
+    </button>
+  </div>
+
+  <div class="popup-body">
+    @if (hasNameVariants()) {
+      <div class="popup-warning">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+        <span>Eltérő névváltozatok találhatóak!</span>
+      </div>
+    }
+
+    @if (uploadedPhotoMatch(); as photo) {
+      <div class="popup-archive">
+        <div class="popup-archive__photo">
+          <img [src]="photo.thumbUrl" [alt]="photo.filename" />
+        </div>
+        <div class="popup-archive__info">
+          <span class="popup-archive__label">Feltöltött fotó egyezés</span>
+          <span class="popup-archive__name">{{ photo.filename }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Archív fotók szekció -->
+    @if (archivePhotos().length > 0) {
+      <div class="popup-section">
+        <div class="popup-section__header">
+          <span class="popup-section__title">Archív fotók</span>
+          <button class="popup-section__action" (click)="openPhotoChooser()">
+            Összes fotó
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="14" />
+          </button>
+        </div>
+        <div class="popup-photo-strip">
+          @for (photo of archivePhotos().slice(0, 5); track photo.mediaId) {
+            <div
+              class="popup-photo-strip__item"
+              [class.popup-photo-strip__item--active]="photo.isActive"
+              [matTooltip]="photo.schoolName ?? photo.teacherName"
+            >
+              @if (photo.thumbUrl) {
+                <img [src]="photo.thumbUrl" [alt]="photo.teacherName" />
+              } @else {
+                <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
+              }
+            </div>
+          }
+          @if (archivePhotos().length > 5) {
+            <div class="popup-photo-strip__more" (click)="openPhotoChooser()">
+              +{{ archivePhotos().length - 5 }}
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (loadingPhotos()) {
+      <div class="popup-section">
+        <div class="popup-section__header">
+          <span class="popup-section__title">Archív fotók</span>
+        </div>
+        <div class="popup-photo-strip">
+          <div class="popup-photo-strip__skeleton"></div>
+          <div class="popup-photo-strip__skeleton"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Előfordulások szekció -->
+    <div class="popup-section">
+      <div class="popup-section__header">
+        <span class="popup-section__title">Előfordulások</span>
+      </div>
+      <div class="popup-list">
+        @for (item of occurrences(); track item.personId) {
+          <div
+            class="popup-item"
+            [class.popup-item--variant]="hasNameVariants() && item.name !== teacherName()"
+          >
+            <div class="popup-item__photo">
+              @if (item.hasPhoto && item.photoThumbUrl) {
+                <img [src]="item.photoThumbUrl" [alt]="item.name" />
+              } @else {
+                <div class="popup-item__no-photo">
+                  <lucide-icon [name]="ICONS.USER" [size]="16" />
+                </div>
+              }
+            </div>
+            <div class="popup-item__info">
+              <span class="popup-item__name" [class.popup-item__name--diff]="item.name !== teacherName()">
+                {{ item.name }}
+              </span>
+              <span class="popup-item__class">{{ item.schoolName }} — {{ item.className }}</span>
+            </div>
+            <div class="popup-item__actions">
+              @if (item.hasOverride) {
+                <span class="popup-item__badge">Felülírva</span>
+                <button
+                  class="popup-item__action-btn popup-item__action-btn--danger"
+                  matTooltip="Override eltávolítás"
+                  (click)="removeOverride(item.personId)"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="14" />
+                </button>
+              } @else {
+                @if (item.hasPhoto) {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="16" class="popup-item__check" />
+                } @else {
+                  <lucide-icon [name]="ICONS.X" [size]="16" class="popup-item__missing" />
+                }
+                @if (activeArchivePhoto()) {
+                  <button
+                    class="popup-item__action-btn"
+                    matTooltip="Archív fotó alkalmazása"
+                    (click)="applyOverride(item.personId)"
+                  >
+                    <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Műveletek szekció -->
+    @if (canLink() || (activeArchivePhoto() && occurrences().length > 1)) {
+      <div class="popup-section popup-section--actions">
+        <div class="popup-section__header">
+          <span class="popup-section__title">Műveletek</span>
+        </div>
+        <div class="popup-actions">
+          @if (canLink()) {
+            <button class="popup-actions__btn" [disabled]="linking()" (click)="linkTeachers()">
+              <lucide-icon [name]="ICONS.LINK" [size]="16" />
+              @if (linking()) {
+                Összekapcsolás...
+              } @else {
+                Tanárok összekapcsolása
+              }
+            </button>
+          }
+          @if (activeArchivePhoto() && occurrences().length > 1) {
+            <button class="popup-actions__btn" (click)="applyArchiveToAll()">
+              <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="16" />
+              Archív fotó mindegyikhez
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Fotóválasztó dialog -->
+@if (showPhotoChooser() && photoChooserMode()) {
+  <app-teacher-photo-chooser-dialog
+    [photos]="archivePhotos()"
+    [mode]="photoChooserMode()!"
+    (closeEvent)="showPhotoChooser.set(false)"
+    (savedEvent)="onPhotoChooserSaved()"
+  />
+}

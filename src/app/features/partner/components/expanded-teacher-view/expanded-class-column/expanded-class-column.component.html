@@ -1,0 +1,27 @@
+<div class="class-column">
+  <div class="class-column__header">
+    <span class="class-column__school">{{ classData().schoolName }}</span>
+    <span class="class-column__name">{{ classData().className }}</span>
+    <span class="class-column__count">({{ classData().teachers.length }})</span>
+  </div>
+
+  <div class="class-column__list" #listRef>
+    @for (teacher of classData().teachers; track teacher.personId) {
+      <app-expanded-teacher-card
+        [attr.data-person-id]="teacher.personId"
+        [teacher]="teacher"
+        [isHighlighted]="isHighlighted(teacher)"
+        [highlightType]="getHighlightType(teacher)"
+        (hover)="onTeacherHover($event)"
+        (select)="onTeacherSelect($event)"
+        (drop)="onTeacherDrop($event)"
+        (removeOverride)="onRemoveOverride($event)"
+      />
+    } @empty {
+      <div class="class-column__empty">
+        <lucide-icon [name]="ICONS.USER" [size]="20" />
+        <span>Nincs tanár</span>
+      </div>
+    }
+  </div>
+</div>

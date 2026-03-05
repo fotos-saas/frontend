@@ -214,6 +214,16 @@
     [projectName]="actions.selectedProject()!.name"
     (close)="actions.closeMissingModal()"
     (openUploadWizard)="actions.openUploadWizardFromMissing($event)"
+    (expandedViewRequested)="openExpandedTeacherView($event)"
+  />
+}
+
+<!-- Bővített tanári nézet -->
+@if (showExpandedTeacherView() && expandedTeacherViewProjectId()) {
+  <app-expanded-teacher-view
+    [projectId]="expandedTeacherViewProjectId()!"
+    (close)="closeExpandedTeacherView()"
+    (teacherUpdated)="closeExpandedTeacherView()"
   />
 }
 

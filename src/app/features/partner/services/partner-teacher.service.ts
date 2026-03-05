@@ -23,6 +23,7 @@ import {
   TeacherUploadHistoryResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
+import { ExpandedViewResponse, ExpandedUploadedPhoto, SyncResult } from '../components/expanded-teacher-view/expanded-teacher-view.types';
 import {
   ArchiveService,
   ArchiveBySchoolResponse,
@@ -44,6 +45,67 @@ import {
 export class PartnerTeacherService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/teachers`;
+
+  getExpandedView(projectId: number): Observable<ExpandedViewResponse> {
+    const params = buildHttpParams({ project_id: projectId });
+    return this.http.get<ExpandedViewResponse>(`${this.baseUrl}/expanded-view`, { params });
+  }
+
+  addProjectToSession(sessionId: number, projectId: number): Observable<ExpandedViewResponse> {
+    return this.http.post<ExpandedViewResponse>(`${this.baseUrl}/expanded-view/add-project`, {
+      session_id: sessionId,
+      project_id: projectId,
+    });
+  }
+
+  removeProjectFromSession(sessionId: number, projectId: number): Observable<ExpandedViewResponse> {
+    return this.http.request<ExpandedViewResponse>('DELETE', `${this.baseUrl}/expanded-view/remove-project`, {
+      body: { session_id: sessionId, project_id: projectId },
+    });
+  }
+
+  uploadPhotosToSession(sessionId: number, photos: File[]): Observable<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }> {
+    const formData = new FormData();
+    formData.append('session_id', String(sessionId));
+    for (const photo of photos) {
+      formData.append('photos[]', photo);
+    }
+    return this.http.post<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }>(
+      `${this.baseUrl}/expanded-view/upload-photos`,
+      formData,
+    );
+  }
+
+  deleteSessionPhoto(photoId: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.baseUrl}/expanded-view/photos/${photoId}`);
+  }
+
+  syncSessionPhotos(sessionId: number): Observable<{ success: boolean; message: string; data: SyncResult }> {
+    return this.http.post<{ success: boolean; message: string; data: SyncResult }>(`${this.baseUrl}/expanded-view/sync`, {
+      session_id: sessionId,
+    });
+  }
+
+  assignPhotoToTeacher(sessionId: number, photoId: number, personIds: number[]): Observable<{ success: boolean; data: { personId: number; photoThumbUrl: string; hasOverride: boolean }[] }> {
+    return this.http.post<{ success: boolean; data: { personId: number; photoThumbUrl: string; hasOverride: boolean }[] }>(
+      `${this.baseUrl}/expanded-view/assign-photo`,
+      { session_id: sessionId, photo_id: photoId, person_ids: personIds },
+    );
+  }
+
+  setOverridePhoto(projectId: number, personId: number, mediaId: number): Observable<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }> {
+    return this.http.patch<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }>(
+      `${environment.apiUrl}/partner/projects/${projectId}/persons/${personId}/override-photo`,
+      { photo_id: mediaId },
+    );
+  }
+
+  removeOverridePhoto(projectId: number, personId: number): Observable<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }> {
+    return this.http.patch<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }>(
+      `${environment.apiUrl}/partner/projects/${projectId}/persons/${personId}/override-photo`,
+      { photo_id: null },
+    );
+  }
 
   getGroupMembers(linkedGroup: string): Observable<TeacherListItem[]> {
     return this.http.get<TeacherListItem[]>(`${this.baseUrl}/group/${linkedGroup}`);

@@ -164,6 +164,17 @@
 <!-- Order Wizard Dialog container -->
 <ng-container #orderWizardContainer></ng-container>
 
+<!-- Bővített tanári nézet dialógus -->
+@if (showExpandedTeacherView() && expandedTeacherViewProjectId()) {
+  @defer {
+    <app-expanded-teacher-view
+      [projectId]="expandedTeacherViewProjectId()!"
+      (close)="closeExpandedTeacherView()"
+      (teacherUpdated)="closeExpandedTeacherView()"
+    />
+  }
+}
+
 <!-- Delete User Confirmation - page-card-on KÍVÜL -->
 @if (facade.showDeleteUserConfirm()) {
   <app-confirm-dialog

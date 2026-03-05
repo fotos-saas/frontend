@@ -1,0 +1,51 @@
+<div
+  class="teacher-card"
+  [class.teacher-card--highlighted]="isHighlighted()"
+  [class.teacher-card--exact]="highlightType() === 'exact'"
+  [class.teacher-card--similar]="highlightType() === 'similar'"
+  [class.teacher-card--missing]="highlightType() === 'missing'"
+  [class.teacher-card--drop-target]="isDragTarget()"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  (click)="onClick()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave()"
+  (drop)="onDropPhoto($event)"
+>
+  <div class="teacher-card__photo">
+    @if (teacher().hasPhoto && teacher().photoThumbUrl) {
+      <img
+        [src]="teacher().photoThumbUrl"
+        [alt]="teacher().name"
+        class="teacher-card__img"
+        loading="lazy"
+      />
+    } @else {
+      <div class="teacher-card__placeholder">
+        <span>{{ initials() }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="teacher-card__info">
+    <span class="teacher-card__name">
+      {{ teacher().name }}
+    </span>
+    @if (teacher().title) {
+      <span class="teacher-card__title">{{ teacher().title }}</span>
+    }
+  </div>
+
+  @if (teacher().hasOverride) {
+    <span class="teacher-card__override-icon" matTooltip="Felülírt fotó">
+      <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+    </span>
+    <button
+      class="teacher-card__override-btn"
+      matTooltip="Egyedi fotó eltávolítása"
+      (click)="onRemoveOverride($event)"
+    >
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  }
+</div>

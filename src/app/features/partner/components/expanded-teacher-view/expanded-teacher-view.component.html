@@ -1,0 +1,156 @@
+<div class="expanded-view dialog-backdrop" (mousedown)="backdropHandler.onMouseDown($event)" (click)="backdropHandler.onClick($event)">
+  <div class="expanded-view__panel" (click)="$event.stopPropagation()">
+    <!-- Fejléc -->
+    <div class="expanded-view__header">
+      <div class="expanded-view__header-left">
+        <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="20" class="expanded-view__header-icon" />
+        <h2 class="expanded-view__title">Bővített nézet</h2>
+      </div>
+      <button class="expanded-view__close" (click)="close.emit()" matTooltip="Bezárás (Esc)">
+        <lucide-icon [name]="ICONS.X" [size]="20" />
+      </button>
+    </div>
+
+    <!-- Osztály chip-ek -->
+    <div class="expanded-view__schools">
+      <span class="expanded-view__schools-label">Osztályok:</span>
+      @for (project of projects(); track project.projectId) {
+        <div class="expanded-view__chip" [class.expanded-view__chip--source]="project.isSource">
+          <span>{{ project.schoolName }} {{ project.className }}</span>
+          @if (!project.isSource) {
+            <button class="expanded-view__chip-remove" (click)="removeProject(project.projectId)">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          }
+        </div>
+      }
+      <div class="expanded-view__add-school" (click)="$event.stopPropagation()">
+        <button class="expanded-view__add-btn" (click)="toggleDropdown(); $event.stopPropagation()" matTooltip="Osztály hozzáadása">
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+          <span>Hozzáadás</span>
+        </button>
+        @if (showDropdown) {
+          <div class="expanded-view__dropdown" (click)="$event.stopPropagation()">
+            <div class="expanded-view__dropdown-search">
+              <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="expanded-view__dropdown-search-icon" />
+              <input
+                #dropdownSearchInput
+                type="text"
+                class="expanded-view__dropdown-search-input"
+                placeholder="Osztály keresése..."
+                [ngModel]="dropdownSearch()"
+                (ngModelChange)="dropdownSearch.set($event)"
+              />
+            </div>
+            <div class="expanded-view__dropdown-list">
+              @if (groupedAvailableProjects().sameSchool.length > 0) {
+                <div class="expanded-view__dropdown-group-header">Azonos iskola</div>
+                @for (project of groupedAvailableProjects().sameSchool; track project.projectId) {
+                  <button class="expanded-view__dropdown-item" (click)="addProject(project)">
+                    {{ project.schoolName }} {{ project.className }}
+                  </button>
+                }
+              }
+              @if (groupedAvailableProjects().otherSchool.length > 0) {
+                <div class="expanded-view__dropdown-group-header">Más iskolák</div>
+                @for (project of groupedAvailableProjects().otherSchool; track project.projectId) {
+                  <button class="expanded-view__dropdown-item" (click)="addProject(project)">
+                    {{ project.schoolName }} {{ project.className }}
+                  </button>
+                }
+              }
+              @if (groupedAvailableProjects().sameSchool.length === 0 && groupedAvailableProjects().otherSchool.length === 0) {
+                <div class="expanded-view__dropdown-empty">
+                  {{ dropdownSearch() ? 'Nincs találat' : 'Nincs több osztály' }}
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="expanded-view__loading">
+        <div class="expanded-view__spinner"></div>
+        <span>Betöltés...</span>
+      </div>
+    } @else {
+      <!-- Feltöltési terület -->
+      <div class="expanded-view__archive">
+        <app-expanded-upload-panel />
+      </div>
+
+      <!-- Osztály oszlopok -->
+      <div class="expanded-view__classes">
+        @for (cls of classes(); track cls.projectId) {
+          @defer (on viewport) {
+            <app-expanded-class-column [classData]="cls" />
+          } @placeholder {
+            <div class="expanded-view__column-placeholder">
+              <span>{{ cls.className }}</span>
+            </div>
+          }
+        } @empty {
+          <div class="expanded-view__empty">
+            <lucide-icon [name]="ICONS.INFO" [size]="24" />
+            <span>Nincs osztály a megadott szűrőkkel</span>
+          </div>
+        }
+      </div>
+
+      <!-- Hasonlóság figyelmeztetés -->
+      @if (hasSimilarityIssues()) {
+        <div class="expanded-view__similarity-warning">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+          <span>{{ similarityGroups().length }} hasonló név-csoport észlelve — hover-elj a tanár kártyákra a részletekért</span>
+        </div>
+      }
+
+      <!-- Jelmagyarázat -->
+      <div class="expanded-view__legend">
+        <span class="expanded-view__legend-title">Jelmagyarázat:</span>
+        <span class="expanded-view__legend-item expanded-view__legend-item--exact">
+          <span class="expanded-view__legend-dot"></span> Egyező név
+        </span>
+        <span class="expanded-view__legend-item expanded-view__legend-item--similar">
+          <span class="expanded-view__legend-dot"></span> Hasonló név
+        </span>
+        <span class="expanded-view__legend-item expanded-view__legend-item--missing">
+          <span class="expanded-view__legend-dot"></span> Nincs archívban
+        </span>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Drag & drop választó -->
+@if (dataService.pendingDrop(); as drop) {
+  <div class="drop-choice-overlay">
+    <div class="drop-choice-card">
+      <p class="drop-choice-card__title">Fotó hozzárendelés</p>
+      <p class="drop-choice-card__text">
+        <strong>{{ drop.teacherName }}</strong> {{ drop.allPersonIds.length }} osztályban szerepel.
+      </p>
+      <div class="drop-choice-card__buttons">
+        <button class="drop-choice-card__btn drop-choice-card__btn--primary"
+                (click)="dataService.confirmDrop('all')">
+          Mindegyikhez ({{ drop.allPersonIds.length }})
+        </button>
+        <button class="drop-choice-card__btn"
+                (click)="dataService.confirmDrop('single')">
+          Csak ehhez
+        </button>
+        <button class="drop-choice-card__btn drop-choice-card__btn--cancel"
+                (click)="dataService.cancelDrop()">
+          Mégse
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Popup -->
+@if (selectedPersonId(); as personId) {
+  <app-expanded-teacher-popup [personId]="personId" (close)="closePopup()" />
+}

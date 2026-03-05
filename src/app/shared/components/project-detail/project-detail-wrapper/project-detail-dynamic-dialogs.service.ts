@@ -49,6 +49,7 @@ export class ProjectDetailDynamicDialogsService<T> {
     typeFilter?: 'student' | 'teacher',
     openUploadWizardFn?: (album: 'students' | 'teachers') => void,
     openAddPersonsFn?: (type: 'student' | 'teacher') => void,
+    expandedViewFn?: (data: { projectId: number }) => void,
   ): Promise<void> {
     const projectData = this.getProjectData();
     if (!projectData) return;
@@ -76,6 +77,11 @@ export class ProjectDetailDynamicDialogsService<T> {
     });
     ref.instance.addPersonsRequested.subscribe((type: 'student' | 'teacher') => {
       openAddPersonsFn?.(type);
+    });
+    ref.instance.expandedViewRequested.subscribe((data: { projectId: number }) => {
+      container.clear();
+      this.personsModalRef = null;
+      expandedViewFn?.(data);
     });
   }
 

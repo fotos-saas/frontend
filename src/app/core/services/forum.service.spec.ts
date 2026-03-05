@@ -11,7 +11,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -80,6 +81,8 @@ describe('ForumService', () => {
     editedAt: undefined,
     likesCount: 3,
     hasLiked: false,
+    userReaction: null,
+    reactions: {},
     canEdit: true,
     canDelete: true,
     createdAt: '2024-01-15T11:00:00Z',
@@ -136,9 +139,9 @@ describe('ForumService', () => {
     };
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [
-        ForumService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GuestService, useValue: guestServiceMock }
       ]
     });
@@ -404,10 +407,11 @@ describe('ForumService', () => {
         parentId: 1
       };
 
-      const replyPost: DiscussionPost = {
-        ...mockPost,
+      // API snake_case formátumú válasz
+      const replyApiPost = {
+        ...mockApiPost,
         id: 3,
-        parentId: 1,
+        parent_id: 1,
         content: 'Válasz tartalom'
       };
 
@@ -417,7 +421,7 @@ describe('ForumService', () => {
       // A service parent_id-t (snake_case) küld az API felé
       expect(req.request.body.parent_id).toBe(1);
 
-      req.flush({ data: replyPost });
+      req.flush({ data: replyApiPost });
 
       const post = await createPromise;
       expect(post.parentId).toBe(1);
@@ -428,24 +432,17 @@ describe('ForumService', () => {
 
   describe('updatePost', () => {
     it('should update post successfully', async () => {
-      const updatedPost: DiscussionPost = {
-        ...mockPost,
-        content: 'Módosított tartalom',
-        isEdited: true,
-        editedAt: '2024-01-15T12:00:00Z'
-      };
-
       const updatePromise = firstValueFrom(service.updatePost(1, 'Módosított tartalom'));
 
       const req = httpMock.expectOne(`${API_BASE}/posts/1`);
       expect(req.request.method).toBe('PUT');
       expect(req.request.body).toEqual({ content: 'Módosított tartalom' });
 
-      req.flush({ data: updatedPost });
+      // A ForumPostService.updatePost() { media: PostMedia[] } objektumot ad vissza
+      req.flush({ success: true, data: { media: [] }, message: 'Hozzászólás módosítva!' });
 
-      const post = await updatePromise;
-      expect(post.content).toBe('Módosított tartalom');
-      expect(post.isEdited).toBe(true);
+      const result = await updatePromise;
+      expect(result.media).toEqual([]);
     });
 
     it('should handle edit time expired error', async () => {

@@ -521,13 +521,13 @@ describe('TemplateChooserService', () => {
 
   describe('Loading State', () => {
     it('should set loading state during template fetch', async () => {
-      const loadingStates: boolean[] = [];
-      const subscription = service.loading$.subscribe(state => loadingStates.push(state));
+      // loading signal-t kozvetlenul ellenorizzuk (toObservable async, signal szinkron)
+      expect(service.loading()).toBe(false);
 
       const templatesPromise = firstValueFrom(service.loadTemplates());
 
-      // Loading should be true during fetch
-      expect(loadingStates).toContain(true);
+      // Loading should be true during fetch (signal is synchronous)
+      expect(service.loading()).toBe(true);
 
       const req = httpMock.expectOne(request => request.url === API_BASE);
       req.flush({
@@ -537,10 +537,9 @@ describe('TemplateChooserService', () => {
       });
 
       await templatesPromise;
-      subscription.unsubscribe();
 
       // Loading should be false after fetch
-      expect(loadingStates[loadingStates.length - 1]).toBe(false);
+      expect(service.loading()).toBe(false);
     });
   });
 });

@@ -2,6 +2,7 @@
 
 import { defineConfig } from 'vite';
 import angular from '@analogjs/vite-plugin-angular';
+import { resolve } from 'node:path';
 
 /**
  * Vite + Vitest konfiguráció Angular projekthez
@@ -11,6 +12,14 @@ import angular from '@analogjs/vite-plugin-angular';
  */
 export default defineConfig({
   plugins: [angular()],
+  resolve: {
+    alias: {
+      '@shared': resolve(__dirname, 'src/app/shared'),
+      '@core': resolve(__dirname, 'src/app/core'),
+      '@features': resolve(__dirname, 'src/app/features'),
+      '@env': resolve(__dirname, 'src/environments'),
+    },
+  },
   test: {
     // Vitest globális API automatikus importja (describe, it, expect, etc.)
     globals: true,

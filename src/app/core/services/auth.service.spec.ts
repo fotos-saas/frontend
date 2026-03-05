@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { AuthService, type LoginResponse } from './auth.service';
-import { TabloStorageService } from './tablo-storage.service';
 import { TabloAuthService } from './auth/tablo-auth.service';
 
 /**
@@ -17,7 +17,6 @@ import { TabloAuthService } from './auth/tablo-auth.service';
 describe('AuthService - Guest User System', () => {
   let service: AuthService;
   let tabloAuthService: TabloAuthService;
-  let storageService: TabloStorageService;
 
   const mockProject = {
     id: 1,
@@ -40,13 +39,15 @@ describe('AuthService - Guest User System', () => {
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      providers: [AuthService, TabloStorageService, TabloAuthService],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
 
     service = TestBed.inject(AuthService);
     tabloAuthService = TestBed.inject(TabloAuthService);
-    storageService = TestBed.inject(TabloStorageService);
   });
 
   // ============ isGuest() Signal Tests ============

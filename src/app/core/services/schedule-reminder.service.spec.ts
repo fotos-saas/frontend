@@ -1,17 +1,46 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { Injectable } from '@angular/core';
 import { ScheduleReminderService } from './schedule-reminder.service';
+import { TabloStorageService } from './tablo-storage.service';
+import { TabloStorageCrudService } from './tablo-storage-crud.service';
+import { TabloStorageSessionService } from './tablo-storage-session.service';
+import { TabloStorageUiService } from './tablo-storage-ui.service';
+import { LoggerService } from './logger.service';
+
+/**
+ * Teszt subclass: eagerly init-eli a storage-ot (NG0203 workaround)
+ */
+@Injectable()
+class TestableScheduleReminderService extends ScheduleReminderService {
+  constructor() {
+    super();
+    // Eager init a storage getter-t az injection context-en belul
+    void this.storage;
+  }
+}
 
 describe('ScheduleReminderService', () => {
   let service: ScheduleReminderService;
   const testProjectId = 123;
 
+  // Actual storage key format: tablo:{projectId}:reminder:{suffix}
+  const dismissedKey = 'tablo:123:reminder:schedule_dismissed_until';
+  const shownKey = 'tablo:123:reminder:schedule_last_shown';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ScheduleReminderService]
+      providers: [
+        { provide: ScheduleReminderService, useClass: TestableScheduleReminderService },
+        TabloStorageService,
+        TabloStorageCrudService,
+        TabloStorageSessionService,
+        TabloStorageUiService,
+        LoggerService,
+      ]
     });
-    service = TestBed.inject(ScheduleReminderService);
     localStorage.clear();
+    service = TestBed.inject(ScheduleReminderService);
   });
 
   afterEach(() => {
@@ -57,9 +86,9 @@ describe('ScheduleReminderService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2025-01-25T10:00:00.000Z'));
 
-      // Set dismissal that expired (pretend it was set earlier)
+      // Set dismissal that expired - use new key format
       localStorage.setItem(
-        'kv:123:schedule_reminder_dismissed_until',
+        dismissedKey,
         '2025-01-20T00:00:00.000Z'
       );
 
@@ -84,9 +113,9 @@ describe('ScheduleReminderService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2025-01-16T10:00:00.000Z'));
 
-      // Set as shown yesterday
+      // Set as shown yesterday - use new key format
       localStorage.setItem(
-        'kv:123:schedule_reminder_last_shown',
+        shownKey,
         '2025-01-15T14:00:00.000Z'
       );
 
@@ -108,13 +137,13 @@ describe('ScheduleReminderService', () => {
     it('should use correct dismissed key format', () => {
       service.setDismissal(testProjectId, 1);
 
-      expect(localStorage.getItem('kv:123:schedule_reminder_dismissed_until')).toBeTruthy();
+      expect(localStorage.getItem(dismissedKey)).toBeTruthy();
     });
 
     it('should use correct shown key format', () => {
       service.markAsShown(testProjectId);
 
-      expect(localStorage.getItem('kv:123:schedule_reminder_last_shown')).toBeTruthy();
+      expect(localStorage.getItem(shownKey)).toBeTruthy();
     });
   });
 
@@ -128,8 +157,8 @@ describe('ScheduleReminderService', () => {
 
       service.clearReminder(testProjectId);
 
-      expect(localStorage.getItem('kv:123:schedule_reminder_dismissed_until')).toBeNull();
-      expect(localStorage.getItem('kv:123:schedule_reminder_last_shown')).toBeNull();
+      expect(localStorage.getItem(dismissedKey)).toBeNull();
+      expect(localStorage.getItem(shownKey)).toBeNull();
     });
   });
 });

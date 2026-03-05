@@ -46,10 +46,9 @@ describe('FileUploadService', () => {
         expect(service.attachmentConfig.allowedMimeTypes).toContain('application/x-7z-compressed');
       });
 
-      it('should have magic bytes for ZIP, RAR, and 7Z', () => {
-        expect(service.attachmentConfig.magicBytes).toHaveLength(3);
-        // ZIP magic bytes: 50 4B 03 04
-        expect(service.attachmentConfig.magicBytes![0].bytes).toEqual([0x50, 0x4B, 0x03, 0x04]);
+      it('should not have magic bytes (backend validates)', () => {
+        // attachmentConfig nem tartalmaz magic bytes-ot — túl sok fájltípus, backend validál
+        expect(service.attachmentConfig.magicBytes).toBeUndefined();
       });
     });
 
@@ -149,14 +148,14 @@ describe('FileUploadService', () => {
         expect(result.error).toBe('A csatolmány maximum 64MB lehet!');
       });
 
-      it('should reject non-archive files', () => {
-        const file = new File(['content'], 'image.png', { type: 'image/png' });
+      it('should reject non-allowed files', () => {
+        const file = new File(['content'], 'script.exe', { type: 'application/x-msdownload' });
         Object.defineProperty(file, 'size', { value: 1 * 1024 * 1024 });
 
         const result = service.validateFile(file, 'attachment');
 
         expect(result.valid).toBe(false);
-        expect(result.error).toBe('Csak ZIP, RAR vagy 7Z fájl tölthető fel!');
+        expect(result.error).toBe('Nem megengedett fájltípus! Elfogadott: PDF, DOC, XLSX, JPG, ZIP stb.');
       });
     });
   });

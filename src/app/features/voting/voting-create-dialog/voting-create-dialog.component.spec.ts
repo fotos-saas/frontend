@@ -1,7 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { VotingCreateDialogComponent, VotingCreateResult } from './voting-create-dialog.component';
+
+// Stub komponensek a lucide ikon hiba elkerulesehez
+@Component({ selector: 'app-rich-text-editor', template: '', standalone: true })
+class StubRichTextEditorComponent {}
+
+@Component({ selector: 'app-ps-file-upload', template: '', standalone: true })
+class StubPsFileUploadComponent {}
+
+@Component({ selector: 'app-ps-input', template: '', standalone: true })
+class StubPsInputComponent {}
+
+@Component({ selector: 'app-ps-checkbox', template: '', standalone: true })
+class StubPsCheckboxComponent {}
 
 describe('VotingCreateDialogComponent', () => {
   let component: VotingCreateDialogComponent;
@@ -9,8 +23,17 @@ describe('VotingCreateDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VotingCreateDialogComponent, FormsModule]
-    }).compileComponents();
+      imports: [VotingCreateDialogComponent, FormsModule],
+      schemas: [NO_ERRORS_SCHEMA],
+    })
+    .overrideComponent(VotingCreateDialogComponent, {
+      set: {
+        template: '',
+        imports: [],
+        schemas: [NO_ERRORS_SCHEMA],
+      },
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(VotingCreateDialogComponent);
     component = fixture.componentInstance;
@@ -183,18 +206,14 @@ describe('VotingCreateDialogComponent', () => {
 
   describe('inputs', () => {
     it('should accept externalErrorMessage input via fixture', () => {
-      // Signal inputs need to be set via fixture.componentRef.setInput
       fixture.componentRef.setInput('externalErrorMessage', 'Test error');
       fixture.detectChanges();
-      // errorMessage is a signal, call it to get value
       expect(component.errorMessage()).toBe('Test error');
     });
 
     it('should accept externalIsSubmitting input via fixture', () => {
-      // Signal inputs need to be set via fixture.componentRef.setInput
       fixture.componentRef.setInput('externalIsSubmitting', true);
       fixture.detectChanges();
-      // isSubmitting is a signal, call it to get value
       expect(component.isSubmitting()).toBe(true);
     });
   });

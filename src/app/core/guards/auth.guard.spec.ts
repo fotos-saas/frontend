@@ -11,11 +11,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of, throwError, firstValueFrom, Observable, isObservable } from 'rxjs';
-import { AuthGuard } from './auth.guard';
+import { authGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 
 describe('AuthGuard', () => {
-  let guard: AuthGuard;
   let authServiceSpy: {
     hasToken: ReturnType<typeof vi.fn>;
     validateSession: ReturnType<typeof vi.fn>;
@@ -38,18 +37,20 @@ describe('AuthGuard', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        AuthGuard,
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy }
       ]
     });
 
-    guard = TestBed.inject(AuthGuard);
-
     // Mock route objects
     mockRoute = {} as ActivatedRouteSnapshot;
     mockState = { url: '/dashboard' } as RouterStateSnapshot;
   });
+
+  /** Segédfüggvény: functional guard futtatása injection context-ben */
+  function runGuard(): boolean | Observable<boolean> {
+    return TestBed.runInInjectionContext(() => authGuard(mockRoute, mockState));
+  }
 
   // ===========================================
   // NO TOKEN TESTS
@@ -61,14 +62,14 @@ describe('AuthGuard', () => {
     });
 
     it('should redirect to login', () => {
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       expect(result).toBe(false);
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
     });
 
     it('should not call validateSession', () => {
-      guard.canActivate(mockRoute, mockState);
+      runGuard();
 
       expect(authServiceSpy.validateSession).not.toHaveBeenCalled();
     });
@@ -87,7 +88,7 @@ describe('AuthGuard', () => {
     });
 
     it('should allow access', async () => {
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         const value = await firstValueFrom(result as Observable<boolean>);
@@ -99,7 +100,7 @@ describe('AuthGuard', () => {
     });
 
     it('should call validateSession', async () => {
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         await firstValueFrom(result as Observable<boolean>);
@@ -122,7 +123,7 @@ describe('AuthGuard', () => {
     });
 
     it('should redirect to login', async () => {
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         const value = await firstValueFrom(result as Observable<boolean>);
@@ -147,7 +148,7 @@ describe('AuthGuard', () => {
     });
 
     it('should redirect to login on error', async () => {
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         const value = await firstValueFrom(result as Observable<boolean>);
@@ -170,7 +171,7 @@ describe('AuthGuard', () => {
         throwError(() => ({ status: 401, message: 'Unauthorized' }))
       );
 
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         const value = await firstValueFrom(result as Observable<boolean>);
@@ -187,7 +188,7 @@ describe('AuthGuard', () => {
         throwError(() => new Error('Network error'))
       );
 
-      const result = guard.canActivate(mockRoute, mockState);
+      const result = runGuard();
 
       if (isObservable(result)) {
         const value = await firstValueFrom(result as Observable<boolean>);

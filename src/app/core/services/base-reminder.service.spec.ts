@@ -10,6 +10,13 @@ class TestReminderService extends BaseReminderService {
   protected readonly DISMISSED_SUFFIX = 'test_reminder_dismissed_until';
   protected readonly SHOWN_SUFFIX = 'test_reminder_last_shown';
 
+  constructor() {
+    super();
+    // Lusta inject kényszerítése injection context-ben
+    // (a BaseReminderService lazy inject-et használ a storage getter-ben)
+    void this.storage;
+  }
+
   // Expose protected methods for testing
   public testGetReminderState(projectId: number): ReminderState {
     return this.getReminderState(projectId);
@@ -279,9 +286,13 @@ describe('BaseReminderService', () => {
   // ============================================================================
   describe('migration from old kv: keys', () => {
     it('should migrate old kv: key when reading state', () => {
-      // Simulate old key format
+      // Simulate old key format — az érték az érvényes tartományon belül kell legyen
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 1);
+      const recentDateStr = recentDate.toISOString();
+
       const oldKey = `kv:${testProjectId}:test_reminder_last_shown`;
-      localStorage.setItem(oldKey, '2025-01-15T09:00:00.000Z');
+      localStorage.setItem(oldKey, recentDateStr);
 
       // Reading state should migrate the old key
       const state = service.testGetReminderState(testProjectId);
@@ -290,7 +301,7 @@ describe('BaseReminderService', () => {
       // Old key should be removed
       expect(localStorage.getItem(oldKey)).toBeNull();
       // New format should have the value
-      expect(storage.getReminderValue(testProjectId, 'test_reminder_last_shown')).toBe('2025-01-15T09:00:00.000Z');
+      expect(storage.getReminderValue(testProjectId, 'test_reminder_last_shown')).toBe(recentDateStr);
     });
   });
 });

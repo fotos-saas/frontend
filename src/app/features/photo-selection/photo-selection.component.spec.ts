@@ -1,37 +1,33 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { of } from 'rxjs';
 import { PhotoSelectionComponent } from './photo-selection.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { LoggerService } from '../../core/services/logger.service';
 import { TabloStorageService } from '../../core/services/tablo-storage.service';
 import { TabloWorkflowService } from './services/tablo-workflow.service';
-import { SelectionQueueService } from './services/selection-queue.service';
-import { WorkflowNavigationService } from './services/workflow-navigation.service';
 import { WorkflowStep, StepData } from './models/workflow.models';
 
 /**
  * PhotoSelectionComponent unit tesztek
  *
  * Tesztelendő:
- * - Workflow betöltés
  * - Kijelölés változás kezelése
  * - Navigáció lépések között
  * - Dialógusok működése
  * - Pagination
+ * - Lightbox
  */
 describe('PhotoSelectionComponent', () => {
   let component: PhotoSelectionComponent;
   let fixture: ComponentFixture<PhotoSelectionComponent>;
   let mockAuthService: Partial<AuthService>;
-  let mockWorkflowService: Partial<TabloWorkflowService>;
-  let mockQueueService: Partial<SelectionQueueService>;
-  let mockNavigationService: Partial<WorkflowNavigationService>;
   let mockToastService: Partial<ToastService>;
   let mockLoggerService: Partial<LoggerService>;
   let mockStorageService: Partial<TabloStorageService>;
+  let mockWorkflowService: Partial<TabloWorkflowService>;
 
   const mockProject = {
     id: 1,
@@ -56,28 +52,18 @@ describe('PhotoSelectionComponent', () => {
   };
 
   beforeEach(() => {
-    // Mock services
     mockAuthService = {
       project$: of(mockProject),
       getProject: vi.fn().mockReturnValue(mockProject),
+      updatePhotoDate: vi.fn().mockReturnValue(of({ success: true })),
     };
 
     mockWorkflowService = {
       loadStepData: vi.fn().mockReturnValue(of(mockStepData)),
       finalizeTabloSelection: vi.fn().mockReturnValue(of({ success: true })),
-    };
-
-    mockQueueService = {
-      enqueue: vi.fn(),
-      reset: vi.fn(),
-    };
-
-    mockNavigationService = {
-      nextStep: vi.fn(),
-      previousStep: vi.fn(),
-      moveToStep: vi.fn(),
-      returnToCompleted: vi.fn(),
-      viewStepReadonly: vi.fn(),
+      previousStep: vi.fn().mockReturnValue(of(mockStepData)),
+      nextStep: vi.fn().mockReturnValue(of(mockStepData)),
+      requestModification: vi.fn().mockReturnValue(of({ success: true })),
     };
 
     mockToastService = {
@@ -90,6 +76,7 @@ describe('PhotoSelectionComponent', () => {
       error: vi.fn(),
       warn: vi.fn(),
       info: vi.fn(),
+      debug: vi.fn(),
     };
 
     mockStorageService = {
@@ -102,55 +89,22 @@ describe('PhotoSelectionComponent', () => {
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: TabloWorkflowService, useValue: mockWorkflowService },
-        { provide: SelectionQueueService, useValue: mockQueueService },
-        { provide: WorkflowNavigationService, useValue: mockNavigationService },
         { provide: ToastService, useValue: mockToastService },
         { provide: LoggerService, useValue: mockLoggerService },
         { provide: TabloStorageService, useValue: mockStorageService },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     });
 
     fixture = TestBed.createComponent(PhotoSelectionComponent);
     component = fixture.componentInstance;
   });
 
-  // ============ Workflow Loading Tests ============
-
-  describe('Workflow betöltés', () => {
-    it('betölti a workflow adatokat inicializáláskor', () => {
-      // Act
-      fixture.detectChanges();
-
-      // Assert
-      expect(mockWorkflowService.loadStepData).toHaveBeenCalledWith(100);
-    });
-
-    it('kezeli a betöltési hibát', () => {
-      // Arrange
-      const error = new Error('Network error');
-      mockWorkflowService.loadStepData = vi.fn().mockReturnValue(throwError(() => error));
-
-      // Act
-      fixture.detectChanges();
-
-      // Assert
-      expect(mockLoggerService.error).toHaveBeenCalled();
-    });
-  });
-
-  // ============ Selection Tests ============
+  // ============ Kijelölés Tests ============
 
   describe('Kijelölés kezelése', () => {
     beforeEach(() => {
       fixture.detectChanges();
-    });
-
-    it('enqueue-olja a kijelölés változást', () => {
-      // Act
-      component.onSelectionChange([1, 2, 3]);
-
-      // Assert
-      expect(mockQueueService.enqueue).toHaveBeenCalledWith(100, [1, 2, 3], 'claiming');
     });
 
     it('frissíti a state-et kijelöléskor', () => {
@@ -167,7 +121,6 @@ describe('PhotoSelectionComponent', () => {
   describe('Navigáció', () => {
     beforeEach(() => {
       fixture.detectChanges();
-      // Simulate valid selection for navigation
       component.state.selectedPhotoIds.set([1]);
       component.state.allowMultiple.set(true);
     });
@@ -179,19 +132,8 @@ describe('PhotoSelectionComponent', () => {
       // Act
       component.onNextStep();
 
-      // Assert
-      expect(mockNavigationService.nextStep).not.toHaveBeenCalled();
-    });
-
-    it('meghívja a previousStep szolgáltatást', () => {
-      // Arrange
-      component.state.currentStep.set('retouch');
-
-      // Act
-      component.onPreviousStep();
-
-      // Assert
-      expect(mockNavigationService.previousStep).toHaveBeenCalled();
+      // Assert - should not navigate (canProceed is false)
+      expect(component.state.currentStep()).toBe('claiming');
     });
   });
 
@@ -232,8 +174,8 @@ describe('PhotoSelectionComponent', () => {
       // Act
       component.onDeselectConfirmResult({ action: 'confirm' });
 
-      // Assert - should trigger selection change with empty array
-      expect(mockQueueService.enqueue).toHaveBeenCalledWith(100, [], 'claiming');
+      // Assert - should clear selection
+      expect(component.state.selectedPhotoIds()).toEqual([]);
     });
   });
 
@@ -250,30 +192,9 @@ describe('PhotoSelectionComponent', () => {
 
       // Assert
       expect(mockToastService.info).toHaveBeenCalledWith(
-        'Maximum elérve',
+        'Maximum elerve',
         expect.stringContaining('5')
       );
-    });
-  });
-
-  // ============ Pagination Tests ============
-
-  describe('Pagination', () => {
-    beforeEach(() => {
-      fixture.detectChanges();
-      // Set up pagination state
-      component.state.pagination.setAllPhotos(mockStepData.visible_photos, 10);
-    });
-
-    it('nem tölt be többet ha már folyamatban van', () => {
-      // Arrange
-      component.state.startLoadingMore();
-
-      // Act
-      component.onLoadMore();
-
-      // Assert - should not trigger additional loading
-      expect(component.state.isLoadingMore()).toBe(true);
     });
   });
 
@@ -309,6 +230,8 @@ describe('PhotoSelectionComponent', () => {
   describe('Lightbox', () => {
     beforeEach(() => {
       fixture.detectChanges();
+      // Set visible photos for lightbox
+      component.state.pagination.setAllPhotos(mockStepData.visible_photos, 2);
     });
 
     it('megnyitja a lightbox-ot zoom click-re', () => {

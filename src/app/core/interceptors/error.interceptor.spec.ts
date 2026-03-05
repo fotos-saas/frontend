@@ -1,44 +1,53 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ErrorInterceptor } from './error.interceptor';
+import { Router } from '@angular/router';
+import { errorInterceptor } from './error.interceptor';
 import { ToastService } from '../services/toast.service';
 import { LoggerService } from '../services/logger.service';
+import { SentryService } from '../services/sentry.service';
+import { ErrorBoundaryService } from '../services/error-boundary.service';
+import { AuthService } from '../services/auth.service';
 
 describe('ErrorInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
-  let toastService: ToastService;
-  let loggerService: LoggerService;
+  let toastService: { error: ReturnType<typeof vi.fn> };
+  let loggerService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    const toastServiceMock = {
-      error: vi.fn()
-    };
+    toastService = { error: vi.fn() };
+    loggerService = { error: vi.fn() };
 
-    const loggerServiceMock = {
-      error: vi.fn()
+    const sentryServiceMock = {
+      captureException: vi.fn().mockReturnValue('test-event-id')
+    };
+    const errorBoundaryMock = {
+      reportError: vi.fn()
+    };
+    const authServiceMock = {
+      logoutAdmin: vi.fn()
+    };
+    const routerMock = {
+      navigate: vi.fn()
     };
 
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
-        {
-          provide: HTTP_INTERCEPTORS,
-          useClass: ErrorInterceptor,
-          multi: true
-        },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: LoggerService, useValue: loggerServiceMock }
+        { provide: ToastService, useValue: toastService },
+        { provide: LoggerService, useValue: loggerService },
+        { provide: SentryService, useValue: sentryServiceMock },
+        { provide: ErrorBoundaryService, useValue: errorBoundaryMock },
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: Router, useValue: routerMock },
       ]
     });
 
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
-    toastService = TestBed.inject(ToastService);
-    loggerService = TestBed.inject(LoggerService);
   });
 
   afterEach(() => {
@@ -213,7 +222,7 @@ describe('ErrorInterceptor', () => {
     expect(toastService.error).toHaveBeenCalledWith(
       'Szerverhiba',
       'Belső szerverhiba történt. Kérlek próbáld újra később.',
-      5000  // Hosszabb duration súlyos hibáknál
+      5000
     );
   });
 

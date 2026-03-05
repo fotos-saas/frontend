@@ -12,7 +12,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
 import {
   GuestService,
@@ -27,8 +28,6 @@ import { environment } from '../../../environments/environment';
 describe('GuestService', () => {
   let service: GuestService;
   let httpMock: HttpTestingController;
-  let storageServiceMock: { getActiveSession: ReturnType<typeof vi.fn> };
-  let authServiceMock: { isGuest: ReturnType<typeof vi.fn>; getTokenType: ReturnType<typeof vi.fn> };
   let originalGetContext: typeof HTMLCanvasElement.prototype.getContext;
 
   const API_BASE = `${environment.apiUrl}/tablo-frontend/guest`;
@@ -37,6 +36,43 @@ describe('GuestService', () => {
     projectId: 123,
     sessionType: 'share' as TokenType
   };
+
+  /**
+   * localStorage-alapú TabloStorageService mock
+   * A valódi service localStorage-on keresztül tárol, ezt szimuláljuk
+   */
+  function createStorageMock() {
+    return {
+      getActiveSession: vi.fn().mockReturnValue(mockActiveSession),
+      getGuestSession: vi.fn().mockImplementation((projectId: number, sessionType: string) =>
+        localStorage.getItem(`tablo:${projectId}:${sessionType}:guest_session`)
+      ),
+      getGuestName: vi.fn().mockImplementation((projectId: number, sessionType: string) =>
+        localStorage.getItem(`tablo:${projectId}:${sessionType}:guest_name`)
+      ),
+      getGuestId: vi.fn().mockImplementation((projectId: number, sessionType: string) => {
+        const val = localStorage.getItem(`tablo:${projectId}:${sessionType}:guest_id`);
+        return val ? parseInt(val, 10) : null;
+      }),
+      setGuestSession: vi.fn().mockImplementation((projectId: number, sessionType: string, token: string) =>
+        localStorage.setItem(`tablo:${projectId}:${sessionType}:guest_session`, token)
+      ),
+      setGuestName: vi.fn().mockImplementation((projectId: number, sessionType: string, name: string) =>
+        localStorage.setItem(`tablo:${projectId}:${sessionType}:guest_name`, name)
+      ),
+      setGuestId: vi.fn().mockImplementation((projectId: number, sessionType: string, id: number) =>
+        localStorage.setItem(`tablo:${projectId}:${sessionType}:guest_id`, id.toString())
+      ),
+      clearGuestData: vi.fn().mockImplementation((projectId: number, sessionType: string) => {
+        localStorage.removeItem(`tablo:${projectId}:${sessionType}:guest_session`);
+        localStorage.removeItem(`tablo:${projectId}:${sessionType}:guest_name`);
+        localStorage.removeItem(`tablo:${projectId}:${sessionType}:guest_id`);
+      }),
+    };
+  }
+
+  let storageServiceMock: ReturnType<typeof createStorageMock>;
+  let authServiceMock: { isGuest: ReturnType<typeof vi.fn>; getTokenType: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     // Clear localStorage before each test
@@ -53,19 +89,16 @@ describe('GuestService', () => {
     // Mock canvas toDataURL
     HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,mock');
 
-    storageServiceMock = {
-      getActiveSession: vi.fn().mockReturnValue(mockActiveSession)
-    };
-
+    storageServiceMock = createStorageMock();
     authServiceMock = {
       isGuest: vi.fn(),
       getTokenType: vi.fn()
     };
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [
-        GuestService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: TabloStorageService, useValue: storageServiceMock },
         { provide: AuthService, useValue: authServiceMock }
       ]
@@ -100,20 +133,11 @@ describe('GuestService', () => {
       localStorage.setItem('tablo:123:share:guest_session', 'stored-session-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Tárolt Vendég');
 
-      // Re-create service to trigger loadStoredSession
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
+      // Kényszerítjük a storage-ból való újratöltést
+      service.initializeFromStorage();
 
-      const newService = TestBed.inject(GuestService);
-      expect(newService.hasGuestSession()).toBe(true);
-      expect(newService.guestName()).toBe('Tárolt Vendég');
+      expect(service.hasGuestSession()).toBe(true);
+      expect(service.guestName()).toBe('Tárolt Vendég');
     });
   });
 
@@ -222,7 +246,6 @@ describe('GuestService', () => {
       const registerPromise = firstValueFrom(service.register('Test')).catch(e => e);
 
       const req = httpMock.expectOne(`${API_BASE}/register`);
-      // HTTP hiba szimulálása az üzenettel, hogy a handleError megkapja
       req.flush({ message: 'Regisztráció sikertelen' }, { status: 422, statusText: 'Unprocessable Entity' });
 
       const error = await registerPromise;
@@ -254,22 +277,10 @@ describe('GuestService', () => {
 
   describe('validateSession', () => {
     it('should validate session successfully', async () => {
-      // Set up session first
+      // Set up session
       localStorage.setItem('tablo:123:share:guest_session', 'existing-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Existing Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const mockResponse: GuestValidateResponse = {
         success: true,
@@ -295,22 +306,9 @@ describe('GuestService', () => {
     });
 
     it('should return false and clear session when invalid', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'existing-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Existing Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const mockResponse: GuestValidateResponse = {
         success: false,
@@ -333,22 +331,9 @@ describe('GuestService', () => {
     });
 
     it('should handle validation error and clear session', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'existing-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Existing Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const validatePromise = firstValueFrom(service.validateSession());
 
@@ -365,22 +350,9 @@ describe('GuestService', () => {
 
   describe('sendDeviceLink', () => {
     it('should send device link successfully', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'test-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Test Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const mockResponse = {
         success: true,
@@ -411,22 +383,9 @@ describe('GuestService', () => {
 
   describe('sendHeartbeat', () => {
     it('should send heartbeat successfully', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'heartbeat-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Heartbeat Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const heartbeatPromise = firstValueFrom(service.sendHeartbeat());
 
@@ -445,22 +404,9 @@ describe('GuestService', () => {
     });
 
     it('should silently handle heartbeat errors', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'heartbeat-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Heartbeat Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       const heartbeatPromise = firstValueFrom(service.sendHeartbeat());
 
@@ -476,22 +422,9 @@ describe('GuestService', () => {
 
   describe('clearSession', () => {
     it('should clear session from state', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'clear-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Clear Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       expect(service.hasGuestSession()).toBe(true);
 
@@ -502,22 +435,9 @@ describe('GuestService', () => {
     });
 
     it('should clear session from localStorage', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'clear-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Clear Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       expect(localStorage.getItem('tablo:123:share:guest_session')).toBe('clear-token');
 
@@ -528,22 +448,9 @@ describe('GuestService', () => {
     });
 
     it('should update guestSession$ observable', async () => {
-      // Set up session first
       localStorage.setItem('tablo:123:share:guest_session', 'clear-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Clear Guest');
-
-      // Re-create service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      service = TestBed.inject(GuestService);
-      httpMock = TestBed.inject(HttpTestingController);
+      service.initializeFromStorage();
 
       service.clearSession();
 
@@ -563,19 +470,9 @@ describe('GuestService', () => {
     it('should return headers with session token when session exists', () => {
       localStorage.setItem('tablo:123:share:guest_session', 'header-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Header Guest');
+      service.initializeFromStorage();
 
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      const serviceWithSession = TestBed.inject(GuestService);
-
-      const headers = serviceWithSession.getGuestSessionHeader();
+      const headers = service.getGuestSessionHeader();
       expect(headers.get('X-Guest-Session')).toBe('header-token');
     });
   });
@@ -590,19 +487,9 @@ describe('GuestService', () => {
     it('should return token when session exists', () => {
       localStorage.setItem('tablo:123:share:guest_session', 'get-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Token Guest');
+      service.initializeFromStorage();
 
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      const serviceWithSession = TestBed.inject(GuestService);
-
-      expect(serviceWithSession.getSessionToken()).toBe('get-token');
+      expect(service.getSessionToken()).toBe('get-token');
     });
   });
 
@@ -616,19 +503,9 @@ describe('GuestService', () => {
     it('should return true when session exists', () => {
       localStorage.setItem('tablo:123:share:guest_session', 'registered-token');
       localStorage.setItem('tablo:123:share:guest_name', 'Registered Guest');
+      service.initializeFromStorage();
 
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [
-          GuestService,
-          { provide: TabloStorageService, useValue: storageServiceMock },
-          { provide: AuthService, useValue: authServiceMock }
-        ]
-      });
-      const serviceWithSession = TestBed.inject(GuestService);
-
-      expect(serviceWithSession.hasRegisteredSession()).toBe(true);
+      expect(service.hasRegisteredSession()).toBe(true);
     });
   });
 

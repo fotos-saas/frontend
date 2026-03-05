@@ -12,7 +12,9 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { VotingService, Poll, PollResults, VoteResponse, CreatePollRequest } from './voting.service';
 import { GuestService } from './guest.service';
@@ -21,7 +23,10 @@ import { environment } from '../../../environments/environment';
 describe('VotingService', () => {
   let service: VotingService;
   let httpMock: HttpTestingController;
-  let guestServiceMock: { getSessionToken: ReturnType<typeof vi.fn> };
+  let guestServiceMock: {
+    getSessionToken: ReturnType<typeof vi.fn>;
+    getGuestSessionHeader: ReturnType<typeof vi.fn>;
+  };
 
   const API_BASE = `${environment.apiUrl}/tablo-frontend/polls`;
 
@@ -53,13 +58,16 @@ describe('VotingService', () => {
 
   beforeEach(() => {
     guestServiceMock = {
-      getSessionToken: vi.fn().mockReturnValue('test-session-token-123')
+      getSessionToken: vi.fn().mockReturnValue('test-session-token-123'),
+      getGuestSessionHeader: vi.fn().mockReturnValue(
+        new HttpHeaders().set('X-Guest-Session', 'test-session-token-123')
+      )
     };
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [
-        VotingService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GuestService, useValue: guestServiceMock }
       ]
     });
@@ -465,12 +473,10 @@ describe('VotingService', () => {
 
   describe('X-Guest-Session header', () => {
     it('should include X-Guest-Session header when session exists', async () => {
-      guestServiceMock.getSessionToken.mockReturnValue('my-session-token');
-
       const pollsPromise = firstValueFrom(service.loadPolls());
 
       const req = httpMock.expectOne(API_BASE);
-      expect(req.request.headers.get('X-Guest-Session')).toBe('my-session-token');
+      expect(req.request.headers.get('X-Guest-Session')).toBe('test-session-token-123');
 
       req.flush({ success: true, data: [] });
 
@@ -478,7 +484,7 @@ describe('VotingService', () => {
     });
 
     it('should not include X-Guest-Session header when no session', async () => {
-      guestServiceMock.getSessionToken.mockReturnValue(null);
+      guestServiceMock.getGuestSessionHeader.mockReturnValue(new HttpHeaders());
 
       const pollsPromise = firstValueFrom(service.loadPolls());
 

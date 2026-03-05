@@ -124,6 +124,32 @@
   </div>
 </div>
 
+<!-- Drag & drop választó -->
+@if (dataService.pendingDrop(); as drop) {
+  <div class="drop-choice-overlay">
+    <div class="drop-choice-card">
+      <p class="drop-choice-card__title">Fotó hozzárendelés</p>
+      <p class="drop-choice-card__text">
+        <strong>{{ drop.teacherName }}</strong> {{ drop.allPersonIds.length }} osztályban szerepel.
+      </p>
+      <div class="drop-choice-card__buttons">
+        <button class="drop-choice-card__btn drop-choice-card__btn--primary"
+                (click)="dataService.confirmDrop('all')">
+          Mindegyikhez ({{ drop.allPersonIds.length }})
+        </button>
+        <button class="drop-choice-card__btn"
+                (click)="dataService.confirmDrop('single')">
+          Csak ehhez
+        </button>
+        <button class="drop-choice-card__btn drop-choice-card__btn--cancel"
+                (click)="dataService.cancelDrop()">
+          Mégse
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- Popup -->
 @if (selectedPersonId(); as personId) {
   <app-expanded-teacher-popup [personId]="personId" (close)="closePopup()" />

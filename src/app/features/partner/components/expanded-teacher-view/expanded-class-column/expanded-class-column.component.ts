@@ -85,7 +85,7 @@ export class ExpandedClassColumnComponent {
   onTeacherDrop(personId: number): void {
     const photo = this.dataService.draggedPhoto();
     if (photo) {
-      this.dataService.assignPhotoToTeacher(photo.id, personId);
+      this.dataService.handlePhotoDrop(photo.id, personId);
     }
   }
 }

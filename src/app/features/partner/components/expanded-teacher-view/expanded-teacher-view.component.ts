@@ -84,7 +84,9 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (this.showDropdown) {
+    if (this.dataService.pendingDrop()) {
+      this.dataService.cancelDrop();
+    } else if (this.showDropdown) {
       this.showDropdown = false;
       this.dropdownSearch.set('');
     } else if (this.selectedPersonId()) {

@@ -9,6 +9,13 @@ import {
 } from './expanded-teacher-view.types';
 import { LoggerService } from '@core/services/logger.service';
 
+export interface PendingDrop {
+  photoId: number;
+  targetPersonId: number;
+  allPersonIds: number[];
+  teacherName: string;
+}
+
 @Injectable()
 export class ExpandedTeacherViewDataService {
   private teacherService = inject(PartnerTeacherService);
@@ -23,6 +30,7 @@ export class ExpandedTeacherViewDataService {
   // Drag & drop
   readonly draggedPhoto = signal<ExpandedUploadedPhoto | null>(null);
   readonly assigning = signal(false);
+  readonly pendingDrop = signal<PendingDrop | null>(null);
 
   // Hover/kijelölés
   readonly hoveredPersonId = signal<number | null>(null);
@@ -188,25 +196,85 @@ export class ExpandedTeacherViewDataService {
     });
   }
 
-  assignPhotoToTeacher(photoId: number, personId: number): void {
+  /**
+   * Fotó ráhúzás kezelése: ha a tanár több osztályban is szerepel, kérdez.
+   */
+  handlePhotoDrop(photoId: number, targetPersonId: number): void {
+    const viewData = this.data();
+    if (!viewData) return;
+
+    // Keressük meg a target tanár normalizedName-jét
+    let targetName = '';
+    let targetNormalized = '';
+    for (const cls of viewData.classes) {
+      const teacher = cls.teachers.find(t => t.personId === targetPersonId);
+      if (teacher) {
+        targetName = teacher.name;
+        targetNormalized = teacher.normalizedName;
+        break;
+      }
+    }
+
+    if (!targetNormalized) return;
+
+    // Keressük az összes azonos normalizedName-ű person-t
+    const allPersonIds: number[] = [];
+    for (const cls of viewData.classes) {
+      for (const teacher of cls.teachers) {
+        if (teacher.normalizedName === targetNormalized) {
+          allPersonIds.push(teacher.personId);
+        }
+      }
+    }
+
+    if (allPersonIds.length <= 1) {
+      // Csak 1 osztályban van → azonnal assign
+      this.assignPhotoToTeacher(photoId, [targetPersonId]);
+    } else {
+      // Több osztályban is van → popup
+      this.pendingDrop.set({
+        photoId,
+        targetPersonId,
+        allPersonIds,
+        teacherName: targetName,
+      });
+    }
+  }
+
+  confirmDrop(mode: 'all' | 'single'): void {
+    const drop = this.pendingDrop();
+    if (!drop) return;
+
+    const personIds = mode === 'all' ? drop.allPersonIds : [drop.targetPersonId];
+    this.pendingDrop.set(null);
+    this.assignPhotoToTeacher(drop.photoId, personIds);
+  }
+
+  cancelDrop(): void {
+    this.pendingDrop.set(null);
+    this.draggedPhoto.set(null);
+  }
+
+  assignPhotoToTeacher(photoId: number, personIds: number[]): void {
     const sid = this.sessionId();
     if (!sid || this.assigning()) return;
 
     this.assigning.set(true);
-    this.teacherService.assignPhotoToTeacher(sid, photoId, personId).subscribe({
+    this.teacherService.assignPhotoToTeacher(sid, photoId, personIds).subscribe({
       next: (response) => {
-        const result = response.data;
+        const results = response.data;
         const current = this.data();
         if (current) {
           this.data.set({
             ...current,
             classes: current.classes.map(cls => ({
               ...cls,
-              teachers: cls.teachers.map(t =>
-                t.personId === result.personId
-                  ? { ...t, hasPhoto: true, photoThumbUrl: result.photoThumbUrl, hasOverride: result.hasOverride }
-                  : t
-              ),
+              teachers: cls.teachers.map(t => {
+                const match = results.find(r => r.personId === t.personId);
+                return match
+                  ? { ...t, hasPhoto: true, photoThumbUrl: match.photoThumbUrl, hasOverride: match.hasOverride }
+                  : t;
+              }),
             })),
           });
         }

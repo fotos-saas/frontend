@@ -88,4 +88,8 @@ export class ExpandedClassColumnComponent {
       this.dataService.handlePhotoDrop(photo.id, personId);
     }
   }
+
+  onRemoveOverride(personId: number): void {
+    this.dataService.removeOverride(personId);
+  }
 }

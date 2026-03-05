@@ -227,14 +227,6 @@ export class ExpandedTeacherViewDataService {
       }
     }
 
-    this.logger.info('[handlePhotoDrop]', {
-      targetPersonId,
-      targetName,
-      targetNormalized,
-      allPersonIds,
-      totalClasses: viewData.classes.length,
-    });
-
     if (allPersonIds.length <= 1) {
       // Csak 1 osztályban van → azonnal assign
       this.assignPhotoToTeacher(photoId, [targetPersonId]);
@@ -292,6 +284,45 @@ export class ExpandedTeacherViewDataService {
       error: (err) => {
         this.logger.error('Fotó hozzárendelési hiba', err);
         this.assigning.set(false);
+      },
+    });
+  }
+
+  removeOverride(personId: number): void {
+    const viewData = this.data();
+    if (!viewData) return;
+
+    // Keressük meg a person projectId-jét
+    let projectId: number | null = null;
+    for (const cls of viewData.classes) {
+      if (cls.teachers.some(t => t.personId === personId)) {
+        projectId = cls.projectId;
+        break;
+      }
+    }
+
+    if (!projectId) return;
+
+    this.teacherService.removeOverridePhoto(projectId, personId).subscribe({
+      next: (response) => {
+        const result = response.data;
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            classes: current.classes.map(cls => ({
+              ...cls,
+              teachers: cls.teachers.map(t =>
+                t.personId === personId
+                  ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
+                  : t
+              ),
+            })),
+          });
+        }
+      },
+      error: (err) => {
+        this.logger.error('Override eltávolítási hiba', err);
       },
     });
   }

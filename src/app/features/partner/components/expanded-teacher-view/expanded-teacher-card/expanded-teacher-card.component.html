@@ -37,11 +37,12 @@
   </div>
 
   @if (teacher().hasOverride) {
-    <lucide-icon
-      [name]="ICONS.IMAGE"
-      [size]="14"
-      class="teacher-card__override-icon"
-      matTooltip="Egyedi fotó (felülírva)"
-    />
+    <button
+      class="teacher-card__override-btn"
+      matTooltip="Egyedi fotó eltávolítása"
+      (click)="onRemoveOverride($event)"
+    >
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
   }
 </div>

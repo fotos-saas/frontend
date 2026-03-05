@@ -22,6 +22,7 @@ export class ExpandedTeacherCardComponent {
   readonly hover = output<{ normalizedName: string; personId: number } | null>();
   readonly select = output<number>();
   readonly drop = output<number>();
+  readonly removeOverride = output<number>();
 
   readonly isDragTarget = signal(false);
 
@@ -64,5 +65,10 @@ export class ExpandedTeacherCardComponent {
     if (event.dataTransfer?.types.includes('application/x-photo-id')) {
       this.drop.emit(this.teacher().personId);
     }
+  }
+
+  onRemoveOverride(event: MouseEvent): void {
+    event.stopPropagation();
+    this.removeOverride.emit(this.teacher().personId);
   }
 }

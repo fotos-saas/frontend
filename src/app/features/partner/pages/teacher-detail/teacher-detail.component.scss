@@ -1,92 +1,10 @@
 @use '../../../../shared/styles/list-page' as list;
-@use 'styles/mixins' as *;
+@use '../../../../shared/styles/detail-page' as detail;
 @use 'styles/colors' as *;
 
-.teacher-detail-page {
-}
+@include detail.detail-page-base;
 
-// === FEJLÉC ===
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: get-color('slate', 500);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  transition: color 0.15s;
-
-  &:hover { color: get-color('slate', 800); }
-}
-
-// === KÉTOSZLOPOS LAYOUT ===
-.detail-layout {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
-// === BAL SIDEBAR ===
-.profile-sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px 14px;
-  background: linear-gradient(135deg, get-color('slate', 50) 0%, get-color('slate', 100) 100%);
-  border-radius: 12px;
-  border: 1px solid get-color('slate', 200);
-  position: -webkit-sticky;
-  position: sticky;
-  top: 20px;
-}
-
-.profile-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: get-color('slate', 200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  color: get-color('slate', 500);
-  margin-bottom: 10px;
-  border: 3px solid #fff;
-  @include shadow-md;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.profile-name {
-  font-size: 1rem;
-  font-weight: 700;
-  color: get-color('slate', 800);
-  margin: 0 0 4px;
-  line-height: 1.3;
-  word-break: break-word;
-}
-
-.profile-meta {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: get-color('slate', 500);
-  font-size: 0.75rem;
-  margin-bottom: 8px;
-  line-height: 1.3;
-}
+// === TANÁR-SPECIFIKUS STÍLUSOK ===
 
 .profile-position {
   display: flex;
@@ -98,103 +16,10 @@
   line-height: 1.3;
 }
 
-// === FEJLÉC IKON GOMB ===
-.header-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  color: get-color('slate', 400);
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover {
-    background: get-color('slate', 100);
-    color: get-color('slate', 600);
-  }
-}
-
-// === SZERKESZTÉS FORM ===
-.edit-form {
-  width: 100%;
-  text-align: left;
-}
-
-.edit-label {
-  display: block;
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: get-color('slate', 400);
-  margin-bottom: 3px;
-  margin-top: 8px;
-
-  &:first-child { margin-top: 0; }
-}
-
-.edit-input {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  font-size: 0.75rem;
-  background: #fff;
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary, #1e3a5f);
-    box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
-  }
-}
-
-.edit-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.edit-save-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  justify-content: center;
-  padding: 6px 10px;
-  background: var(--color-primary, #1e3a5f);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover:not(:disabled) { background: var(--color-primary-dark, #152a45); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-}
-
-.edit-cancel-btn {
-  padding: 6px 10px;
-  background: transparent;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  color: get-color('slate', 500);
-  font-size: 0.6875rem;
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover { background: get-color('slate', 50); }
-}
-
 // === MEGJEGYZÉS SZEKCIÓ ===
 .notes-display {
   padding: 6px 8px;
-  background: #fff;
+  background: var(--bg-primary, #fff);
   border: 1px solid get-color('slate', 200);
   border-radius: 6px;
   cursor: pointer;
@@ -219,7 +44,7 @@
   font-size: 0.6875rem;
   font-family: inherit;
   line-height: 1.5;
-  background: #fff;
+  background: var(--bg-primary, #fff);
   resize: vertical;
   min-height: 50px;
   box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
@@ -227,253 +52,7 @@
   &:focus { outline: none; }
 }
 
-// === SIDEBAR SZEKCIÓ (Aliasok) ===
-.sidebar-section {
-  width: 100%;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid get-color('slate', 200);
-  text-align: left;
-}
-
-.section-label {
-  display: block;
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: get-color('slate', 400);
-  margin-bottom: 6px;
-}
-
-.alias-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.alias-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 6px 2px 8px;
-  background: #fff;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 4px;
-  font-size: 0.6875rem;
-  color: get-color('slate', 700);
-}
-
-.alias-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  background: transparent;
-  border: none;
-  border-radius: 2px;
-  color: get-color('slate', 400);
-  cursor: pointer;
-  padding: 0;
-
-  &:hover { background: get-color('error', 50); color: get-color('error', 600); }
-}
-
-.no-data {
-  color: get-color('slate', 400);
-  font-size: 0.6875rem;
-  font-style: italic;
-}
-
-
-// === JOBB FŐ TARTALOM ===
-.detail-content {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-// === SZEKCIÓK ===
-.content-section {
-  background: #fff;
-  border: 1px solid get-color('slate', 200);
-  border-radius: 10px;
-  padding: 16px;
-}
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: get-color('slate', 600);
-
-  h2 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: get-color('slate', 800);
-    margin: 0;
-  }
-}
-
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: get-color('slate', 100);
-  color: get-color('slate', 500);
-  border-radius: 10px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-}
-
-.btn-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  background: var(--color-primary, #1e3a5f);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover { background: var(--color-primary-dark, #152a45); }
-}
-
-// === FOTÓ GRID ===
-.photos-grid {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
-
-  &::-webkit-scrollbar { height: 4px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: get-color('slate', 300); border-radius: 2px; }
-}
-
-.photo-card {
-  flex-shrink: 0;
-  width: 100px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid get-color('slate', 200);
-  transition: border-color 0.15s, box-shadow 0.15s;
-
-  &--active {
-    border-color: var(--color-primary, #1e3a5f);
-  }
-
-  &:hover {
-    @include shadow-md;
-
-    .photo-overlay { opacity: 1; }
-  }
-}
-
-.photo-image {
-  position: relative;
-  cursor: pointer;
-
-  img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
-  }
-}
-
-.active-indicator {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: var(--color-primary, #1e3a5f);
-  color: #fff;
-  border-radius: 50%;
-}
-
-.portrait-indicator {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: #7c3aed;
-  color: #fff;
-  border-radius: 50%;
-}
-
-.photo-year {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2px 0;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.photo-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.overlay-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #fff;
-  border: none;
-  border-radius: 6px;
-  color: get-color('slate', 700);
-  cursor: pointer;
-  transition: all 0.1s;
-
-  &:hover { background: get-color('slate', 100); }
-
-  &--danger:hover { background: get-color('error', 50); color: get-color('error', 600); }
-}
-
+// === FOTÓ KÁRTYA META ===
 .photo-card__meta {
   padding: 4px 6px;
   display: flex;
@@ -495,15 +74,19 @@
   color: get-color('slate', 500);
 }
 
-.empty-section {
+// === PORTRÉ INDIKÁTOR ===
+.portrait-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 28px 0;
-  color: get-color('slate', 400);
-
-  p { margin: 0; font-size: 0.8125rem; }
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 50%;
 }
 
 // === PROJEKTEK LISTA ===
@@ -521,7 +104,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: #fff;
+  background: var(--bg-primary, #fff);
   text-decoration: none;
   color: inherit;
   transition: background 0.15s;
@@ -568,160 +151,8 @@
   transition: color 0.15s;
 }
 
-// === VÁLTOZÁSNAPLÓ TÁBLA ===
-.changelog-search {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  background: get-color('slate', 50);
-  border: 1px solid get-color('slate', 200);
-  border-radius: 6px;
-  color: get-color('slate', 400);
-  min-width: 160px;
-
-  input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 0.75rem;
-    color: get-color('slate', 800);
-    outline: none;
-    min-width: 0;
-
-    &::placeholder { color: get-color('slate', 400); }
-  }
-}
-
-.changelog-table {
-  border: 1px solid get-color('slate', 100);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.changelog-thead {
-  display: grid;
-  grid-template-columns: 140px 1fr 90px 130px;
-  gap: 8px;
-  padding: 7px 12px;
-  background: get-color('slate', 50);
-  border-bottom: 1px solid get-color('slate', 100);
-}
-
-.cl-th {
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: get-color('slate', 400);
-}
-
-.changelog-row {
-  display: grid;
-  grid-template-columns: 140px 1fr 90px 130px;
-  gap: 8px;
-  padding: 6px 12px;
-  border-bottom: 1px solid get-color('slate', 50);
-  align-items: center;
-  font-size: 0.75rem;
-  animation: fadeSlideIn 0.2s ease forwards;
-  opacity: 0;
-
-  &:last-child { border-bottom: none; }
-  &:hover { background: #fafbfc; }
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.cl-td {
-  color: get-color('slate', 600);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cl-td--detail {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-
-.cl-td--user { color: get-color('slate', 500); }
-.cl-td--date { color: get-color('slate', 400); font-size: 0.6875rem; }
-
+// === TANÁR-SPECIFIKUS TYPE-BADGE VÁLTOZATOK ===
 .type-badge {
-  display: inline-block;
-  padding: 1px 7px;
-  border-radius: 4px;
-  font-size: 0.625rem;
-  font-weight: 600;
-  background: get-color('slate', 100);
-  color: get-color('slate', 600);
-
-  [data-type="created"] & { background: #ecfdf5; color: #059669; }
-  [data-type="name_changed"] & { background: get-color('primary', 50); color: get-color('primary', 600); }
-  [data-type="photo_uploaded"] & { background: #f5f3ff; color: #7c3aed; }
-  [data-type="school_changed"] & { background: #fff7ed; color: #ea580c; }
   [data-type="title_changed"] & { background: #fdf4ff; color: #c026d3; }
   [data-type="position_changed"] & { background: #fefce8; color: #ca8a04; }
-  [data-type="active_photo_changed"] & { background: #ecfeff; color: #0891b2; }
-  [data-type="photo_deleted"] & { background: get-color('error', 50); color: get-color('error', 600); }
-  [data-type="group_photo_unified"] & { background: #ecfdf5; color: #059669; }
-}
-
-.old-val {
-  text-decoration: line-through;
-  color: get-color('slate', 400);
-}
-
-.empty-search {
-  text-align: center;
-  padding: 16px;
-  color: get-color('slate', 400);
-  font-size: 0.75rem;
-
-  p { margin: 0; }
-}
-
-// === RESPONSIVE ===
-@media (max-width: 768px) {
-  .detail-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-sidebar {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    text-align: left;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .profile-avatar {
-    width: 52px;
-    height: 52px;
-    margin-bottom: 0;
-  }
-
-  .profile-name { font-size: 0.9375rem; }
-
-  .sidebar-section { border-top: none; padding-top: 0; margin-top: 0; }
-
-  .changelog-thead,
-  .changelog-row {
-    grid-template-columns: 110px 1fr 100px;
-  }
-
-  .cl-th--user, .cl-td--user { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
 }

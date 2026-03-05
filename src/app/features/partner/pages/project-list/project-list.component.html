@@ -219,11 +219,9 @@
 }
 
 <!-- Bővített tanári nézet -->
-@if (showExpandedTeacherView() && expandedTeacherViewSchoolId()) {
+@if (showExpandedTeacherView() && expandedTeacherViewProjectId()) {
   <app-expanded-teacher-view
-    [schoolId]="expandedTeacherViewSchoolId()!"
-    [classYear]="expandedTeacherViewClassYear()"
-    [projectId]="selectedProject()!.id"
+    [projectId]="expandedTeacherViewProjectId()!"
     (close)="closeExpandedTeacherView()"
     (teacherUpdated)="closeExpandedTeacherView()"
   />

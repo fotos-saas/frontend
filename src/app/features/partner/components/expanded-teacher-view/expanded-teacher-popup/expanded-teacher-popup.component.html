@@ -16,21 +16,14 @@
       </div>
     }
 
-    @if (archiveMatch(); as archive) {
+    @if (uploadedPhotoMatch(); as photo) {
       <div class="popup-archive">
         <div class="popup-archive__photo">
-          @if (archive.hasPhoto && archive.photoThumbUrl) {
-            <img [src]="archive.photoThumbUrl" [alt]="archive.name" />
-          } @else {
-            <div class="popup-archive__no-photo">
-              <lucide-icon [name]="ICONS.IMAGE" [size]="20" />
-            </div>
-          }
+          <img [src]="photo.thumbUrl" [alt]="photo.filename" />
         </div>
         <div class="popup-archive__info">
-          <span class="popup-archive__label">Archív rekord</span>
-          <span class="popup-archive__name">{{ archive.name }}</span>
-          <span class="popup-archive__school">{{ archive.schoolName }}</span>
+          <span class="popup-archive__label">Feltöltött fotó egyezés</span>
+          <span class="popup-archive__name">{{ photo.filename }}</span>
         </div>
       </div>
     }

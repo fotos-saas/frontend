@@ -11,21 +11,21 @@
       </button>
     </div>
 
-    <!-- Iskola chip-ek -->
+    <!-- Osztály chip-ek -->
     <div class="expanded-view__schools">
-      <span class="expanded-view__schools-label">Iskolák:</span>
-      @for (school of schools(); track school.id) {
-        <div class="expanded-view__chip" [class.expanded-view__chip--linked]="school.isLinked">
-          <span>{{ school.name }}</span>
-          @if (!school.isLinked) {
-            <button class="expanded-view__chip-remove" (click)="removeSchool(school.id)">
+      <span class="expanded-view__schools-label">Osztályok:</span>
+      @for (project of projects(); track project.projectId) {
+        <div class="expanded-view__chip" [class.expanded-view__chip--source]="project.isSource">
+          <span>{{ project.schoolName }} {{ project.className }}</span>
+          @if (!project.isSource) {
+            <button class="expanded-view__chip-remove" (click)="removeProject(project.projectId)">
               <lucide-icon [name]="ICONS.X" [size]="14" />
             </button>
           }
         </div>
       }
       <div class="expanded-view__add-school" (click)="$event.stopPropagation()">
-        <button class="expanded-view__add-btn" (click)="toggleDropdown(); $event.stopPropagation()" matTooltip="Iskola hozzáadása">
+        <button class="expanded-view__add-btn" (click)="toggleDropdown(); $event.stopPropagation()" matTooltip="Osztály hozzáadása">
           <lucide-icon [name]="ICONS.PLUS" [size]="16" />
           <span>Hozzáadás</span>
         </button>
@@ -37,19 +37,31 @@
                 #dropdownSearchInput
                 type="text"
                 class="expanded-view__dropdown-search-input"
-                placeholder="Iskola keresése..."
+                placeholder="Osztály keresése..."
                 [ngModel]="dropdownSearch()"
                 (ngModelChange)="dropdownSearch.set($event)"
               />
             </div>
             <div class="expanded-view__dropdown-list">
-              @for (school of filteredAvailableSchools(); track school.id) {
-                <button class="expanded-view__dropdown-item" (click)="addSchool(school)">
-                  {{ school.name }}
-                </button>
-              } @empty {
+              @if (groupedAvailableProjects().sameSchool.length > 0) {
+                <div class="expanded-view__dropdown-group-header">Azonos iskola</div>
+                @for (project of groupedAvailableProjects().sameSchool; track project.projectId) {
+                  <button class="expanded-view__dropdown-item" (click)="addProject(project)">
+                    {{ project.schoolName }} {{ project.className }}
+                  </button>
+                }
+              }
+              @if (groupedAvailableProjects().otherSchool.length > 0) {
+                <div class="expanded-view__dropdown-group-header">Más iskolák</div>
+                @for (project of groupedAvailableProjects().otherSchool; track project.projectId) {
+                  <button class="expanded-view__dropdown-item" (click)="addProject(project)">
+                    {{ project.schoolName }} {{ project.className }}
+                  </button>
+                }
+              }
+              @if (groupedAvailableProjects().sameSchool.length === 0 && groupedAvailableProjects().otherSchool.length === 0) {
                 <div class="expanded-view__dropdown-empty">
-                  {{ dropdownSearch() ? 'Nincs találat' : 'Nincs több iskola' }}
+                  {{ dropdownSearch() ? 'Nincs találat' : 'Nincs több osztály' }}
                 </div>
               }
             </div>
@@ -64,12 +76,9 @@
         <span>Betöltés...</span>
       </div>
     } @else {
-      <!-- Archív panel -->
+      <!-- Feltöltési terület -->
       <div class="expanded-view__archive">
-        <app-expanded-archive-panel
-          (uploadRequested)="onUploadRequested()"
-          (syncRequested)="onSyncRequested()"
-        />
+        <app-expanded-upload-panel />
       </div>
 
       <!-- Osztály oszlopok -->

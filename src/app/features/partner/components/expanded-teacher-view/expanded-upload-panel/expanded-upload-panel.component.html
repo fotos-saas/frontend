@@ -1,0 +1,84 @@
+<div class="upload-panel">
+  <button class="upload-panel__toggle" (click)="toggleCollapse()">
+    <lucide-icon
+      [name]="collapsed() ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_UP"
+      [size]="18"
+    />
+    <span class="upload-panel__toggle-label">FELTÖLTÉSI TERÜLET</span>
+    <span class="upload-panel__summary">({{ summaryText() }})</span>
+  </button>
+
+  @if (!collapsed()) {
+    <div
+      class="upload-panel__content"
+      [class.upload-panel__content--dragover]="isDragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <div class="upload-panel__toolbar">
+        <button
+          class="upload-panel__action-btn"
+          (click)="onFileSelect()"
+          [disabled]="uploading()"
+          matTooltip="Fotók feltöltése"
+        >
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          @if (uploading()) {
+            <span>Feltöltés...</span>
+          } @else {
+            <span>Fotó feltöltés</span>
+          }
+        </button>
+
+        <button
+          class="upload-panel__action-btn upload-panel__action-btn--sync"
+          (click)="onSync()"
+          [disabled]="syncing() || photos().length === 0"
+          matTooltip="Fotók szinkronizálása az osztályokba"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+          @if (syncing()) {
+            <span>Szinkronizálás...</span>
+          } @else {
+            <span>Szinkronizálás</span>
+          }
+        </button>
+      </div>
+
+      <input
+        #fileInput
+        type="file"
+        accept="image/jpeg,image/png"
+        multiple
+        class="upload-panel__file-input"
+        (change)="onFilesSelected($event)"
+      />
+
+      @if (photos().length > 0) {
+        <div class="upload-panel__grid">
+          @for (photo of photos(); track photo.id) {
+            <div class="upload-photo" [matTooltip]="photo.filename">
+              <div class="upload-photo__image">
+                <img [src]="photo.thumbUrl" [alt]="photo.filename" loading="lazy" />
+                <button
+                  class="upload-photo__delete"
+                  (click)="deletePhoto(photo.id, $event)"
+                  matTooltip="Fotó törlése"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="12" />
+                </button>
+              </div>
+              <span class="upload-photo__name">{{ photo.filename }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="upload-panel__empty">
+          <lucide-icon [name]="ICONS.IMAGE" [size]="32" />
+          <span>Húzd ide a fotókat, vagy kattints a "Fotó feltöltés" gombra</span>
+        </div>
+      }
+    </div>
+  }
+</div>

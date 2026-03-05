@@ -483,13 +483,11 @@ export class PartnerProjectListComponent implements OnInit {
 
   // Bővített tanári nézet
   showExpandedTeacherView = signal(false);
-  expandedTeacherViewSchoolId = signal<number | null>(null);
-  expandedTeacherViewClassYear = signal<string | undefined>(undefined);
+  expandedTeacherViewProjectId = signal<number | null>(null);
 
-  openExpandedTeacherView(data: { schoolId: number; classYear?: string }): void {
+  openExpandedTeacherView(data: { projectId: number }): void {
     this.showMissingModal.set(false);
-    this.expandedTeacherViewSchoolId.set(data.schoolId);
-    this.expandedTeacherViewClassYear.set(data.classYear);
+    this.expandedTeacherViewProjectId.set(data.projectId);
     this.showExpandedTeacherView.set(true);
   }
 

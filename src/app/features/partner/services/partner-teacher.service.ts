@@ -23,7 +23,7 @@ import {
   TeacherUploadHistoryResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
-import { ExpandedViewResponse } from '../components/expanded-teacher-view/expanded-teacher-view.types';
+import { ExpandedViewResponse, ExpandedUploadedPhoto, SyncResult } from '../components/expanded-teacher-view/expanded-teacher-view.types';
 import {
   ArchiveService,
   ArchiveBySchoolResponse,
@@ -46,18 +46,44 @@ export class PartnerTeacherService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/teachers`;
 
-  getExpandedView(schoolId: number, classYear?: string, additionalSchoolIds?: number[]): Observable<ExpandedViewResponse> {
-    let params = buildHttpParams({
-      school_id: schoolId,
-      class_year: classYear,
-    });
-    if (additionalSchoolIds?.length) {
-      for (const id of additionalSchoolIds) {
-        params = params.append('additional_school_ids[]', String(id));
-      }
-    }
-
+  getExpandedView(projectId: number): Observable<ExpandedViewResponse> {
+    const params = buildHttpParams({ project_id: projectId });
     return this.http.get<ExpandedViewResponse>(`${this.baseUrl}/expanded-view`, { params });
+  }
+
+  addProjectToSession(sessionId: number, projectId: number): Observable<ExpandedViewResponse> {
+    return this.http.post<ExpandedViewResponse>(`${this.baseUrl}/expanded-view/add-project`, {
+      session_id: sessionId,
+      project_id: projectId,
+    });
+  }
+
+  removeProjectFromSession(sessionId: number, projectId: number): Observable<ExpandedViewResponse> {
+    return this.http.request<ExpandedViewResponse>('DELETE', `${this.baseUrl}/expanded-view/remove-project`, {
+      body: { session_id: sessionId, project_id: projectId },
+    });
+  }
+
+  uploadPhotosToSession(sessionId: number, photos: File[]): Observable<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }> {
+    const formData = new FormData();
+    formData.append('session_id', String(sessionId));
+    for (const photo of photos) {
+      formData.append('photos[]', photo);
+    }
+    return this.http.post<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }>(
+      `${this.baseUrl}/expanded-view/upload-photos`,
+      formData,
+    );
+  }
+
+  deleteSessionPhoto(photoId: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.baseUrl}/expanded-view/photos/${photoId}`);
+  }
+
+  syncSessionPhotos(sessionId: number): Observable<{ success: boolean; message: string; data: SyncResult }> {
+    return this.http.post<{ success: boolean; message: string; data: SyncResult }>(`${this.baseUrl}/expanded-view/sync`, {
+      session_id: sessionId,
+    });
   }
 
   getGroupMembers(linkedGroup: string): Observable<TeacherListItem[]> {

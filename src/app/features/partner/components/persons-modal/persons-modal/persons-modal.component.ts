@@ -59,7 +59,7 @@ export class PersonsModalComponent implements OnInit {
   readonly close = output<void>();
   readonly openUploadWizard = output<TypeFilter>();
   readonly addPersonsRequested = output<'student' | 'teacher'>();
-  readonly expandedViewRequested = output<{ schoolId: number; classYear?: string }>();
+  readonly expandedViewRequested = output<{ projectId: number }>();
 
   private partnerService = inject(PartnerService);
   private projectService = inject(PartnerProjectService);
@@ -117,9 +117,6 @@ export class PersonsModalComponent implements OnInit {
   linkDialogAllTeachers = signal<TeacherListItem[]>([]);
   photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
   photoChooserMode = signal<PhotoChooserMode | null>(null);
-
-  // Bővített nézet
-  expandedViewLoading = signal(false);
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -600,22 +597,7 @@ export class PersonsModalComponent implements OnInit {
   // --- Bővített tanári nézet ---
 
   openExpandedView(): void {
-    this.expandedViewLoading.set(true);
-    this.partnerService.getProjectDetails(this.projectId())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (details) => {
-          const schoolId = details.school?.id;
-          if (schoolId) {
-            this.expandedViewRequested.emit({
-              schoolId,
-              classYear: details.classYear ?? undefined,
-            });
-            this.close.emit();
-          }
-          this.expandedViewLoading.set(false);
-        },
-        error: () => this.expandedViewLoading.set(false),
-      });
+    this.expandedViewRequested.emit({ projectId: this.projectId() });
+    this.close.emit();
   }
 }

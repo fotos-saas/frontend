@@ -164,11 +164,9 @@
 <ng-container #orderWizardContainer></ng-container>
 
 <!-- Bővített tanári nézet dialógus -->
-@if (showExpandedTeacherView() && expandedTeacherViewSchoolId()) {
+@if (showExpandedTeacherView() && expandedTeacherViewProjectId()) {
   @defer {
     <app-expanded-teacher-view
-      [schoolId]="expandedTeacherViewSchoolId()!"
-      [classYear]="expandedTeacherViewClassYear()"
       [projectId]="expandedTeacherViewProjectId()!"
       (close)="closeExpandedTeacherView()"
       (teacherUpdated)="closeExpandedTeacherView()"

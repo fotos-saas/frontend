@@ -334,8 +334,6 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   // Bővített tanári nézet
   showExpandedTeacherView = signal(false);
-  expandedTeacherViewSchoolId = signal<number | null>(null);
-  expandedTeacherViewClassYear = signal<string | undefined>(undefined);
   expandedTeacherViewProjectId = signal<number | null>(null);
 
   async openPersonsModalDialog(typeFilter?: 'student' | 'teacher'): Promise<void> {
@@ -369,9 +367,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     ref.instance.expandedViewRequested.subscribe((data) => {
       container.clear();
       this.personsModalRef = null;
-      this.expandedTeacherViewSchoolId.set(data.schoolId);
-      this.expandedTeacherViewClassYear.set(data.classYear);
-      this.expandedTeacherViewProjectId.set(this.projectData()!.id);
+      this.expandedTeacherViewProjectId.set(data.projectId);
       this.showExpandedTeacherView.set(true);
     });
   }

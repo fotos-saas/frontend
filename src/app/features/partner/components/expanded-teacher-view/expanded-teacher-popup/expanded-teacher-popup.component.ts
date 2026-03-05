@@ -75,15 +75,17 @@ export class ExpandedTeacherPopupComponent {
     return names.size > 1;
   });
 
-  readonly archiveMatch = computed(() => {
+  // Feltöltött fotó egyezés keresés
+  readonly uploadedPhotoMatch = computed(() => {
     const viewData = this.dataService.data();
     const items = this.occurrences();
     if (!viewData || items.length === 0) return null;
 
-    const targetPerson = items[0];
-    return viewData.archive.teachers.find(t =>
-      t.name.toLowerCase().trim() === targetPerson.name.toLowerCase().trim()
-    ) ?? null;
+    const targetName = items[0].name.toLowerCase().trim();
+    return viewData.uploadedPhotos.find(p => {
+      const nameFromFile = p.filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ').toLowerCase().trim();
+      return nameFromFile === targetName;
+    }) ?? null;
   });
 
   onClose(): void {

@@ -2,10 +2,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import {
   ExpandedViewResponse,
-  ExpandedArchiveTeacher,
+  ExpandedUploadedPhoto,
   ExpandedClassData,
   SimilarityGroup,
-  ExpandedSchoolInfo,
+  ExpandedProjectInfo,
 } from './expanded-teacher-view.types';
 import { LoggerService } from '@core/services/logger.service';
 
@@ -16,6 +16,8 @@ export class ExpandedTeacherViewDataService {
 
   // Core state
   readonly loading = signal(false);
+  readonly uploading = signal(false);
+  readonly syncing = signal(false);
   readonly data = signal<ExpandedViewResponse | null>(null);
 
   // Hover/kijelölés
@@ -23,14 +25,11 @@ export class ExpandedTeacherViewDataService {
   readonly hoveredNormalizedName = signal<string | null>(null);
   readonly selectedPersonId = signal<number | null>(null);
 
-  // Archív szűrés
-  readonly archiveSearchQuery = signal('');
-  readonly showOnlyMissingPhoto = signal(false);
-  readonly archiveCollapsed = signal(false);
+  // Feltöltési terület
+  readonly uploadPanelCollapsed = signal(false);
 
-  // Iskola kezelés
-  readonly activeSchoolIds = signal<number[]>([]);
-  readonly additionalSchoolIds = signal<number[]>([]);
+  // Computed: session ID
+  readonly sessionId = computed<number | null>(() => this.data()?.sessionId ?? null);
 
   // Computed: hover alapján kiemelt person ID-k
   readonly matchingPersonIds = computed<Set<number>>(() => {
@@ -64,37 +63,23 @@ export class ExpandedTeacherViewDataService {
     ) ?? null;
   });
 
-  // Computed: szűrt archív tanárok
-  readonly filteredArchiveTeachers = computed<ExpandedArchiveTeacher[]>(() => {
-    const viewData = this.data();
-    if (!viewData) return [];
+  // Computed: feltöltött fotók
+  readonly uploadedPhotos = computed<ExpandedUploadedPhoto[]>(() => this.data()?.uploadedPhotos ?? []);
 
-    let teachers = viewData.archive.teachers;
-
-    const search = this.archiveSearchQuery().toLowerCase().trim();
-    if (search) {
-      teachers = teachers.filter(t => t.name.toLowerCase().includes(search));
-    }
-
-    if (this.showOnlyMissingPhoto()) {
-      teachers = teachers.filter(t => !t.hasPhoto);
-    }
-
-    return teachers;
-  });
-
-  // Computed: iskolák listája
-  readonly schools = computed<ExpandedSchoolInfo[]>(() => this.data()?.schools ?? []);
-  readonly availableSchools = computed<ExpandedSchoolInfo[]>(() => this.data()?.availableSchools ?? []);
+  // Computed: projektek és osztályok
+  readonly projects = computed<ExpandedProjectInfo[]>(() => this.data()?.projects ?? []);
+  readonly availableProjects = computed<ExpandedProjectInfo[]>(() => this.data()?.availableProjects ?? []);
   readonly classes = computed<ExpandedClassData[]>(() => this.data()?.classes ?? []);
   readonly similarityGroups = computed<SimilarityGroup[]>(() => this.data()?.similarityGroups ?? []);
 
-  loadData(schoolId: number, classYear?: string): void {
+  private sourceProjectId: number | null = null;
+
+  loadData(projectId: number): void {
+    this.sourceProjectId = projectId;
     this.loading.set(true);
-    this.teacherService.getExpandedView(schoolId, classYear, this.additionalSchoolIds()).subscribe({
+    this.teacherService.getExpandedView(projectId).subscribe({
       next: (response) => {
         this.data.set(response);
-        this.activeSchoolIds.set(response.schools.map(s => s.id));
         this.loading.set(false);
       },
       error: (err) => {
@@ -104,19 +89,99 @@ export class ExpandedTeacherViewDataService {
     });
   }
 
-  addSchool(schoolId: number): void {
-    const current = this.additionalSchoolIds();
-    if (!current.includes(schoolId)) {
-      this.additionalSchoolIds.set([...current, schoolId]);
-    }
+  addProject(projectId: number): void {
+    const sid = this.sessionId();
+    if (!sid) return;
+
+    this.loading.set(true);
+    this.teacherService.addProjectToSession(sid, projectId).subscribe({
+      next: (response) => {
+        this.data.set(response);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Projekt hozzáadási hiba', err);
+        this.loading.set(false);
+      },
+    });
   }
 
-  removeSchool(schoolId: number): void {
-    this.additionalSchoolIds.update(ids => ids.filter(id => id !== schoolId));
+  removeProject(projectId: number): void {
+    const sid = this.sessionId();
+    if (!sid) return;
+
+    this.loading.set(true);
+    this.teacherService.removeProjectFromSession(sid, projectId).subscribe({
+      next: (response) => {
+        this.data.set(response);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Projekt eltávolítási hiba', err);
+        this.loading.set(false);
+      },
+    });
   }
 
-  refreshAfterChange(schoolId: number, classYear?: string): void {
-    this.loadData(schoolId, classYear);
+  uploadPhotos(files: File[]): void {
+    const sid = this.sessionId();
+    if (!sid) return;
+
+    this.uploading.set(true);
+    this.teacherService.uploadPhotosToSession(sid, files).subscribe({
+      next: (response) => {
+        // Feltöltött fotók hozzáadása a meglévőkhöz
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            uploadedPhotos: [...response.photos, ...current.uploadedPhotos],
+          });
+        }
+        this.uploading.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Fotó feltöltési hiba', err);
+        this.uploading.set(false);
+      },
+    });
+  }
+
+  deletePhoto(photoId: number): void {
+    this.teacherService.deleteSessionPhoto(photoId).subscribe({
+      next: () => {
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            uploadedPhotos: current.uploadedPhotos.filter(p => p.id !== photoId),
+          });
+        }
+      },
+      error: (err) => {
+        this.logger.error('Fotó törlési hiba', err);
+      },
+    });
+  }
+
+  syncPhotos(): void {
+    const sid = this.sessionId();
+    if (!sid || !this.sourceProjectId) return;
+
+    this.syncing.set(true);
+    this.teacherService.syncSessionPhotos(sid).subscribe({
+      next: () => {
+        // Teljes újratöltés a sync után, hogy a tanár kártyákon megjelenjen a frissített fotó
+        if (this.sourceProjectId) {
+          this.loadData(this.sourceProjectId);
+        }
+        this.syncing.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Szinkronizálási hiba', err);
+        this.syncing.set(false);
+      },
+    });
   }
 
   onTeacherHover(normalizedName: string | null, personId: number | null): void {

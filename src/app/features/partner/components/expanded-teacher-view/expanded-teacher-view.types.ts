@@ -1,32 +1,25 @@
 export interface ExpandedViewResponse {
-  schools: ExpandedSchoolInfo[];
-  archive: ExpandedArchiveData;
+  sessionId: number;
+  projects: ExpandedProjectInfo[];
+  uploadedPhotos: ExpandedUploadedPhoto[];
   classes: ExpandedClassData[];
   similarityGroups: SimilarityGroup[];
-  availableSchools: ExpandedSchoolInfo[];
+  availableProjects: ExpandedProjectInfo[];
 }
 
-export interface ExpandedSchoolInfo {
-  id: number;
-  name: string;
-  isLinked?: boolean;
-}
-
-export interface ExpandedArchiveData {
-  teachers: ExpandedArchiveTeacher[];
-  totalCount: number;
-  withPhotoCount: number;
-  missingPhotoCount: number;
-}
-
-export interface ExpandedArchiveTeacher {
-  archiveId: number;
-  name: string;
-  schoolId: number;
+export interface ExpandedProjectInfo {
+  projectId: number;
   schoolName: string;
-  hasPhoto: boolean;
-  photoThumbUrl: string | null;
-  photoUrl: string | null;
+  className: string;
+  isSource?: boolean;
+  sameSchool?: boolean;
+}
+
+export interface ExpandedUploadedPhoto {
+  id: number;
+  filename: string;
+  url: string;
+  thumbUrl: string;
 }
 
 export interface ExpandedClassData {
@@ -61,4 +54,22 @@ export interface SimilarityPersonRef {
   personId: number;
   projectId: number;
   name: string;
+}
+
+export interface SyncResult {
+  synced: number;
+  results: SyncResultItem[];
+  message: string;
+}
+
+export interface SyncResultItem {
+  photoId: number;
+  filename: string;
+  matched: boolean;
+  teachers: Array<{
+    personId: number;
+    name: string;
+    projectId: number;
+    className: string;
+  }>;
 }

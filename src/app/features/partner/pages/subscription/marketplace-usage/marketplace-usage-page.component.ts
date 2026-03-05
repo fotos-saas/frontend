@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarketplaceService } from '../../../services/marketplace.service';
 import { UsageResponse } from '../../../models/marketplace.models';
 import { LucideAngularModule } from 'lucide-angular';
@@ -11,9 +12,11 @@ import { DecimalPipe, DatePipe } from '@angular/common';
   imports: [LucideAngularModule, DecimalPipe, DatePipe],
   templateUrl: './marketplace-usage-page.component.html',
   styleUrl: './marketplace-usage-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MarketplaceUsagePageComponent implements OnInit {
   private readonly marketplaceService = inject(MarketplaceService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
   readonly loading = signal(true);
@@ -26,7 +29,7 @@ export class MarketplaceUsagePageComponent implements OnInit {
 
   loadUsage(): void {
     this.loading.set(true);
-    this.marketplaceService.getUsage(this.selectedMonth()).subscribe({
+    this.marketplaceService.getUsage(this.selectedMonth()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: data => {
         this.usage.set(data);
         this.loading.set(false);

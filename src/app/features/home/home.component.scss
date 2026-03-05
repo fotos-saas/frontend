@@ -602,9 +602,6 @@ $blue-600: get-color('primary', 600);
   z-index: var(--z-modal);
   padding: 1rem;
   animation: fadeIn 0.15s ease-out;
-  @media (prefers-color-scheme: dark) {
-    background: rgba(0, 0, 0, 0.7);
-  }
 }
 
 @keyframes scaleIn {

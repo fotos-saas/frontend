@@ -151,16 +151,6 @@
   }
 }
 
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .hero {
-    &__cta {
-      background: rgba(255, 255, 255, 0.95);
-      color: get-color('slate', 900);
-    }
-  }
-}
-
 // Responsive
 @media (max-width: 640px) {
   .hero {

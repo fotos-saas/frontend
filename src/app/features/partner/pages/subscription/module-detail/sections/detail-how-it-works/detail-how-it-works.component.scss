@@ -72,21 +72,3 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .section-title { color: get-color('slate', 100); }
-
-  .timeline-step {
-    &__number {
-      background: get-color('primary', 600);
-    }
-
-    &__line {
-      background: get-color('slate', 700);
-    }
-
-    &__content {
-      h3 { color: get-color('slate', 100); }
-      p { color: get-color('slate', 400); }
-    }
-  }
-}

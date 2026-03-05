@@ -62,39 +62,6 @@
 }
 
 // ==========================================
-// DARK MODE
-// ==========================================
-
-@media (prefers-color-scheme: dark) {
-  .preset-selector {
-    .label {
-      color: get-color('gray', 400);
-    }
-  }
-
-  .preset-btn {
-    background: get-color('gray', 700);
-
-    &:hover {
-      background: get-color('gray', 600);
-    }
-
-    &.selected {
-      background: #2e1065;
-      border-color: #8b5cf6;
-
-      .text {
-        color: #c4b5fd;
-      }
-    }
-
-    .text {
-      color: get-color('gray', 300);
-    }
-  }
-}
-
-// ==========================================
 // MOBILE
 // ==========================================
 

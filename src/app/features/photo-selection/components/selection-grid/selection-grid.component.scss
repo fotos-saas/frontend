@@ -430,11 +430,6 @@ $color-selected-light: rgba(59, 130, 246, 0.1);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-// Dark mode skeleton
-@media (prefers-color-scheme: dark) {
-  .skeleton-shimmer { --shimmer-light: get-color('gray', 700); --shimmer-mid: get-color('gray', 600); }
-}
-.dark .skeleton-shimmer { --shimmer-light: get-color('gray', 700); --shimmer-mid: get-color('gray', 600); }
 
 // Animations
 @keyframes checkPop {

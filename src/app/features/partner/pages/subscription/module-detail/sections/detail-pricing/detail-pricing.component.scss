@@ -215,57 +215,6 @@
 }
 
 // ============================================================================
-// Dark mode
-// ============================================================================
-
-@media (prefers-color-scheme: dark) {
-  .section-title { color: get-color('slate', 100); }
-
-  .pricing-card {
-    background: get-color('slate', 800);
-    border-color: get-color('slate', 700);
-
-    &--free {
-      background: linear-gradient(135deg, rgba(get-color('success', 900), 0.3) 0%, get-color('slate', 800) 100%);
-      border-color: get-color('success', 800);
-    }
-
-    &--recommended {
-      background: linear-gradient(135deg, rgba(get-color('primary', 900), 0.4) 0%, get-color('slate', 800) 100%);
-      border-color: get-color('primary', 700);
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
-    }
-  }
-
-  .pricing-free-icon {
-    background: rgba(get-color('success', 800), 0.5);
-    color: get-color('success', 400);
-  }
-
-  .pricing-free-title { color: get-color('slate', 100); }
-  .pricing-free-desc { color: get-color('slate', 400); }
-
-  .pricing-per-use-header {
-    background: rgba(get-color('primary', 800), 0.5);
-    color: get-color('primary', 300);
-  }
-
-  .pricing-plan-label { color: get-color('slate', 500); }
-  .pricing-amount__value { color: get-color('slate', 100); }
-  .pricing-amount__unit { color: get-color('slate', 500); }
-  .pricing-description { color: get-color('slate', 400); }
-
-  .pricing-save-badge {
-    background: linear-gradient(135deg, get-color('primary', 600), get-color('primary', 800));
-  }
-
-  .pricing-active {
-    background: rgba(get-color('success', 800), 0.5);
-    color: get-color('success', 300);
-  }
-}
-
-// ============================================================================
 // Responsive
 // ============================================================================
 

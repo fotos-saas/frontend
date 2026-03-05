@@ -80,33 +80,3 @@
   }
 }
 
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .btn {
-    &--secondary {
-      background: get-color('slate', 700);
-      color: get-color('slate', 300);
-
-      &:hover:not(:disabled) { background: get-color('slate', 600); }
-    }
-
-    &--outline {
-      border-color: get-color('slate', 600);
-      color: get-color('slate', 300);
-
-      &:hover:not(:disabled) {
-        background: get-color('slate', 700);
-        border-color: get-color('slate', 500);
-      }
-    }
-
-    &--danger-outline {
-      color: get-color('error', 400);
-      border-color: get-color('error', 800);
-
-      &:hover:not(:disabled) {
-        background: rgba(get-color('error', 900), 0.4);
-      }
-    }
-  }
-}

@@ -34,32 +34,6 @@
   --schedule-card-secondary: #6b7280;
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  :root {
-    --schedule-card-bg: #1f2937;
-    --schedule-card-border: #374151;
-    --schedule-card-border-hover: #4b5563;
-
-    // Success state dark
-    --schedule-card-success-bg: #064e3b;
-    --schedule-card-success-border: #10b981;
-    --schedule-card-success-text: #a7f3d0;
-    --schedule-card-success-icon-bg: #047857;
-
-    // Warning state dark
-    --schedule-card-warning-bg: #78350f;
-    --schedule-card-warning-border: #f59e0b;
-    --schedule-card-warning-text: #fcd34d;
-    --schedule-card-warning-icon-bg: #b45309;
-
-    // Text dark
-    --schedule-card-label: #6b7280;
-    --schedule-card-value: #f3f4f6;
-    --schedule-card-secondary: #6b7280;
-  }
-}
-
 // ============================================================================
 // BEM CLASSES
 // ============================================================================

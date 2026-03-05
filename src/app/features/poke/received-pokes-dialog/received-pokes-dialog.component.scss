@@ -112,40 +112,6 @@
   border: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  .mark-read-btn {
-    background: get-color('gray', 700);
-    color: get-color('gray', 300);
-
-    &:hover {
-      background: get-color('gray', 600);
-    }
-  }
-
-  .poke-item {
-    background: get-color('gray', 700);
-
-    &.unread {
-      background: #422006;
-      border-left-color: get-color('warning', 500);
-    }
-  }
-
-  .poke-info {
-    .from-name {
-      color: get-color('gray', 100);
-    }
-
-    .poke-message {
-      color: get-color('gray', 300);
-    }
-
-    .poke-time {
-      color: get-color('gray', 500);
-    }
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .poke-item,
   .mark-read-btn {

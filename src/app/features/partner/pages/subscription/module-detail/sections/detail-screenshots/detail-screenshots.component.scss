@@ -58,30 +58,6 @@
   background: white;
 }
 
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .section-title { color: get-color('slate', 100); }
-
-  .screenshot-card {
-    border-color: get-color('slate', 700);
-
-    &:hover {
-      border-color: get-color('slate', 600);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  .screenshot-placeholder {
-    background: get-color('slate', 700);
-    color: get-color('slate', 500);
-  }
-
-  .screenshot-caption {
-    background: get-color('slate', 800);
-    color: get-color('slate', 400);
-  }
-}
-
 @media (max-width: 640px) {
   .screenshots-grid {
     grid-template-columns: 1fr;

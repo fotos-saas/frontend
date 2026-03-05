@@ -73,32 +73,6 @@
   }
 }
 
-// Dark mode
-@media (prefers-color-scheme: dark) {
-  .section-title { color: get-color('slate', 100); }
-
-  .faq-item {
-    background: get-color('slate', 800);
-    border-color: get-color('slate', 700);
-
-    &--open {
-      border-color: get-color('primary', 700);
-    }
-  }
-
-  .faq-question {
-    color: get-color('slate', 200);
-
-    &:hover { color: get-color('slate', 100); }
-  }
-
-  .faq-chevron { color: get-color('slate', 500); }
-
-  .faq-answer p {
-    color: get-color('slate', 400);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .faq-chevron { transition: none !important; }
   .faq-answer { transition: none !important; }

@@ -25,16 +25,3 @@
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .navbar__guest-badge {
-    color: #fef3c7;
-    background: linear-gradient(135deg, #78350f 0%, get-color('warning', 800) 100%);
-    border-color: #b45309;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-
-    &:hover {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    }
-  }
-}

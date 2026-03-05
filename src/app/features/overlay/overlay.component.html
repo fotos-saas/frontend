@@ -825,6 +825,7 @@
                   [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
                   [style.border-left-color]="group.colorIndex | dragOrderColor"
                   cdkDrag
+                  [cdkDragData]="person"
                   [cdkDragDisabled]="!!dragOrderSearchQuery()"
                   (click)="toggleDragOrderSelect(person.id, $event)"
                 >
@@ -887,6 +888,7 @@
             class="drag-order-panel__item"
             [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
             cdkDrag
+            [cdkDragData]="person"
             [cdkDragDisabled]="!!dragOrderSearchQuery()"
             (click)="toggleDragOrderSelect(person.id, $event)"
           >

@@ -486,40 +486,59 @@ export class OverlayDragOrderService {
 
   /** Elem mozgatás csoportba */
   onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void {
+    const sel = this.selected();
+    const draggedItem = event.item.data as PersonItem | undefined;
+    const isMulti = sel.size > 1 && draggedItem && sel.has(draggedItem.id);
+
     if (event.previousContainer === event.container) {
       // Csoporton belüli mozgatás
-      const grps = this.groups().map(g => {
-        if (g.id !== groupId) return g;
-        const items = [...g.items];
-        moveItemInArray(items, event.previousIndex, event.currentIndex);
-        return { ...g, items };
-      });
-      this.groups.set(grps);
-    } else {
-      // Másik listából ide húzás — saját tömbökön dolgozunk
-      const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
-      const currGroup = this.groups().find(g => g.id === groupId);
-      if (!currGroup) return;
-
-      if (sourceGroupId) {
-        // Forrás: másik csoport
-        const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
-        if (!sourceGroup) return;
-        const srcItems = [...sourceGroup.items];
-        const dstItems = [...currGroup.items];
-        transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
-        this.groups.update(gs => gs.map(g => {
-          if (g.id === sourceGroupId) return { ...g, items: srcItems };
-          if (g.id === groupId) return { ...g, items: dstItems };
-          return g;
-        }));
+      if (isMulti) {
+        this.multiMoveWithinList(
+          g => {
+            const grp = g.find(gr => gr.id === groupId);
+            return grp ? grp.items : [];
+          },
+          reordered => {
+            this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, items: reordered } : g));
+          },
+          sel, event.previousIndex, event.currentIndex,
+        );
       } else {
-        // Forrás: ungrouped
-        const srcItems = [...this.ungrouped()];
-        const dstItems = [...currGroup.items];
-        transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
-        this.ungrouped.set(srcItems);
-        this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, items: dstItems } : g));
+        const grps = this.groups().map(g => {
+          if (g.id !== groupId) return g;
+          const items = [...g.items];
+          moveItemInArray(items, event.previousIndex, event.currentIndex);
+          return { ...g, items };
+        });
+        this.groups.set(grps);
+      }
+    } else {
+      // Másik listából ide húzás
+      if (isMulti) {
+        this.multiMoveBetweenContainers(sel, groupId, event.currentIndex);
+      } else {
+        const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
+        const currGroup = this.groups().find(g => g.id === groupId);
+        if (!currGroup) return;
+
+        if (sourceGroupId) {
+          const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
+          if (!sourceGroup) return;
+          const srcItems = [...sourceGroup.items];
+          const dstItems = [...currGroup.items];
+          transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
+          this.groups.update(gs => gs.map(g => {
+            if (g.id === sourceGroupId) return { ...g, items: srcItems };
+            if (g.id === groupId) return { ...g, items: dstItems };
+            return g;
+          }));
+        } else {
+          const srcItems = [...this.ungrouped()];
+          const dstItems = [...currGroup.items];
+          transferArrayItem(srcItems, dstItems, event.previousIndex, event.currentIndex);
+          this.ungrouped.set(srcItems);
+          this.groups.update(gs => gs.map(g => g.id === groupId ? { ...g, items: dstItems } : g));
+        }
       }
     }
     this.rebuildFlatList();
@@ -527,25 +546,40 @@ export class OverlayDragOrderService {
 
   /** Elem mozgatás az ungrouped-be */
   onDropToUngrouped(event: CdkDragDrop<PersonItem[]>): void {
-    if (event.previousContainer === event.container) {
-      const items = [...this.ungrouped()];
-      moveItemInArray(items, event.previousIndex, event.currentIndex);
-      this.ungrouped.set(items);
-    } else {
-      const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
-      const currData = [...this.ungrouped()];
+    const sel = this.selected();
+    const draggedItem = event.item.data as PersonItem | undefined;
+    const isMulti = sel.size > 1 && draggedItem && sel.has(draggedItem.id);
 
-      if (sourceGroupId) {
-        const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
-        if (!sourceGroup) return;
-        const srcItems = [...sourceGroup.items];
-        transferArrayItem(srcItems, currData, event.previousIndex, event.currentIndex);
-        this.groups.update(gs => gs.map(g => g.id === sourceGroupId ? { ...g, items: srcItems } : g));
+    if (event.previousContainer === event.container) {
+      if (isMulti) {
+        this.multiMoveWithinList(
+          () => this.ungrouped(),
+          reordered => this.ungrouped.set(reordered),
+          sel, event.previousIndex, event.currentIndex,
+        );
       } else {
-        // Ugyan az a lista
-        moveItemInArray(currData, event.previousIndex, event.currentIndex);
+        const items = [...this.ungrouped()];
+        moveItemInArray(items, event.previousIndex, event.currentIndex);
+        this.ungrouped.set(items);
       }
-      this.ungrouped.set(currData);
+    } else {
+      if (isMulti) {
+        this.multiMoveBetweenContainers(sel, null, event.currentIndex);
+      } else {
+        const sourceGroupId = this.getGroupIdFromContainerId(event.previousContainer.id);
+        const currData = [...this.ungrouped()];
+
+        if (sourceGroupId) {
+          const sourceGroup = this.groups().find(g => g.id === sourceGroupId);
+          if (!sourceGroup) return;
+          const srcItems = [...sourceGroup.items];
+          transferArrayItem(srcItems, currData, event.previousIndex, event.currentIndex);
+          this.groups.update(gs => gs.map(g => g.id === sourceGroupId ? { ...g, items: srcItems } : g));
+        } else {
+          moveItemInArray(currData, event.previousIndex, event.currentIndex);
+        }
+        this.ungrouped.set(currData);
+      }
     }
     this.rebuildFlatList();
   }
@@ -821,6 +855,77 @@ export class OverlayDragOrderService {
     }
 
     this.rowBreaks.set(result);
+  }
+
+  /**
+   * Multi-select: listán belüli átrendezés.
+   * Kijelölt elemeket kiszedi, majd a cél pozícióba szúrja vissza blokkban.
+   */
+  private multiMoveWithinList(
+    getItems: (groups: DragOrderGroup[]) => PersonItem[],
+    setItems: (reordered: PersonItem[]) => void,
+    sel: Set<number>,
+    previousIndex: number,
+    currentIndex: number,
+  ): void {
+    const items = [...getItems(this.groups())];
+    const selectedItems = items.filter(p => sel.has(p.id));
+    const remaining = items.filter(p => !sel.has(p.id));
+    let insertAt: number;
+    if (currentIndex >= items.length) {
+      insertAt = remaining.length;
+    } else {
+      const targetItem = items[currentIndex];
+      if (sel.has(targetItem.id)) {
+        insertAt = remaining.length;
+      } else {
+        insertAt = remaining.indexOf(targetItem);
+        if (currentIndex > previousIndex) insertAt++;
+      }
+    }
+    remaining.splice(insertAt, 0, ...selectedItems);
+    setItems(remaining);
+  }
+
+  /**
+   * Multi-select: konténerek közötti mozgatás.
+   * Kijelölt elemeket kiszedi minden csoportból + ungrouped-ből,
+   * és a célba (groupId vagy null=ungrouped) szúrja be insertIndex pozícióba.
+   */
+  private multiMoveBetweenContainers(
+    sel: Set<number>,
+    targetGroupId: string | null,
+    insertIndex: number,
+  ): void {
+    // Kijelölt elemek összegyűjtése eredeti sorrendben
+    const allItems = this.buildFlatList();
+    const selectedItems = allItems.filter(p => sel.has(p.id));
+
+    // Kiszedés minden forrásból
+    const grps = this.groups().map(g => ({
+      ...g,
+      items: g.items.filter(p => !sel.has(p.id)),
+    }));
+    const ung = this.ungrouped().filter(p => !sel.has(p.id));
+
+    // Beszúrás a célba
+    if (targetGroupId) {
+      const finalGroups = grps.map(g => {
+        if (g.id !== targetGroupId) return g;
+        const items = [...g.items];
+        const safeIndex = Math.min(insertIndex, items.length);
+        items.splice(safeIndex, 0, ...selectedItems);
+        return { ...g, items };
+      });
+      this.groups.set(finalGroups);
+      this.ungrouped.set(ung);
+    } else {
+      const finalUng = [...ung];
+      const safeIndex = Math.min(insertIndex, finalUng.length);
+      finalUng.splice(safeIndex, 0, ...selectedItems);
+      this.ungrouped.set(finalUng);
+      this.groups.set(grps);
+    }
   }
 
   /** Csoport ID kinyerése a CDK drop list container id-jéből */

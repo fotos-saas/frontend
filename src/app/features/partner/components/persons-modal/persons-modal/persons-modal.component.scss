@@ -56,7 +56,7 @@
 
 ps-toggle {
   flex-shrink: 0;
-  --ps-toggle-bg-off: #94a3b8;
+  --ps-toggle-bg-off: #{get-color('slate', 400)};
 
   ::ng-deep .ps-toggle {
     flex-direction: column;
@@ -129,7 +129,7 @@ ps-toggle {
 
 ps-toggle {
   flex-shrink: 0;
-  --ps-toggle-bg-off: #94a3b8;
+  --ps-toggle-bg-off: #{get-color('slate', 400)};
 }
 
 .modal-content {
@@ -187,7 +187,7 @@ ps-toggle {
 .edit-dialog__label {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #64748b;
+  color: get-color('slate', 500);
   margin-top: 12px;
 
   &:first-child {
@@ -199,19 +199,19 @@ ps-toggle {
   width: 100%;
   padding: 8px 12px;
   margin-top: 4px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid get-color('slate', 200);
   border-radius: 6px;
   font-size: 0.875rem;
   outline: none;
   transition: border-color 0.15s ease;
 
   &:focus {
-    border-color: #3b82f6;
+    border-color: get-color('primary', 500);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
 
   &::placeholder {
-    color: #94a3b8;
+    color: get-color('slate', 400);
   }
 }
 
@@ -235,8 +235,8 @@ ps-toggle {
 }
 
 .edit-row--dirty {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: get-color('primary', 300);
+  background: get-color('primary', 50);
 }
 
 .edit-row--saving {
@@ -269,8 +269,8 @@ ps-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fee2e2;
-  color: #ef4444;
+  background: get-color('error', 100);
+  color: get-color('error', 500);
 }
 
 .edit-thumb-camera {
@@ -279,7 +279,7 @@ ps-toggle {
   right: -4px;
   width: 22px;
   height: 22px;
-  background: #2563eb;
+  background: get-color('primary', 600);
   border: 2px solid #fff;
   border-radius: 50%;
   display: flex;
@@ -291,7 +291,7 @@ ps-toggle {
 }
 
 .edit-thumb-camera:hover {
-  background: #1d4ed8;
+  background: get-color('primary', 700);
   transform: scale(1.1);
 }
 
@@ -315,7 +315,7 @@ ps-toggle {
 }
 
 .edit-field:focus {
-  border-color: #3b82f6;
+  border-color: get-color('primary', 500);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -344,8 +344,8 @@ ps-toggle {
   height: 32px;
   border: none;
   border-radius: 6px;
-  background: #dcfce7;
-  color: #16a34a;
+  background: get-color('success', 100);
+  color: get-color('success', 600);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,7 +355,7 @@ ps-toggle {
 }
 
 .edit-save-btn:hover:not(:disabled) {
-  background: #bbf7d0;
+  background: get-color('success', 200);
 }
 
 .edit-save-btn:disabled {
@@ -367,8 +367,8 @@ ps-toggle {
   height: 32px;
   border: none;
   border-radius: 6px;
-  background: #fee2e2;
-  color: #ef4444;
+  background: get-color('error', 100);
+  color: get-color('error', 500);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,8 +378,8 @@ ps-toggle {
 }
 
 .edit-delete-btn:hover {
-  background: #fecaca;
-  color: #dc2626;
+  background: get-color('error', 200);
+  color: get-color('error', 600);
 }
 
 .spin {
@@ -402,7 +402,7 @@ ps-toggle {
   align-items: center;
   gap: 8px;
   padding: 10px 24px;
-  background: #2563eb;
+  background: get-color('primary', 600);
   border: none;
   border-radius: 8px;
   font-size: 0.875rem;
@@ -413,7 +413,7 @@ ps-toggle {
 }
 
 .save-all-btn:hover {
-  background: #1d4ed8;
+  background: get-color('primary', 700);
 }
 
 // --- Empty state ---
@@ -446,7 +446,7 @@ ps-toggle {
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -519,9 +519,9 @@ ps-toggle {
 }
 
 .en-action-btn--success {
-  background: #dcfce7;
-  border-color: #86efac;
-  color: #16a34a;
+  background: get-color('success', 100);
+  border-color: get-color('success', 300);
+  color: get-color('success', 600);
 }
 
 .extra-names-textarea {
@@ -538,7 +538,7 @@ ps-toggle {
 }
 
 .extra-names-textarea:focus {
-  border-color: #3b82f6;
+  border-color: get-color('primary', 500);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -553,7 +553,7 @@ ps-toggle {
   gap: 6px;
   margin-top: 8px;
   padding: 6px 14px;
-  background: #2563eb;
+  background: get-color('primary', 600);
   border: none;
   border-radius: 6px;
   font-size: 0.8125rem;
@@ -564,7 +564,7 @@ ps-toggle {
 }
 
 .extra-names-save-btn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: get-color('primary', 700);
 }
 
 .extra-names-save-btn:disabled {

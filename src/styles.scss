@@ -107,6 +107,14 @@ input, textarea, [contenteditable="true"] {
   --shadow-color: rgba(0, 0, 0, 0.1);
   --shadow-color-hover: rgba(0, 0, 0, 0.15);
 
+  // Skeleton shimmer
+  --skeleton-base: #f0f0f0;
+  --skeleton-highlight: #e0e0e0;
+
+  // Overlay/transparency
+  --overlay-dark: rgba(0, 0, 0, 0.4);
+  --overlay-light: rgba(255, 255, 255, 0.08);
+
   // Gradient háttérek (light mode)
   --gradient-secondary: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   --gradient-blue: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -187,6 +195,14 @@ input, textarea, [contenteditable="true"] {
     --shadow-color: rgba(0, 0, 0, 0.3);
     --shadow-color-hover: rgba(0, 0, 0, 0.5);
 
+    // Skeleton shimmer (dark)
+    --skeleton-base: #374151;
+    --skeleton-highlight: #4b5563;
+
+    // Overlay/transparency (dark)
+    --overlay-dark: rgba(0, 0, 0, 0.6);
+    --overlay-light: rgba(255, 255, 255, 0.04);
+
     // Gradient háttérek (dark mode)
     --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
     --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
@@ -207,6 +223,10 @@ input, textarea, [contenteditable="true"] {
   --border-color: #374151;
   --shadow-color: rgba(0, 0, 0, 0.3);
   --shadow-color-hover: rgba(0, 0, 0, 0.5);
+  --skeleton-base: #374151;
+  --skeleton-highlight: #4b5563;
+  --overlay-dark: rgba(0, 0, 0, 0.6);
+  --overlay-light: rgba(255, 255, 255, 0.04);
   --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
   --gradient-yellow: linear-gradient(135deg, #78350f 0%, #92400e 100%);
@@ -363,7 +383,7 @@ body.dialog-open {
 
 // Preliminary variant (előzetes projekt — sárga top border)
 .page-card--preliminary {
-  border-top: 3px solid #f59e0b;
+  border-top: 3px solid var(--color-warning, #f59e0b);
 }
 
 // Sticky page-header: scrollozásnál a tetején marad
@@ -385,22 +405,17 @@ body.dialog-open {
   border-radius: 16px 16px 0 0;
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
+// Dark mode page-card stílusok (közös mixin a duplikáció elkerüléséhez)
+@mixin page-card-dark {
   .page-card {
-    // Gradient háttér (subtle dark tint)
     background: linear-gradient(135deg,
       rgba(30, 41, 59, 0.98) 0%,
       rgba(15, 23, 42, 0.95) 100%
     );
-
-    // Gradient border (highlight effekt - fent világosabb, lent sötétebb)
     border-top: 1px solid rgba(71, 85, 105, 0.6);
     border-left: 1px solid rgba(71, 85, 105, 0.4);
     border-right: 1px solid rgba(30, 41, 59, 0.5);
     border-bottom: 1px solid rgba(15, 23, 42, 0.7);
-
-    // Erősebb shadow + subtle inner glow
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 0.25),
       0 10px 20px -5px rgba(0, 0, 0, 0.2),
@@ -429,45 +444,13 @@ body.dialog-open {
   }
 }
 
-.dark .page-card {
-  // Gradient háttér (subtle dark tint)
-  background: linear-gradient(135deg,
-    rgba(30, 41, 59, 0.98) 0%,
-    rgba(15, 23, 42, 0.95) 100%
-  );
-
-  // Gradient border (highlight effekt - fent világosabb, lent sötétebb)
-  border-top: 1px solid rgba(71, 85, 105, 0.6);
-  border-left: 1px solid rgba(71, 85, 105, 0.4);
-  border-right: 1px solid rgba(30, 41, 59, 0.5);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.7);
-
-  // Erősebb shadow + subtle inner glow
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.25),
-    0 10px 20px -5px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(71, 85, 105, 0.4);
-
-  &:hover {
-    box-shadow:
-      0 8px 16px -4px rgba(0, 0, 0, 0.3),
-      0 20px 40px -10px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(71, 85, 105, 0.5);
-  }
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  @include page-card-dark;
 }
 
-.dark .page-card > .page-header {
-  background: linear-gradient(135deg,
-    rgba(30, 41, 59, 0.98) 0%,
-    rgba(15, 23, 42, 0.95) 100%
-  );
-}
-
-.dark .page-card--hoverable:hover {
-  box-shadow:
-    0 12px 24px -6px rgba(0, 0, 0, 0.35),
-    0 24px 48px -12px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(71, 85, 105, 0.5);
+.dark {
+  @include page-card-dark;
 }
 
 // Mobil - kisebb padding
@@ -576,7 +559,7 @@ body.dialog-open {
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--overlay-dark);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px); // Safari támogatás
   display: flex;
@@ -608,7 +591,7 @@ body.dialog-open {
 // FONTOS: A padding-et a komponens belső tartalma kezeli!
 // Használj pl. Tailwind p-6 class-t vagy saját .modal-content wrapper-t
 .dialog-panel {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
   width: 100%;
   max-width: 400px;
@@ -666,35 +649,12 @@ body.dialog-open {
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
+    var(--skeleton-base) 25%,
+    var(--skeleton-highlight) 50%,
+    var(--skeleton-base) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
-}
-
-// Dark mode skeleton shimmer
-@media (prefers-color-scheme: dark) {
-  .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      #374151 25%,
-      #4b5563 50%,
-      #374151 75%
-    );
-    background-size: 200% 100%;
-  }
-}
-
-.dark .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    #374151 25%,
-    #4b5563 50%,
-    #374151 75%
-  );
-  background-size: 200% 100%;
 }
 
 // Lazy image wrapper (pozícionálás a skeleton-hez)
@@ -720,17 +680,7 @@ body.dialog-open {
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer {
     animation: none;
-    background: get-color('gray', 200);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .skeleton-shimmer {
-      background: get-color('gray', 600);
-    }
-  }
-
-  .dark .skeleton-shimmer {
-    background: get-color('gray', 600);
+    background: var(--skeleton-base);
   }
 }
 

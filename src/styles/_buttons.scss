@@ -19,16 +19,16 @@
 // ============================================================================
 
 /// Standard primary button - kek hatter, feher szoveg
-/// @param {string} $bg - Hatterszin [default: var(--color-primary, #1e3a5f)]
-/// @param {string} $hover-bg - Hover hatterszin [default: var(--color-primary-dark, #152a45)]
+/// @param {string} $bg - Hatterszin [default: var(--color-primary, #2563eb)]
+/// @param {string} $hover-bg - Hover hatterszin [default: var(--color-primary-dark, #1d4ed8)]
 /// @param {string} $color - Szovegszin [default: #ffffff]
 /// @param {string} $padding - Belteres [default: 10px 20px]
 /// @param {string} $radius - Sarok lekerekites [default: 8px]
 /// @param {string} $font-size - Betumeret [default: 0.875rem]
 /// @param {number} $font-weight - Betu vastagsag [default: 600]
 @mixin btn-primary(
-  $bg: var(--color-primary, #1e3a5f),
-  $hover-bg: var(--color-primary-dark, #152a45),
+  $bg: var(--color-primary, #2563eb),
+  $hover-bg: var(--color-primary-dark, #1d4ed8),
   $color: #ffffff,
   $padding: 10px 20px,
   $radius: 8px,
@@ -63,7 +63,7 @@
 // ============================================================================
 
 /// Standard secondary button - feher/vilagos hatter, szurke border
-/// @param {string} $bg - Hatterszin [default: #ffffff]
+/// @param {string} $bg - Hatterszin [default: var(--bg-primary, #ffffff)]
 /// @param {string} $hover-bg - Hover hatterszin [default: get-color('slate', 50)]
 /// @param {string} $color - Szovegszin [default: get-color('slate', 600)]
 /// @param {string} $border-color - Keret szin [default: get-color('slate', 200)]
@@ -73,7 +73,7 @@
 /// @param {string} $font-size - Betumeret [default: 0.875rem]
 /// @param {number} $font-weight - Betu vastagsag [default: 500]
 @mixin btn-secondary(
-  $bg: #ffffff,
+  $bg: var(--bg-primary, #ffffff),
   $hover-bg: get-color('slate', 50),
   $color: get-color('slate', 600),
   $border-color: get-color('slate', 200),

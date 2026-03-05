@@ -835,23 +835,32 @@ export class OverlayDragOrderService {
       return;
     }
 
-    // Y szerint rendezés, azonos Y-on belül X szerint
-    withPos.sort((a, b) => {
-      if (Math.abs(a.y - b.y) <= ROW_THRESHOLD) return a.x - b.x;
-      return a.y - b.y;
-    });
+    // 1. Y szerint rendezés (stabil)
+    withPos.sort((a, b) => a.y - b.y);
 
-    // Sorokba csoportosítás
-    const result = new Map<number, number>();
-    let currentRow = 0;
+    // 2. Sorokba csoportosítás: az első elem Y-jához képest threshold-on belül = azonos sor
+    const rows: ItemWithPos[][] = [];
+    let currentRowItems: ItemWithPos[] = [withPos[0]];
     let currentRowY = withPos[0].y;
 
-    for (const item of withPos) {
-      if (Math.abs(item.y - currentRowY) > ROW_THRESHOLD) {
-        currentRow++;
-        currentRowY = item.y;
+    for (let i = 1; i < withPos.length; i++) {
+      if (Math.abs(withPos[i].y - currentRowY) > ROW_THRESHOLD) {
+        rows.push(currentRowItems);
+        currentRowItems = [withPos[i]];
+        currentRowY = withPos[i].y;
+      } else {
+        currentRowItems.push(withPos[i]);
       }
-      result.set(item.id, currentRow);
+    }
+    rows.push(currentRowItems);
+
+    // 3. Sorokon belül X szerint rendezés, majd sor index hozzárendelés
+    const result = new Map<number, number>();
+    for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+      rows[rowIdx].sort((a, b) => a.x - b.x);
+      for (const item of rows[rowIdx]) {
+        result.set(item.id, rowIdx);
+      }
     }
 
     this.rowBreaks.set(result);

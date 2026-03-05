@@ -5,9 +5,10 @@
     <span class="class-column__count">({{ classData().teachers.length }})</span>
   </div>
 
-  <div class="class-column__list">
+  <div class="class-column__list" #listRef>
     @for (teacher of classData().teachers; track teacher.personId) {
       <app-expanded-teacher-card
+        [attr.data-person-id]="teacher.personId"
         [teacher]="teacher"
         [isHighlighted]="isHighlighted(teacher)"
         [highlightType]="getHighlightType(teacher)"

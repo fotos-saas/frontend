@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, viewChild } from '@angular/core';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LucideAngularModule } from 'lucide-angular';
 import { ExpandedClassData, ExpandedClassTeacher } from '../expanded-teacher-view.types';
@@ -18,10 +18,35 @@ export class ExpandedClassColumnComponent {
   private dataService = inject(ExpandedTeacherViewDataService);
 
   readonly classData = input.required<ExpandedClassData>();
+  readonly listEl = viewChild<ElementRef<HTMLElement>>('listRef');
 
   readonly matchingIds = computed(() => this.dataService.matchingPersonIds());
   readonly hoveredPersonId = computed(() => this.dataService.hoveredPersonId());
   readonly similarityGroup = computed(() => this.dataService.highlightedSimilarityGroup());
+
+  constructor() {
+    effect(() => {
+      const hoveredId = this.hoveredPersonId();
+      const matching = this.matchingIds();
+      if (!hoveredId || matching.size === 0) return;
+
+      // Ne scrollozzunk abban az oszlopban, ahol a hover történt
+      const isHoverSource = this.classData().teachers.some(t => t.personId === hoveredId);
+      if (isHoverSource) return;
+
+      // Keressük meg a matching tanárt ebben az oszlopban
+      const matchInThisColumn = this.classData().teachers.find(t => matching.has(t.personId));
+      if (!matchInThisColumn) return;
+
+      const listContainer = this.listEl()?.nativeElement;
+      if (!listContainer) return;
+
+      const card = listContainer.querySelector(`[data-person-id="${matchInThisColumn.personId}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
 
   getHighlightType(teacher: ExpandedClassTeacher): 'exact' | 'similar' | 'missing' | null {
     const matching = this.matchingIds();

@@ -227,6 +227,14 @@ export class ExpandedTeacherViewDataService {
       }
     }
 
+    this.logger.info('[handlePhotoDrop]', {
+      targetPersonId,
+      targetName,
+      targetNormalized,
+      allPersonIds,
+      totalClasses: viewData.classes.length,
+    });
+
     if (allPersonIds.length <= 1) {
       // Csak 1 osztályban van → azonnal assign
       this.assignPhotoToTeacher(photoId, [targetPersonId]);

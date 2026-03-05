@@ -93,6 +93,13 @@ export class PartnerTeacherService implements ArchiveService {
     );
   }
 
+  setOverridePhoto(projectId: number, personId: number, mediaId: number): Observable<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }> {
+    return this.http.patch<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }>(
+      `${environment.apiUrl}/partner/projects/${projectId}/persons/${personId}/override-photo`,
+      { photo_id: mediaId },
+    );
+  }
+
   removeOverridePhoto(projectId: number, personId: number): Observable<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }> {
     return this.http.patch<{ success: boolean; data: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null } }>(
       `${environment.apiUrl}/partner/projects/${projectId}/persons/${personId}/override-photo`,

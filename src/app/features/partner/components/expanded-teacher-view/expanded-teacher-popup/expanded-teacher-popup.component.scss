@@ -112,16 +112,6 @@
     }
   }
 
-  &__no-photo {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgb(219 234 254);
-    color: rgb(59 130 246);
-  }
-
   &__info {
     display: flex;
     flex-direction: column;
@@ -140,13 +130,124 @@
     font-weight: 500;
     color: rgb(17 24 39);
   }
+}
 
-  &__school {
-    font-size: 12px;
+// Szekciók
+.popup-section {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &--actions {
+    border-top: 1px solid rgb(229 231 235);
+    padding-top: 12px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: rgb(107 114 128);
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: rgb(59 130 246);
+    padding: 2px 4px;
+    border-radius: 4px;
+
+    lucide-icon {
+      margin-left: 2px;
+    }
+
+    &:hover {
+      background-color: rgb(239 246 255);
+    }
   }
 }
 
+// Archív fotó strip
+.popup-photo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -3px;
+
+  &__item {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: default;
+    margin: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(243 244 246);
+    color: rgb(156 163 175);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &--active {
+      border-color: rgb(34 197 94);
+    }
+  }
+
+  &__more {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(243 244 246);
+    color: rgb(107 114 128);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 3px;
+
+    &:hover {
+      background-color: rgb(229 231 235);
+    }
+  }
+
+  &__skeleton {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgb(243 244 246) 25%, rgb(229 231 235) 50%, rgb(243 244 246) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin: 3px;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Előfordulás lista
 .popup-list {
   display: flex;
   flex-direction: column;
@@ -217,9 +318,48 @@
     color: rgb(107 114 128);
   }
 
-  &__status {
+  &__actions {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
     margin-left: 8px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background-color: rgb(219 234 254);
+    color: rgb(59 130 246);
+    margin-right: 4px;
+  }
+
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: rgb(107 114 128);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: rgb(239 246 255);
+      color: rgb(59 130 246);
+    }
+
+    &--danger:hover {
+      background-color: rgb(254 226 226);
+      color: rgb(239 68 68);
+    }
   }
 
   &__check {
@@ -231,8 +371,53 @@
   }
 }
 
+// Műveletek
+.popup-actions {
+  display: flex;
+  flex-direction: column;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 8px;
+    background: white;
+    color: rgb(17 24 39);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    lucide-icon {
+      margin-right: 8px;
+      color: rgb(107 114 128);
+    }
+
+    &:hover:not(:disabled) {
+      background-color: rgb(249 250 251);
+      border-color: rgb(209 213 219);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .popup-panel {
+    animation: none;
+  }
+
+  .popup-photo-strip__skeleton {
     animation: none;
   }
 }

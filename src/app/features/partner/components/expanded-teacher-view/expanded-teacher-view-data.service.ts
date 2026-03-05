@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import {
   ExpandedViewResponse,
@@ -325,6 +326,95 @@ export class ExpandedTeacherViewDataService {
         this.logger.error('Override eltávolítási hiba', err);
       },
     });
+  }
+
+  setOverrideFromArchive(personId: number, mediaId: number): void {
+    const viewData = this.data();
+    if (!viewData) return;
+
+    let projectId: number | null = null;
+    for (const cls of viewData.classes) {
+      if (cls.teachers.some(t => t.personId === personId)) {
+        projectId = cls.projectId;
+        break;
+      }
+    }
+    if (!projectId) return;
+
+    this.teacherService.setOverridePhoto(projectId, personId, mediaId).subscribe({
+      next: (response) => {
+        const result = response.data;
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            classes: current.classes.map(cls => ({
+              ...cls,
+              teachers: cls.teachers.map(t =>
+                t.personId === personId
+                  ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
+                  : t
+              ),
+            })),
+          });
+        }
+      },
+      error: (err) => {
+        this.logger.error('Override beállítási hiba', err);
+      },
+    });
+  }
+
+  setOverrideFromArchiveForAll(personIds: number[], mediaId: number): void {
+    const viewData = this.data();
+    if (!viewData || personIds.length === 0) return;
+
+    const requests = personIds.map(pid => {
+      let projectId: number | null = null;
+      for (const cls of viewData.classes) {
+        if (cls.teachers.some(t => t.personId === pid)) {
+          projectId = cls.projectId;
+          break;
+        }
+      }
+      return projectId ? this.teacherService.setOverridePhoto(projectId, pid, mediaId) : null;
+    }).filter((r): r is NonNullable<typeof r> => r !== null);
+
+    if (requests.length === 0) return;
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        const current = this.data();
+        if (!current) return;
+
+        const resultMap = new Map<number, { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null }>();
+        responses.forEach((resp, i) => {
+          resultMap.set(personIds[i], resp.data);
+        });
+
+        this.data.set({
+          ...current,
+          classes: current.classes.map(cls => ({
+            ...cls,
+            teachers: cls.teachers.map(t => {
+              const result = resultMap.get(t.personId);
+              return result
+                ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
+                : t;
+            }),
+          })),
+        });
+      },
+      error: (err) => {
+        this.logger.error('Tömeges override beállítási hiba', err);
+      },
+    });
+  }
+
+  reloadData(): void {
+    if (this.sourceProjectId) {
+      this.loadData(this.sourceProjectId);
+    }
   }
 
   onTeacherHover(normalizedName: string | null, personId: number | null): void {

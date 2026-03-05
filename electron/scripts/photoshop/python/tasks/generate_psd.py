@@ -84,15 +84,15 @@ def cm_to_px(cm: float, dpi: int) -> int:
 
 def sanitize_name(name: str, person_id: int) -> str:
     """
-    Nev + ID slug generalas: 'Kiss János' + 42 => 'kiss-janos---42'
-    Ekezetek eltavolitasa, kisbetusites, nem-alfanumerikus => kotojel.
+    Nev + ID slug generalas: 'Kiss János' + 42 => 'kiss_janos---42'
+    Ekezetek eltavolitasa, kisbetusites, nem-alfanumerikus => alulvonas.
     """
     slug = name
     for accent, replacement in ACCENT_MAP.items():
         slug = slug.replace(accent, replacement)
     slug = slug.lower()
-    slug = re.sub(r'[^a-z0-9]+', '-', slug)
-    slug = slug.strip('-')
+    slug = re.sub(r'[^a-z0-9]+', '_', slug)
+    slug = slug.strip('_')
     return f'{slug}---{person_id}'
 
 

@@ -181,6 +181,25 @@ export class TabloEditorPsdService {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      // Layer nevek javítása: kötőjel → alulvonás (a --- előtti slug részben)
+      if (persons.length > 0) {
+        const renameMap: Array<{ old: string; new: string }> = [];
+        for (const p of persons) {
+          const stripped = p.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+          const badSlug = stripped.replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
+          const goodSlug = stripped.replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
+          if (badSlug !== goodSlug) {
+            renameMap.push({ old: `${badSlug}---${p.id}`, new: `${goodSlug}---${p.id}` });
+          }
+        }
+        if (renameMap.length > 0) {
+          await window.electronAPI?.photoshop.runJsx({
+            scriptName: 'actions/rename-layers.jsx',
+            jsonData: { renameMap },
+          });
+        }
+      }
+
       const psdFileName = result.outputPath?.split('/').pop() || undefined;
 
       const guideResult = await this.ps.addGuides(psdFileName);

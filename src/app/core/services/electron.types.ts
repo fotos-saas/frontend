@@ -547,6 +547,43 @@ interface PortraitAPI {
   readProcessedFile: (params: { filePath: string }) => Promise<{ success: boolean; data?: ArrayBuffer; error?: string }>;
 }
 
+export interface AnonymizeFaceRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface AnonymizeSettings {
+  mode?: string;     // 'blur' | 'rect'
+  color?: string;
+  opacity?: number;
+  quality?: number;
+}
+
+interface AnonymizerAPI {
+  selectWorkDir: () => Promise<{
+    cancelled: boolean;
+    path?: string;
+    imageCount?: number;
+    images?: Array<{ name: string; path: string; size: number }>;
+    error?: string;
+  }>;
+  detect: (params: { inputPath: string }) => Promise<{
+    success: boolean; error?: string;
+    input?: string; image_width?: number; image_height?: number;
+    faces?: AnonymizeFaceRect[];
+    face_count?: number; processing_time?: number;
+  }>;
+  process: (params: {
+    inputPath: string;
+    faces: AnonymizeFaceRect[];
+    settings?: AnonymizeSettings;
+  }) => Promise<{
+    success: boolean; outputPath?: string; error?: string;
+  }>;
+}
+
 export interface ElectronAPI {
   showNotification: (options: unknown, body?: string) => Promise<NotificationResultData | boolean>;
   onNotificationClicked: (callback: (data: { id: string }) => void) => CleanupFn;
@@ -592,6 +629,7 @@ export interface ElectronAPI {
   portrait: PortraitAPI;
   crop: CropAPI;
   sync: SyncAPI;
+  anonymizer: AnonymizerAPI;
 }
 
 declare global {

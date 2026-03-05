@@ -569,6 +569,33 @@ contextBridge.exposeInMainWorld('electronAPI', {
       }>,
   },
 
+  // ============ Tabló Referencia Anonimizáló ============
+  anonymizer: {
+    selectWorkDir: () =>
+      ipcRenderer.invoke('anonymizer:select-workdir') as Promise<{
+        cancelled: boolean;
+        path?: string;
+        imageCount?: number;
+        images?: Array<{ name: string; path: string; size: number }>;
+        error?: string;
+      }>,
+    detect: (params: { inputPath: string }) =>
+      ipcRenderer.invoke('anonymizer:detect', params) as Promise<{
+        success: boolean; error?: string;
+        input?: string; image_width?: number; image_height?: number;
+        faces?: Array<{ x: number; y: number; w: number; h: number }>;
+        face_count?: number; processing_time?: number;
+      }>,
+    process: (params: {
+      inputPath: string;
+      faces: Array<{ x: number; y: number; w: number; h: number }>;
+      settings?: { mode?: string; color?: string; opacity?: number; quality?: number };
+    }) =>
+      ipcRenderer.invoke('anonymizer:process', params) as Promise<{
+        success: boolean; outputPath?: string; error?: string;
+      }>,
+  },
+
   // ============ LAN Szinkronizálás ============
   sync: {
     getStatus: () =>

@@ -271,6 +271,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/tablo-designer/tablo-designer.component').then(m => m.TabloDesignerComponent),
         title: 'Tablókészítő'
       },
+      // Tabló Referencia Anonimizáló (Electron only)
+      {
+        path: 'tablo-anonymizer',
+        loadComponent: () => import('./features/partner/pages/tablo-anonymizer/tablo-anonymizer.component').then(m => m.TabloAnonymizerComponent),
+        title: 'Tabló anonimizáló'
+      },
       {
         path: 'contacts',
         loadComponent: () => import('./features/partner/pages/contact-list/contact-list.component').then(m => m.PartnerContactListComponent)
@@ -610,6 +616,12 @@ export const routes: Routes = [
         path: 'tablo-designer',
         loadComponent: () => import('./features/partner/pages/tablo-designer/tablo-designer.component').then(m => m.TabloDesignerComponent),
         title: 'Tablókészítő'
+      },
+      // Tabló Referencia Anonimizáló (Electron only)
+      {
+        path: 'tablo-anonymizer',
+        loadComponent: () => import('./features/partner/pages/tablo-anonymizer/tablo-anonymizer.component').then(m => m.TabloAnonymizerComponent),
+        title: 'Tabló anonimizáló'
       },
       {
         path: 'contacts',

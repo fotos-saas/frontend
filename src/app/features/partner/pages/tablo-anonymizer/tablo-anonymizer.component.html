@@ -1,0 +1,211 @@
+<div class="tablo-anonymizer page-card">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header__title">
+      <lucide-icon [name]="ICONS.EYE_OFF" [size]="24" />
+      <h1>Tabló referencia anonimizáló</h1>
+    </div>
+    <p class="page-header__desc">
+      Tablóképek arcainak automatikus felismerése és elfedése szürke téglalappal (GDPR).
+    </p>
+  </div>
+
+  <!-- Step 1: Mappa választás -->
+  @if (step() === 'select') {
+    <div class="step-card">
+      <div class="step-card__icon">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="48" />
+      </div>
+      <h2>Válassz mappát</h2>
+      <p>Válaszd ki a mappát, amelyben a tablóképek vannak. A program az összes képfájlt megkeresi.</p>
+      <button class="btn btn--primary btn--lg" (click)="selectFolder()">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+        Mappa kiválasztása
+      </button>
+    </div>
+  }
+
+  <!-- Step 2: Arcdetektálás -->
+  @if (step() === 'detect') {
+    <div class="step-card">
+      <div class="info-bar">
+        <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16" />
+        <span class="info-bar__path">{{ workDir() }}</span>
+        <span class="info-bar__badge">{{ totalImages() }} kép</span>
+      </div>
+
+      <h2>Arcok felismerése</h2>
+      <p>A program MediaPipe AI-val megkeresi az összes arcot a tablóképeken.</p>
+
+      <button
+        class="btn btn--primary btn--lg"
+        [disabled]="isProcessing()"
+        (click)="detectAllFaces()">
+        @if (isProcessing()) {
+          <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+          Detektálás... ({{ processProgress() }}%)
+        } @else {
+          <lucide-icon [name]="ICONS.SCAN_FACE" [size]="18" />
+          Arcok keresése
+        }
+      </button>
+
+      @if (isProcessing()) {
+        <div class="progress-bar">
+          <div class="progress-bar__fill" [style.width.%]="processProgress()"></div>
+        </div>
+      }
+
+      <!-- Képek listája -->
+      @if (images().length > 0) {
+        <div class="image-list">
+          @for (img of images(); track img.path) {
+            <div class="image-row" [class.image-row--error]="img.status === 'error'">
+              <lucide-icon [name]="getStatusIcon(img.status)" [size]="16"
+                           [class.spin]="img.status === 'detecting'" />
+              <span class="image-row__name">{{ img.name }}</span>
+              <span class="image-row__size">{{ formatSize(img.size) }}</span>
+              @if (img.faceCount !== undefined) {
+                <span class="image-row__faces">{{ img.faceCount }} arc</span>
+              }
+              <span class="image-row__status">{{ getStatusLabel(img.status) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 3: Áttekintés + beállítások -->
+  @if (step() === 'review') {
+    <div class="step-card">
+      <div class="info-bar">
+        <lucide-icon [name]="ICONS.SCAN_FACE" [size]="16" />
+        <span>{{ totalFaces() }} arc felismerve {{ detectedImages() }} képen</span>
+      </div>
+
+      <!-- Beállítások -->
+      <div class="settings-section">
+        <h3>Anonimizálás beállításai</h3>
+        <div class="settings-grid">
+          <label class="setting">
+            <span>Mód</span>
+            <select [ngModel]="anonMode()" (ngModelChange)="anonMode.set($event)">
+              <option value="blur">Elhomályosítás (blur)</option>
+              <option value="rect">Szürke téglalap</option>
+            </select>
+          </label>
+          @if (anonMode() === 'rect') {
+            <label class="setting">
+              <span>Téglalap színe</span>
+              <input type="color" [ngModel]="rectColor()" (ngModelChange)="rectColor.set($event)" />
+            </label>
+            <label class="setting">
+              <span>Átlátszóság</span>
+              <input type="range" min="0" max="1" step="0.1"
+                     [ngModel]="rectOpacity()" (ngModelChange)="rectOpacity.set(+$event)" />
+              <span class="setting__value">{{ rectOpacity() * 100 }}%</span>
+            </label>
+          }
+          <label class="setting">
+            <span>JPG minőség</span>
+            <input type="range" min="50" max="100" step="5"
+                   [ngModel]="jpgQuality()" (ngModelChange)="jpgQuality.set(+$event)" />
+            <span class="setting__value">{{ jpgQuality() }}%</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn--secondary" (click)="reset()">
+          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+          Vissza
+        </button>
+        <button class="btn btn--primary btn--lg" (click)="processAll()">
+          <lucide-icon [name]="ICONS.EYE_OFF" [size]="18" />
+          Anonimizálás indítása
+        </button>
+      </div>
+
+      <!-- Képek listája -->
+      <div class="image-list">
+        @for (img of images(); track img.path) {
+          <div class="image-row" [class.image-row--error]="img.status === 'error'">
+            <lucide-icon [name]="getStatusIcon(img.status)" [size]="16" />
+            <span class="image-row__name">{{ img.name }}</span>
+            <span class="image-row__faces">{{ img.faceCount || 0 }} arc</span>
+            <span class="image-row__status">{{ getStatusLabel(img.status) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Step 4: Feldolgozás -->
+  @if (step() === 'processing') {
+    <div class="step-card step-card--processing">
+      <lucide-icon [name]="ICONS.LOADER" [size]="48" class="spin" />
+      <h2>Anonimizálás folyamatban...</h2>
+      <p>{{ doneImages() }} / {{ totalImages() }} kép kész</p>
+      <div class="progress-bar">
+        <div class="progress-bar__fill" [style.width.%]="processProgress()"></div>
+      </div>
+
+      <div class="image-list">
+        @for (img of images(); track img.path) {
+          <div class="image-row"
+               [class.image-row--done]="img.status === 'done'"
+               [class.image-row--error]="img.status === 'error'">
+            <lucide-icon [name]="getStatusIcon(img.status)" [size]="16"
+                         [class.spin]="img.status === 'processing'" />
+            <span class="image-row__name">{{ img.name }}</span>
+            <span class="image-row__faces">{{ img.faceCount || 0 }} arc</span>
+            <span class="image-row__status">{{ getStatusLabel(img.status) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Step 5: Kész -->
+  @if (step() === 'done') {
+    <div class="step-card step-card--done">
+      <div class="done-icon">
+        <lucide-icon [name]="ICONS.SHIELD_CHECK" [size]="48" />
+      </div>
+      <h2>Anonimizálás kész!</h2>
+      <p>{{ doneImages() }} kép sikeresen feldolgozva, összesen {{ totalFaces() }} arc elfedve.</p>
+
+      @if (hasErrors()) {
+        <div class="error-summary">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16" />
+          Néhány kép feldolgozása sikertelen volt.
+        </div>
+      }
+
+      <div class="action-bar">
+        <button class="btn btn--secondary" (click)="reset()">
+          <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="16" />
+          Újra kezdés
+        </button>
+        <button class="btn btn--primary btn--lg" (click)="openOutputFolder()">
+          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="18" />
+          Mappa megnyitása
+        </button>
+      </div>
+
+      <div class="image-list">
+        @for (img of images(); track img.path) {
+          <div class="image-row"
+               [class.image-row--done]="img.status === 'done'"
+               [class.image-row--error]="img.status === 'error'">
+            <lucide-icon [name]="getStatusIcon(img.status)" [size]="16" />
+            <span class="image-row__name">{{ img.name }}</span>
+            <span class="image-row__faces">{{ img.faceCount || 0 }} arc</span>
+            <span class="image-row__status">{{ getStatusLabel(img.status) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -39,6 +39,7 @@ export function buildPartnerMenu(params: {
         { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
         { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
         { id: 'tablo-designer', route: `${base}/tablo-designer`, label: 'Tablókészítő', visible: () => isElectron },
+        { id: 'tablo-anonymizer', route: `${base}/tablo-anonymizer`, label: 'Tabló anonimizáló', visible: () => isElectron },
       ]
     },
     { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },

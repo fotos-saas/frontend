@@ -20,6 +20,7 @@ import { registerOverlayHandlers } from './handlers/overlay.handler';
 import { registerPortraitHandlers } from './handlers/portrait.handler';
 import { registerSyncHandlers } from './handlers/sync.handler';
 import { registerCropHandlers } from './handlers/crop.handler';
+import { registerAnonymizerHandlers } from './handlers/anonymizer.handler';
 
 // Background mód service-ek
 import { TrayManagerService } from './services/tray-manager.service';
@@ -776,6 +777,9 @@ app.whenReady().then(async () => {
 
   // Auto Crop IPC handlerek regisztralasa
   registerCropHandlers();
+
+  // Tabló Referencia Anonimizáló
+  registerAnonymizerHandlers();
 
   // LAN szinkronizálás IPC handlerek regisztralasa
   registerSyncHandlers(mainWindow || undefined);

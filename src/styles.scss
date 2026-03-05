@@ -73,10 +73,12 @@ input, textarea, [contenteditable="true"] {
 }
 
 // ============================================================================
-// GLOBÁLIS DARK MODE CSS VÁLTOZÓK
+// GLOBÁLIS CSS VÁLTOZÓK (Light Only)
 // ============================================================================
 
 :root {
+  color-scheme: light only;
+
   // Safe area CSS variables (set by Capacitor for iOS notch, etc.)
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
@@ -175,62 +177,6 @@ input, textarea, [contenteditable="true"] {
   --z-lightbox-content: 60001;
   --z-toast: 70000;
   --z-skip-link: 10000;
-}
-
-// Dark mode media query - rendszer dark mode preferencia
-@media (prefers-color-scheme: dark) {
-  :root {
-    // Dark mode háttér szín
-    --bg-primary: #1f2937;
-    --bg-secondary: #111827;
-    --bg-tertiary: #374151;
-
-    // Dark mode szöveg szín (WCAG AA compliant kontrasztek)
-    --text-primary: #f9fafb;      // 15.3:1 kontraszt sötét háttéren
-    --text-secondary: #d1d5db;    // 9.7:1 kontraszt sötét háttéren (gray-300)
-    --text-muted: #6b7280;        // 4.8:1 kontraszt sötét háttéren (gray-400) - OK dark mode-ban
-
-    // Dark mode border és árnyék
-    --border-color: #374151;
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --shadow-color-hover: rgba(0, 0, 0, 0.5);
-
-    // Skeleton shimmer (dark)
-    --skeleton-base: #374151;
-    --skeleton-highlight: #4b5563;
-
-    // Overlay/transparency (dark)
-    --overlay-dark: rgba(0, 0, 0, 0.6);
-    --overlay-light: rgba(255, 255, 255, 0.04);
-
-    // Gradient háttérek (dark mode)
-    --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-    --gradient-yellow: linear-gradient(135deg, #78350f 0%, #92400e 100%);
-    --gradient-green: linear-gradient(135deg, #064e3b 0%, #047857 100%);
-  }
-}
-
-// Manuális dark mode class támogatás (ha a komponens manuálisan bekapcsolja)
-.dark {
-  --bg-primary: #1f2937;
-  --bg-secondary: #111827;
-  --bg-tertiary: #374151;
-  // Dark mode szöveg szín (WCAG AA compliant kontrasztek)
-  --text-primary: #f9fafb;      // 15.3:1 kontraszt sötét háttéren
-  --text-secondary: #d1d5db;    // 9.7:1 kontraszt sötét háttéren (gray-300)
-  --text-muted: #6b7280;        // 4.8:1 kontraszt sötét háttéren (gray-400) - OK dark mode-ban
-  --border-color: #374151;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --shadow-color-hover: rgba(0, 0, 0, 0.5);
-  --skeleton-base: #374151;
-  --skeleton-highlight: #4b5563;
-  --overlay-dark: rgba(0, 0, 0, 0.6);
-  --overlay-light: rgba(255, 255, 255, 0.04);
-  --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-  --gradient-yellow: linear-gradient(135deg, #78350f 0%, #92400e 100%);
-  --gradient-green: linear-gradient(135deg, #064e3b 0%, #047857 100%);
 }
 
 // ============================================================================
@@ -405,54 +351,6 @@ body.dialog-open {
   border-radius: 16px 16px 0 0;
 }
 
-// Dark mode page-card stílusok (közös mixin a duplikáció elkerüléséhez)
-@mixin page-card-dark {
-  .page-card {
-    background: linear-gradient(135deg,
-      rgba(30, 41, 59, 0.98) 0%,
-      rgba(15, 23, 42, 0.95) 100%
-    );
-    border-top: 1px solid rgba(71, 85, 105, 0.6);
-    border-left: 1px solid rgba(71, 85, 105, 0.4);
-    border-right: 1px solid rgba(30, 41, 59, 0.5);
-    border-bottom: 1px solid rgba(15, 23, 42, 0.7);
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.25),
-      0 10px 20px -5px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(71, 85, 105, 0.4);
-
-    &:hover {
-      box-shadow:
-        0 8px 16px -4px rgba(0, 0, 0, 0.3),
-        0 20px 40px -10px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(71, 85, 105, 0.5);
-    }
-  }
-
-  .page-card--hoverable:hover {
-    box-shadow:
-      0 12px 24px -6px rgba(0, 0, 0, 0.35),
-      0 24px 48px -12px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(71, 85, 105, 0.5);
-  }
-
-  .page-card > .page-header {
-    background: linear-gradient(135deg,
-      rgba(30, 41, 59, 0.98) 0%,
-      rgba(15, 23, 42, 0.95) 100%
-    );
-  }
-}
-
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  @include page-card-dark;
-}
-
-.dark {
-  @include page-card-dark;
-}
-
 // Mobil - kisebb padding
 @media (max-width: 480px) {
   .page-card {
@@ -608,19 +506,6 @@ body.dialog-open {
 
 .dialog-panel--lg {
   max-width: 600px;
-}
-
-// Dark mode dialog
-@media (prefers-color-scheme: dark) {
-  .dialog-panel {
-    background: get-color('slate', 800);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  }
-}
-
-.dark .dialog-panel {
-  background: get-color('slate', 800);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 // Reduced motion - animációk kikapcsolása

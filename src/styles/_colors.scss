@@ -1,7 +1,7 @@
 /**
  * Design System - Centralizált Szín Paletta
  * WCAG AA+ Kontraszt Compliance
- * Dark Mode Support
+ * Light Only Mode
  */
 
 // ============================================================================
@@ -112,60 +112,6 @@ $colors: (
 }
 
 // ============================================================================
-// DARK MODE (Media Query)
-// ============================================================================
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    // Dark Mode Theme
-    --color-primary: #{get-color('primary', 500)};
-    --color-primary-light: #{get-color('primary', 400)};
-    --color-success: #{get-color('success', 500)};
-    --color-warning: #{get-color('warning', 500)};
-    --color-error: #{get-color('error', 500)};
-
-    // Backgrounds
-    --bg-primary: #{get-color('gray', 900)};
-    --bg-secondary: #{get-color('gray', 800)};
-    --bg-tertiary: #{get-color('gray', 700)};
-
-    // Text colors (WCAG AA+ dark)
-    --text-primary: #{get-color('gray', 50)};      // 15.3:1 dark bg
-    --text-secondary: #{get-color('gray', 300)};   // 9.7:1 dark bg
-    --text-muted: #{get-color('gray', 400)};       // 4.8:1 dark bg
-
-    // Borders & Shadows
-    --border-color: #{get-color('gray', 700)};
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --shadow-color-hover: rgba(0, 0, 0, 0.5);
-  }
-}
-
-// ============================================================================
-// MANUAL DARK MODE CLASS (Fallback)
-// ============================================================================
-
-.dark {
-  --color-primary: #{get-color('primary', 500)};
-  --color-primary-light: #{get-color('primary', 400)};
-  --color-success: #{get-color('success', 500)};
-  --color-warning: #{get-color('warning', 500)};
-  --color-error: #{get-color('error', 500)};
-
-  --bg-primary: #{get-color('gray', 900)};
-  --bg-secondary: #{get-color('gray', 800)};
-  --bg-tertiary: #{get-color('gray', 700)};
-
-  --text-primary: #{get-color('gray', 50)};
-  --text-secondary: #{get-color('gray', 300)};
-  --text-muted: #{get-color('gray', 400)};
-
-  --border-color: #{get-color('gray', 700)};
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --shadow-color-hover: rgba(0, 0, 0, 0.5);
-}
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -222,13 +168,3 @@ $colors: (
   --alert-error-border: #{get-color('error', 500)};
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --alert-success-bg: #{get-color('success', 900)};
-    --alert-success-border: #{get-color('success', 500)};
-    --alert-warning-bg: #{get-color('warning', 900)};
-    --alert-warning-border: #{get-color('warning', 400)};
-    --alert-error-bg: #{get-color('error', 900)};
-    --alert-error-border: #{get-color('error', 400)};
-  }
-}

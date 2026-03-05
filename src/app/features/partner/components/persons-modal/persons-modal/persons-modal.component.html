@@ -63,6 +63,22 @@
             </button>
           </div>
         }
+        @if (typeFilter() === 'teacher') {
+          <button
+            type="button"
+            class="expanded-view-btn"
+            (click)="openExpandedView()"
+            [disabled]="expandedViewLoading()"
+            matTooltip="Iskolák közötti tanár összehasonlítás"
+          >
+            <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="16" />
+            @if (expandedViewLoading()) {
+              <span>Betöltés...</span>
+            } @else {
+              <span>Bővített nézet</span>
+            }
+          </button>
+        }
       </div>
     </div>
 
@@ -456,5 +472,16 @@
     [mode]="mode"
     (closeEvent)="showPhotoChooserDialog.set(false)"
     (savedEvent)="onPhotoChosen()"
+  />
+}
+
+<!-- Bővített tanári nézet dialógus -->
+@if (showExpandedView() && expandedViewSchoolId()) {
+  <app-expanded-teacher-view
+    [schoolId]="expandedViewSchoolId()!"
+    [classYear]="expandedViewClassYear()"
+    [projectId]="projectId()"
+    (close)="closeExpandedView()"
+    (teacherUpdated)="loadPersons(true)"
   />
 }

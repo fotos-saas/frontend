@@ -23,6 +23,7 @@ import {
   TeacherUploadHistoryResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
+import { ExpandedViewResponse } from '../components/expanded-teacher-view/expanded-teacher-view.types';
 import {
   ArchiveService,
   ArchiveBySchoolResponse,
@@ -44,6 +45,20 @@ import {
 export class PartnerTeacherService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/teachers`;
+
+  getExpandedView(schoolId: number, classYear?: string, additionalSchoolIds?: number[]): Observable<ExpandedViewResponse> {
+    let params = buildHttpParams({
+      school_id: schoolId,
+      class_year: classYear,
+    });
+    if (additionalSchoolIds?.length) {
+      for (const id of additionalSchoolIds) {
+        params = params.append('additional_school_ids[]', String(id));
+      }
+    }
+
+    return this.http.get<ExpandedViewResponse>(`${this.baseUrl}/expanded-view`, { params });
+  }
 
   getGroupMembers(linkedGroup: string): Observable<TeacherListItem[]> {
     return this.http.get<TeacherListItem[]>(`${this.baseUrl}/group/${linkedGroup}`);

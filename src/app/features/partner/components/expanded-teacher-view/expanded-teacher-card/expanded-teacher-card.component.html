@@ -1,0 +1,43 @@
+<div
+  class="teacher-card"
+  [class.teacher-card--highlighted]="isHighlighted()"
+  [class.teacher-card--exact]="highlightType() === 'exact'"
+  [class.teacher-card--similar]="highlightType() === 'similar'"
+  [class.teacher-card--missing]="highlightType() === 'missing'"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  (click)="onClick()"
+>
+  <div class="teacher-card__photo">
+    @if (teacher().hasPhoto && teacher().photoThumbUrl) {
+      <img
+        [src]="teacher().photoThumbUrl"
+        [alt]="teacher().name"
+        class="teacher-card__img"
+        loading="lazy"
+      />
+    } @else {
+      <div class="teacher-card__placeholder">
+        <span>{{ initials() }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="teacher-card__info">
+    <span class="teacher-card__name" [matTooltip]="teacher().name">
+      {{ teacher().name }}
+    </span>
+    @if (teacher().title) {
+      <span class="teacher-card__title">{{ teacher().title }}</span>
+    }
+  </div>
+
+  @if (teacher().hasOverride) {
+    <lucide-icon
+      [name]="ICONS.IMAGE"
+      [size]="14"
+      class="teacher-card__override-icon"
+      matTooltip="Egyedi fotó (felülírva)"
+    />
+  }
+</div>

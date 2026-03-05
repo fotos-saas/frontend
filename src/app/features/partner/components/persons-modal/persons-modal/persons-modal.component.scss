@@ -118,6 +118,38 @@ ps-toggle {
   opacity: 0.8;
 }
 
+// --- Bővített nézet gomb ---
+.expanded-view-btn {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 6px 12px;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: get-color('slate', 600);
+  cursor: pointer;
+  @include transition-fast;
+  white-space: nowrap;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+
+  &:hover:not(:disabled) {
+    background: get-color('slate', 100);
+    border-color: get-color('slate', 300);
+    color: get-color('slate', 800);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // --- Tabs akció gombok ---
 .tabs-actions {
   display: flex;

@@ -1,0 +1,226 @@
+:host {
+  display: block;
+}
+
+.archive-panel {
+  background: white;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 12px;
+  overflow: hidden;
+
+  &__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgb(249 250 251);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: rgb(243 244 246);
+    }
+
+    lucide-icon {
+      margin-right: 8px;
+      color: rgb(107 114 128);
+    }
+  }
+
+  &__toggle-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgb(55 65 81);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  &__summary {
+    font-size: 12px;
+    color: rgb(107 114 128);
+    margin-left: 8px;
+    font-weight: 400;
+  }
+
+  &__content {
+    padding: 12px 16px;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    // gap nem támogatott Safari flexbox-ban, negatív margin workaround
+    margin: -4px;
+    margin-bottom: 8px;
+
+    & > * {
+      margin: 4px;
+    }
+  }
+
+  &__search {
+    position: relative;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(156 163 175);
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: rgb(59 130 246);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &__filter-btn {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgb(55 65 81);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    lucide-icon {
+      margin-right: 6px;
+    }
+
+    &:hover {
+      background: rgb(243 244 246);
+    }
+
+    &--active {
+      background: rgb(254 226 226);
+      border-color: rgb(239 68 68);
+      color: rgb(185 28 28);
+    }
+  }
+
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgb(55 65 81);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    lucide-icon {
+      margin-right: 6px;
+    }
+
+    &:hover {
+      background: rgb(243 244 246);
+    }
+  }
+
+  &__grid {
+    display: flex;
+    flex-wrap: wrap;
+    // gap workaround Safari
+    margin: -4px;
+  }
+
+  &__empty {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    color: rgb(156 163 175);
+    font-size: 13px;
+    margin: 4px;
+  }
+}
+
+.archive-teacher {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+  margin: 4px;
+
+  &:hover {
+    background-color: rgb(243 244 246);
+  }
+
+  &__photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 4px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__no-photo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(229 231 235);
+    color: rgb(156 163 175);
+  }
+
+  &__name {
+    font-size: 11px;
+    color: rgb(55 65 81);
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-panel__content {
+    animation: none;
+  }
+}

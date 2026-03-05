@@ -26,6 +26,7 @@ import {
 } from '../../../pages/project-tablo-editor/layout-designer/components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-link-dialog.component';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
+import { ExpandedTeacherViewComponent } from '../../expanded-teacher-view/expanded-teacher-view.component';
 import { getPersonCategory, getCategoryOrder } from '../person-category.util';
 
 /** Szerkesztési sor state */
@@ -43,7 +44,7 @@ interface EditRow {
 @Component({
   selector: 'app-persons-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent],
+  imports: [FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsToggleComponent, ModalPersonCardComponent, PhotoLightboxComponent, DialogWrapperComponent, LayoutPhotoUploadDialogComponent, ConfirmDialogComponent, BatchPortraitDialogComponent, BatchCropDialogComponent, TeacherLinkDialogComponent, TeacherPhotoChooserDialogComponent, ExpandedTeacherViewComponent],
   providers: [BatchPortraitActionsService],
   templateUrl: './persons-modal.component.html',
   styleUrl: './persons-modal.component.scss',
@@ -116,6 +117,12 @@ export class PersonsModalComponent implements OnInit {
   linkDialogAllTeachers = signal<TeacherListItem[]>([]);
   photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
   photoChooserMode = signal<PhotoChooserMode | null>(null);
+
+  // Bővített nézet
+  showExpandedView = signal(false);
+  expandedViewSchoolId = signal<number | null>(null);
+  expandedViewClassYear = signal<string | undefined>(undefined);
+  expandedViewLoading = signal(false);
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -590,6 +597,31 @@ export class PersonsModalComponent implements OnInit {
 
   onPhotoChosen(): void {
     this.showPhotoChooserDialog.set(false);
+    this.loadPersons(true);
+  }
+
+  // --- Bővített tanári nézet ---
+
+  openExpandedView(): void {
+    this.expandedViewLoading.set(true);
+    this.partnerService.getProjectDetails(this.projectId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (details) => {
+          const schoolId = details.school?.id;
+          if (schoolId) {
+            this.expandedViewSchoolId.set(schoolId);
+            this.expandedViewClassYear.set(details.classYear ?? undefined);
+            this.showExpandedView.set(true);
+          }
+          this.expandedViewLoading.set(false);
+        },
+        error: () => this.expandedViewLoading.set(false),
+      });
+  }
+
+  closeExpandedView(): void {
+    this.showExpandedView.set(false);
     this.loadPersons(true);
   }
 }

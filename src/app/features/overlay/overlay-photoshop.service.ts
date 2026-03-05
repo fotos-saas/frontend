@@ -152,6 +152,34 @@ export class OverlayPhotoshopService {
     } catch { return empty; }
   }
 
+  /** Nevek + pozíciók egyetlen PS hívással. 2 JSX helyett 1. */
+  async getImageDataCombined(): Promise<{
+    names: string[];
+    studentNames: string[];
+    teacherNames: string[];
+    students: Array<{ name: string; x: number; y: number }>;
+    teachers: Array<{ name: string; x: number; y: number }>;
+  }> {
+    const empty = { names: [], studentNames: [], teacherNames: [], students: [], teachers: [] };
+    if (!window.electronAPI) return empty;
+    try {
+      const result = await window.electronAPI.photoshop.runJsx({
+        scriptName: 'actions/get-image-data-combined.jsx',
+      });
+      if (!result.success || !result.output) return empty;
+      const cleaned = result.output.trim();
+      if (!cleaned.startsWith('{')) return empty;
+      const data = JSON.parse(cleaned);
+      return {
+        names: data.names || [],
+        studentNames: data.studentNames || [],
+        teacherNames: data.teacherNames || [],
+        students: data.students || [],
+        teachers: data.teachers || [],
+      };
+    } catch { return empty; }
+  }
+
   /**
    * PS-ből frissen lekéri a kijelölt layerek neveit (get-active-doc.jsx).
    * Visszaadja a nyers parsed doc-ot is a caller-nek.

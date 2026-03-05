@@ -62,8 +62,17 @@ export class OverlayDragOrderService {
   /** Person ID → PS slug mapping, save() használja a PS reorderhez */
   private personSlugMap = new Map<number, string>();
 
-  /** Cachelt PS layer data — scope váltáskor nem kell újra lekérni */
-  private psLayerDataCache: { names: string[]; students: string[]; teachers: string[] } | null = null;
+  /** Cachelt PS combined data — nevek + pozíciók egyetlen hívásból */
+  private psCombinedCache: {
+    names: string[];
+    studentNames: string[];
+    teacherNames: string[];
+    students: Array<{ name: string; x: number; y: number }>;
+    teachers: Array<{ name: string; x: number; y: number }>;
+  } | null = null;
+
+  /** Cachelt title-k PS-ből */
+  private psTitlesCache: Map<string, string> | null = null;
 
   /** Következő csoport szín index */
   private nextColorIndex = 0;
@@ -162,7 +171,8 @@ export class OverlayDragOrderService {
     this.panelOpen.set(false);
     this.searchQuery.set('');
     this.clearSelection();
-    this.psLayerDataCache = null;
+    this.psCombinedCache = null;
+    this.psTitlesCache = null;
   }
 
   clearSelection(): void { this.selected.set(new Set()); }
@@ -178,7 +188,8 @@ export class OverlayDragOrderService {
     const pid = this.projectIdResolver();
     if (!pid) return;
     this.refreshing.set(true);
-    this.psLayerDataCache = null;
+    this.psCombinedCache = null;
+    this.psTitlesCache = null;
     try {
       await this.projectService.fetchPersons(pid);
       await this.refreshListFromPS();
@@ -194,13 +205,14 @@ export class OverlayDragOrderService {
    * Ha nincs PS (nem Electron) → DB fallback.
    */
   private async refreshListFromPS(): Promise<void> {
-    if (!this.psLayerDataCache) {
-      this.psLayerDataCache = await this.ps.getImageLayerData();
+    // Egyetlen PS hívás: nevek + pozíciók egyszerre (cache-elve)
+    if (!this.psCombinedCache) {
+      this.psCombinedCache = await this.ps.getImageDataCombined();
     }
-    const data = this.psLayerDataCache;
+    const data = this.psCombinedCache;
     const s = this.scope();
-    const slugList = s === 'teachers' ? data.teachers
-      : s === 'students' ? data.students : data.names;
+    const slugList = s === 'teachers' ? data.teacherNames
+      : s === 'students' ? data.studentNames : data.names;
 
     // Ha nincs PS (üres lista) → DB fallback
     if (slugList.length === 0) {
@@ -227,12 +239,10 @@ export class OverlayDragOrderService {
       const humanName = this.sortService.slugToHumanName(slug);
 
       if (personId && dbPersonsById.has(personId)) {
-        // DB-ből enrichelt PersonItem
         const dbPerson = dbPersonsById.get(personId)!;
         items.push({ ...dbPerson });
         this.personSlugMap.set(dbPerson.id, slug);
       } else {
-        // Nincs DB match → placeholder
         const id = placeholderId--;
         items.push({
           id,
@@ -252,8 +262,11 @@ export class OverlayDragOrderService {
     this.ngZone.run(() => this.list.set(items));
     await this.enrichTitlesFromPS();
 
-    // Sor-szeparátor pozíciók betöltése PS-ből
-    await this.loadRowPositions(items);
+    // Sor-szeparátor: pozíciók már a combined cache-ben vannak
+    const positions = s === 'teachers' ? data.teachers
+      : s === 'students' ? data.students
+      : [...data.students, ...data.teachers];
+    this.buildRowMap(positions, items);
   }
 
   /** DB-ből építi a listát — fallback ha nincs PS */
@@ -267,7 +280,10 @@ export class OverlayDragOrderService {
 
   /** PS Positions layerekből kiszedi a title-ket és felülírja a lista értékeit */
   private async enrichTitlesFromPS(): Promise<void> {
-    const posMap = await this.ps.getPositionsTextContent();
+    if (!this.psTitlesCache) {
+      this.psTitlesCache = await this.ps.getPositionsTextContent();
+    }
+    const posMap = this.psTitlesCache;
     if (posMap.size === 0) return;
     const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     // slug → title mapping
@@ -785,16 +801,6 @@ export class OverlayDragOrderService {
   /** Az összes elem (csoportokból + ungrouped) */
   private getAllItems(): PersonItem[] {
     return this.buildFlatList();
-  }
-
-  /** PS-ből betölti a layer pozíciókat és felépíti a sor-map-et */
-  private async loadRowPositions(items: PersonItem[]): Promise<void> {
-    const posData = await this.ps.getImageLayerPositions();
-    const s = this.scope();
-    const positions = s === 'teachers' ? posData.teachers
-      : s === 'students' ? posData.students
-      : [...posData.students, ...posData.teachers];
-    this.buildRowMap(positions, items);
   }
 
   /**

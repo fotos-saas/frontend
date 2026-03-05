@@ -1,6 +1,6 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+<div class="bg-white rounded-lg border border-gray-200 p-6">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+    <h2 class="text-lg font-semibold text-gray-900">
       Albumok ({{ albums().length }})
     </h2>
     <button
@@ -15,7 +15,7 @@
   @if (albums().length === 0) {
     <div class="text-center py-8">
       <lucide-icon [name]="ICONS.IMAGE" [size]="48" class="mx-auto text-gray-400 mb-3" />
-      <p class="text-gray-600 dark:text-gray-400">
+      <p class="text-gray-600">
         Még nincs album az ügyfélhez
       </p>
     </div>
@@ -37,17 +37,17 @@
                   loading="lazy"
                 />
               } @else {
-                <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center">
                   <lucide-icon
                     [name]="album.type === 'selection' ? ICONS.GRID : ICONS.FRAME"
                     [size]="24"
-                    class="text-primary-600 dark:text-primary-400"
+                    class="text-primary-600"
                   />
                 </div>
               }
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="font-medium text-gray-900 dark:text-white">{{ album.name }}</h3>
+                  <h3 class="font-medium text-gray-900">{{ album.name }}</h3>
                   <span
                     class="px-2 py-0.5 text-xs font-medium rounded"
                     [class]="ordersService.getStatusColor(album.status)"

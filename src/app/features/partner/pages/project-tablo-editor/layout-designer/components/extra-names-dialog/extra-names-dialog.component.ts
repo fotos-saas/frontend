@@ -3,6 +3,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 import { ICONS } from '@shared/constants/icons.constants';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 
 @Component({
   selector: 'app-extra-names-dialog',
@@ -70,7 +71,7 @@ export class ExtraNamesDialogComponent implements OnInit {
     if (!text) return;
     navigator.clipboard.writeText(text);
     this.copied.set(field);
-    setTimeout(() => this.copied.set(null), 1500);
+    setTimeout(() => this.copied.set(null), TIMEOUTS.ID_COPY_FEEDBACK);
   }
 
   onInsert(): void {

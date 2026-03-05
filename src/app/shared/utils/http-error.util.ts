@@ -1,4 +1,5 @@
 import { HttpError } from '../types/http-error.types';
+import { ERROR_MESSAGES } from '@shared/constants/error-messages.constants';
 
 export interface HandleErrorOptions {
   notFoundMessage?: string;
@@ -15,7 +16,7 @@ export function handleHttpError(error: HttpError, options?: HandleErrorOptions):
   if (error.error?.message) {
     message = error.error.message;
   } else if (error.status === 401) {
-    message = 'Nincs jogosultságod ehhez a művelethez';
+    message = ERROR_MESSAGES.FORBIDDEN;
   } else if (error.status === 403) {
     message = 'A hozzáférés megtagadva';
   } else if (error.status === 404) {
@@ -38,7 +39,7 @@ export function handleVotingError(error: {
   error?: { message?: string; requires_class_size?: boolean };
   status?: number;
 }): Error {
-  let message = 'Hiba történt. Próbáld újra!';
+  let message: string = ERROR_MESSAGES.GENERIC_RETRY;
 
   if (error.error?.message) {
     message = error.error.message;
@@ -62,7 +63,7 @@ export function handleVotingError(error: {
 export function handleAuthError(
   error: { error?: { message?: string } | ErrorEvent; status?: number },
   statusMessages: Record<number, string>,
-  fallbackMessage = 'Hiba történt'
+  fallbackMessage: string = ERROR_MESSAGES.GENERIC
 ): Error {
   let errorMessage: string;
 
@@ -92,6 +93,6 @@ export function handleClientError(
     return new Error('A munkamenet lejárt. Kérlek jelentkezz be újra.');
   }
 
-  const message = error.error?.message ?? 'Hiba történt. Kérlek próbáld újra.';
+  const message = error.error?.message ?? ERROR_MESSAGES.GENERIC_RETRY_POLITE;
   return new Error(message);
 }

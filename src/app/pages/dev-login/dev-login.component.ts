@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevLoginService, DevLoginConsumeResponse } from '../../core/services/dev-login.service';
 import { TabloAuthService } from '../../core/services/auth/tablo-auth.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 @Component({
   selector: 'app-dev-login',
@@ -118,7 +119,7 @@ export class DevLoginComponent implements OnInit {
         next: (response) => this.handleLoginResponse(response),
         error: (err: Error) => {
           this.loading = false;
-          this.error = err.message || 'Hiba történt a bejelentkezés során';
+          this.error = err.message || ERROR_MESSAGES.LOGIN;
         }
       });
   }

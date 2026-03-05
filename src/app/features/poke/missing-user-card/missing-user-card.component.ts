@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, computed, input, signal, output } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MissingUser } from '../../../core/models/poke.models';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 
 /**
  * Missing User Card Component
@@ -73,6 +74,6 @@ export class MissingUserCardComponent {
    */
   markAsPoked(): void {
     this.justPoked.set(true);
-    setTimeout(() => this.justPoked.set(false), 2000);
+    setTimeout(() => this.justPoked.set(false), TIMEOUTS.COPY_FEEDBACK);
   }
 }

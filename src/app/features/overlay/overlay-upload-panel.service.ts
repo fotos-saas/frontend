@@ -8,6 +8,7 @@ import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlayPollingService } from './overlay-polling.service';
 import { OverlaySettingsService } from './overlay-settings.service';
 import { OverlayContext, ActiveDocInfo } from '../../core/services/electron.types';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 interface UploadResult {
   success: boolean;
@@ -189,7 +190,7 @@ export class OverlayUploadPanelService {
       }),
       error: (err) => this.ngZone.run(() => {
         this.uploading.set(false);
-        this.uploadResult.set({ success: false, message: err.error?.message || 'Hiba történt a feltöltés során.' });
+        this.uploadResult.set({ success: false, message: err.error?.message || ERROR_MESSAGES.UPLOAD_DOT });
       }),
     });
   }

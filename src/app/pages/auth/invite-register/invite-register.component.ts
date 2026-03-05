@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { PsInputComponent } from '@shared/components/form';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 interface InvitationValidationResponse {
   valid: boolean;
@@ -144,7 +145,7 @@ export class InviteRegisterComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set(error.error?.message || 'Hiba történt a meghívó elfogadása során.');
+          this.errorMessage.set(error.error?.message || ERROR_MESSAGES.INVITE_ACCEPT);
         }
       });
   }
@@ -172,7 +173,7 @@ export class InviteRegisterComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set(error.error?.message || 'Hiba történt a meghívó elfogadása során.');
+          this.errorMessage.set(error.error?.message || ERROR_MESSAGES.INVITE_ACCEPT);
         }
       });
   }
@@ -204,7 +205,7 @@ export class InviteRegisterComponent implements OnInit {
             const firstError = Object.values(errors)[0];
             this.errorMessage.set(Array.isArray(firstError) ? firstError[0] : String(firstError));
           } else {
-            this.errorMessage.set(error.error?.message || 'Hiba történt a regisztráció során.');
+            this.errorMessage.set(error.error?.message || ERROR_MESSAGES.REGISTER_DOT);
           }
         }
       });

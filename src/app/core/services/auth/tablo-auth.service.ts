@@ -8,6 +8,7 @@ import { TabloStorageService, type StoredSession } from '../tablo-storage.servic
 import { TokenService, type TokenType } from '../token.service';
 import { GuestService } from '../guest.service';
 import { SentryService } from '../sentry.service';
+import { ERROR_MESSAGES } from '@shared/constants';
 import type {
   TabloProject,
   AuthUser,
@@ -75,7 +76,7 @@ export class TabloAuthService {
             this.storeClientAuthData(response);
           }
         }),
-        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, ERROR_MESSAGES.LOGIN)))
       );
   }
 
@@ -100,7 +101,7 @@ export class TabloAuthService {
             this.guestService.setRestoredSession(response.restoredSession);
           }
         }),
-        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, ERROR_MESSAGES.LOGIN)))
       );
   }
 
@@ -113,7 +114,7 @@ export class TabloAuthService {
         tap(response => {
           this.storeAuthData(response, 'preview');
         }),
-        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, 'Hiba történt a bejelentkezés során')))
+        catchError(error => throwError(() => handleAuthError(error, TABLO_AUTH_ERROR_MESSAGES, ERROR_MESSAGES.LOGIN)))
       );
   }
 

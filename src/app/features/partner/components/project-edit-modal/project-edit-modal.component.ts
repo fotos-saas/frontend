@@ -7,6 +7,7 @@ import { ProjectDetailData } from '../../../../shared/components/project-detail'
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsDatepickerComponent } from '@shared/components/form';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 /**
  * Project Edit Modal - Projekt adatok szerkesztése.
@@ -137,7 +138,7 @@ export class ProjectEditModalComponent implements OnInit {
         },
         error: (err) => {
           this.submitting.set(false);
-          this.error.set(err.error?.message ?? 'Hiba történt a mentés során');
+          this.error.set(err.error?.message ?? ERROR_MESSAGES.SAVE);
         }
       });
   }

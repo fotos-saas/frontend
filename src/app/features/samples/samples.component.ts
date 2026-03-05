@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SamplesService, Sample, ProjectInfo } from './services/samples.service';
 import { forkJoin } from 'rxjs';
 import { LoggerService } from '../../core/services/logger.service';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { SamplesLightboxComponent, SampleLightboxItem } from '../../shared/components/samples-lightbox';
 
 /**
@@ -74,7 +75,7 @@ export class SamplesComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        this.error = 'Hiba történt az adatok betöltésekor';
+        this.error = ERROR_MESSAGES.LOAD_DATA;
         this.loading = false;
         this.cdr.markForCheck();
         this.logger.error('Load error', err);

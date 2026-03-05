@@ -11,6 +11,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../../environments/environment';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { SidebarStateService } from '../../services/sidebar-state.service';
 import { AuthService, TokenType } from '../../../services/auth.service';
 import { GuestService, GuestSession } from '../../../services/guest.service';
@@ -189,7 +190,7 @@ export class TopBarComponent {
         },
         error: (err: Error) => {
           this.isUpdating.set(false);
-          this.updateError.set(err.message || 'Hiba történt a mentés során');
+          this.updateError.set(err.message || ERROR_MESSAGES.SAVE);
         }
       });
   }

@@ -9,6 +9,7 @@ import { ICONS } from '../../../../shared/constants/icons.constants';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { SearchableDropdownComponent, DropdownOption } from './components/searchable-dropdown.component';
 import { PsInputComponent } from '@shared/components/form';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 
 /**
  * Create Project Modal - Új projekt létrehozása.
@@ -106,7 +107,7 @@ export class CreateProjectModalComponent {
     if (this.schoolSearchTimeout) {
       clearTimeout(this.schoolSearchTimeout);
     }
-    this.schoolSearchTimeout = setTimeout(() => this.loadSchools(search), 300);
+    this.schoolSearchTimeout = setTimeout(() => this.loadSchools(search), TIMEOUTS.SEARCH_DEBOUNCE);
   }
 
   onSchoolSelected(option: DropdownOption): void {

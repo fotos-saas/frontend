@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal, computed } f
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { TIMEOUTS } from '../../../../../shared/constants/timeouts.constants';
 import { TabloPersonItem } from '../persons-modal.types';
 import { getPersonCategory, PersonCategory } from '../person-category.util';
 
@@ -45,7 +46,7 @@ export class ModalPersonCardComponent {
     event.stopPropagation();
     navigator.clipboard.writeText(this.person().id.toString());
     this.idCopied.set(true);
-    setTimeout(() => this.idCopied.set(false), 1500);
+    setTimeout(() => this.idCopied.set(false), TIMEOUTS.ID_COPY_FEEDBACK);
   }
 
   onLinkClick(event: Event): void {

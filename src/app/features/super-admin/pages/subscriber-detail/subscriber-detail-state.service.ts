@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SuperAdminService, SubscriberDetail, AuditLogEntry, DiscountInfo } from '../../services/super-admin.service';
-import { getSubscriptionStatusLabel } from '../../../../shared/constants';
+import { getSubscriptionStatusLabel, ERROR_MESSAGES } from '../../../../shared/constants';
 
 /**
  * Subscriber Detail oldal state management service.
@@ -47,7 +47,7 @@ export class SubscriberDetailStateService {
           this.loading.set(false);
         },
         error: (err) => {
-          this.error.set(err.error?.message || 'Hiba történt az adatok betöltésekor.');
+          this.error.set(err.error?.message || ERROR_MESSAGES.LOAD_DATA_DOT);
           this.loading.set(false);
         }
       });

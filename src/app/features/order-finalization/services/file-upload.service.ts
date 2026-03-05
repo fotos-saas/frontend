@@ -6,6 +6,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import { FileUploadService as CoreFileUploadService } from '../../../core/services/file-upload.service';
 import { FileUploadResponse } from '../models/order-finalization.models';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 /**
  * Order Finalization File Upload Service
@@ -95,7 +96,7 @@ export class FileUploadService {
           }),
           catchError(err => {
             this.logger.error(`${type} upload failed`, err);
-            this.toastService.error('Hiba', 'Hiba történt a fájl feltöltésekor');
+            this.toastService.error('Hiba', ERROR_MESSAGES.FILE_UPLOAD);
             return throwError(() => err);
           }),
           tap({
@@ -116,7 +117,7 @@ export class FileUploadService {
     return this.orderFinalizationService.deleteFile(fileId).pipe(
       catchError(err => {
         this.logger.error('File delete failed', err);
-        this.toastService.error('Hiba', 'Hiba történt a fájl törlésekor');
+        this.toastService.error('Hiba', ERROR_MESSAGES.FILE_DELETE);
         return throwError(() => err);
       })
     );

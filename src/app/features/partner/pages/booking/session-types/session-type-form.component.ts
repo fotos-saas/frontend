@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PartnerBookingService } from '../../../services/partner-booking.service';
 import {
@@ -110,7 +111,7 @@ export class SessionTypeFormComponent implements OnInit {
       : this.bookingService.createSessionType(payload);
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.saving.set(false); this.saved.emit(); },
-      error: (err) => { this.saving.set(false); this.errorMsg.set(err.error?.message ?? 'Hiba történt a mentés során.'); },
+      error: (err) => { this.saving.set(false); this.errorMsg.set(err.error?.message ?? ERROR_MESSAGES.SAVE_DOT); },
     });
   }
 }

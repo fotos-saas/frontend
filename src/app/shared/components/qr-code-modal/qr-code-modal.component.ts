@@ -8,6 +8,7 @@ import { QR_CODE_TYPES, QR_CODE_TYPE_LIST, QrCodeTypeKey } from '../../constants
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
 import { ClipboardService } from '../../../core/services/clipboard.service';
 import { QrCode, IQrCodeService } from '../../interfaces/qr-code.interface';
+import { TIMEOUTS } from '../../constants/timeouts.constants';
 
 @Component({
   selector: 'app-shared-qr-code-modal',
@@ -161,7 +162,7 @@ export class SharedQrCodeModalComponent implements OnInit {
       if (success) {
         this.copied.set(codeId);
         if (this.copyTimeoutId) clearTimeout(this.copyTimeoutId);
-        this.copyTimeoutId = setTimeout(() => this.copied.set(null), 2000);
+        this.copyTimeoutId = setTimeout(() => this.copied.set(null), TIMEOUTS.COPY_FEEDBACK);
       }
     });
   }
@@ -171,7 +172,7 @@ export class SharedQrCodeModalComponent implements OnInit {
       if (success) {
         this.linkCopied.set(codeId);
         if (this.linkCopyTimeoutId) clearTimeout(this.linkCopyTimeoutId);
-        this.linkCopyTimeoutId = setTimeout(() => this.linkCopied.set(null), 2000);
+        this.linkCopyTimeoutId = setTimeout(() => this.linkCopied.set(null), TIMEOUTS.COPY_FEEDBACK);
       }
     });
   }

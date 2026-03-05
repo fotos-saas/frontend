@@ -9,6 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { SafeHtmlPipe } from '../../shared/pipes/safe-html.pipe';
 import { LinkifyPipe } from '../../shared/pipes/linkify.pipe';
 import { isSecureUrl, openSecureUrl } from '../../core/utils/url-validator.util';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 /**
  * Order Data Component - Megrendelési adatok oldal
@@ -77,7 +78,7 @@ export class OrderDataComponent implements OnInit {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = 'Hiba történt az adatok betöltésekor';
+          this.error = ERROR_MESSAGES.LOAD_DATA;
           this.loading = false;
           this.cdr.markForCheck();
           this.logger.error('Order data load error', err);

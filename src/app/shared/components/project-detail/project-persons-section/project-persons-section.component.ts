@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ProjectDetailData, PersonPreviewItem } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
+import { TIMEOUTS } from '../../../constants/timeouts.constants';
 
 interface PersonListItem {
   id: number;
@@ -109,7 +110,7 @@ export class ProjectPersonsSectionComponent {
           this.copying.set(false);
           this.copyingType.set(null);
           this.copiedType.set(type);
-          setTimeout(() => this.copiedType.set(null), 2000);
+          setTimeout(() => this.copiedType.set(null), TIMEOUTS.COPY_FEEDBACK);
         }).catch(() => {
           this.toastService.error('Hiba', 'Nem sikerült a vágólapra másolni');
           this.copying.set(false);

@@ -8,6 +8,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { ClipboardService } from '../../../../../core/services/clipboard.service';
 import { UploadProgressService } from '../../../../../core/services/upload-progress.service';
 import { environment } from '../../../../../../environments/environment';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 import { saveFile } from '@shared/utils/file.util';
 import { AlbumDetailState } from './album-detail.state';
 import { AlbumEditFormData } from './components/album-edit-modal/album-edit-modal.component';
@@ -337,7 +338,7 @@ export class AlbumDetailActionsService {
     this.clipboardService.copyLink(url).then((success) => {
       if (success) {
         state.linkCopied.set(true);
-        setTimeout(() => state.linkCopied.set(false), 2000);
+        setTimeout(() => state.linkCopied.set(false), TIMEOUTS.COPY_FEEDBACK);
       }
     });
   }

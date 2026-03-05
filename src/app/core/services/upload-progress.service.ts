@@ -12,6 +12,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { ERROR_MESSAGES } from '@shared/constants';
 import type {
   FileUploadProgress,
   UploadedPhotoResult,
@@ -162,7 +163,7 @@ export class UploadProgressService {
           subscriber.next({
             ...state,
             phase: 'error',
-            errorMessage: err.error?.message ?? 'Hiba történt a feltöltés során',
+            errorMessage: err.error?.message ?? ERROR_MESSAGES.UPLOAD,
           });
           subscriber.error(err);
         },

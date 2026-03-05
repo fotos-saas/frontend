@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, debounceTime, switchMap, filter, catchError, of, tap } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
@@ -283,12 +284,12 @@ export class PartnerOrderWizardDialogComponent implements OnInit {
             this.saved.emit();
             this.close.emit();
           } else {
-            this.toast.error('Hiba', response.message || 'Hiba történt a mentés során.');
+            this.toast.error('Hiba', response.message || ERROR_MESSAGES.SAVE_DOT);
           }
         },
         error: () => {
           this.submitting.set(false);
-          this.toast.error('Hiba', 'Hiba történt a mentés során.');
+          this.toast.error('Hiba', ERROR_MESSAGES.SAVE_DOT);
         }
       });
   }

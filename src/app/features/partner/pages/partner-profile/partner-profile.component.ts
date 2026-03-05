@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PsInputComponent } from '@shared/components/form';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { AuthService } from '@core/services/auth.service';
 import { PartnerProfileService } from '../../services/partner-profile.service';
 
@@ -102,7 +103,7 @@ export class PartnerProfileComponent implements OnInit {
         error: (err) => {
           this.savingProfile.set(false);
           this.profileError.set(
-            err.error?.message || 'Hiba történt a mentés során.'
+            err.error?.message || ERROR_MESSAGES.SAVE_DOT
           );
         },
       });

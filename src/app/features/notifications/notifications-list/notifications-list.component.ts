@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationCardComponent } from '../notification-card/notification-card.component';
 import { PokeDetailDialogComponent } from '../../../shared/components/poke-detail-dialog/poke-detail-dialog.component';
 import { StaggerAnimationDirective } from '../../../shared/directives';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 /**
  * Notifications List Component
@@ -90,7 +91,7 @@ export class NotificationsListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err) => {
-          this.errorMessage.set('Hiba történt az értesítések betöltésekor');
+          this.errorMessage.set(ERROR_MESSAGES.LOAD_DATA);
         }
       });
   }

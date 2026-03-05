@@ -12,6 +12,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper';
 import { PartnerPrepaymentService } from '../../../services/partner-prepayment.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
@@ -188,7 +189,7 @@ export class CreatePrepaymentDialogComponent implements OnInit {
         },
         error: (err) => {
           this.submitting.set(false);
-          this.errorMessage.set(err.error?.message ?? 'Hiba történt a létrehozás során.');
+          this.errorMessage.set(err.error?.message ?? ERROR_MESSAGES.CREATE_DOT);
         },
       });
   }

@@ -12,6 +12,7 @@ import { ErrorBoundaryService } from '../../../core/services/error-boundary.serv
 import { SentryService } from '../../../core/services/sentry.service';
 import { ClipboardService } from '../../../core/services/clipboard.service';
 import { DialogWrapperComponent } from '../dialog-wrapper/dialog-wrapper.component';
+import { TIMEOUTS } from '../../constants/timeouts.constants';
 import { PsTextareaComponent } from '@shared/components/form';
 
 /**
@@ -69,7 +70,7 @@ export class ErrorFeedbackDialogComponent {
     const success = await this.clipboardService.copy(eventId, 'Hiba azonosító');
     if (success) {
       this.copiedEventId.set(true);
-      setTimeout(() => this.copiedEventId.set(false), 2000);
+      setTimeout(() => this.copiedEventId.set(false), TIMEOUTS.COPY_FEEDBACK);
     }
   }
 

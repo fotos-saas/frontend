@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerOrdersService, PartnerClient } from '../../services/partner-orders.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { PsInputComponent, PsTextareaComponent } from '@shared/components/form';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
@@ -70,12 +71,12 @@ export class ClientEditModalComponent {
         if (response.success) {
           this.saved.emit(response.data);
         } else {
-          this.errorMessage.set(response.message || 'Hiba történt a mentés során.');
+          this.errorMessage.set(response.message || ERROR_MESSAGES.SAVE_DOT);
         }
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMessage.set(err.error?.message || 'Hiba történt a mentés során.');
+        this.errorMessage.set(err.error?.message || ERROR_MESSAGES.SAVE_DOT);
       }
     });
   }

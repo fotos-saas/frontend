@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { PartnerService, SchoolListItem, SchoolItem } from '../../services/partner.service';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { PsInputComponent } from '../../../../shared/components/form/ps-input/ps-input.component';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
@@ -115,12 +116,12 @@ export class SchoolEditModalComponent {
         if (response.success) {
           this.saved.emit(response.data);
         } else {
-          this.errorMessage.set(response.message || 'Hiba történt a mentés során.');
+          this.errorMessage.set(response.message || ERROR_MESSAGES.SAVE_DOT);
         }
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMessage.set(err.error?.message || 'Hiba történt a mentés során.');
+        this.errorMessage.set(err.error?.message || ERROR_MESSAGES.SAVE_DOT);
       }
     });
   }

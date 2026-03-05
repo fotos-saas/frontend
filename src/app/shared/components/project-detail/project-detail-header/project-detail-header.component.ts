@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectDetailData } from '../project-detail.types';
 import { BackButtonComponent } from '../../../components/action-buttons';
 import { ICONS } from '../../../constants/icons.constants';
+import { TIMEOUTS } from '../../../constants/timeouts.constants';
 import { StatusDropdownComponent } from '../../status-dropdown/status-dropdown.component';
 
 @Component({
@@ -38,7 +39,7 @@ export class ProjectDetailHeaderComponent {
     if (!id) return;
     navigator.clipboard.writeText(String(id)).then(() => {
       this.idCopied.set(true);
-      setTimeout(() => this.idCopied.set(false), 1500);
+      setTimeout(() => this.idCopied.set(false), TIMEOUTS.ID_COPY_FEEDBACK);
     });
   }
 

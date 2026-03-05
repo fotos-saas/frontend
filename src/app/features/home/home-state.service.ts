@@ -12,6 +12,7 @@ import { FinalizationReminderResult } from '../../shared/components/finalization
 import { ContactEditResult, ContactData } from '../../shared/components/contact-edit-dialog/contact-edit-dialog.component';
 import { ToastService } from '../../core/services/toast.service';
 import { LoggerService } from '../../core/services/logger.service';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { GuestService } from '../../core/services/guest.service';
 import { OnboardingResult } from '../../shared/components/onboarding-dialog/onboarding-dialog.component';
 
@@ -215,7 +216,7 @@ export class HomeStateService {
             this.cdr.markForCheck();
           },
           error: (err) => {
-            this.toastService.error('Hiba', err.message || 'Hiba történt a mentés során');
+            this.toastService.error('Hiba', err.message || ERROR_MESSAGES.SAVE);
             this.isContactSaving = false;
             this.cdr.markForCheck();
           }
@@ -245,7 +246,7 @@ export class HomeStateService {
         },
         error: (err) => {
           this.isOnboardingSubmitting.set(false);
-          this.onboardingError.set(err.message || 'Hiba történt a regisztráció során');
+          this.onboardingError.set(err.message || ERROR_MESSAGES.REGISTER);
           this.cdr.markForCheck();
         }
       });

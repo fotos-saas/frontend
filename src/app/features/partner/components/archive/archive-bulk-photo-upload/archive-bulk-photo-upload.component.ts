@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsSearchableSelectComponent, PsInputComponent, PsCheckboxComponent, SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { SchoolItem } from '../../../models/partner.models';
 import { ARCHIVE_SERVICE, ArchiveService, BulkPhotoMatch } from '../../../models/archive.models';
 
@@ -188,7 +189,7 @@ export class ArchiveBulkPhotoUploadComponent {
         },
         error: () => {
           this.uploading.set(false);
-          this.error.set('Hiba történt a feltöltés során.');
+          this.error.set(ERROR_MESSAGES.UPLOAD_DOT);
         },
       });
   }

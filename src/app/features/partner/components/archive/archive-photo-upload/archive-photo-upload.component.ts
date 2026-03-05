@@ -6,6 +6,7 @@ import { ARCHIVE_SERVICE } from '../../../models/archive.models';
 import { PsCheckboxComponent, PsInputComponent } from '@shared/components/form';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 @Component({
   selector: 'app-archive-photo-upload',
@@ -60,12 +61,12 @@ export class ArchivePhotoUploadComponent {
           if (res.success) {
             this.uploaded.emit();
           } else {
-            this.errorMessage.set(res.message || 'Hiba történt a feltöltés során.');
+            this.errorMessage.set(res.message || ERROR_MESSAGES.UPLOAD_DOT);
           }
         },
         error: (err) => {
           this.uploading.set(false);
-          this.errorMessage.set(err.error?.message || 'Hiba történt a feltöltés során.');
+          this.errorMessage.set(err.error?.message || ERROR_MESSAGES.UPLOAD_DOT);
         },
       });
   }

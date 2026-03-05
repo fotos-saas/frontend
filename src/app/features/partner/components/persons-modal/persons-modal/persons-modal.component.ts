@@ -8,6 +8,7 @@ import { PartnerProjectService } from '../../../services/partner-project.service
 import { ElectronService } from '../../../../../core/services/electron.service';
 import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { TIMEOUTS } from '../../../../../shared/constants/timeouts.constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { TypeFilter, TabloPersonItem } from '../persons-modal.types';
 import { ModalPersonCardComponent } from '../modal-person-card/modal-person-card.component';
@@ -243,7 +244,7 @@ export class PersonsModalComponent implements OnInit {
     if (!text) return;
     navigator.clipboard.writeText(text);
     this.extraNamesCopied.set(true);
-    setTimeout(() => this.extraNamesCopied.set(false), 1500);
+    setTimeout(() => this.extraNamesCopied.set(false), TIMEOUTS.ID_COPY_FEEDBACK);
   }
 
   // --- Kijelölés / kártya kattintás ---

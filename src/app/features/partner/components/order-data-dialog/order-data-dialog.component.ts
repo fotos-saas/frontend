@@ -21,6 +21,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { SafeHtmlPipe } from '../../../../shared/pipes/safe-html.pipe';
 import { LinkifyPipe } from '../../../../shared/pipes/linkify.pipe';
 import { ICONS } from '../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { isSecureUrl, openSecureUrl } from '../../../../core/utils/url-validator.util';
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { OrderSyncPanelComponent } from '../order-sync-panel/order-sync-panel.component';
@@ -87,7 +88,7 @@ export class OrderDataDialogComponent implements OnInit {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = 'Hiba történt az adatok betöltésekor';
+          this.error = ERROR_MESSAGES.LOAD_DATA;
           this.loading = false;
           this.cdr.markForCheck();
           this.logger.error('Partner order data load error', err);

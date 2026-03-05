@@ -6,7 +6,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { PasswordStrengthComponent } from '../../../shared/components/password-strength/password-strength.component';
 import { AuthLayoutComponent } from '../../../shared/components/auth-layout/auth-layout.component';
 import { LucideAngularModule } from 'lucide-angular';
-import { ICONS } from '../../../shared/constants';
+import { ICONS, ERROR_MESSAGES } from '../../../shared/constants';
 import { PlansService, PricingPlan } from '../../../shared/services/plans.service';
 import { SubscriptionService } from '../../../features/partner/services/subscription.service';
 import { PsInputComponent, PsSelectComponent, PsCheckboxComponent, PsSelectOption } from '@shared/components/form';
@@ -245,7 +245,7 @@ export class RegisterAppComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading.set(false);
-        const message = error.error?.message || 'Hiba történt a regisztráció során.';
+        const message = error.error?.message || ERROR_MESSAGES.REGISTER_DOT;
         this.errorMessage.set(message);
       }
     });

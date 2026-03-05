@@ -6,6 +6,7 @@ import { ARCHIVE_SERVICE, ArchiveConfig, ArchiveField, CreateArchivePayload, Upd
 import { SchoolItem } from '../../../models/partner.models';
 import { PsSearchableSelectComponent, PsCheckboxComponent, PsInputComponent, SelectOption } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { DialogWrapperComponent } from '../../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 
 @Component({
@@ -147,12 +148,12 @@ export class ArchiveEditModalComponent {
           }
         } else {
           this.saving.set(false);
-          this.errorMessage.set(response.message || 'Hiba történt a mentés során.');
+          this.errorMessage.set(response.message || ERROR_MESSAGES.SAVE_DOT);
         }
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMessage.set(err.error?.message || 'Hiba történt a mentés során.');
+        this.errorMessage.set(err.error?.message || ERROR_MESSAGES.SAVE_DOT);
       },
     });
   }

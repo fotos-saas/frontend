@@ -13,6 +13,7 @@ import { DEADLINE_OPTIONS } from '../voting-create-dialog/voting-create-dialog.c
 import { PsFileUploadComponent } from '@shared/components/form';
 import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
 import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
 
 export interface VotingEditResult {
@@ -216,7 +217,7 @@ export class VotingEditDialogComponent extends BaseDialogComponent {
 
   onMediaUploadError(error: string): void {
     this.mediaUploadError.set(error);
-    setTimeout(() => this.mediaUploadError.set(null), 5000);
+    setTimeout(() => this.mediaUploadError.set(null), TIMEOUTS.ERROR_AUTO_HIDE);
   }
 
   // ============================================================================

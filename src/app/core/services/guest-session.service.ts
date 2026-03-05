@@ -16,6 +16,7 @@ import {
   SessionStatusResponse,
   SessionInvalidatedEvent
 } from './guest.models';
+import { ERROR_MESSAGES } from '@shared/constants';
 
 /**
  * Guest Session Service
@@ -280,7 +281,7 @@ export class GuestSessionService {
   }
 
   handleError(error: HttpErrorResponse): Observable<never> {
-    let message = 'Hiba történt. Próbáld újra!';
+    let message: string = ERROR_MESSAGES.GENERIC_RETRY;
     if (error.error?.message) message = error.error.message;
     else if (error.status === 0) message = 'Nincs internetkapcsolat.';
     else if (error.status === 429) message = 'Túl sok kérés. Várj egy kicsit!';

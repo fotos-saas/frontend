@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ERROR_MESSAGES } from '@shared/constants';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
 import { PROJECT_DETAIL_SERVICE } from '../project-detail/project-detail.tokens';
@@ -97,7 +98,7 @@ export class ContactEditorModalComponent implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMessage.set(err.error?.message ?? 'Hiba történt a mentés során');
+        this.errorMessage.set(err.error?.message ?? ERROR_MESSAGES.SAVE);
       }
     });
   }

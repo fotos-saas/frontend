@@ -13,6 +13,7 @@ import {
   DeleteButtonComponent
 } from '../../../components/action-buttons';
 import { ICONS } from '../../../constants/icons.constants';
+import { TIMEOUTS } from '../../../constants/timeouts.constants';
 import { QR_CODE_TYPES, QrCodeTypeKey } from '../../../constants/qr-code-types';
 import { InfoBoxComponent, InfoHelpItemComponent } from '../../../components/info-box';
 import { ProjectPersonsSectionComponent } from '../project-persons-section/project-persons-section.component';
@@ -91,7 +92,7 @@ export class ProjectDetailViewComponent {
     this.clipboardService.copyLink(url).then((success) => {
       if (success) {
         this.copiedCodeId = codeId;
-        setTimeout(() => this.copiedCodeId = null, 2000);
+        setTimeout(() => this.copiedCodeId = null, TIMEOUTS.COPY_FEEDBACK);
       }
     });
   }

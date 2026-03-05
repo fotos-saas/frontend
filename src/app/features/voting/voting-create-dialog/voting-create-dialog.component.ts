@@ -11,6 +11,7 @@ import { RichTextEditorComponent } from '../../../shared/components/rich-text-ed
 import { PsFileUploadComponent } from '@shared/components/form';
 import { BaseDialogComponent } from '../../../shared/components/base-dialog/base-dialog.component';
 import { PsInputComponent, PsCheckboxComponent } from '@shared/components/form';
+import { TIMEOUTS } from '@shared/constants/timeouts.constants';
 
 /** Határidő opciók */
 export interface DeadlineOption {
@@ -162,7 +163,7 @@ export class VotingCreateDialogComponent extends BaseDialogComponent {
 
   onMediaUploadError(error: string): void {
     this.mediaUploadError.set(error);
-    setTimeout(() => this.mediaUploadError.set(null), 5000);
+    setTimeout(() => this.mediaUploadError.set(null), TIMEOUTS.ERROR_AUTO_HIDE);
   }
 
   // ============================================================================

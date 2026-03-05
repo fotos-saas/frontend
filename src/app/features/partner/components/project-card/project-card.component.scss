@@ -116,24 +116,24 @@
   color: get-color('slate', 700);
 }
 .tag-badge--red {
-  background: #fecaca;
-  color: #991b1b;
+  background: get-color('error', 200);
+  color: get-color('error', 800);
 }
 .tag-badge--orange {
   background: #fed7aa;
   color: #9a3412;
 }
 .tag-badge--amber {
-  background: #fde68a;
-  color: #92400e;
+  background: get-color('warning', 200);
+  color: get-color('warning', 800);
 }
 .tag-badge--green {
-  background: #bbf7d0;
-  color: #166534;
+  background: get-color('success', 200);
+  color: get-color('success', 800);
 }
 .tag-badge--blue {
-  background: #bfdbfe;
-  color: #1e40af;
+  background: get-color('primary', 200);
+  color: get-color('primary', 800);
 }
 .tag-badge--indigo {
   background: #c7d2fe;
@@ -191,8 +191,8 @@
   font-weight: 600;
   padding: 2px 5px;
   border-radius: 4px;
-  background: #fef3c7;
-  color: #b45309;
+  background: get-color('warning', 100);
+  color: get-color('warning', 700);
   white-space: nowrap;
   cursor: default;
   flex-shrink: 0;

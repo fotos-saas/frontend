@@ -2,8 +2,9 @@ import { Component, inject, signal, ChangeDetectionStrategy, computed, OnInit, D
 import { LoggerService } from '@core/services/logger.service';
 import { NgClass } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
@@ -93,9 +94,27 @@ export class PartnerShellComponent implements OnInit {
   // Subscription info
   subscriptionInfo = signal<SubscriptionInfo | null>(null);
   isPaused = computed(() => this.subscriptionInfo()?.status === 'paused');
-  inPrintCount = signal(0);
-  pendingTaskCount = signal(0);
-  pendingApprovalCount = signal(0);
+  readonly inPrintCount = toSignal(
+    this.finalizationService.getInPrintCount(new Date().getFullYear()).pipe(
+      map(res => res.count),
+      catchError(() => of(0)),
+    ),
+    { initialValue: 0 },
+  );
+  readonly pendingTaskCount = toSignal(
+    this.taskService.getPendingCount().pipe(
+      map(res => res.data.count),
+      catchError(() => of(0)),
+    ),
+    { initialValue: 0 },
+  );
+  readonly pendingApprovalCount = toSignal(
+    this.workflowService.getPendingCount().pipe(
+      map(res => res.count),
+      catchError(() => of(0)),
+    ),
+    { initialValue: 0 },
+  );
 
   // User role info
   private userRoles = signal<string[]>(this.authService.getCurrentUser()?.roles ?? []);
@@ -197,9 +216,6 @@ export class PartnerShellComponent implements OnInit {
 
     this.loadSubscriptionInfo();
     this.loadBranding();
-    this.loadInPrintCount();
-    this.loadPendingTaskCount();
-    this.loadPendingApprovalCount();
   }
 
   private loadSubscriptionInfo(): void {
@@ -213,23 +229,6 @@ export class PartnerShellComponent implements OnInit {
     });
   }
 
-  private loadInPrintCount(): void {
-    this.finalizationService.getInPrintCount(new Date().getFullYear())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: (res) => this.inPrintCount.set(res.count), error: () => {} });
-  }
-
-  private loadPendingTaskCount(): void {
-    this.taskService.getPendingCount()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: (res) => this.pendingTaskCount.set(res.data.count), error: () => {} });
-  }
-
-  private loadPendingApprovalCount(): void {
-    this.workflowService.getPendingCount()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: (res) => this.pendingApprovalCount.set(res.count), error: () => {} });
-  }
 
   private loadBranding(): void {
     this.brandingService.getBranding().subscribe({

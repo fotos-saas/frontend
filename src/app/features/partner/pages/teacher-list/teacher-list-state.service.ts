@@ -1,5 +1,7 @@
 import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
 import { TeacherListItem, TeacherGroupRow, SyncResultItem } from '../../models/teacher.models';
@@ -23,8 +25,17 @@ export class TeacherListStateService {
   readonly teachers = signal<TeacherListItem[]>([]);
   readonly totalPages = signal(1);
   readonly totalTeachers = signal(0);
-  readonly schools = signal<SchoolItem[]>([]);
-  readonly classYears = signal<SelectOption[]>([]);
+  readonly schools = toSignal(
+    this.schoolService.getAllSchools().pipe(catchError(() => of([] as SchoolItem[]))),
+    { initialValue: [] as SchoolItem[] },
+  );
+  readonly classYears = toSignal(
+    this.teacherService.getClassYears().pipe(
+      map(years => years.map(y => ({ id: y, label: y }))),
+      catchError(() => of([] as SelectOption[])),
+    ),
+    { initialValue: [] as SelectOption[] },
+  );
   readonly syncingSchoolId = signal(0);
   readonly downloading = signal(false);
   readonly downloadingSchoolId = signal(0);
@@ -59,23 +70,7 @@ export class TeacherListStateService {
   });
 
   init(): void {
-    this.loadSchools();
-    this.loadClassYears();
     this.loadTeachers();
-  }
-
-  loadSchools(): void {
-    this.schoolService.getAllSchools()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: (data) => this.schools.set(data) });
-  }
-
-  loadClassYears(): void {
-    this.teacherService.getClassYears()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (years) => this.classYears.set(years.map(y => ({ id: y, label: y }))),
-      });
   }
 
   loadTeachers(): void {

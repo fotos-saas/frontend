@@ -5,7 +5,7 @@
 <div
   class="toolbar"
   [class.toolbar--has-collapse]="openSubmenu()"
-  [class.toolbar--panel-open]="uploadPanelOpen() || customOrderPanelOpen() || dragOrderPanelOpen()"
+  [class.toolbar--panel-open]="uploadPanelOpen() || dragOrderPanelOpen()"
   (mouseenter)="onCollapseEnter()"
   (mouseleave)="onCollapseLeave()"
 >
@@ -169,17 +169,6 @@
                   matTooltip="Rácsba rendezés"
                 >
                   <lucide-icon [name]="ICONS.LAYOUT_GRID" [size]="15" />
-                </button>
-                <div class="toolbar__collapse-sep"></div>
-                <button
-                  class="toolbar__btn toolbar__btn--sm toolbar__btn--amber"
-                  [class.toolbar__btn--busy]="sorting()"
-                  [class.toolbar__btn--active]="customOrderPanelOpen()"
-                  [disabled]="sorting()"
-                  (click)="toggleCustomOrderPanel(); $event.stopPropagation()"
-                  matTooltip="Egyedi sorrend"
-                >
-                  <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="15" />
                 </button>
                 <div class="toolbar__collapse-sep"></div>
                 <button
@@ -633,63 +622,6 @@
         </div>
       }
   </div>
-</div>
-}
-
-<!-- Custom Order Panel (egyedi sorrend — textarea + rendezés) -->
-@if (customOrderPanelOpen()) {
-<div class="custom-order-panel">
-  <div class="custom-order-panel__header">
-    <lucide-icon [name]="ICONS.LIST_ORDERED" [size]="14" />
-    <span>Egyedi sorrend</span>
-    <button class="custom-order-panel__close" (click)="closeCustomOrderPanel()" type="button">
-      <lucide-icon [name]="ICONS.X" [size]="14" />
-    </button>
-  </div>
-  <div class="custom-order-panel__body">
-    <p class="custom-order-panel__desc">
-      Írd be a kívánt sorrendben a neveket, soronként egyet. Az AI párosítja a layer nevekkel.
-    </p>
-    <div class="custom-order-panel__scope">
-      <span class="custom-order-panel__scope-label">Célcsoport</span>
-      <div class="custom-order-panel__scope-buttons">
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.reorderTarget() === 'all'" (click)="qa.reorderTarget.set('all')">Mind</button>
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.reorderTarget() === 'teachers'" (click)="qa.reorderTarget.set('teachers')">Tanárok</button>
-        <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.reorderTarget() === 'students'" (click)="qa.reorderTarget.set('students')">Diákok</button>
-      </div>
-    </div>
-    <textarea
-      class="custom-order-panel__textarea"
-      [value]="customOrderText()"
-      (input)="customOrderText.set($any($event.target).value)"
-      placeholder="Kiss Anna&#10;Nagy Péter&#10;Szabó Gábor&#10;..."
-      rows="8"
-    ></textarea>
-  </div>
-  <div class="custom-order-panel__footer">
-    <button
-      class="custom-order-panel__btn custom-order-panel__btn--submit"
-      [disabled]="!customOrderText().trim() || sorting()"
-      (click)="submitCustomOrder()"
-      type="button"
-    >
-      @if (sorting()) {
-        <span class="toolbar__spinner toolbar__spinner--sm"></span>
-        Feldolgozás...
-      } @else {
-        <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-        Rendezés
-      }
-    </button>
-  </div>
-  @if (customOrderResult()) {
-    <div class="custom-order-panel__result"
-      [class.custom-order-panel__result--success]="customOrderResult()!.success"
-      [class.custom-order-panel__result--error]="!customOrderResult()!.success"
-    >
-      <span>{{ customOrderResult()!.message }}</span>
-    </div>
-  }
 </div>
 }
 

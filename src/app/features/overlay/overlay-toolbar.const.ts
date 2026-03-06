@@ -40,7 +40,6 @@ export const TOOLBAR_GROUPS: ToolbarGroup[] = [
       { id: 'arrange-grid', icon: ICONS.LAYOUT_GRID, label: 'Rácsba rendezés', accent: 'purple' },
       { id: 'sort-abc', icon: ICONS.ARROW_DOWN_AZ, label: 'ABC sorrend', accent: 'blue' },
       { id: 'sort-gender', icon: ICONS.USERS, label: 'Felváltva fiú-lány' },
-      { id: 'sort-custom', icon: ICONS.LIST_ORDERED, label: 'Egyedi sorrend' },
     ],
   },
   {

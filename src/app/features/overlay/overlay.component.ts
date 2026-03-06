@@ -103,11 +103,6 @@ export class OverlayComponent implements OnInit {
     return this.renameUnmatched().some(u => u.newId.trim().length > 0);
   });
 
-  // Custom order panel state
-  readonly customOrderPanelOpen = signal(false);
-  readonly customOrderText = signal('');
-  readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
-
   // Drag order panel — alias-ok a service signal-ekre
   readonly dragOrderPanelOpen = this.dragOrder.panelOpen;
   readonly dragOrderSaving = this.dragOrder.saving;
@@ -221,7 +216,6 @@ export class OverlayComponent implements OnInit {
     if (!target.closest('.toolbar-wrap')) {
       if (this.openSubmenu()) this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
-      if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
       if (this.dragOrderPanelOpen()) this.closeDragOrderPanel();
     }
   }
@@ -235,18 +229,6 @@ export class OverlayComponent implements OnInit {
   async sortGender(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGender(); }
   async sortGrid(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGrid(this.activeDoc()); }
 
-  // ============ Custom Order Panel ============
-
-  toggleCustomOrderPanel(): void {
-    if (this.customOrderPanelOpen()) { this.closeCustomOrderPanel(); } else {
-      this.customOrderPanelOpen.set(true);
-      this.customOrderResult.set(null);
-      this.closeSubmenu();
-      if (this.uploadPanelOpen()) this.closeUploadPanel();
-    }
-  }
-  closeCustomOrderPanel(): void { this.customOrderPanelOpen.set(false); this.customOrderResult.set(null); }
-
   // ============ Drag Order Panel (delegálva: OverlayDragOrderService) ============
 
   async toggleDragOrderPanel(): Promise<void> {
@@ -255,7 +237,6 @@ export class OverlayComponent implements OnInit {
     } else {
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
-      if (this.customOrderPanelOpen()) this.closeCustomOrderPanel();
       if (this.qa.panelOpen()) this.closeQuickActions();
       await this.dragOrder.openPanel();
     }
@@ -291,18 +272,6 @@ export class OverlayComponent implements OnInit {
   onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void { this.dragOrder.onDropToGroup(event, groupId); }
   onDropToUngrouped(event: CdkDragDrop<PersonItem[]>): void { this.dragOrder.onDropToUngrouped(event); }
   moveDragOrderGroup(id: string, direction: -1 | 1): void { this.dragOrder.moveGroup(id, direction); }
-
-  async submitCustomOrder(): Promise<void> {
-    const text = this.customOrderText().trim();
-    if (!text || this.sortService.sorting()) return;
-    const target = this.qa.reorderTarget();
-    const data = await this.ps.getImageLayerData();
-    const slugNames = target === 'teachers' ? data.teachers
-      : target === 'students' ? data.students : data.names;
-    if (slugNames.length < 2) { this.ngZone.run(() => this.customOrderResult.set({ success: false, message: 'Legalább 2 layer kell.' })); return; }
-    const result = await this.sortService.submitCustomOrderScoped(text, slugNames, target);
-    if (result.message) this.ngZone.run(() => this.customOrderResult.set(result));
-  }
 
   // ============ Sync & Generate delegálás ============
 

@@ -31,7 +31,7 @@ export class PhotoshopPsdService {
 
   /** Szöveget fájlrendszer-biztos névre alakít */
   sanitizeName(text: string): string {
-    return this.slugify(text, '-');
+    return this.slugify(text, '_');
   }
 
   /** Fájl/mappa név generálás (aláhúzásos szeparátor) */

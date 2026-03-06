@@ -326,10 +326,10 @@ export class PhotoshopService {
 
   /**
    * Szöveget fájlrendszer-biztos névre alakít.
-   * Ékezetek eltávolítása, kisbetűsítés, nem alfanumerikus → kötőjel.
+   * Ékezetek eltávolítása, kisbetűsítés, nem alfanumerikus → aláhúzás.
    */
   sanitizeName(text: string): string {
-    return this.slugify(text, '-');
+    return this.slugify(text, '_');
   }
 
   /** Fájl/mappa név generálás (aláhúzásos szeparátor) */

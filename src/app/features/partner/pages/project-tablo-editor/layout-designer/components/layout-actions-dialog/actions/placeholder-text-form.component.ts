@@ -65,7 +65,7 @@ function fixedNumbers(length: number): string {
         <input
           type="text"
           class="form__input"
-          placeholder="pl. Alcímek"
+          placeholder="pl. Alcímek (üres = Names mappába)"
           [ngModel]="groupName()"
           (ngModelChange)="groupName.set($event)"
         />
@@ -229,7 +229,7 @@ export class PlaceholderTextFormComponent {
   readonly formData = computed<PlaceholderTextFormData | null>(() => {
     const name = this.groupName().trim();
     const len = this.charLength();
-    if (!name || !len || len <= 0) return null;
+    if (!len || len <= 0) return null;
     return {
       textType: this.textType(),
       charLength: len,

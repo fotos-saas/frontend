@@ -1,11 +1,11 @@
 /**
  * reorder-layers.jsx — Layer atrendezes ORDERED_NAMES sorrend alapjan
  *
- * Fazis 0: linkLayers — Image + Names + Positions layerek osszelinkelese nev alapjan
  * Fazis 1: moveLayersToBottomInGroup — Images layer STACK sorrend
- * Fazis 2: rearrangeGroupLayersAndPositions — fizikai poziciok atrendezese
+ * Fazis 2: linkLayers — Image + Names + Positions layerek osszelinkelese nev alapjan
+ *          (a stack atrendezes UTAN, mert layer.move() eltori a linkelest!)
+ * Fazis 3: rearrangeGroupLayersAndPositions — fizikai poziciok atrendezese
  *          A linkeles miatt a Names/Positions layerek automatikusan kovetik a kepeket
- * A linkelés megmarad — a layerek össze vannak kapcsolva a rendezés után is
  *
  * CONFIG bemenet:
  *   ORDERED_NAMES = JSON string tomb: ["slug1---123", "slug2---456", ...]
@@ -83,10 +83,10 @@ function _selectMultipleLayersById(layerIds) {
   }
 }
 
-// ========== FAZIS 0: Image + Names + Positions layerek osszelinkelese ==========
+// ========== FAZIS 2: Image + Names + Positions layerek osszelinkelese ==========
 // Minden image layer-hez megkeresi az azonos nevu Names es Positions layert,
 // majd PS nativ "Link Layers" funkcio-val osszekapcsolja oket.
-// A linkeles megmarad — a felhasznalo igy latja a Layers panelen is.
+// FONTOS: a stack atrendezes (FAZIS 1) UTAN kell futtatni, mert layer.move() eltori a linkeket!
 
 function _linkLayersForGroup(subName) {
   var imgGrp = getGroupByPath(_doc, ["Images", subName]);
@@ -199,10 +199,8 @@ function _doReorderLayers() {
     var imageLayers = imgGrp.artLayers;
     if (imageLayers.length < 2) continue;
 
-    // --- FAZIS 0: Linkelés — Image + Names + Positions osszekapcsolasa ---
-    _linkLayersForGroup(subName);
-
     // --- FAZIS 1: Images layer STACK sorrend csere ---
+    // (a linkelés ELŐTT, mert layer.move() eltöri a linkeket!)
     var matchedLayers = [];
     var nameToLayer = {};
     for (var li = 0; li < imageLayers.length; li++) {
@@ -218,8 +216,12 @@ function _doReorderLayers() {
     // Production minta: reverse + moveLayersToBottomInGroup
     moveLayersToBottomInGroup(imgGrp, matchedLayers.reverse());
 
-    // --- FAZIS 2: Fizikai poziciok atrendezese ---
-    // A linkeles miatt a Names + Positions layerek automatikusan kovetik a kepeket
+    // --- FAZIS 2: Linkelés — Image + Names + Positions összekapcsolása ---
+    // A stack átrendezés UTÁN linkeljük, így a move() nem töri el a linkeket
+    _linkLayersForGroup(subName);
+
+    // --- FAZIS 3: Fizikai pozíciók átrendezése ---
+    // A linkelés miatt a Names + Positions layerek automatikusan követik a képeket
     rearrangeGroupLayersAndPositions(imgGrp);
 
     totalReordered += matchedLayers.length;

@@ -135,6 +135,9 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (personsData.length > 0) {
       const imageResult = await ps.addImageLayers(personsData, undefined, docName);
       if (imageResult.success) {
+        // placed-photos.json létrehozása (fotóváltozás-figyeléshez)
+        await this.createPlacedPhotosJson(personsData, psdPath);
+
         await this.wait();
         const layoutResult = await ps.arrangeTabloLayout(
           { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
@@ -167,6 +170,27 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       this.logger.warn(`${tag} Bezárás sikertelen`, closeResult.error);
     }
     this.logger.info(`${tag} KÉSZ`);
+  }
+
+  /** placed-photos.json létrehozása a fotóváltozás-figyeléshez */
+  private async createPlacedPhotosJson(
+    persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
+    psdPath: string,
+  ): Promise<void> {
+    const layers = persons
+      .filter(p => p.photoUrl)
+      .map(p => {
+        const slug = p.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
+        return { layerName: `${slug}---${p.id}`, photoUrl: p.photoUrl! };
+      });
+    if (layers.length > 0) {
+      await window.electronAPI?.photoshop.refreshPlacedJson({
+        psdFilePath: psdPath,
+        layers,
+        syncBorder: true,
+      });
+    }
   }
 
   /** Layer nevek javítása: kötőjel → alulvonás a slug részben */

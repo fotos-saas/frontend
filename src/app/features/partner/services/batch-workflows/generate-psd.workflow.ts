@@ -135,7 +135,7 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     }
     checkAbort();
 
-    // 6. Pillanatkép mentése
+    // 6. Pillanatkép mentése + Dokumentum mentése és bezárása
     onStep(6);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
@@ -145,6 +145,11 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     );
     if (!snapshotResult.success) {
       this.logger.warn('Pillanatkép mentés sikertelen (nem kritikus)', snapshotResult.error);
+    }
+
+    const closeResult = await ps.saveAndCloseDocument(docName);
+    if (!closeResult.success) {
+      this.logger.warn('Dokumentum bezárás sikertelen', closeResult.error);
     }
   }
 

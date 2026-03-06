@@ -35,6 +35,11 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
   private readonly logger = inject(LoggerService);
   private readonly photoshopService = inject(PhotoshopService);
 
+  /** Várakozás a Photoshop feldolgozására a lépések között */
+  private wait(ms = 1500): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async execute(
     job: BatchJobState,
     projectData: BatchProjectData,
@@ -55,12 +60,14 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       photoUrl: p.photoUrl,
     }));
 
+    const tag = `[Batch PSD] ${job.projectName}`;
+
     // 0. PSD létezés ellenőrzés — ha létezik, bezárjuk PS-ben (a generátor felülírja)
     onStep(0);
-    this.logger.info(`[Batch PSD] Ellenőrzés: ${job.projectName}, személyek: ${personsData.length}, méret: ${size.value}`);
+    this.logger.info(`${tag} Indítás — ${personsData.length} fő, méret: ${size.value}`);
     const existsCheck = await ps.checkPsdExists(psdPath);
     if (existsCheck.exists) {
-      this.logger.info(`[Batch PSD] PSD már létezik, újrageneráljuk: ${psdPath.split('/').pop()}`);
+      this.logger.info(`${tag} PSD már létezik, újrageneráljuk`);
       const existingDocName = psdPath.split('/').pop() ?? undefined;
       await ps.closeDocumentWithoutSaving(existingDocName);
     }
@@ -72,7 +79,6 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
 
     // 1. PSD generálás és megnyitás
     onStep(1);
-    this.logger.info(`[Batch PSD] Generálás: ${docName}`);
     const genResult = await ps.generateAndOpenPsd(size, {
       projectName: job.projectName,
       schoolName: job.schoolName,
@@ -87,83 +93,65 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
 
     // 2. Layer nevek javítása (kötőjel → alulvonás) + Guide-ok
     onStep(2);
-    this.logger.info(`[Batch PSD] Layer nevek + Guide-ok`);
     await this.fixLayerNames(persons);
-    // Várunk hogy a PS feldolgozza
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await this.wait(2000);
 
     const guideResult = await ps.addGuides(docName);
     if (!guideResult.success) {
-      this.logger.warn('[Batch PSD] Guide-ok sikertelen', guideResult.error);
+      this.logger.warn(`${tag} Guide-ok sikertelen`, guideResult.error);
     }
+    await this.wait();
     checkAbort();
 
     // 3. Felirat layerek
     onStep(3);
-    this.logger.info(`[Batch PSD] Feliratok`);
-    try {
-      const subtitles = ps.buildSubtitles({
-        schoolName: job.schoolName,
-        className: job.className,
-        classYear: job.classYear,
-      });
-      if (subtitles.length > 0) {
-        const subResult = await ps.addSubtitleLayers(subtitles, docName);
-        this.logger.info(`[Batch PSD] Feliratok eredmény: success=${subResult.success}, error=${subResult.error}`);
-      } else {
-        this.logger.info(`[Batch PSD] Feliratok: nincs felirat (üres subtitles)`);
+    const subtitles = ps.buildSubtitles({
+      schoolName: job.schoolName,
+      className: job.className,
+      classYear: job.classYear,
+    });
+    if (subtitles.length > 0) {
+      const subResult = await ps.addSubtitleLayers(subtitles, docName);
+      if (!subResult.success) {
+        this.logger.warn(`${tag} Feliratok sikertelen`, subResult.error);
       }
-    } catch (err) {
-      this.logger.error('[Batch PSD] Feliratok EXCEPTION:', err);
     }
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    this.logger.info(`[Batch PSD] checkAbort előtt (3. lépés után)`);
+    await this.wait();
     checkAbort();
-    this.logger.info(`[Batch PSD] checkAbort után (3. lépés után) — TOVÁBBLÉPÜNK`);
 
     // 4. Név layerek
     onStep(4);
-    this.logger.info(`[Batch PSD] Név layerek: ${personsData.length} fő`);
-    try {
-      if (personsData.length > 0) {
-        const nameResult = await ps.addNameLayers(personsData, docName);
-        this.logger.info(`[Batch PSD] Név layerek eredmény: success=${nameResult.success}, error=${nameResult.error}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        this.logger.info(`[Batch PSD] Név layerek: SKIP (0 fő)`);
+    if (personsData.length > 0) {
+      const nameResult = await ps.addNameLayers(personsData, docName);
+      if (!nameResult.success) {
+        this.logger.warn(`${tag} Név layerek sikertelen`, nameResult.error);
       }
-    } catch (err) {
-      this.logger.error('[Batch PSD] Név layerek EXCEPTION:', err);
+      await this.wait();
     }
     checkAbort();
 
     // 5. Kép layerek + Tablóelrendezés
     onStep(5);
-    this.logger.info(`[Batch PSD] Kép layerek + Elrendezés`);
-    try {
-      if (personsData.length > 0) {
-        const imageResult = await ps.addImageLayers(personsData, undefined, docName);
-        this.logger.info(`[Batch PSD] Kép layerek eredmény: success=${imageResult.success}, error=${imageResult.error}`);
-        if (imageResult.success) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const layoutResult = await ps.arrangeTabloLayout(
-            { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
-            docName,
-          );
-          this.logger.info(`[Batch PSD] Elrendezés eredmény: success=${layoutResult.success}, error=${layoutResult.error}`);
+    if (personsData.length > 0) {
+      const imageResult = await ps.addImageLayers(personsData, undefined, docName);
+      if (imageResult.success) {
+        await this.wait();
+        const layoutResult = await ps.arrangeTabloLayout(
+          { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
+          docName,
+        );
+        if (!layoutResult.success) {
+          this.logger.warn(`${tag} Elrendezés sikertelen`, layoutResult.error);
         }
       } else {
-        this.logger.info(`[Batch PSD] Kép layerek: SKIP (0 fő)`);
+        this.logger.warn(`${tag} Kép layerek sikertelen`, imageResult.error);
       }
-    } catch (err) {
-      this.logger.error('[Batch PSD] Kép layerek EXCEPTION:', err);
+      await this.wait();
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
     checkAbort();
 
     // 6. Pillanatkép + Mentés és bezárás
     onStep(6);
-    this.logger.info(`[Batch PSD] Pillanatkép + Mentés és bezárás`);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
       { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
@@ -171,14 +159,14 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       docName,
     );
     if (!snapshotResult.success) {
-      this.logger.warn('[Batch PSD] Pillanatkép mentés sikertelen (nem kritikus)', snapshotResult.error);
+      this.logger.warn(`${tag} Pillanatkép sikertelen (nem kritikus)`, snapshotResult.error);
     }
 
     const closeResult = await ps.saveAndCloseDocument(docName);
     if (!closeResult.success) {
-      this.logger.warn('[Batch PSD] Dokumentum bezárás sikertelen', closeResult.error);
+      this.logger.warn(`${tag} Bezárás sikertelen`, closeResult.error);
     }
-    this.logger.info(`[Batch PSD] KÉSZ: ${job.projectName}`);
+    this.logger.info(`${tag} KÉSZ`);
   }
 
   /** Layer nevek javítása: kötőjel → alulvonás a slug részben */

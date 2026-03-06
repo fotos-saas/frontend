@@ -1377,6 +1377,40 @@
   &:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 }
 
+.drag-order-panel__custom-order {
+  padding: 0 12px 8px;
+}
+
+.drag-order-panel__custom-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  padding: 8px;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+
+  &::placeholder { color: rgba(255, 255, 255, 0.3); }
+  &:focus { outline: none; border-color: rgba(99, 102, 241, 0.5); }
+}
+
+.drag-order-panel__custom-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.drag-order-panel__custom-result {
+  font-size: 10px;
+  color: #22c55e;
+
+  &--error { color: #f87171; }
+}
+
 .drag-order-panel__refresh {
   display: flex;
   align-items: center;

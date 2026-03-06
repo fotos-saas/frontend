@@ -730,6 +730,95 @@ export class OverlayDragOrderService {
     }
   }
 
+  // === Egyedi sorrend ===
+
+  readonly customOrderOpen = signal(false);
+  readonly customOrderText = signal('');
+  readonly customOrderLoading = signal(false);
+  readonly customOrderResult = signal<{ success: boolean; message: string } | null>(null);
+
+  toggleCustomOrder(): void {
+    const open = !this.customOrderOpen();
+    this.customOrderOpen.set(open);
+    if (!open) {
+      this.customOrderResult.set(null);
+    }
+  }
+
+  closeCustomOrder(): void {
+    this.customOrderOpen.set(false);
+    this.customOrderResult.set(null);
+  }
+
+  async submitCustomOrder(): Promise<void> {
+    const text = this.customOrderText().trim();
+    if (!text || this.customOrderLoading()) return;
+
+    const allItems = this.buildFlatList();
+    if (allItems.length < 2) {
+      this.customOrderResult.set({ success: false, message: 'Legalább 2 személy kell a rendezéshez.' });
+      return;
+    }
+
+    this.customOrderLoading.set(true);
+    try {
+      const humanNames = allItems.map(p => p.name);
+      const res = await firstValueFrom(
+        this.http.post<{ success: boolean; ordered_names: string[]; unmatched: string[] }>(
+          `${environment.apiUrl}/partner/ai/match-custom-order`,
+          { layer_names: humanNames, custom_order: text },
+        ),
+      );
+      if (res.success && res.ordered_names) {
+        // Human name → PersonItem map (case insensitive)
+        const nameToItem = new Map<string, PersonItem>();
+        for (const item of allItems) {
+          nameToItem.set(item.name.toLowerCase(), item);
+        }
+
+        // Matched személyek az AI sorrend alapján
+        const ordered: PersonItem[] = [];
+        const usedIds = new Set<number>();
+        for (const name of res.ordered_names) {
+          const item = nameToItem.get(name.toLowerCase());
+          if (item && !usedIds.has(item.id)) {
+            ordered.push(item);
+            usedIds.add(item.id);
+          }
+        }
+
+        // Nem matchelt személyek a végére
+        for (const item of allItems) {
+          if (!usedIds.has(item.id)) {
+            ordered.push(item);
+          }
+        }
+
+        // Csoportok törlése, minden ungrouped-be — egyedi sorrend flat
+        this.ngZone.run(() => {
+          this.groups.set([]);
+          this.ungrouped.set(ordered);
+          this.rebuildFlatList();
+          const unmatchedCount = res.unmatched?.length || 0;
+          const msg = unmatchedCount > 0
+            ? `Rendezve (${unmatchedCount} nem párosított név a végén)`
+            : 'Rendezve';
+          this.customOrderResult.set({ success: true, message: msg });
+        });
+      } else {
+        this.ngZone.run(() => {
+          this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' });
+        });
+      }
+    } catch {
+      this.ngZone.run(() => {
+        this.customOrderResult.set({ success: false, message: 'Hiba a nevek párosításakor.' });
+      });
+    } finally {
+      this.ngZone.run(() => this.customOrderLoading.set(false));
+    }
+  }
+
   // === Segéd metódusok ===
 
   /** Csoportok + ungrouped sorrendjében flat lista */

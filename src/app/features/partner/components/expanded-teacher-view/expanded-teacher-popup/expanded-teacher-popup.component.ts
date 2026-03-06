@@ -16,6 +16,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
 import { PartnerTeacherService } from '../../../services/partner-teacher.service';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
+import { ConfirmDialogComponent, type ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import type { LinkedGroupPhoto, PhotoChooserMode } from '../../../models/teacher.models';
 
 interface OccurrenceItem {
@@ -34,7 +35,7 @@ interface OccurrenceItem {
 @Component({
   selector: 'app-expanded-teacher-popup',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, TeacherPhotoChooserDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, TeacherPhotoChooserDialogComponent, ConfirmDialogComponent],
   templateUrl: './expanded-teacher-popup.component.html',
   styleUrl: './expanded-teacher-popup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +54,7 @@ export class ExpandedTeacherPopupComponent {
   readonly loadingPhotos = signal(false);
   readonly showPhotoChooser = signal(false);
   readonly linking = signal(false);
+  readonly pendingMediaId = signal<number | null>(null);
 
   readonly occurrences = computed<OccurrenceItem[]>(() => {
     const viewData = this.dataService.data();
@@ -204,6 +206,19 @@ export class ExpandedTeacherPopupComponent {
   }
 
   selectArchivePhoto(mediaId: number): void {
+    // Ha már ez az aktív, nem csinálunk semmit
+    const active = this.activeArchivePhoto();
+    if (active?.mediaId === mediaId) return;
+
+    this.pendingMediaId.set(mediaId);
+  }
+
+  onConfirmPhotoChange(result: ConfirmDialogResult): void {
+    const mediaId = this.pendingMediaId();
+    this.pendingMediaId.set(null);
+
+    if (result.action !== 'confirm' || !mediaId) return;
+
     const mode = this.photoChooserMode();
     if (!mode) return;
 
@@ -213,7 +228,6 @@ export class ExpandedTeacherPopupComponent {
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        // Lokálisan frissítjük az aktív fotó jelzést
         this.archivePhotos.update(photos =>
           photos.map(p => ({ ...p, isActive: p.mediaId === mediaId }))
         );

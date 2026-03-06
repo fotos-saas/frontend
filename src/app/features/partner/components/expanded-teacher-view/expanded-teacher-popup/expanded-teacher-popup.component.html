@@ -168,3 +168,15 @@
     (savedEvent)="onPhotoChooserSaved()"
   />
 }
+
+<!-- Fotó csere megerősítés -->
+@if (pendingMediaId()) {
+  <app-confirm-dialog
+    title="Fotó beállítása"
+    [message]="'Ez a fotó lesz beállítva minden előfordulásnál (' + occurrences().length + ' helyen). Folytatod?'"
+    confirmText="Beállítás"
+    cancelText="Mégse"
+    confirmType="primary"
+    (resultEvent)="onConfirmPhotoChange($event)"
+  />
+}

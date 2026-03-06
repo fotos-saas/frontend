@@ -748,34 +748,6 @@
           <button class="qa-btn" [class.qa-btn--active]="dragOrderCustomOpen()" (click)="dragOrder.toggleCustomOrder()" matTooltip="Nevek beírásával rendezés">Egyedi</button>
         </div>
       </div>
-      @if (dragOrderCustomOpen()) {
-        <div class="drag-order-panel__custom-order">
-          <textarea
-            class="drag-order-panel__custom-textarea"
-            placeholder="Írj be neveket soronként a kívánt sorrendben..."
-            [value]="dragOrderCustomText()"
-            (input)="dragOrder.customOrderText.set($any($event.target).value)"
-            rows="4"
-          ></textarea>
-          <div class="drag-order-panel__custom-actions">
-            <button
-              class="qa-btn qa-btn--blue"
-              [disabled]="dragOrderCustomLoading() || !dragOrderCustomText().trim()"
-              (click)="dragOrder.submitCustomOrder()"
-            >
-              @if (dragOrderCustomLoading()) {
-                <span class="toolbar__spinner toolbar__spinner--sm"></span>
-              }
-              Alkalmazás
-            </button>
-            @if (dragOrderCustomResult(); as result) {
-              <span class="drag-order-panel__custom-result" [class.drag-order-panel__custom-result--error]="!result.success">
-                {{ result.message }}
-              </span>
-            }
-          </div>
-        </div>
-      }
       <div class="drag-order-panel__group-actions">
         <button class="qa-btn qa-btn--green" (click)="createDragOrderGroup()" matTooltip="Új üres csoport">
           <lucide-icon [name]="ICONS.PLUS" [size]="10" /> Csoport
@@ -787,6 +759,34 @@
         }
       </div>
     </div>
+    @if (dragOrderCustomOpen()) {
+      <div class="drag-order-panel__custom-order">
+        <textarea
+          class="drag-order-panel__custom-textarea"
+          placeholder="Írj be neveket soronként a kívánt sorrendben..."
+          [value]="dragOrderCustomText()"
+          (input)="dragOrder.customOrderText.set($any($event.target).value)"
+          rows="4"
+        ></textarea>
+        <div class="drag-order-panel__custom-actions">
+          <button
+            class="qa-btn qa-btn--blue"
+            [disabled]="dragOrderCustomLoading() || !dragOrderCustomText().trim()"
+            (click)="dragOrder.submitCustomOrder()"
+          >
+            @if (dragOrderCustomLoading()) {
+              <span class="toolbar__spinner toolbar__spinner--sm"></span>
+            }
+            Alkalmazás
+          </button>
+          @if (dragOrderCustomResult(); as result) {
+            <span class="drag-order-panel__custom-result" [class.drag-order-panel__custom-result--error]="!result.success">
+              {{ result.message }}
+            </span>
+          }
+        </div>
+      </div>
+    }
     <!-- Keresősáv -->
     <div class="drag-order-panel__search">
       <lucide-icon [name]="ICONS.SEARCH" [size]="12" class="drag-order-panel__search-icon" />

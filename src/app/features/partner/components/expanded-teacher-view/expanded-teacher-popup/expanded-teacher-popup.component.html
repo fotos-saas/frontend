@@ -44,6 +44,7 @@
               class="popup-photo-strip__item"
               [class.popup-photo-strip__item--active]="photo.isActive"
               [matTooltip]="photo.schoolName ?? photo.teacherName"
+              (click)="selectArchivePhoto(photo.mediaId)"
             >
               @if (photo.thumbUrl) {
                 <img [src]="photo.thumbUrl" [alt]="photo.teacherName" />

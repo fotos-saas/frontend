@@ -203,6 +203,25 @@ export class ExpandedTeacherPopupComponent {
     this.dataService.reloadData();
   }
 
+  selectArchivePhoto(mediaId: number): void {
+    const mode = this.photoChooserMode();
+    if (!mode) return;
+
+    const request$ = mode.kind === 'linkedGroup'
+      ? this.teacherService.setGroupActivePhoto(mode.linkedGroup, mediaId)
+      : this.teacherService.setActivePhotoByMedia(mode.archiveId, mediaId);
+
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        // Lokálisan frissítjük az aktív fotó jelzést
+        this.archivePhotos.update(photos =>
+          photos.map(p => ({ ...p, isActive: p.mediaId === mediaId }))
+        );
+        this.dataService.reloadData();
+      },
+    });
+  }
+
   applyOverride(personId: number): void {
     const activePhoto = this.activeArchivePhoto();
     if (!activePhoto) return;

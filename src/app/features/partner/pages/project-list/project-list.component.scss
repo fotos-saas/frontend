@@ -143,6 +143,9 @@
 }
 
 .bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 14px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -157,6 +160,18 @@
   &:hover {
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &--primary {
+    background: #ffffff;
+    color: get-color('slate', 800);
+    border-color: transparent;
+    font-weight: 600;
+
+    &:hover {
+      background: get-color('slate', 100);
+      color: get-color('slate', 900);
+    }
   }
 }
 

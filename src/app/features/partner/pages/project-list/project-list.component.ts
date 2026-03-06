@@ -32,6 +32,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
 import { ProjectListActionsService } from './project-list-actions.service';
 import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
 import { SyncDialogComponent } from '../../components/sync-dialog/sync-dialog.component';
+import { BatchActionDialogComponent } from '../../components/batch-action-dialog/batch-action-dialog.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -58,6 +59,7 @@ import { SyncDialogComponent } from '../../components/sync-dialog/sync-dialog.co
     LinkPreliminaryDialogComponent,
     ExpandedTeacherViewComponent,
     SyncDialogComponent,
+    BatchActionDialogComponent,
   ],
   providers: [ProjectListActionsService],
   templateUrl: './project-list.component.html',
@@ -184,9 +186,7 @@ export class PartnerProjectListComponent implements OnInit {
 
   // Computed-ok amik a service-t hívják
   readonly selectedProjects = computed(() => this.actions.selectedProjects(this.projects()));
-  readonly canBulkGeneratePsd = computed(() => this.actions.canBulkGeneratePsd(this.projects()));
-  readonly canBulkGenerateSample = computed(() => this.actions.canBulkGenerateSample(this.projects()));
-  readonly canBulkFinalize = computed(() => this.actions.canBulkGenerateSample(this.projects()));
+  readonly availableBatchActions = computed(() => this.actions.getAvailableBatchActions(this.projects()));
 
   toggleOrderSort(): void {
     this.filterState.setSortBy(this.filterState.sortBy() === 'order_submitted_at' ? 'created_at' : 'order_submitted_at');

@@ -1,0 +1,42 @@
+<div
+  class="dialog-backdrop"
+  (mousedown)="backdropHandler.onMouseDown($event)"
+  (mouseup)="backdropHandler.onMouseUp($event)"
+>
+  <div class="dialog-panel" (mousedown)="$event.stopPropagation()" (mouseup)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <h2>Tömeges művelet</h2>
+      <p class="dialog-subtitle">{{ selectedCount() }} projekt kijelölve — válassz műveletet:</p>
+      <button type="button" class="dialog-close" (click)="close.emit()">
+        <lucide-icon [name]="ICONS.X" [size]="18" />
+      </button>
+    </header>
+
+    <div class="action-list">
+      @for (action of availableActions(); track action.type) {
+        <button
+          type="button"
+          class="action-card"
+          [class]="'action-card action-card--' + action.colorClass"
+          (click)="selectAction(action.type)"
+        >
+          <div class="action-card__icon">
+            <lucide-icon [name]="action.icon" [size]="24" />
+          </div>
+          <div class="action-card__content">
+            <span class="action-card__label">{{ action.label }}</span>
+            <span class="action-card__desc">{{ action.description }}</span>
+          </div>
+          <lucide-icon class="action-card__arrow" [name]="ICONS.CHEVRON_RIGHT" [size]="18" />
+        </button>
+      }
+    </div>
+
+    @if (availableActions().length === 0) {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.INFO" [size]="24" />
+        <p>A kijelölt projektekhez nincs elérhető tömeges művelet.</p>
+      </div>
+    }
+  </div>
+</div>

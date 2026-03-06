@@ -53,6 +53,7 @@ export class SyncDialogComponent implements OnInit {
   readonly searchText = signal('');
   readonly syncingIds = signal<Set<number>>(new Set());
   readonly syncAllRunning = signal(false);
+  readonly activeTab = signal<'all' | 'pending' | 'synced'>('all');
 
   readonly filteredProjects = computed(() => {
     const search = this.searchText().toLowerCase().trim();
@@ -67,8 +68,13 @@ export class SyncDialogComponent implements OnInit {
     );
   });
 
-  readonly pendingProjects = computed(() => this.filteredProjects().filter((p) => !p.synced));
-  readonly syncedProjects = computed(() => this.filteredProjects().filter((p) => p.synced));
+  readonly visibleProjects = computed(() => {
+    const tab = this.activeTab();
+    const filtered = this.filteredProjects();
+    if (tab === 'pending') return filtered.filter((p) => !p.synced);
+    if (tab === 'synced') return filtered.filter((p) => p.synced);
+    return filtered;
+  });
 
   ngOnInit(): void {
     this.loadRemoteProjects();

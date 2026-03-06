@@ -225,7 +225,13 @@ export class OverlayQuickActionsService {
       group: person.type === 'teacher' ? 'Teachers' : 'Students',
     }));
 
-    if (personsData.length === 0) { this.setResult(false, 'Nem találtam párosítható személyeket'); return; }
+    if (personsData.length === 0) {
+      const teacherPersons = persons.filter(p => p.type === 'teacher');
+      const personSample = teacherPersons.slice(0, 3).map(p => `${p.id}:${p.name}`).join(', ');
+      const layerSample = layerNames.slice(0, 3).join(', ');
+      this.setResult(false, `Nem párosítható (${teacherPersons.length}/${persons.length} tanár, ${layerNames.length} layer) L:[${layerSample}] P:[${personSample}]`);
+      return;
+    }
 
     const result = await this.ps.runJsx('sync-positions', 'actions/update-positions.jsx', {
       persons: personsData,

@@ -207,9 +207,7 @@ export class OverlayLayerManagementService {
     const toAdd: Array<{ name: string; type: string; layerName: string; displayText: string; group: string }> = [];
     for (const person of personList) {
       if (!layerPersonIds.has(person.id)) {
-        const slug = person.name
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase().replace(/\s+/g, '-');
+        const slug = this.toLayerSlug(person.name);
         toAdd.push({
           name: person.name,
           type: person.type,

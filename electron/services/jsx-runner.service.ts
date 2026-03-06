@@ -220,8 +220,8 @@ export class JsxRunnerService {
       .replace(/\u0150/g, 'O').replace(/\u0151/g, 'o')
       .replace(/\u0170/g, 'U').replace(/\u0171/g, 'u')
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
     if (personId !== undefined) {
       result += `---${personId}`;
     }

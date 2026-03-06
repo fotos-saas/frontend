@@ -10,6 +10,8 @@ import { PsSelectOption } from '@shared/components/form/form.types';
 export interface PlaceholderTextFormData {
   textType: 'lorem' | 'numbers';
   charLength: number;
+  groupName: string;
+  random: boolean;
 }
 
 const LOREM_WORDS = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip commodo consequat aute irure reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat proident sunt culpa qui officia deserunt mollit anim'.split(' ');
@@ -23,10 +25,27 @@ function shuffledLorem(length: number): string {
   return result.substring(0, length);
 }
 
+function fixedLorem(length: number): string {
+  const source = LOREM_WORDS.join(' ');
+  let result = '';
+  while (result.length < length) {
+    result += source + ' ';
+  }
+  return result.substring(0, length);
+}
+
 function randomNumbers(length: number): string {
   let result = '';
   for (let i = 0; i < length; i++) {
     result += String(Math.floor(Math.random() * 10));
+  }
+  return result;
+}
+
+function fixedNumbers(length: number): string {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += String(i % 10);
   }
   return result;
 }
@@ -37,6 +56,22 @@ function randomNumbers(length: number): string {
   imports: [FormsModule, LucideAngularModule, PsSelectComponent],
   template: `
     <div class="form">
+      <!-- Csoport nev -->
+      <div class="form__field">
+        <label class="form__label">
+          <lucide-icon [name]="ICONS.FOLDER" [size]="14" />
+          Csoport neve
+        </label>
+        <input
+          type="text"
+          class="form__input"
+          placeholder="pl. Alcímek"
+          [ngModel]="groupName()"
+          (ngModelChange)="groupName.set($event)"
+        />
+      </div>
+
+      <!-- Szoveg tipus -->
       <div class="form__field">
         <label class="form__label">
           <lucide-icon [name]="ICONS.TYPE" [size]="14" />
@@ -50,6 +85,7 @@ function randomNumbers(length: number): string {
         />
       </div>
 
+      <!-- Karakter hossz -->
       <div class="form__field">
         <label class="form__label">
           <lucide-icon [name]="ICONS.HASH" [size]="14" />
@@ -67,13 +103,15 @@ function randomNumbers(length: number): string {
         />
       </div>
 
+      <!-- Random toggle -->
+      <label class="form__toggle">
+        <input type="checkbox" [checked]="random()" (change)="random.set(!random())" />
+        <span>Random (mindenkinél más szöveg)</span>
+      </label>
+
+      <!-- Minta -->
       <div class="form__preview">
-        <div class="form__preview-header">
-          <span class="form__preview-label">Minta:</span>
-          <button type="button" class="form__preview-refresh" (click)="refresh()">
-            <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
-          </button>
-        </div>
+        <span class="form__preview-label">Minta:</span>
         <span class="form__preview-text">{{ preview() }}</span>
       </div>
     </div>
@@ -120,6 +158,23 @@ function randomNumbers(length: number): string {
       margin: 0;
     }
 
+    .form__toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      user-select: none;
+
+      input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        accent-color: #a78bfa;
+        cursor: pointer;
+      }
+    }
+
     .form__preview {
       display: flex;
       flex-direction: column;
@@ -130,37 +185,12 @@ function randomNumbers(length: number): string {
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .form__preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
     .form__preview-label {
       font-size: 0.65rem;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.3);
       text-transform: uppercase;
       letter-spacing: 0.04em;
-    }
-
-    .form__preview-refresh {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
-      background: transparent;
-      color: rgba(167, 139, 250, 0.6);
-      cursor: pointer;
-      transition: all 0.12s;
-
-      &:hover {
-        background: rgba(167, 139, 250, 0.1);
-        color: #a78bfa;
-      }
     }
 
     .form__preview-text {
@@ -174,10 +204,10 @@ function randomNumbers(length: number): string {
 export class PlaceholderTextFormComponent {
   protected readonly ICONS = ICONS;
 
+  readonly groupName = signal('');
   readonly textType = signal<'lorem' | 'numbers'>('lorem');
   readonly charLength = signal<number>(20);
-  /** Tick signal a preview újragenerálásához */
-  readonly seed = signal(0);
+  readonly random = signal(true);
 
   readonly typeOptions: PsSelectOption[] = [
     { id: 'lorem', label: 'Lorem Ipsum' },
@@ -187,22 +217,32 @@ export class PlaceholderTextFormComponent {
   readonly charLengthStr = computed(() => String(this.charLength()));
 
   readonly preview = computed(() => {
-    this.seed(); // dependency a refresh-hez
-    return this.generateText(this.textType(), this.charLength());
+    const type = this.textType();
+    const len = this.charLength();
+    const rnd = this.random();
+    if (rnd) {
+      return type === 'numbers' ? randomNumbers(len) : shuffledLorem(len);
+    }
+    return type === 'numbers' ? fixedNumbers(len) : fixedLorem(len);
   });
 
   readonly formData = computed<PlaceholderTextFormData | null>(() => {
+    const name = this.groupName().trim();
     const len = this.charLength();
-    if (!len || len <= 0) return null;
-    return { textType: this.textType(), charLength: len };
+    if (!name || !len || len <= 0) return null;
+    return {
+      textType: this.textType(),
+      charLength: len,
+      groupName: name,
+      random: this.random(),
+    };
   });
 
-  generateText(type: 'lorem' | 'numbers', length: number): string {
-    return type === 'numbers' ? randomNumbers(length) : shuffledLorem(length);
-  }
-
-  refresh(): void {
-    this.seed.update(v => v + 1);
+  generateText(type: 'lorem' | 'numbers', length: number, isRandom: boolean): string {
+    if (isRandom) {
+      return type === 'numbers' ? randomNumbers(length) : shuffledLorem(length);
+    }
+    return type === 'numbers' ? fixedNumbers(length) : fixedLorem(length);
   }
 
   onLengthChange(value: string): void {

@@ -1920,6 +1920,7 @@ export class PhotoshopService {
    */
   async addPlaceholderTexts(params: {
     layers: Array<{ layerName: string; displayText: string; group: 'Students' | 'Teachers' }>;
+    groupName?: string;
     textAlign?: string;
   }): Promise<{ success: boolean; created?: number; errors?: number; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };

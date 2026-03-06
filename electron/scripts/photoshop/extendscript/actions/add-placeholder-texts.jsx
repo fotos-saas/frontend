@@ -25,14 +25,35 @@ function log(msg) {
 
 var _doc, _data, _created = 0, _errors = 0;
 
+// --- Csoport letrehozas/kereses ---
+function _ensureGroup(doc, groupName) {
+  try {
+    return doc.layerSets.getByName(groupName);
+  } catch (e) {
+    var grp = doc.layerSets.add();
+    grp.name = groupName;
+    return grp;
+  }
+}
+
 function _doAddPlaceholderTexts() {
+  var groupName = _data.groupName;
+
   for (var i = 0; i < _data.layers.length; i++) {
     var item = _data.layers[i];
 
     try {
-      var targetGroup = getGroupByPath(_doc, ["Names", item.group]);
+      var targetGroup;
+      if (groupName) {
+        // Egyedi mappa nev → top-level csoport
+        targetGroup = _ensureGroup(_doc, groupName);
+      } else {
+        // Nincs mappa nev → Names/Students, Names/Teachers
+        targetGroup = getGroupByPath(_doc, ["Names", item.group]);
+      }
+
       if (!targetGroup) {
-        log("[JSX] HIBA: Names/" + item.group + " csoport nem talalhato!");
+        log("[JSX] HIBA: csoport nem talalhato! (" + (groupName || item.group) + ")");
         _errors++;
         continue;
       }

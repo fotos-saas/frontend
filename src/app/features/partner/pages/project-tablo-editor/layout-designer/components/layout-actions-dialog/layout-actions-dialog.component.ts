@@ -324,11 +324,14 @@ export class LayoutActionsDialogComponent {
 
     const layers = selectedPersons.map(p => ({
       layerName: p.layerName,
-      displayText: form.generateText(formData.textType, formData.charLength),
+      displayText: form.generateText(formData.textType, formData.charLength, formData.random),
       group: (p.type === 'teacher' ? 'Teachers' : 'Students') as 'Teachers' | 'Students',
     }));
 
-    const result = await this.ps.addPlaceholderTexts({ layers });
+    const result = await this.ps.addPlaceholderTexts({
+      layers,
+      groupName: formData.groupName,
+    });
 
     if (!result.success) {
       throw new Error(result.error || 'Szöveg generálás sikertelen');

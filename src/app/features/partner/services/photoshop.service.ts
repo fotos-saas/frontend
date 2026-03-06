@@ -1370,6 +1370,30 @@ export class PhotoshopService {
     }
   }
 
+  /** Dokumentum bezárása mentés nélkül (batch újrageneráláshoz) */
+  async closeDocumentWithoutSaving(targetDocName?: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/close-without-saving.jsx',
+        targetDocName,
+      });
+      if (!result.success) {
+        return { success: false, error: result.error || 'Bezárás sikertelen' };
+      }
+      const output = result.output ?? '';
+      if (output.indexOf('__CLOSE_NOSAVE__OK') === -1) {
+        const errorMatch = output.match(/\[JSX\] HIBA: (.+)/);
+        return { success: false, error: errorMatch?.[1] || 'Ismeretlen hiba a bezárásnál' };
+      }
+      return { success: true };
+    } catch (err) {
+      // Ha nincs nyitva a dok, nem baj
+      this.logger.warn('Dokumentum bezárás sikertelen (valószínűleg nincs nyitva)', err);
+      return { success: true };
+    }
+  }
+
   /** Snapshot betöltése (JSON tartalom visszaadása) */
   async loadSnapshot(snapshotPath: string): Promise<{ success: boolean; error?: string; data?: Record<string, unknown> }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };

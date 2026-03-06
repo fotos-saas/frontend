@@ -55,11 +55,13 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       photoUrl: p.photoUrl,
     }));
 
-    // 0. PSD létezés ellenőrzés
+    // 0. PSD létezés ellenőrzés — ha létezik, bezárjuk PS-ben (a generátor felülírja)
     onStep(0);
     const existsCheck = await ps.checkPsdExists(psdPath);
     if (existsCheck.exists) {
-      throw new Error(`PSD már létezik: ${psdPath.split('/').pop()} — töröld vagy nevezd át a meglévő fájlt`);
+      this.logger.info(`PSD már létezik, újrageneráljuk: ${psdPath.split('/').pop()}`);
+      const existingDocName = psdPath.split('/').pop() ?? undefined;
+      await ps.closeDocumentWithoutSaving(existingDocName);
     }
     checkAbort();
 

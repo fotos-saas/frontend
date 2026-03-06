@@ -97,14 +97,6 @@ export class ProjectListActionsService {
   readonly selectedProjects = (projects: PartnerProjectListItem[]) =>
     projects.filter(p => this.selectedProjectIds().has(p.id));
 
-  canBulkGeneratePsd(projects: PartnerProjectListItem[]): boolean {
-    return this.selectedProjects(projects).some(p => !this.psdStatusService.getStatus(p.id)?.exists);
-  }
-
-  canBulkGenerateSample(projects: PartnerProjectListItem[]): boolean {
-    return this.selectedProjects(projects).some(p => this.psdStatusService.getStatus(p.id)?.exists);
-  }
-
   onCardSelect(project: PartnerProjectListItem, event: MouseEvent, index: number, projects: PartnerProjectListItem[]): void {
     if (event.metaKey || event.ctrlKey) {
       this.selectedProjectIds.update(ids => {
@@ -138,34 +130,30 @@ export class ProjectListActionsService {
 
   addSelectedToBatch(workflowType: BatchWorkflowType, projects: PartnerProjectListItem[]): void {
     const selected = this.selectedProjects(projects);
-    const filtered = workflowType === 'generate-psd'
-      ? selected.filter(p => !this.psdStatusService.getStatus(p.id)?.exists)
-      : selected.filter(p => this.psdStatusService.getStatus(p.id)?.exists);
-
-    if (filtered.length > 0) {
-      this.batchWorkspaceService.addTasks(filtered, workflowType);
+    if (selected.length > 0) {
+      this.batchWorkspaceService.addTasks(selected, workflowType);
       this.batchWorkspaceService.panelOpen.set(true);
     }
     this.clearSelection();
   }
 
-  /** Elérhető batch műveletek a kijelölt projektek PSD státusza alapján */
+  /** Elérhető batch műveletek a kijelölt projektek alapján */
   getAvailableBatchActions(projects: PartnerProjectListItem[]): BatchActionChoice[] {
     const selected = this.selectedProjects(projects);
-    const actions: BatchActionChoice[] = [];
+    if (selected.length === 0) return [];
 
-    const hasWithoutPsd = selected.some(p => !this.psdStatusService.getStatus(p.id)?.exists);
     const hasWithPsd = selected.some(p => this.psdStatusService.getStatus(p.id)?.exists);
 
-    if (hasWithoutPsd) {
-      actions.push({
+    const actions: BatchActionChoice[] = [
+      {
         type: 'generate-psd',
         label: 'PSD generálás',
-        description: 'Tablókép PSD fájl létrehozása Photoshopban',
+        description: 'Tablókép PSD fájl létrehozása (vagy újragenerálása)',
         icon: ICONS.LAYERS,
         colorClass: 'purple',
-      });
-    }
+      },
+    ];
+
     if (hasWithPsd) {
       actions.push({
         type: 'generate-sample',

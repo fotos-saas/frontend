@@ -1009,6 +1009,44 @@ export class PhotoshopService {
   }
 
   /**
+   * Projekt mappa útvonal kiszámítása (PSD fájlnév nélkül).
+   * Ha nincs workDir, null-t ad vissza.
+   */
+  computeProjectFolderPath(
+    context: { projectName: string; schoolName?: string | null; className?: string | null; brandName?: string | null },
+  ): string | null {
+    if (!this.workDir()) return null;
+    const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
+    const folderName = this.buildProjectFolderName(context);
+    const year = new Date().getFullYear().toString();
+    return `${this.workDir()}/${partnerDir}/${year}/${folderName}`;
+  }
+
+  /** Projekt PSD keresése mappa alapján (nem pontos fájlnév, hanem az első .psd a mappában) */
+  async findProjectPsd(folderPath: string): Promise<{
+    exists: boolean; psdPath: string | null; hasLayouts: boolean;
+    hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null;
+  }> {
+    if (!this.api) return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    try {
+      const result = await this.api.findProjectPsd({ folderPath });
+      if (result.success && result.exists) {
+        return {
+          exists: true,
+          psdPath: result.psdPath ?? null,
+          hasLayouts: result.hasLayouts ?? false,
+          hasPlacedPhotos: result.hasPlacedPhotos ?? false,
+          placedPhotos: result.placedPhotos ?? null,
+        };
+      }
+      return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    } catch (err) {
+      this.logger.error('Projekt PSD keresés hiba', err);
+      return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    }
+  }
+
+  /**
    * Layout pozíció-regiszter kiolvasása a Photoshopból és mentése JSON fájlba a PSD mellé.
    *
    * 1. Futtatja a read-layout.jsx-et → kinyeri a layer pozíciókat

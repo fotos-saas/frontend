@@ -1,5 +1,5 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
-import { LucideAngularModule, ArrowLeft, ArrowRight, X } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft as LucideArrowLeft, ArrowRight as LucideArrowRight, X } from 'lucide-angular';
 import { GuidedTourTooltipComponent } from './guided-tour-tooltip.component';
 
 const meta: Meta<GuidedTourTooltipComponent> = {
@@ -10,7 +10,7 @@ const meta: Meta<GuidedTourTooltipComponent> = {
     moduleMetadata({
       imports: [
         GuidedTourTooltipComponent,
-        LucideAngularModule.pick({ ArrowLeft, ArrowRight, X }),
+        LucideAngularModule.pick({ ArrowLeft: LucideArrowLeft, ArrowRight: LucideArrowRight, X }),
       ],
     }),
   ],
@@ -88,7 +88,7 @@ export const LastStep: Story = {
 };
 
 /** Nyíl balra */
-export const ArrowLeft: Story = {
+export const ArrowLeftStory: Story = {
   name: 'Nyíl balra',
   args: {
     step: {

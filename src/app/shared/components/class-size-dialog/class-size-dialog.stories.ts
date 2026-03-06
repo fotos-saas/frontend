@@ -37,8 +37,8 @@ type Story = StoryObj<ClassSizeDialogComponent>;
  */
 export const Default: Story = {
   args: {
-    isSubmitting: false,
-    errorMessage: null,
+    externalIsSubmitting: false,
+    externalErrorMessage: null,
     currentValue: null,
   },
 };
@@ -49,8 +49,8 @@ export const Default: Story = {
 export const WithCurrentValue: Story = {
   args: {
     currentValue: 28,
-    isSubmitting: false,
-    errorMessage: null,
+    externalIsSubmitting: false,
+    externalErrorMessage: null,
   },
 };
 
@@ -60,8 +60,8 @@ export const WithCurrentValue: Story = {
 export const Submitting: Story = {
   args: {
     currentValue: 32,
-    isSubmitting: true,
-    errorMessage: null,
+    externalIsSubmitting: true,
+    externalErrorMessage: null,
   },
 };
 
@@ -71,7 +71,7 @@ export const Submitting: Story = {
 export const WithError: Story = {
   args: {
     currentValue: 28,
-    isSubmitting: false,
-    errorMessage: 'Hiba történt a létszám mentése során.',
+    externalIsSubmitting: false,
+    externalErrorMessage: 'Hiba történt a létszám mentése során.',
   },
 };

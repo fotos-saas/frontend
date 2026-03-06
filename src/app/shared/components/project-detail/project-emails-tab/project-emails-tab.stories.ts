@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { moduleMetadata } from '@storybook/angular';
+import { applicationConfig, moduleMetadata } from '@storybook/angular';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
@@ -64,8 +64,8 @@ const mockEmailWithAttachment: ProjectEmail = {
   hasAttachments: true,
   attachmentCount: 2,
   attachments: [
-    { filename: 'megrendeles.pdf', mime_type: 'application/pdf', size: 245000 },
-    { filename: 'foto.jpg', mime_type: 'image/jpeg', size: 1200000 },
+    { name: 'megrendeles.pdf', filename: 'megrendeles.pdf', mime_type: 'application/pdf', size: 245000 },
+    { name: 'foto.jpg', filename: 'foto.jpg', mime_type: 'image/jpeg', size: 1200000 },
   ],
 };
 
@@ -73,7 +73,7 @@ const meta: Meta<EmailListItemComponent> = {
   title: 'Project Detail/Email List Item',
   component: EmailListItemComponent,
   decorators: [
-    moduleMetadata({
+    applicationConfig({
       providers: [
         provideHttpClient(),
         importProvidersFrom(LucideAngularModule.pick(LUCIDE_ICONS_MAP)),

@@ -147,7 +147,7 @@ export const Loading: Story = {
 export const Empty: Story = {
   args: {
     participants: [],
-    statistics: { total: 0, active: 0, banned: 0, extraCount: 0, expectedClassSize: 30 },
+    statistics: { total: 0, active: 0, banned: 0, extraCount: 0, regularCount: 0, active24h: 0, expectedClassSize: 30, participationRate: null },
     hasFullAccess: false,
     isLoading: false,
     togglingExtraId: null,

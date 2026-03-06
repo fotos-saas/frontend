@@ -49,10 +49,10 @@ const meta: Meta<ScheduleCardComponent> = {
       control: 'text',
       description: 'Custom státusz szöveg (opcional)',
     },
-    editClick: {
+    editClickEvent: {
       description: 'Edit button click event',
     },
-    cardClick: {
+    cardClickEvent: {
       description: 'Card click event',
     },
   },
@@ -79,8 +79,8 @@ export const Default: Story = {
     isDisabled: false,
     label: 'Fotózás időpontja',
     customStatusText: null,
-    editClick: action('edit-click'),
-    cardClick: action('card-click'),
+    editClickEvent: action('edit-click'),
+    cardClickEvent: action('card-click'),
   },
 };
 
@@ -164,7 +164,7 @@ export const DarkModeEmpty: Story = {
     backgrounds: { default: 'dark' },
   },
   decorators: [
-    (story: Record<string, unknown>) => ({
+    (story: any) => ({
       template: `
         <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem; min-height: 150px; display: flex; align-items: center;">
           ${story['template']}
@@ -184,7 +184,7 @@ export const DarkModeSelected: Story = {
     backgrounds: { default: 'dark' },
   },
   decorators: [
-    (story: Record<string, unknown>) => ({
+    (story: any) => ({
       template: `
         <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem; min-height: 150px; display: flex; align-items: center;">
           ${story['template']}
@@ -311,7 +311,7 @@ export const CustomStatusText: Story = {
 export const Compact: Story = {
   args: WithSelection.args,
   decorators: [
-    (story: Record<string, unknown>) => ({
+    (story: any) => ({
       template: `
         <div class="schedule-card--compact">
           ${story['template']}

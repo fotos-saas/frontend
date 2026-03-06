@@ -43,8 +43,8 @@ export const Default: Story = {
     mode: 'register',
     initialName: '',
     initialEmail: '',
-    isSubmitting: false,
-    errorMessage: null,
+    externalIsSubmitting: false,
+    externalErrorMessage: null,
     canClose: false,
   },
 };
@@ -80,7 +80,7 @@ export const Submitting: Story = {
   args: {
     mode: 'register',
     initialName: 'Nagy Anna',
-    isSubmitting: true,
+    externalIsSubmitting: true,
   },
 };
 
@@ -91,7 +91,7 @@ export const WithError: Story = {
   args: {
     mode: 'register',
     initialName: 'Teszt',
-    errorMessage: 'Ez a név már foglalt. Kérlek, válassz másikat.',
+    externalErrorMessage: 'Ez a név már foglalt. Kérlek, válassz másikat.',
   },
 };
 

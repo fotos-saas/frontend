@@ -102,12 +102,12 @@ export const Default: Story = {
     values: {},
     visibleCount: 3,
   },
-  render: (args: typeof Default.args) => ({
+  render: (args) => ({
     props: {
       ...args,
       filterValues: signal<Record<string, string>>({}),
-      onFilterChange: function(event: { id: string; value: string }) {
-        this.filterValues.update((vals: Record<string, string>) => ({
+      onFilterChange: function(this: any, event: { id: string; value: string }) {
+        this['filterValues'].update((vals: Record<string, string>) => ({
           ...vals,
           [event.id]: event.value
         }));
@@ -136,12 +136,12 @@ export const WithMoreFilters: Story = {
     values: {},
     visibleCount: 3,
   },
-  render: (args: typeof WithMoreFilters.args) => ({
+  render: (args) => ({
     props: {
       ...args,
       filterValues: signal<Record<string, string>>({}),
-      onFilterChange: function(event: { id: string; value: string }) {
-        this.filterValues.update((vals: Record<string, string>) => ({
+      onFilterChange: function(this: any, event: { id: string; value: string }) {
+        this['filterValues'].update((vals: Record<string, string>) => ({
           ...vals,
           [event.id]: event.value
         }));
@@ -170,12 +170,12 @@ export const WithActiveHiddenFilters: Story = {
     values: { year: '2025', type: 'tablo' },
     visibleCount: 3,
   },
-  render: (args: typeof WithActiveHiddenFilters.args) => ({
+  render: (args) => ({
     props: {
       ...args,
-      filterValues: signal<Record<string, string>>(args.values as Record<string, string>),
-      onFilterChange: function(event: { id: string; value: string }) {
-        this.filterValues.update((vals: Record<string, string>) => ({
+      filterValues: signal<Record<string, string>>((args?.values ?? {}) as Record<string, string>),
+      onFilterChange: function(this: any, event: { id: string; value: string }) {
+        this['filterValues'].update((vals: Record<string, string>) => ({
           ...vals,
           [event.id]: event.value
         }));
@@ -204,12 +204,12 @@ export const TwoVisible: Story = {
     values: {},
     visibleCount: 2,
   },
-  render: (args: typeof TwoVisible.args) => ({
+  render: (args) => ({
     props: {
       ...args,
       filterValues: signal<Record<string, string>>({}),
-      onFilterChange: function(event: { id: string; value: string }) {
-        this.filterValues.update((vals: Record<string, string>) => ({
+      onFilterChange: function(this: any, event: { id: string; value: string }) {
+        this['filterValues'].update((vals: Record<string, string>) => ({
           ...vals,
           [event.id]: event.value
         }));
@@ -243,12 +243,12 @@ export const DarkMode: Story = {
       default: 'dark',
     },
   },
-  render: (args: typeof DarkMode.args) => ({
+  render: (args) => ({
     props: {
       ...args,
-      filterValues: signal<Record<string, string>>(args.values as Record<string, string>),
-      onFilterChange: function(event: { id: string; value: string }) {
-        this.filterValues.update((vals: Record<string, string>) => ({
+      filterValues: signal<Record<string, string>>((args?.values ?? {}) as Record<string, string>),
+      onFilterChange: function(this: any, event: { id: string; value: string }) {
+        this['filterValues'].update((vals: Record<string, string>) => ({
           ...vals,
           [event.id]: event.value
         }));

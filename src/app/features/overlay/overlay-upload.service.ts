@@ -1,7 +1,7 @@
 import { Injectable, inject, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, from, of, concat } from 'rxjs';
-import { map, catchError, tap, finalize } from 'rxjs/operators';
+import { Observable, Subject, of } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { matchFilesToPersons, FileMatchResult } from '../../shared/utils/filename-matcher.util';
 
@@ -193,7 +193,9 @@ export class OverlayUploadService {
       formData.append('photo', layer.file!);
       const url = `${environment.apiUrl}/partner/projects/${projectId}/persons/${layer.personId}/photo`;
 
-      this.http.post<UploadResponse>(url, formData).subscribe({
+      this.http.post<UploadResponse>(url, formData).pipe(
+        timeout(120_000),
+      ).subscribe({
         next: (res) => {
           this.ngZone.run(() => {
             done++;
@@ -211,7 +213,7 @@ export class OverlayUploadService {
         error: (err) => {
           this.ngZone.run(() => {
             done++;
-            const msg = err.error?.message || 'Feltöltési hiba';
+            const msg = err.error?.message || (err.name === 'TimeoutError' ? 'Időtúllépés (2 perc)' : 'Feltöltési hiba');
             updatedLayers[index] = {
               ...updatedLayers[index],
               uploadStatus: 'error',

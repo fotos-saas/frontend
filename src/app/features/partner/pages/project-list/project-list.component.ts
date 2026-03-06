@@ -31,6 +31,7 @@ import { ListPaginationComponent } from '../../../../shared/components/list-pagi
 import { OrderDataDialogComponent } from '../../components/order-data-dialog/order-data-dialog.component';
 import { ProjectListActionsService } from './project-list-actions.service';
 import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
+import { SyncDialogComponent } from '../../components/sync-dialog/sync-dialog.component';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -56,6 +57,7 @@ import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-
     CreatePreliminaryModalComponent,
     LinkPreliminaryDialogComponent,
     ExpandedTeacherViewComponent,
+    SyncDialogComponent,
   ],
   providers: [ProjectListActionsService],
   templateUrl: './project-list.component.html',
@@ -277,6 +279,22 @@ export class PartnerProjectListComponent implements OnInit {
     }
   }
 
+
+  // Szinkronizálás dialógus
+  showSyncDialog = signal(false);
+
+  openSyncDialog(): void {
+    this.showSyncDialog.set(true);
+  }
+
+  closeSyncDialog(): void {
+    this.showSyncDialog.set(false);
+  }
+
+  onSyncCompleted(): void {
+    this.loadProjects();
+    this.actions.checkSyncInBackground();
+  }
 
   // Bővített tanári nézet
   showExpandedTeacherView = signal(false);

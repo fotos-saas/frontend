@@ -4,6 +4,21 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { OrderSyncData, UpdateRosterPayload } from '../models/order-sync.models';
 
+export interface RemoteProject {
+  remote_id: number;
+  name: string;
+  school: string | null;
+  city: string | null;
+  class_name: string | null;
+  class_year: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  has_order: boolean;
+  created_at: string | null;
+  synced: boolean;
+  local_project_id: number | null;
+}
+
 /**
  * Megrendelés szinkronizálás API service.
  */
@@ -41,6 +56,44 @@ export class PartnerOrderSyncService {
       `${this.baseUrl}/${projectId}/order-sync/roster`,
       data
     );
+  }
+
+  /**
+   * Távoli projektek listázása szinkronizálási állapottal.
+   */
+  listRemoteProjects(): Observable<{
+    success: boolean;
+    data: {
+      projects: RemoteProject[];
+      total: number;
+      synced_count: number;
+      pending_count: number;
+    };
+  }> {
+    return this.http.get<{
+      success: boolean;
+      data: {
+        projects: RemoteProject[];
+        total: number;
+        synced_count: number;
+        pending_count: number;
+      };
+    }>(`${environment.apiUrl}/partner/order-sync/remote-projects`);
+  }
+
+  /**
+   * Egyetlen projekt szinkronizálása a régi rendszerből.
+   */
+  syncSingle(remoteId: number): Observable<{
+    success: boolean;
+    message: string;
+    data: { project_id: number; already_existed: boolean; linked?: boolean };
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      data: { project_id: number; already_existed: boolean; linked?: boolean };
+    }>(`${environment.apiUrl}/partner/order-sync/sync-single/${remoteId}`, {});
   }
 
   /**

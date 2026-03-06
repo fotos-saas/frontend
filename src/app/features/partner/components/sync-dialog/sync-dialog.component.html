@@ -1,0 +1,184 @@
+<app-dialog-wrapper
+  title="Projekt szinkronizálás"
+  description="Projektek a régi rendszerből (tablokiraly.hu)"
+  headerStyle="flat"
+  theme="blue"
+  [icon]="ICONS.REFRESH"
+  size="lg"
+  (closed)="close.emit()"
+>
+  <div dialogBody class="sync-dialog">
+    <!-- Keresés + összesítő -->
+    <div class="sync-dialog__header">
+      <div class="sync-dialog__stats">
+        <span class="sync-dialog__stat sync-dialog__stat--synced">
+          <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          {{ syncedCount() }} szinkronizálva
+        </span>
+        <span class="sync-dialog__stat sync-dialog__stat--pending">
+          <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+          {{ pendingCount() }} új
+        </span>
+        <span class="sync-dialog__stat">
+          {{ projects().length }} összesen
+        </span>
+      </div>
+      <div class="sync-dialog__search">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+        <input
+          type="text"
+          placeholder="Keresés név, iskola, város..."
+          [ngModel]="searchText()"
+          (ngModelChange)="searchText.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Betöltés -->
+    @if (loading()) {
+      <div class="sync-dialog__loading">
+        <lucide-icon [name]="ICONS.LOADER" [size]="24" class="spin" />
+        <span>Projektek betöltése a régi rendszerből...</span>
+      </div>
+    } @else if (error()) {
+      <div class="sync-dialog__error">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="24" />
+        <span>{{ error() }}</span>
+        <button class="sync-dialog__retry-btn" (click)="loadRemoteProjects()">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+          Újra
+        </button>
+      </div>
+    } @else {
+      <!-- Új projektek -->
+      @if (pendingProjects().length > 0) {
+        <div class="sync-dialog__section">
+          <div class="sync-dialog__section-header">
+            <h3>
+              <lucide-icon [name]="ICONS.CLOCK" [size]="16" />
+              Új projektek ({{ pendingProjects().length }})
+            </h3>
+            <button
+              class="sync-dialog__sync-all-btn"
+              [disabled]="syncAllRunning()"
+              (click)="syncAllPending()"
+              matTooltip="Összes új projekt szinkronizálása"
+            >
+              @if (syncAllRunning()) {
+                <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                Szinkronizálás...
+              } @else {
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                Mind szinkronizálása
+              }
+            </button>
+          </div>
+          <div class="sync-dialog__list">
+            @for (project of pendingProjects(); track project.remote_id) {
+              <div class="sync-dialog__row sync-dialog__row--pending">
+                <div class="sync-dialog__row-info">
+                  <span class="sync-dialog__row-name">{{ project.name }}</span>
+                  <span class="sync-dialog__row-details">
+                    @if (project.school) {
+                      {{ project.school }}
+                      @if (project.city) {
+                        , {{ project.city }}
+                      }
+                    }
+                    @if (project.contact_name) {
+                      &middot; {{ project.contact_name }}
+                    }
+                  </span>
+                </div>
+                <div class="sync-dialog__row-actions">
+                  <button
+                    class="sync-dialog__icon-btn"
+                    (click)="openInTablokiraly(project.remote_id)"
+                    matTooltip="Megnyitás a tablokiraly.hu-n"
+                  >
+                    <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+                  </button>
+                  <button
+                    class="sync-dialog__sync-btn"
+                    [disabled]="syncingIds().has(project.remote_id)"
+                    (click)="syncSingle(project)"
+                    matTooltip="Projekt szinkronizálása"
+                  >
+                    @if (syncingIds().has(project.remote_id)) {
+                      <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.DOWNLOAD" [size]="14" />
+                    }
+                    Szinkronizálás
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Szinkronizált projektek -->
+      @if (syncedProjects().length > 0) {
+        <div class="sync-dialog__section">
+          <h3 class="sync-dialog__section-header">
+            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+            Szinkronizált projektek ({{ syncedProjects().length }})
+          </h3>
+          <div class="sync-dialog__list">
+            @for (project of syncedProjects(); track project.remote_id) {
+              <div class="sync-dialog__row sync-dialog__row--synced">
+                <div class="sync-dialog__row-info">
+                  <span class="sync-dialog__row-name">{{ project.name }}</span>
+                  <span class="sync-dialog__row-details">
+                    @if (project.school) {
+                      {{ project.school }}
+                      @if (project.city) {
+                        , {{ project.city }}
+                      }
+                    }
+                    @if (project.contact_name) {
+                      &middot; {{ project.contact_name }}
+                    }
+                  </span>
+                </div>
+                <div class="sync-dialog__row-actions">
+                  <button
+                    class="sync-dialog__icon-btn"
+                    (click)="openInTablokiraly(project.remote_id)"
+                    matTooltip="Megnyitás a tablokiraly.hu-n"
+                  >
+                    <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="14" />
+                  </button>
+                  @if (project.local_project_id) {
+                    <button
+                      class="sync-dialog__view-btn"
+                      (click)="navigateToProject(project.local_project_id!)"
+                      matTooltip="Megnyitás a rendszerben"
+                    >
+                      <lucide-icon [name]="ICONS.EYE" [size]="14" />
+                      Megnyitás
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Üres állapot -->
+      @if (filteredProjects().length === 0) {
+        <div class="sync-dialog__empty">
+          @if (searchText()) {
+            <lucide-icon [name]="ICONS.SEARCH" [size]="32" />
+            <span>Nincs találat a keresésre</span>
+          } @else {
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="32" />
+            <span>Nincs projekt a régi rendszerben</span>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-dialog-wrapper>

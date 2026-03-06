@@ -13,19 +13,13 @@
         <button
           type="button"
           class="btn-secondary btn-with-badge"
-          [disabled]="actions.syncing()"
-          (click)="actions.triggerSync()"
+          (click)="openSyncDialog()"
           matTooltip="Megrendeléses projektek szinkronizálása a régi rendszerből"
         >
-          @if (actions.syncing()) {
-            <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
-            Szinkronizálás...
-          } @else {
-            <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
-            Szinkronizálás
-            @if (actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0) {
-              <span class="btn-badge">{{ actions.pendingSyncCount() }}</span>
-            }
+          <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
+          Szinkronizálás
+          @if (actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0) {
+            <span class="btn-badge">{{ actions.pendingSyncCount() }}</span>
           }
         </button>
         <button
@@ -290,5 +284,13 @@
     [project]="actions.linkingProject()!"
     (close)="actions.closeLinkDialog()"
     (linked)="actions.onPreliminaryLinked()"
+  />
+}
+
+<!-- Szinkronizálás Dialógus -->
+@if (showSyncDialog()) {
+  <app-sync-dialog
+    (close)="closeSyncDialog()"
+    (synced)="onSyncCompleted()"
   />
 }

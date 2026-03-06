@@ -15,20 +15,17 @@
           class="btn-secondary btn-with-badge"
           [disabled]="actions.syncing()"
           (click)="actions.triggerSync()"
-          [matTooltip]="actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0
-            ? actions.pendingSyncCount() + ' új projekt szinkronizálható'
-            : 'Megrendeléses projektek szinkronizálása a régi rendszerből'"
+          matTooltip="Megrendeléses projektek szinkronizálása a régi rendszerből"
         >
           @if (actions.syncing()) {
             <lucide-icon [name]="ICONS.LOADER" [size]="18" class="spin" />
+            Szinkronizálás...
           } @else {
             <lucide-icon [name]="ICONS.REFRESH" [size]="18" />
-          }
-          @if (actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0) {
-            Szinkronizálás indítása
-            <span class="btn-badge">{{ actions.pendingSyncCount() }}</span>
-          } @else {
             Szinkronizálás
+            @if (actions.pendingSyncCount() !== null && actions.pendingSyncCount()! > 0) {
+              <span class="btn-badge">{{ actions.pendingSyncCount() }}</span>
+            }
           }
         </button>
         <button

@@ -357,26 +357,6 @@ export class ProjectListActionsService {
   triggerSync(): void {
     if (this.syncing()) return;
 
-    const pending = this.pendingSyncCount();
-    if (pending === null || pending === 0) {
-      this.syncing.set(true);
-      this.orderSyncService.checkSync()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (res) => {
-            this.syncing.set(false);
-            const count = res.data?.pending_count ?? 0;
-            this.pendingSyncCount.set(count);
-            if (count === 0) this.toast.info('Naprakész', 'Nincs új szinkronizálandó projekt');
-          },
-          error: () => {
-            this.syncing.set(false);
-            this.toast.error('Hiba', 'Nem sikerült ellenőrizni a régi rendszert');
-          },
-        });
-      return;
-    }
-
     this.syncing.set(true);
     this.orderSyncService.triggerSync()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -384,11 +364,13 @@ export class ProjectListActionsService {
         next: (res) => {
           this.syncing.set(false);
           this.pendingSyncCount.set(0);
-          if (res.data?.created > 0) {
-            this.toast.success('Szinkronizálva', res.message);
+          const d = res.data;
+          if (d?.created > 0 || d?.moved > 0) {
+            const total = (d.created ?? 0) + (d.moved ?? 0);
+            this.toast.success('Szinkronizálva', `${total} új projekt szinkronizálva`);
             this.reloadFn?.();
           } else {
-            this.toast.info('Kész', res.message);
+            this.toast.info('Naprakész', res.message || 'Nincs új megrendeléses projekt');
           }
         },
         error: (err) => {

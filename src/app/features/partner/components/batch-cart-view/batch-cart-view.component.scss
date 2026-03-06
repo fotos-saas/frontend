@@ -142,6 +142,10 @@
       background: var(--success-100, #dcfce7);
       color: var(--success-700, #15803d);
     }
+    &.badge--amber {
+      background: #fef3c7;
+      color: #92400e;
+    }
     &.badge--gray {
       background: var(--surface-tertiary, #e5e7eb);
       color: var(--text-secondary, #6b7280);

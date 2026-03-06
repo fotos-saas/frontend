@@ -959,26 +959,31 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const placedJsonPath = path.join(psdDir, 'placed-photos.json');
       const hasPlacedPhotos = fs.existsSync(placedJsonPath);
 
-      // placed-photos.json beolvasása: {personId: mediaId} map
+      // placed-photos.json beolvasása: {personId: mediaId} map + withFrame többség
       let placedPhotos: Record<string, number> | null = null;
+      let majorityWithFrame = true;
       if (hasPlacedPhotos) {
         try {
           const raw: PlacedPhotosMap = JSON.parse(fs.readFileSync(placedJsonPath, 'utf-8'));
           placedPhotos = {};
+          let framed = 0;
+          let unframed = 0;
           for (const [personId, entry] of Object.entries(raw)) {
             if (entry.mediaId !== null) {
               placedPhotos[personId] = entry.mediaId;
             }
+            if (entry.withFrame) framed++; else unframed++;
           }
+          majorityWithFrame = framed >= unframed;
         } catch (err) {
           log.warn('placed-photos.json olvasási hiba:', err);
         }
       }
 
-      return { success: true, exists: true, hasLayouts, hasPlacedPhotos, placedPhotos };
+      return { success: true, exists: true, hasLayouts, hasPlacedPhotos, placedPhotos, majorityWithFrame };
     } catch (error) {
       log.error('PSD letezés ellenorzes hiba:', error);
-      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null, majorityWithFrame: true };
     }
   });
 
@@ -1017,21 +1022,26 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const placedJsonPath = path.join(params.folderPath, 'placed-photos.json');
       const hasPlacedPhotos = fs.existsSync(placedJsonPath);
       let placedPhotos: Record<string, number> | null = null;
+      let majorityWithFrame = true;
       if (hasPlacedPhotos) {
         try {
           const raw: PlacedPhotosMap = JSON.parse(fs.readFileSync(placedJsonPath, 'utf-8'));
           placedPhotos = {};
+          let framed = 0;
+          let unframed = 0;
           for (const [personId, entry] of Object.entries(raw)) {
             if (entry.mediaId !== null) {
               placedPhotos[personId] = entry.mediaId;
             }
+            if (entry.withFrame) framed++; else unframed++;
           }
+          majorityWithFrame = framed >= unframed;
         } catch (err) {
           log.warn('placed-photos.json olvasási hiba:', err);
         }
       }
 
-      return { success: true, exists: true, psdPath, hasLayouts, hasPlacedPhotos, placedPhotos };
+      return { success: true, exists: true, psdPath, hasLayouts, hasPlacedPhotos, placedPhotos, majorityWithFrame };
     } catch (error) {
       log.error('Projekt PSD keresés hiba:', error);
       return { success: false, exists: false };

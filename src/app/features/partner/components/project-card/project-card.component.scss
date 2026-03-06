@@ -462,21 +462,21 @@
 
 .photo-update-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #ffffff;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  line-height: 16px;
+  line-height: 20px;
   text-align: center;
   border: 2px solid #ffffff;
   pointer-events: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Col: Actions */

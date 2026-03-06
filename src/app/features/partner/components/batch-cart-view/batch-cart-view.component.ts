@@ -46,6 +46,7 @@ export class BatchCartViewComponent {
       case 'generate-psd': return 'badge--purple';
       case 'generate-sample': return 'badge--blue';
       case 'finalize': return 'badge--green';
+      case 'refresh-photos': return 'badge--amber';
       default: return 'badge--gray';
     }
   }

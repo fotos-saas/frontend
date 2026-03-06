@@ -4,7 +4,7 @@
  */
 
 /** Workflow tipusok — milyen Photoshop muveletet kell vegrehajtani */
-export type BatchWorkflowType = 'generate-psd' | 'generate-sample' | 'finalize';
+export type BatchWorkflowType = 'generate-psd' | 'generate-sample' | 'finalize' | 'refresh-photos';
 
 /** Egy job statusza a queue-ban */
 export type BatchJobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -59,4 +59,5 @@ export const BATCH_WORKFLOW_LABELS: Record<BatchWorkflowType, string> = {
   'generate-psd': 'PSD generálás',
   'generate-sample': 'Minta generálás',
   'finalize': 'Véglegesítés',
+  'refresh-photos': 'Képek frissítése',
 };

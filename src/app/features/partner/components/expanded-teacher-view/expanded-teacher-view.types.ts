@@ -20,6 +20,7 @@ export interface ExpandedUploadedPhoto {
   filename: string;
   url: string;
   thumbUrl: string;
+  iptcTitle?: string;
 }
 
 export interface ExpandedClassData {

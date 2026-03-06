@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { buildHttpParams } from '@shared/utils/http-params.util';
@@ -64,20 +64,26 @@ export class PartnerTeacherService implements ArchiveService {
     });
   }
 
-  uploadPhotosToSession(sessionId: number, photos: File[]): Observable<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }> {
+  uploadPhotosToSession(sessionId: number, photos: File[]): Observable<HttpEvent<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }>> {
     const formData = new FormData();
     formData.append('session_id', String(sessionId));
     for (const photo of photos) {
       formData.append('photos[]', photo);
     }
-    return this.http.post<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }>(
-      `${this.baseUrl}/expanded-view/upload-photos`,
-      formData,
-    );
+    const req = new HttpRequest('POST', `${this.baseUrl}/expanded-view/upload-photos`, formData, {
+      reportProgress: true,
+    });
+    return this.http.request<{ success: boolean; message: string; photos: ExpandedUploadedPhoto[] }>(req);
   }
 
   deleteSessionPhoto(photoId: number): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(`${this.baseUrl}/expanded-view/photos/${photoId}`);
+  }
+
+  deleteAllSessionPhotos(sessionId: number): Observable<{ success: boolean }> {
+    return this.http.request<{ success: boolean }>('DELETE', `${this.baseUrl}/expanded-view/delete-all-photos`, {
+      body: { session_id: sessionId },
+    });
   }
 
   syncSessionPhotos(sessionId: number): Observable<{ success: boolean; message: string; data: SyncResult }> {

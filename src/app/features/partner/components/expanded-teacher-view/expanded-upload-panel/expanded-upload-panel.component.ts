@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, output, signal, viewChild } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
 import { ExpandedUploadedPhoto } from '../expanded-teacher-view.types';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-expanded-upload-panel',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule],
+  imports: [LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
   templateUrl: './expanded-upload-panel.component.html',
   styleUrl: './expanded-upload-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +26,8 @@ export class ExpandedUploadPanelComponent {
   readonly uploading = computed(() => this.dataService.uploading());
   readonly syncing = computed(() => this.dataService.syncing());
   readonly draggedPhoto = computed(() => this.dataService.draggedPhoto());
+  readonly uploadProgress = computed(() => this.dataService.uploadProgress());
+  readonly showDeleteAllConfirm = signal(false);
 
   readonly summaryText = computed(() => {
     const count = this.photos().length;
@@ -84,6 +87,17 @@ export class ExpandedUploadPanelComponent {
 
   onSync(): void {
     this.dataService.syncPhotos();
+  }
+
+  onDeleteAll(): void {
+    this.showDeleteAllConfirm.set(true);
+  }
+
+  onDeleteAllResult(result: ConfirmDialogResult): void {
+    this.showDeleteAllConfirm.set(false);
+    if (result.action === 'confirm') {
+      this.dataService.deleteAllPhotos();
+    }
   }
 
   onPhotoDragStart(event: DragEvent, photo: ExpandedUploadedPhoto): void {

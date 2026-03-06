@@ -1,9 +1,9 @@
 <div
   class="dialog-backdrop"
   (mousedown)="backdropHandler.onMouseDown($event)"
-  (mouseup)="backdropHandler.onMouseUp($event)"
+  (click)="backdropHandler.onClick($event)"
 >
-  <div class="dialog-panel" (mousedown)="$event.stopPropagation()" (mouseup)="$event.stopPropagation()">
+  <div class="dialog-panel" (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
     <header class="dialog-header">
       <h2>Tömeges művelet</h2>
       <p class="dialog-subtitle">{{ selectedCount() }} projekt kijelölve — válassz műveletet:</p>

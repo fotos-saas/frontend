@@ -47,6 +47,7 @@ export class LayoutActionsDialogComponent {
     { id: 'upload-individual', label: 'Képfeltöltés külön-külön' },
     { id: 'resize', label: 'Átméretezés' },
     { id: 'circle-mask', label: 'Kör maszk (kör fejek)' },
+    { id: 'remove-masks', label: 'Maszkok eltávolítása' },
   ];
 
   readonly selectedAction = signal<string>('upload-to-everyone');
@@ -102,7 +103,7 @@ export class LayoutActionsDialogComponent {
       return form ? form.formData() !== null : false;
     }
 
-    if (action === 'circle-mask') {
+    if (action === 'circle-mask' || action === 'remove-masks') {
       return this.selectedPersonIds().size > 0;
     }
 
@@ -172,6 +173,8 @@ export class LayoutActionsDialogComponent {
         await this.executeResize();
       } else if (action === 'circle-mask') {
         await this.executeCircleMask();
+      } else if (action === 'remove-masks') {
+        await this.executeRemoveMasks();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -260,6 +263,21 @@ export class LayoutActionsDialogComponent {
 
     if (!result.success) {
       throw new Error(result.error || 'Maszkolas sikertelen');
+    }
+
+    this.executed.emit();
+  }
+
+  private async executeRemoveMasks(): Promise<void> {
+    const selectedIds = this.selectedPersonIds();
+    const layerNames = this.persons()
+      .filter(p => selectedIds.has(p.id))
+      .map(p => p.layerName);
+
+    const result = await this.ps.removeMasks({ layerNames });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Maszk eltavolitas sikertelen');
     }
 
     this.executed.emit();

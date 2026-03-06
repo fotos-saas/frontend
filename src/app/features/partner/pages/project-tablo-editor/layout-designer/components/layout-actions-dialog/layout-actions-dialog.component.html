@@ -107,7 +107,13 @@
           @case ('circle-mask') {
             <div class="dialog__hint">
               <lucide-icon [name]="ICONS.CIRCLE" [size]="16" />
-              <span>A kijelolt kepekre kor alaku maszk kerul. Az atmero a kep szelessegebol szamolodik, felulrol igazitva.</span>
+              <span>A kijelölt képekre kör alakú maszk kerül. Az átmérő a kép szélességéből számolódik, felülről igazítva. Szöveges layereket kihagyja.</span>
+            </div>
+          }
+          @case ('remove-masks') {
+            <div class="dialog__hint dialog__hint--warning">
+              <lucide-icon [name]="ICONS.ERASER" [size]="16" />
+              <span>A kijelölt személyek layereiről eltávolítja az összes maszkot (raster és vector).</span>
             </div>
           }
         }

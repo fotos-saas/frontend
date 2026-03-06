@@ -1872,6 +1872,48 @@ export class PhotoshopService {
   }
 
   /**
+   * Maszkok (raster + vector) eltavolitasa a megadott layerekrol.
+   */
+  async removeMasks(params: {
+    layerNames: string[];
+  }): Promise<{ success: boolean; removed?: number; skipped?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
+
+    if (!params.layerNames || params.layerNames.length === 0) {
+      return { success: true, removed: 0 };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/remove-masks.jsx',
+        jsonData: params,
+      });
+
+      if (!result.success) {
+        this.logger.error('removeMasks JSX error:', result.error);
+        return { success: false, error: result.error };
+      }
+
+      try {
+        if (result.output) {
+          const lines = result.output.trim().split('\n');
+          const lastLine = lines[lines.length - 1];
+          if (lastLine.charAt(0) === '{') {
+            const data = JSON.parse(lastLine);
+            if (data.error) return { success: false, error: data.error };
+            return { success: true, removed: data.removed, skipped: data.skipped, errors: data.errors };
+          }
+        }
+      } catch (_) { /* parse hiba */ }
+
+      return { success: result.success };
+    } catch (err) {
+      this.logger.error('JSX removeMasks hiba', err);
+      return { success: false, error: 'Varatlan hiba a maszk eltavolitas soran' };
+    }
+  }
+
+  /**
    * Csoport + SO layerek hozzaadasa a megnyitott dokumentumhoz.
    * Forraskepekbol Smart Object duplicate-ot keszit minden szemelyhez,
    * es a megadott poziciokra helyezi oket.

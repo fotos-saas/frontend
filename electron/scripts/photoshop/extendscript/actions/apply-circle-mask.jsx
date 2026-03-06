@@ -157,7 +157,14 @@ function _doApplyCircleMask() {
   for (var i = 0; i < foundLayers.length; i++) {
     var layer = foundLayers[i];
     try {
-      // Mar van vector mask → kihagyjuk
+      // Text layer → kihagyjuk
+      if (layer.kind === LayerKind.TEXT) {
+        log("[JSX] SKIP (text layer): " + layer.name);
+        _skipped++;
+        continue;
+      }
+
+      // Mar van mask → kihagyjuk
       if (_hasMask(layer.id)) {
         log("[JSX] SKIP (mar van mask): " + layer.name);
         _skipped++;

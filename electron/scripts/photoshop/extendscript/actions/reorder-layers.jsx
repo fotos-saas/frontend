@@ -166,18 +166,30 @@ function _doReorderLayers() {
     var imgSlots = _collectSlotPositions(imageLayers);
     _reorderGroupLayers(imgGrp, _orderedNames, imgSlots);
 
-    // --- 2. Names csoport rendezese (ha letezik) ---
-    var namesGrp = getGroupByPath(_doc, ["Names", subName]);
-    if (namesGrp && namesGrp.artLayers.length > 0) {
-      var nameSlots = _collectSlotPositions(namesGrp.artLayers);
-      _reorderGroupLayers(namesGrp, _orderedNames, nameSlots);
-    }
+    // --- 2. MINDEN top-level csoport ami tartalmaz subName alcsoportot ---
+    // Vegigmegyunk az osszes csoporton (Names, Positions, sdss, barmilyen mas),
+    // es ha van benne subName (Students/Teachers) alcsoport azonos nevu layerekkel,
+    // azokat is rendezzuk a sajat slot pozicioikba.
+    for (var tl = 0; tl < _doc.layerSets.length; tl++) {
+      var topGroup = _doc.layerSets[tl];
+      if (topGroup.name === "Images") continue; // mar kezeltuk
 
-    // --- 3. Positions csoport rendezese (ha letezik) ---
-    var posGrp = getGroupByPath(_doc, ["Positions", subName]);
-    if (posGrp && posGrp.artLayers.length > 0) {
-      var posSlots = _collectSlotPositions(posGrp.artLayers);
-      _reorderGroupLayers(posGrp, _orderedNames, posSlots);
+      var subGrp = null;
+      try { subGrp = topGroup.layerSets.getByName(subName); } catch(e) {}
+      if (!subGrp || subGrp.artLayers.length === 0) continue;
+
+      // Ellenorizzuk hogy vannak-e azonos nevu layerek mint az Images-ben
+      var hasMatch = false;
+      for (var cm = 0; cm < subGrp.artLayers.length; cm++) {
+        if (subGrp.artLayers[cm].name.indexOf("---") !== -1) {
+          hasMatch = true;
+          break;
+        }
+      }
+      if (!hasMatch) continue;
+
+      var grpSlots = _collectSlotPositions(subGrp.artLayers);
+      _reorderGroupLayers(subGrp, _orderedNames, grpSlots);
     }
 
     totalReordered += imageLayers.length;

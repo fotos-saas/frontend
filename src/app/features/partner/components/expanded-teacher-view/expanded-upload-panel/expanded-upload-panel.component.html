@@ -77,7 +77,6 @@
             <div
               class="upload-photo"
               [class.upload-photo--dragging]="draggedPhoto()?.id === photo.id"
-              [matTooltip]="photo.filename"
               draggable="true"
               (dragstart)="onPhotoDragStart($event, photo)"
               (dragend)="onPhotoDragEnd()"
@@ -92,7 +91,7 @@
                   <lucide-icon [name]="ICONS.X" [size]="12" />
                 </button>
               </div>
-              <span class="upload-photo__name">{{ photo.iptcTitle || photo.filename }}</span>
+              <span class="upload-photo__name" [matTooltip]="photo.filename">{{ photo.iptcTitle || photo.filename }}</span>
             </div>
           }
         </div>

@@ -104,6 +104,12 @@
           @case ('resize') {
             <app-resize-form #resizeForm />
           }
+          @case ('circle-mask') {
+            <div class="dialog__hint">
+              <lucide-icon [name]="ICONS.CIRCLE" [size]="16" />
+              <span>A kijelolt kepekre kor alaku maszk kerul. Az atmero a kep szelessegebol szamolodik, felulrol igazitva.</span>
+            </div>
+          }
         }
       </div>
 

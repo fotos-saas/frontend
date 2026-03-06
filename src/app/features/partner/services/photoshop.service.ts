@@ -1828,6 +1828,50 @@ export class PhotoshopService {
   }
 
   /**
+   * Kor alaku vector mask alkalmazasa image layerekre.
+   * A kor atmeroje = layer szelesseg, top-aligned.
+   */
+  async applyCircleMask(params: {
+    layerNames: string[];
+  }): Promise<{ success: boolean; masked?: number; skipped?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
+
+    if (!params.layerNames || params.layerNames.length === 0) {
+      return { success: true, masked: 0 };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/apply-circle-mask.jsx',
+        jsonData: params,
+      });
+
+      if (!result.success) {
+        this.logger.error('applyCircleMask JSX error:', result.error);
+        return { success: false, error: result.error };
+      }
+
+      // Parse output JSON
+      try {
+        if (result.output) {
+          const lines = result.output.trim().split('\n');
+          const lastLine = lines[lines.length - 1];
+          if (lastLine.charAt(0) === '{') {
+            const data = JSON.parse(lastLine);
+            if (data.error) return { success: false, error: data.error };
+            return { success: true, masked: data.masked, skipped: data.skipped, errors: data.errors };
+          }
+        }
+      } catch (_) { /* parse hiba → default */ }
+
+      return { success: result.success };
+    } catch (err) {
+      this.logger.error('JSX applyCircleMask hiba', err);
+      return { success: false, error: 'Varatlan hiba a maszkolas soran' };
+    }
+  }
+
+  /**
    * Csoport + SO layerek hozzaadasa a megnyitott dokumentumhoz.
    * Forraskepekbol Smart Object duplicate-ot keszit minden szemelyhez,
    * es a megadott poziciokra helyezi oket.

@@ -46,6 +46,7 @@ export class LayoutActionsDialogComponent {
     { id: 'upload-to-everyone', label: 'Képek feltöltése mindenkihez' },
     { id: 'upload-individual', label: 'Képfeltöltés külön-külön' },
     { id: 'resize', label: 'Átméretezés' },
+    { id: 'circle-mask', label: 'Kör maszk (kör fejek)' },
   ];
 
   readonly selectedAction = signal<string>('upload-to-everyone');
@@ -99,6 +100,10 @@ export class LayoutActionsDialogComponent {
       if (this.selectedPersonIds().size === 0) return false;
       const form = this.resizeForm();
       return form ? form.formData() !== null : false;
+    }
+
+    if (action === 'circle-mask') {
+      return this.selectedPersonIds().size > 0;
     }
 
     return false;
@@ -165,6 +170,8 @@ export class LayoutActionsDialogComponent {
         await this.executeUploadIndividual();
       } else if (action === 'resize') {
         await this.executeResize();
+      } else if (action === 'circle-mask') {
+        await this.executeCircleMask();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -238,6 +245,21 @@ export class LayoutActionsDialogComponent {
 
     if (!result.success) {
       throw new Error(result.error || 'Atmeretezes sikertelen');
+    }
+
+    this.executed.emit();
+  }
+
+  private async executeCircleMask(): Promise<void> {
+    const selectedIds = this.selectedPersonIds();
+    const layerNames = this.persons()
+      .filter(p => selectedIds.has(p.id))
+      .map(p => p.layerName);
+
+    const result = await this.ps.applyCircleMask({ layerNames });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Maszkolas sikertelen');
     }
 
     this.executed.emit();

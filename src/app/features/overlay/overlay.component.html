@@ -763,7 +763,7 @@
       <div class="drag-order-panel__custom-order">
         <textarea
           class="drag-order-panel__custom-textarea"
-          placeholder="Írj be neveket soronként a kívánt sorrendben..."
+          placeholder="Nevek soronként vagy utasítás (pl. Kiss Anna legyen elől, Bézi a végére...)"
           [value]="dragOrderCustomText()"
           (input)="dragOrder.customOrderText.set($any($event.target).value)"
           rows="4"

@@ -10,7 +10,7 @@ import { GeneratePsdWorkflow } from './batch-workflows/generate-psd.workflow';
 import { GenerateSampleWorkflow } from './batch-workflows/generate-sample.workflow';
 import { FinalizeWorkflow } from './batch-workflows/finalize.workflow';
 import { RefreshPhotosWorkflow } from './batch-workflows/refresh-photos.workflow';
-import { selectTabloSize } from '@shared/utils/tablo-size.util';
+import { resolveProjectTabloSize } from '@shared/utils/tablo-size.util';
 import { firstValueFrom } from 'rxjs';
 
 /** Hiba amit a checkAbort() dob pause/cancel esetén */
@@ -155,8 +155,8 @@ export class BatchJobRunnerService {
       firstValueFrom(this.projectService.getTabloSizes()),
     ]);
 
-    const size = selectTabloSize(
-      personsResp.data.length,
+    const size = resolveProjectTabloSize(
+      { tabloSize: job.tabloSize, personsCount: job.personsCount },
       sizesResp.sizes,
       sizesResp.threshold,
     );

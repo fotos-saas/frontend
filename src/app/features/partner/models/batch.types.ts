@@ -21,6 +21,7 @@ export interface BatchWorkspaceItem {
   className: string | null;
   classYear: string | null;
   personsCount: number;
+  tabloSize: string | null;
   sampleThumbUrl: string | null;
   workflowType: BatchWorkflowType;
   addedAt: string;
@@ -34,6 +35,8 @@ export interface BatchJobState {
   schoolName: string | null;
   className: string | null;
   classYear: string | null;
+  tabloSize: string | null;
+  personsCount: number;
   workflowType: BatchWorkflowType;
   status: BatchJobStatus;
   error?: string;

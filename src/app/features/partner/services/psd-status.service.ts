@@ -13,15 +13,20 @@ export interface PsdStatus {
   psdPath: string | null;
   folderPath: string | null;
   hasPlacedPhotos: boolean;
+  /** Hány személy fotója változott a PSD-be helyezés óta */
+  updatedPhotosCount: number;
+}
+
+interface PsdCheckResult extends PsdStatus {
+  placedPhotos: Record<string, number> | null;
 }
 
 /**
  * PSD létezés ellenőrzés a projekt listához.
  * Háttérben ellenőrzi minden projekthez hogy van-e PSD fájl.
+ * Ha van placed-photos.json, a backend API-val összehasonlítja az aktuális fotókkal.
  *
  * FONTOS: Csak akkor működik, ha a workDir be van állítva a PhotoshopService-ben.
- * workDir nélkül a computePsdPath fallback-et ad (Downloads/PhotoStack/size.psd),
- * ami nem projekt-specifikus — ilyenkor nem ellenőrzünk.
  */
 @Injectable({
   providedIn: 'root',
@@ -59,7 +64,6 @@ export class PsdStatusService {
   async checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
     if (!this.electron.isElectron || projects.length === 0) return;
 
-    // PS beállítások betöltése (workDir, stb.) — ha még nem történt meg
     if (!this.ps.workDir()) {
       await this.ps.detectPhotoshop();
     }
@@ -80,22 +84,31 @@ export class PsdStatusService {
       const { sizes, threshold } = this.tabloSizesCache;
       const brandName = this.branding.brandName();
       const newMap = new Map<number, PsdStatus>();
+      const placedMaps = new Map<number, Record<string, number>>();
 
-      // 5-ösével párhuzamosan
+      // 5-ösével párhuzamosan — PSD létezés + placed-photos.json beolvasás
       for (let i = 0; i < projects.length; i += 5) {
         const batch = projects.slice(i, i + 5);
         const results = await Promise.all(
           batch.map(p => this.checkSingleProject(p, sizes, threshold, brandName)),
         );
-        results.forEach((status, idx) => {
-          newMap.set(batch[idx].id, status);
+        results.forEach((result, idx) => {
+          const projectId = batch[idx].id;
+          const { placedPhotos, ...status } = result;
+          newMap.set(projectId, status);
+          if (placedPhotos && Object.keys(placedPhotos).length > 0) {
+            placedMaps.set(projectId, placedPhotos);
+          }
         });
       }
 
       this.statusMap.set(newMap);
+      this.loading.set(false);
+
+      // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)
+      this.checkPhotoChangesInBackground(projects, newMap, placedMaps);
     } catch (err) {
       this.logger.error('PSD státusz ellenőrzés hiba', err);
-    } finally {
       this.loading.set(false);
     }
   }
@@ -105,7 +118,12 @@ export class PsdStatusService {
     sizes: TabloSize[],
     threshold: TabloSizeThreshold | null,
     brandName: string | null,
-  ): Promise<PsdStatus> {
+  ): Promise<PsdCheckResult> {
+    const noResult: PsdCheckResult = {
+      exists: false, psdPath: null, folderPath: null,
+      hasPlacedPhotos: false, updatedPhotosCount: 0, placedPhotos: null,
+    };
+
     try {
       const context = {
         projectName: project.name,
@@ -114,15 +132,11 @@ export class PsdStatusService {
         brandName,
       };
 
-      // 1. Preferált méret (mentett vagy automatikus)
       const preferredSize = resolveProjectTabloSize(project, sizes, threshold);
-
-      // Méretek sorrendje: preferált először, majd a többi
       const orderedSizes = preferredSize
         ? [preferredSize, ...sizes.filter(s => s.value !== preferredSize.value)]
         : sizes;
 
-      // 2. Összes méreten végigmegyünk, az elsőt visszaadjuk ami létezik
       for (const size of orderedSizes) {
         const psdPath = await this.ps.computePsdPath(size.value, context);
         if (!psdPath) continue;
@@ -130,14 +144,65 @@ export class PsdStatusService {
         const result = await this.ps.checkPsdExists(psdPath);
         if (result.exists) {
           const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
-          return { exists: true, psdPath, folderPath, hasPlacedPhotos: result.hasPlacedPhotos };
+          return {
+            exists: true,
+            psdPath,
+            folderPath,
+            hasPlacedPhotos: result.hasPlacedPhotos,
+            updatedPhotosCount: 0,
+            placedPhotos: result.placedPhotos,
+          };
         }
       }
 
-      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
+      return noResult;
     } catch (err) {
       this.logger.error(`[PSD] #${project.id} hiba`, err);
-      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
+      return noResult;
+    }
+  }
+
+  /**
+   * Háttérben ellenőrzi a fotóváltozásokat a backend API-val.
+   * A placed-photos.json tartalmát (personId→mediaId) elküldi a backendnek,
+   * ami összehasonlítja az aktuális effective media ID-kkel.
+   */
+  private async checkPhotoChangesInBackground(
+    projects: PartnerProjectListItem[],
+    statusMap: Map<number, PsdStatus>,
+    placedMaps: Map<number, Record<string, number>>,
+  ): Promise<void> {
+    if (placedMaps.size === 0) return;
+
+    const projectIds = [...placedMaps.keys()];
+    let hasUpdates = false;
+
+    // 3-asával párhuzamosan
+    for (let i = 0; i < projectIds.length; i += 3) {
+      const batch = projectIds.slice(i, i + 3);
+      const results = await Promise.allSettled(
+        batch.map(async (projectId) => {
+          const placedPhotos = placedMaps.get(projectId)!;
+          const result = await firstValueFrom(
+            this.projectService.checkPhotoChanges(projectId, placedPhotos),
+          );
+          return { projectId, changedCount: result.changed.length };
+        }),
+      );
+
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value.changedCount > 0) {
+          const status = statusMap.get(r.value.projectId);
+          if (status) {
+            status.updatedPhotosCount = r.value.changedCount;
+            hasUpdates = true;
+          }
+        }
+      }
+    }
+
+    if (hasUpdates) {
+      this.statusMap.set(new Map(statusMap));
     }
   }
 }

@@ -956,12 +956,29 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         hasLayouts = jsonFiles.length > 0;
       }
 
-      const hasPlacedPhotos = fs.existsSync(path.join(psdDir, 'placed-photos.json'));
+      const placedJsonPath = path.join(psdDir, 'placed-photos.json');
+      const hasPlacedPhotos = fs.existsSync(placedJsonPath);
 
-      return { success: true, exists: true, hasLayouts, hasPlacedPhotos };
+      // placed-photos.json beolvasása: {personId: mediaId} map
+      let placedPhotos: Record<string, number> | null = null;
+      if (hasPlacedPhotos) {
+        try {
+          const raw: PlacedPhotosMap = JSON.parse(fs.readFileSync(placedJsonPath, 'utf-8'));
+          placedPhotos = {};
+          for (const [personId, entry] of Object.entries(raw)) {
+            if (entry.mediaId !== null) {
+              placedPhotos[personId] = entry.mediaId;
+            }
+          }
+        } catch (err) {
+          log.warn('placed-photos.json olvasási hiba:', err);
+        }
+      }
+
+      return { success: true, exists: true, hasLayouts, hasPlacedPhotos, placedPhotos };
     } catch (error) {
       log.error('PSD letezés ellenorzes hiba:', error);
-      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false };
+      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
     }
   });
 

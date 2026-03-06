@@ -1323,16 +1323,16 @@ export class PhotoshopService {
   }
 
   /** PSD fájl létezés ellenőrzés (layouts/ mappa + placed-photos.json is) */
-  async checkPsdExists(psdPath: string): Promise<{ exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }> {
-    if (!this.api) return { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+  async checkPsdExists(psdPath: string): Promise<{ exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null }> {
+    if (!this.api) return { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
     try {
       const result = await this.api.checkPsdExists({ psdPath });
       return result.success
-        ? { exists: result.exists, hasLayouts: result.hasLayouts, hasPlacedPhotos: result.hasPlacedPhotos ?? false }
-        : { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+        ? { exists: result.exists, hasLayouts: result.hasLayouts, hasPlacedPhotos: result.hasPlacedPhotos ?? false, placedPhotos: result.placedPhotos ?? null }
+        : { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
     } catch (err) {
       this.logger.error('PSD létezés ellenőrzés hiba', err);
-      return { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+      return { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
     }
   }
 

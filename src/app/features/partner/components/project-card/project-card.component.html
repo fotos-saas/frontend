@@ -154,8 +154,13 @@
           >
             <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
           </button>
-          @if (psdStatus()?.hasPlacedPhotos) {
-            <span class="placed-dot" matTooltip="Van placed-photos.json (képek el vannak helyezve)"></span>
+          @if (psdStatus()?.updatedPhotosCount) {
+            <span
+              class="photo-update-badge"
+              [matTooltip]="psdStatus()!.updatedPhotosCount + ' személy fotója frissült'"
+            >{{ psdStatus()!.updatedPhotosCount }}</span>
+          } @else if (psdStatus()?.hasPlacedPhotos) {
+            <span class="placed-dot" matTooltip="Képek elhelyezve"></span>
           }
         </div>
         <button

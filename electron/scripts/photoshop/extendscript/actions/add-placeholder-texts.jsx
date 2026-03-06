@@ -25,13 +25,13 @@ function log(msg) {
 
 var _doc, _data, _created = 0, _errors = 0;
 
-// --- Csoport letrehozas/kereses ---
-function _ensureGroup(doc, groupName) {
+// --- Csoport letrehozas/kereses (nested) ---
+function _ensureSubGroup(parent, childName) {
   try {
-    return doc.layerSets.getByName(groupName);
+    return parent.layerSets.getByName(childName);
   } catch (e) {
-    var grp = doc.layerSets.add();
-    grp.name = groupName;
+    var grp = parent.layerSets.add();
+    grp.name = childName;
     return grp;
   }
 }
@@ -39,21 +39,18 @@ function _ensureGroup(doc, groupName) {
 function _doAddPlaceholderTexts() {
   var groupName = _data.groupName;
 
+  // Fo csoport letrehozasa/keresese
+  var mainGroup = _ensureSubGroup(_doc, groupName);
+
   for (var i = 0; i < _data.layers.length; i++) {
     var item = _data.layers[i];
 
     try {
-      var targetGroup;
-      if (groupName) {
-        // Egyedi mappa nev → top-level csoport
-        targetGroup = _ensureGroup(_doc, groupName);
-      } else {
-        // Nincs mappa nev → Names/Students, Names/Teachers
-        targetGroup = getGroupByPath(_doc, ["Names", item.group]);
-      }
+      // groupName/Students vagy groupName/Teachers
+      var targetGroup = _ensureSubGroup(mainGroup, item.group);
 
       if (!targetGroup) {
-        log("[JSX] HIBA: csoport nem talalhato! (" + (groupName || item.group) + ")");
+        log("[JSX] HIBA: csoport nem talalhato! (" + groupName + "/" + item.group + ")");
         _errors++;
         continue;
       }

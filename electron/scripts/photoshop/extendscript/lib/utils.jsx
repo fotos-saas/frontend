@@ -237,8 +237,19 @@ function placePhotoInSmartObject(doc, layer, photoPath, syncBorder) {
   // 4. Keretezés — Photoshop Action futtatása az SO-n belül (flatten előtt)
   if (syncBorder) {
     try {
-      app.doAction("tker_without_save", "tablo_common");
-    } catch (e) { /* action nem létezik vagy hiba — folytatjuk */ }
+      // Ellenőrzés: az action set létezik-e (elkerüli a modal dialógust)
+      var _actionExists = false;
+      try {
+        var _aRef = new ActionReference();
+        _aRef.putName(stringIDToTypeID("actionSet"), "tablo_common");
+        executeActionGet(_aRef);
+        _actionExists = true;
+      } catch (ae) { /* action set nem létezik */ }
+
+      if (_actionExists) {
+        app.doAction("tker_without_save", "tablo_common");
+      }
+    } catch (e) { /* action hiba — folytatjuk */ }
   }
 
   // 5. Flatten (egyetlen layer legyen az SO-ban)

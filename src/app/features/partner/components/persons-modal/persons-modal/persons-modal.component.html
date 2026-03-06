@@ -318,7 +318,7 @@
           </button>
         }
 
-        @if (withoutPhotoCount() > 0 && !actions.editMode()) {
+        @if (!actions.editMode()) {
           <button type="button" class="btn btn--purple" (click)="openUploadWizard.emit(typeFilter())">
             <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
             Tovább a fényképek feltöltéséhez

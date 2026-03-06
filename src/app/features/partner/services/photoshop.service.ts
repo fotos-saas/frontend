@@ -1919,7 +1919,7 @@ export class PhotoshopService {
    * Placeholder szoveg layerek hozzaadasa a megadott szemelyekhez.
    */
   async addPlaceholderTexts(params: {
-    layers: Array<{ layerName: string; displayText: string; group: 'Students' | 'Teachers' }>;
+    layers: Array<{ layerName: string; displayText: string; group: 'Students' | 'Teachers'; x: number; y: number }>;
     groupName?: string;
     textAlign?: string;
   }): Promise<{ success: boolean; created?: number; errors?: number; error?: string }> {

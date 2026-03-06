@@ -55,13 +55,22 @@ function _doAddPlaceholderTexts() {
         continue;
       }
 
-      createTextLayer(targetGroup, item.displayText, {
+      var textLayer = createTextLayer(targetGroup, item.displayText, {
         name: item.layerName,
         font: CONFIG.FONT_NAME,
         size: CONFIG.FONT_SIZE,
         color: CONFIG.TEXT_COLOR,
         alignment: _data.textAlign || "center"
       });
+
+      // Pozicionalas a szemely koordinataira
+      if (typeof item.x === "number" && typeof item.y === "number") {
+        resetLayerPosition(textLayer);
+        textLayer.translate(
+          new UnitValue(Math.round(item.x), "px"),
+          new UnitValue(Math.round(item.y), "px")
+        );
+      }
       _created++;
     } catch (e) {
       log("[JSX] HIBA layer (" + item.layerName + "): " + e.message);

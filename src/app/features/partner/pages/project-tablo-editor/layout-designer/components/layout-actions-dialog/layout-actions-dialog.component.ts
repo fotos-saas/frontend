@@ -326,6 +326,8 @@ export class LayoutActionsDialogComponent {
       layerName: p.layerName,
       displayText: form.generateText(formData.textType, formData.charLength, formData.random),
       group: (p.type === 'teacher' ? 'Teachers' : 'Students') as 'Teachers' | 'Students',
+      x: Math.round(p.x),
+      y: Math.round(p.y),
     }));
 
     const result = await this.ps.addPlaceholderTexts({

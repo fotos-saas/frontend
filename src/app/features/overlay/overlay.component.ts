@@ -486,8 +486,8 @@ export class OverlayComponent implements OnInit {
         if (ctx.projectId) this.settings.loadSampleSettingsForProject(ctx.projectId);
         if (this.isLoggedOut() && ctx.projectId) {
           this.isLoggedOut.set(false);
-          this.projectService.loadPersons(ctx.projectId);
-        } else if (ctx.projectId && this.uploadPanelOpen()) {
+        }
+        if (ctx.projectId) {
           this.projectService.loadPersons(ctx.projectId);
         }
       });

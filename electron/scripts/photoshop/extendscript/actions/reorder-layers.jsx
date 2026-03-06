@@ -162,19 +162,23 @@ function _doReorderLayers() {
     var imageLayers = imgGrp.artLayers;
     if (imageLayers.length < 2) continue;
 
-    // --- 1. Slot poziciok kimentese AZ EREDETI allapotbol ---
-    var slotPositions = _collectSlotPositions(imageLayers);
+    // --- 1. Images csoport rendezese ---
+    var imgSlots = _collectSlotPositions(imageLayers);
+    _reorderGroupLayers(imgGrp, _orderedNames, imgSlots);
 
-    // --- 2. Images csoport rendezese ---
-    _reorderGroupLayers(imgGrp, _orderedNames, slotPositions);
-
-    // --- 3. Names csoport rendezese (ha letezik) ---
+    // --- 2. Names csoport rendezese (ha letezik) ---
     var namesGrp = getGroupByPath(_doc, ["Names", subName]);
-    _reorderGroupLayers(namesGrp, _orderedNames, slotPositions);
+    if (namesGrp && namesGrp.artLayers.length > 0) {
+      var nameSlots = _collectSlotPositions(namesGrp.artLayers);
+      _reorderGroupLayers(namesGrp, _orderedNames, nameSlots);
+    }
 
-    // --- 4. Positions csoport rendezese (ha letezik) ---
+    // --- 3. Positions csoport rendezese (ha letezik) ---
     var posGrp = getGroupByPath(_doc, ["Positions", subName]);
-    _reorderGroupLayers(posGrp, _orderedNames, slotPositions);
+    if (posGrp && posGrp.artLayers.length > 0) {
+      var posSlots = _collectSlotPositions(posGrp.artLayers);
+      _reorderGroupLayers(posGrp, _orderedNames, posSlots);
+    }
 
     totalReordered += imageLayers.length;
   }

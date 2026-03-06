@@ -45,21 +45,27 @@ function _findLayersByNames(container, nameSet, result) {
   } catch (e) { /* nincs layerSets */ }
 }
 
-// --- Ellenorzes: van-e mar vector mask a layeren ---
-function _hasVectorMask(layerId) {
+// --- Ellenorzes: van-e mar mask (vector VAGY raster/user) a layeren ---
+function _hasMask(layerId) {
   try {
     var ref = new ActionReference();
-    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasVectorMask"));
+    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasUserMask"));
     ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
     var desc = executeActionGet(ref);
-    return desc.getBoolean(stringIDToTypeID("hasVectorMask"));
-  } catch (e) {
-    return false;
-  }
+    if (desc.getBoolean(stringIDToTypeID("hasUserMask"))) return true;
+  } catch (e) { /* */ }
+  try {
+    var ref2 = new ActionReference();
+    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasVectorMask"));
+    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc2 = executeActionGet(ref2);
+    if (desc2.getBoolean(stringIDToTypeID("hasVectorMask"))) return true;
+  } catch (e) { /* */ }
+  return false;
 }
 
-// --- Kor alaku vector mask alkalmazasa ActionDescriptor-ral ---
-function _applyCircleVectorMask(layer) {
+// --- Kor alaku raster mask alkalmazasa ellipszis szelekciobol ---
+function _applyCircleMask(layer) {
   var bounds = layer.bounds;
   var layerLeft = bounds[0].as("px");
   var layerTop = bounds[1].as("px");
@@ -75,59 +81,47 @@ function _applyCircleVectorMask(layer) {
 
   // Kor parameterei: szelesseg = atmero, top-aligned, kozepre igazitva
   var diameter = layerW;
-  var cx = layerLeft + layerW / 2;
   var circleTop = layerTop;
   var circleBottom = layerTop + diameter;
-  var circleLeft = cx - diameter / 2;
-  var circleRight = cx + diameter / 2;
+  var circleLeft = layerLeft;
+  var circleRight = layerRight;
 
-  // Photoshop ActionDescriptor: vector mask ellipszis path-bol
-  var idMk = charIDToTypeID("Mk  ");
-  var desc = new ActionDescriptor();
+  // 1. Ellipszis szelekció készítése
+  var selDesc = new ActionDescriptor();
+  var selRef = new ActionReference();
+  selRef.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
+  selDesc.putReference(charIDToTypeID("null"), selRef);
 
-  // "new" → vector mask
-  var ref = new ActionReference();
-  ref.putClass(stringIDToTypeID("path"));
-  desc.putReference(charIDToTypeID("null"), ref);
+  var ellipseDesc = new ActionDescriptor();
+  ellipseDesc.putUnitDouble(charIDToTypeID("Top "), charIDToTypeID("#Pxl"), circleTop);
+  ellipseDesc.putUnitDouble(charIDToTypeID("Left"), charIDToTypeID("#Pxl"), circleLeft);
+  ellipseDesc.putUnitDouble(charIDToTypeID("Btom"), charIDToTypeID("#Pxl"), circleBottom);
+  ellipseDesc.putUnitDouble(charIDToTypeID("Rght"), charIDToTypeID("#Pxl"), circleRight);
 
-  // Target: current layer
-  var refTarget = new ActionReference();
-  refTarget.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  desc.putReference(charIDToTypeID("At  "), refTarget);
+  selDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Elps"), ellipseDesc);
+  selDesc.putInteger(stringIDToTypeID("feather"), 0);
+  selDesc.putBoolean(charIDToTypeID("AntA"), true);
 
-  // Path descriptor — vector mask type
-  var descPath = new ActionDescriptor();
-  descPath.putEnumerated(
-    stringIDToTypeID("pathOperation"),
-    stringIDToTypeID("shapeOperation"),
-    stringIDToTypeID("xor")
-  );
+  executeAction(charIDToTypeID("setd"), selDesc, DialogModes.NO);
 
-  // Ellipszis subpath component
-  var descEllipse = new ActionDescriptor();
-  descEllipse.putEnumerated(
-    stringIDToTypeID("shapeOperation"),
-    stringIDToTypeID("shapeOperation"),
-    charIDToTypeID("Add ")
-  );
+  // 2. Layer mask (raster mask) hozzáadása a szelekcióból — Reveal Selection
+  var maskDesc = new ActionDescriptor();
+  maskDesc.putClass(charIDToTypeID("Nw  "), charIDToTypeID("Chnl"));
+  var maskRef = new ActionReference();
+  maskRef.putEnumerated(charIDToTypeID("Chnl"), charIDToTypeID("Chnl"), charIDToTypeID("Msk "));
+  maskDesc.putReference(charIDToTypeID("At  "), maskRef);
+  maskDesc.putEnumerated(charIDToTypeID("Usng"), charIDToTypeID("UsrM"), charIDToTypeID("RvlS"));
 
-  // Ellipszis bounds
-  var descBounds = new ActionDescriptor();
-  descBounds.putUnitDouble(charIDToTypeID("Top "), charIDToTypeID("#Pxl"), circleTop);
-  descBounds.putUnitDouble(charIDToTypeID("Left"), charIDToTypeID("#Pxl"), circleLeft);
-  descBounds.putUnitDouble(charIDToTypeID("Btom"), charIDToTypeID("#Pxl"), circleBottom);
-  descBounds.putUnitDouble(charIDToTypeID("Rght"), charIDToTypeID("#Pxl"), circleRight);
+  executeAction(charIDToTypeID("Mk  "), maskDesc, DialogModes.NO);
 
-  descEllipse.putObject(charIDToTypeID("Elps"), charIDToTypeID("Elps"), descBounds);
+  // 3. Szelekció törlése
+  var deselDesc = new ActionDescriptor();
+  var deselRef = new ActionReference();
+  deselRef.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
+  deselDesc.putReference(charIDToTypeID("null"), deselRef);
+  deselDesc.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
 
-  // Subpath lista
-  var listSubpath = new ActionList();
-  listSubpath.putObject(stringIDToTypeID("pathComponent"), descEllipse);
-  descPath.putList(stringIDToTypeID("pathComponents"), listSubpath);
-
-  desc.putObject(charIDToTypeID("Usng"), stringIDToTypeID("path"), descPath);
-
-  executeAction(idMk, desc, DialogModes.NO);
+  executeAction(charIDToTypeID("setd"), deselDesc, DialogModes.NO);
 
   return true;
 }
@@ -164,7 +158,7 @@ function _doApplyCircleMask() {
     var layer = foundLayers[i];
     try {
       // Mar van vector mask → kihagyjuk
-      if (_hasVectorMask(layer.id)) {
+      if (_hasMask(layer.id)) {
         log("[JSX] SKIP (mar van mask): " + layer.name);
         _skipped++;
         continue;
@@ -173,7 +167,7 @@ function _doApplyCircleMask() {
       selectLayerById(layer.id);
       doc.activeLayer = layer;
 
-      var ok = _applyCircleVectorMask(layer);
+      var ok = _applyCircleMask(layer);
       if (ok) {
         _masked++;
       } else {

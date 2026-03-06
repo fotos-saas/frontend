@@ -19,6 +19,9 @@ import {
 import {
   ResizeFormComponent,
 } from './actions/resize-form.component';
+import {
+  PlaceholderTextFormComponent,
+} from './actions/placeholder-text-form.component';
 
 @Component({
   selector: 'app-layout-actions-dialog',
@@ -26,6 +29,7 @@ import {
   imports: [
     FormsModule, LucideAngularModule, PsSelectComponent,
     UploadToEveryoneFormComponent, UploadIndividualFormComponent, ResizeFormComponent,
+    PlaceholderTextFormComponent,
   ],
   templateUrl: './layout-actions-dialog.component.html',
   styleUrl: './layout-actions-dialog.component.scss',
@@ -48,6 +52,7 @@ export class LayoutActionsDialogComponent {
     { id: 'resize', label: 'Átméretezés' },
     { id: 'circle-mask', label: 'Kör maszk (kör fejek)' },
     { id: 'remove-masks', label: 'Maszkok eltávolítása' },
+    { id: 'placeholder-text', label: 'Placeholder szöveg' },
   ];
 
   readonly selectedAction = signal<string>('upload-to-everyone');
@@ -59,6 +64,7 @@ export class LayoutActionsDialogComponent {
   readonly uploadForm = viewChild<UploadToEveryoneFormComponent>('uploadForm');
   readonly individualForm = viewChild<UploadIndividualFormComponent>('individualForm');
   readonly resizeForm = viewChild<ResizeFormComponent>('resizeForm');
+  readonly placeholderForm = viewChild<PlaceholderTextFormComponent>('placeholderForm');
 
   readonly backdropHandler = createBackdropHandler(() => this.close.emit());
 
@@ -106,6 +112,12 @@ export class LayoutActionsDialogComponent {
 
     if (action === 'circle-mask' || action === 'remove-masks') {
       return this.useSelectedLayers() || this.selectedPersonIds().size > 0;
+    }
+
+    if (action === 'placeholder-text') {
+      if (this.selectedPersonIds().size === 0) return false;
+      const form = this.placeholderForm();
+      return form ? form.formData() !== null : false;
     }
 
     return false;
@@ -176,6 +188,8 @@ export class LayoutActionsDialogComponent {
         await this.executeCircleMask();
       } else if (action === 'remove-masks') {
         await this.executeRemoveMasks();
+      } else if (action === 'placeholder-text') {
+        await this.executePlaceholderText();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -293,6 +307,31 @@ export class LayoutActionsDialogComponent {
 
     if (!result.success) {
       throw new Error(result.error || 'Maszk eltavolitas sikertelen');
+    }
+
+    this.executed.emit();
+  }
+
+  private async executePlaceholderText(): Promise<void> {
+    const form = this.placeholderForm();
+    if (!form) return;
+
+    const formData = form.formData();
+    if (!formData) return;
+
+    const selectedIds = this.selectedPersonIds();
+    const selectedPersons = this.persons().filter(p => selectedIds.has(p.id));
+
+    const layers = selectedPersons.map(p => ({
+      layerName: p.layerName,
+      displayText: form.generateText(formData.textType, formData.charLength),
+      group: (p.type === 'teacher' ? 'Teachers' : 'Students') as 'Teachers' | 'Students',
+    }));
+
+    const result = await this.ps.addPlaceholderTexts({ layers });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Szöveg generálás sikertelen');
     }
 
     this.executed.emit();

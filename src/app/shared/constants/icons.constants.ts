@@ -430,6 +430,7 @@ export const ICONS = {
   SQUARE_STACK: 'square-stack',
   PANEL_LEFT: 'panel-left',
   TYPE: 'type',
+  HASH: 'hash',
   MINIMIZE_2: 'minimize-2',
   GRIP: 'grip-vertical',
   CHEVRONS_LEFT_RIGHT: 'chevrons-left-right',

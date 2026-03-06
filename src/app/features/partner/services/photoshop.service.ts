@@ -1916,6 +1916,49 @@ export class PhotoshopService {
   }
 
   /**
+   * Placeholder szoveg layerek hozzaadasa a megadott szemelyekhez.
+   */
+  async addPlaceholderTexts(params: {
+    layers: Array<{ layerName: string; displayText: string; group: 'Students' | 'Teachers' }>;
+    textAlign?: string;
+  }): Promise<{ success: boolean; created?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
+
+    if (!params.layers || params.layers.length === 0) {
+      return { success: true, created: 0 };
+    }
+
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/add-placeholder-texts.jsx',
+        jsonData: params,
+      });
+
+      if (!result.success) {
+        this.logger.error('addPlaceholderTexts JSX error:', result.error);
+        return { success: false, error: result.error };
+      }
+
+      try {
+        if (result.output) {
+          const lines = result.output.trim().split('\n');
+          const lastLine = lines[lines.length - 1];
+          if (lastLine.charAt(0) === '{') {
+            const data = JSON.parse(lastLine);
+            if (data.error) return { success: false, error: data.error };
+            return { success: true, created: data.created, errors: data.errors };
+          }
+        }
+      } catch (_) { /* parse hiba */ }
+
+      return { success: result.success };
+    } catch (err) {
+      this.logger.error('JSX addPlaceholderTexts hiba', err);
+      return { success: false, error: 'Varatlan hiba a szoveg generalas soran' };
+    }
+  }
+
+  /**
    * Csoport + SO layerek hozzaadasa a megnyitott dokumentumhoz.
    * Forraskepekbol Smart Object duplicate-ot keszit minden szemelyhez,
    * es a megadott poziciokra helyezi oket.

@@ -62,5 +62,12 @@ export class GenerateSampleWorkflow implements BatchWorkflow {
     this.logger.info(`Minta generálva: ${job.projectName}`, {
       uploadedCount: result.uploadedCount,
     });
+
+    // Dokumentum mentése és bezárása — a következő job tiszta állapottal induljon
+    const docName = psdPath.split('/').pop() ?? undefined;
+    const closeResult = await ps.saveAndCloseDocument(docName);
+    if (!closeResult.success) {
+      this.logger.warn('Dokumentum bezárás sikertelen', closeResult.error);
+    }
   }
 }

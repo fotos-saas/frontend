@@ -9,6 +9,7 @@ import { BatchWorkflow, BatchProjectData } from './batch-workflows/batch-workflo
 import { GeneratePsdWorkflow } from './batch-workflows/generate-psd.workflow';
 import { GenerateSampleWorkflow } from './batch-workflows/generate-sample.workflow';
 import { FinalizeWorkflow } from './batch-workflows/finalize.workflow';
+import { RefreshPhotosWorkflow } from './batch-workflows/refresh-photos.workflow';
 import { selectTabloSize } from '@shared/utils/tablo-size.util';
 import { firstValueFrom } from 'rxjs';
 
@@ -51,9 +52,11 @@ export class BatchJobRunnerService {
     const generatePsd = inject(GeneratePsdWorkflow);
     const generateSample = inject(GenerateSampleWorkflow);
     const finalize = inject(FinalizeWorkflow);
+    const refreshPhotos = inject(RefreshPhotosWorkflow);
     this.workflows.set(generatePsd.type, generatePsd);
     this.workflows.set(generateSample.type, generateSample);
     this.workflows.set(finalize.type, finalize);
+    this.workflows.set(refreshPhotos.type, refreshPhotos);
   }
 
   /** Előfeltételek ellenőrzése batch indítás előtt */

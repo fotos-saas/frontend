@@ -87,6 +87,24 @@ export class PartnerProjectService {
   }
 
   /**
+   * Fotóváltozások ellenőrzése a placed-photos.json alapján.
+   * Visszaadja a megváltozott személyek számát.
+   */
+  checkPhotoChanges(projectId: number, placedPhotos: Record<string, number>): Observable<{
+    changed: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
+    unchanged: number;
+    notFound: number;
+    newPhotos: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
+  }> {
+    return this.http.post<{
+      changed: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
+      unchanged: number;
+      notFound: number;
+      newPhotos: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
+    }>(`${this.baseUrl}/projects/${projectId}/check-photo-changes`, { placedPhotos });
+  }
+
+  /**
    * Új projekt létrehozása
    */
   createProject(data: CreateProjectRequest): Observable<{

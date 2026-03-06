@@ -5,23 +5,28 @@ import { ElectronService } from '@core/services/electron.service';
 import { PhotoshopService } from './photoshop.service';
 import { BrandingService } from './branding.service';
 import { PartnerProjectService } from './partner-project.service';
-import { PartnerProjectListItem, TabloSize, TabloSizeThreshold } from '../models/partner.models';
-import { resolveProjectTabloSize } from '@shared/utils/tablo-size.util';
+import { PartnerProjectListItem } from '../models/partner.models';
 
 export interface PsdStatus {
   exists: boolean;
   psdPath: string | null;
   folderPath: string | null;
   hasPlacedPhotos: boolean;
+  /** Hány személy fotója változott a PSD-be helyezés óta */
+  updatedPhotosCount: number;
+}
+
+interface PsdCheckResult extends PsdStatus {
+  placedPhotos: Record<string, number> | null;
 }
 
 /**
  * PSD létezés ellenőrzés a projekt listához.
  * Háttérben ellenőrzi minden projekthez hogy van-e PSD fájl.
+ * Ha van placed-photos.json, a backend API-val összehasonlítja az aktuális fotókkal.
  *
- * FONTOS: Csak akkor működik, ha a workDir be van állítva a PhotoshopService-ben.
- * workDir nélkül a computePsdPath fallback-et ad (Downloads/PhotoStack/size.psd),
- * ami nem projekt-specifikus — ilyenkor nem ellenőrzünk.
+ * A mappa path-ot egyszer számolja ki (schoolName + className),
+ * majd az electron handler keresi meg az első .psd fájlt a mappában.
  */
 @Injectable({
   providedIn: 'root',
@@ -36,10 +41,18 @@ export class PsdStatusService {
   readonly statusMap = signal<Map<number, PsdStatus>>(new Map());
   readonly loading = signal(false);
 
-  private tabloSizesCache: { sizes: TabloSize[]; threshold: TabloSizeThreshold | null } | null = null;
-
   getStatus(projectId: number): PsdStatus | null {
     return this.statusMap().get(projectId) ?? null;
+  }
+
+  /** Badge nullázása egy projekt frissítése után */
+  clearUpdatedCount(projectId: number): void {
+    const map = this.statusMap();
+    const status = map.get(projectId);
+    if (status && status.updatedPhotosCount > 0) {
+      status.updatedPhotosCount = 0;
+      this.statusMap.set(new Map(map));
+    }
   }
 
   openInPhotoshop(projectId: number): void {
@@ -59,85 +72,128 @@ export class PsdStatusService {
   async checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
     if (!this.electron.isElectron || projects.length === 0) return;
 
-    // PS beállítások betöltése (workDir, stb.) — ha még nem történt meg
     if (!this.ps.workDir()) {
       await this.ps.detectPhotoshop();
     }
     if (!this.ps.workDir()) {
-      this.logger.warn('[PSD] workDir nem elérhető, PSD ellenőrzés kihagyva');
       return;
     }
-    this.logger.info(`[PSD] checkProjects: ${projects.length} projekt, workDir=${this.ps.workDir()}`);
 
     this.loading.set(true);
 
     try {
-      if (!this.tabloSizesCache) {
-        const resp = await firstValueFrom(this.projectService.getTabloSizes());
-        this.tabloSizesCache = { sizes: resp.sizes, threshold: resp.threshold };
-      }
-
-      const { sizes, threshold } = this.tabloSizesCache;
       const brandName = this.branding.brandName();
       const newMap = new Map<number, PsdStatus>();
+      const placedMaps = new Map<number, Record<string, number>>();
 
-      // 5-ösével párhuzamosan
+      // 5-ösével párhuzamosan — egyetlen IPC hívás per projekt
       for (let i = 0; i < projects.length; i += 5) {
         const batch = projects.slice(i, i + 5);
         const results = await Promise.all(
-          batch.map(p => this.checkSingleProject(p, sizes, threshold, brandName)),
+          batch.map(p => this.checkSingleProject(p, brandName)),
         );
-        results.forEach((status, idx) => {
-          newMap.set(batch[idx].id, status);
+        results.forEach((result, idx) => {
+          const projectId = batch[idx].id;
+          const { placedPhotos, ...status } = result;
+          newMap.set(projectId, status);
+          if (placedPhotos && Object.keys(placedPhotos).length > 0) {
+            placedMaps.set(projectId, placedPhotos);
+          }
         });
       }
 
       this.statusMap.set(newMap);
+      this.loading.set(false);
+
+      // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)
+      this.checkPhotoChangesInBackground(newMap, placedMaps).catch(err =>
+        this.logger.error('[PSD] Fotó-változás háttér hiba:', err),
+      );
     } catch (err) {
       this.logger.error('PSD státusz ellenőrzés hiba', err);
-    } finally {
       this.loading.set(false);
     }
   }
 
+  /** Egyetlen projekt ellenőrzése — mappa keresés, nem size iteráció */
   private async checkSingleProject(
     project: PartnerProjectListItem,
-    sizes: TabloSize[],
-    threshold: TabloSizeThreshold | null,
     brandName: string | null,
-  ): Promise<PsdStatus> {
+  ): Promise<PsdCheckResult> {
+    const noResult: PsdCheckResult = {
+      exists: false, psdPath: null, folderPath: null,
+      hasPlacedPhotos: false, updatedPhotosCount: 0, placedPhotos: null,
+    };
+
     try {
-      const context = {
+      const folderPath = this.ps.computeProjectFolderPath({
         projectName: project.name,
         schoolName: project.schoolName,
         className: project.className,
         brandName,
+      });
+      if (!folderPath) return noResult;
+
+      const result = await this.ps.findProjectPsd(folderPath);
+      if (!result.exists) return noResult;
+
+      return {
+        exists: true,
+        psdPath: result.psdPath,
+        folderPath,
+        hasPlacedPhotos: result.hasPlacedPhotos,
+        updatedPhotosCount: 0,
+        placedPhotos: result.placedPhotos,
       };
-
-      // 1. Preferált méret (mentett vagy automatikus)
-      const preferredSize = resolveProjectTabloSize(project, sizes, threshold);
-
-      // Méretek sorrendje: preferált először, majd a többi
-      const orderedSizes = preferredSize
-        ? [preferredSize, ...sizes.filter(s => s.value !== preferredSize.value)]
-        : sizes;
-
-      // 2. Összes méreten végigmegyünk, az elsőt visszaadjuk ami létezik
-      for (const size of orderedSizes) {
-        const psdPath = await this.ps.computePsdPath(size.value, context);
-        if (!psdPath) continue;
-
-        const result = await this.ps.checkPsdExists(psdPath);
-        if (result.exists) {
-          const folderPath = psdPath.substring(0, psdPath.lastIndexOf('/'));
-          return { exists: true, psdPath, folderPath, hasPlacedPhotos: result.hasPlacedPhotos };
-        }
-      }
-
-      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
     } catch (err) {
       this.logger.error(`[PSD] #${project.id} hiba`, err);
-      return { exists: false, psdPath: null, folderPath: null, hasPlacedPhotos: false };
+      return noResult;
+    }
+  }
+
+  /**
+   * Háttérben ellenőrzi a fotóváltozásokat a backend API-val.
+   * A placed-photos.json tartalmát (personId->mediaId) elküldi a backendnek,
+   * ami összehasonlítja az aktuális effective media ID-kkel.
+   */
+  private async checkPhotoChangesInBackground(
+    statusMap: Map<number, PsdStatus>,
+    placedMaps: Map<number, Record<string, number>>,
+  ): Promise<void> {
+    if (placedMaps.size === 0) return;
+
+    const projectIds = [...placedMaps.keys()];
+    let hasUpdates = false;
+
+    // 3-asával párhuzamosan
+    for (let i = 0; i < projectIds.length; i += 3) {
+      const batch = projectIds.slice(i, i + 3);
+      const results = await Promise.allSettled(
+        batch.map(async (projectId) => {
+          const placedPhotos = placedMaps.get(projectId)!;
+          const result = await firstValueFrom(
+            this.projectService.checkPhotoChanges(projectId, placedPhotos),
+          );
+          const newCount = result.newPhotos?.length ?? 0;
+          return { projectId, changedCount: result.changed.length + newCount };
+        }),
+      );
+
+      for (const r of results) {
+        if (r.status === 'rejected') {
+          this.logger.error('[PSD] Fotó-változás API hiba:', r.reason);
+        } else if (r.value.changedCount > 0) {
+          const status = statusMap.get(r.value.projectId);
+          if (status) {
+            status.updatedPhotosCount = r.value.changedCount;
+            hasUpdates = true;
+          }
+        }
+      }
+    }
+
+    if (hasUpdates) {
+      this.statusMap.set(new Map(statusMap));
     }
   }
 }

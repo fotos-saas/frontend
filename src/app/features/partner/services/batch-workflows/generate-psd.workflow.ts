@@ -14,7 +14,7 @@ import { BatchJobState } from '../../models/batch.types';
  * 3. Felirat layerek
  * 4. Név layerek
  * 5. Kép layerek + Tablóelrendezés
- * 6. Pillanatkép mentése
+ * 6. Mentés és bezárás
  */
 @Injectable({
   providedIn: 'root',
@@ -29,11 +29,16 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     'Feliratok',
     'Név layerek',
     'Kép layerek + Elrendezés',
-    'Pillanatkép',
+    'Mentés és bezárás',
   ];
 
   private readonly logger = inject(LoggerService);
   private readonly photoshopService = inject(PhotoshopService);
+
+  /** Várakozás a Photoshop feldolgozására a lépések között */
+  private wait(ms = 1500): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   async execute(
     job: BatchJobState,
@@ -55,11 +60,16 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       photoUrl: p.photoUrl,
     }));
 
-    // 0. PSD létezés ellenőrzés
+    const tag = `[Batch PSD] ${job.projectName}`;
+
+    // 0. PSD létezés ellenőrzés — ha létezik, bezárjuk PS-ben (a generátor felülírja)
     onStep(0);
+    this.logger.info(`${tag} Indítás — ${personsData.length} fő, méret: ${size.value}`);
     const existsCheck = await ps.checkPsdExists(psdPath);
     if (existsCheck.exists) {
-      throw new Error(`PSD már létezik: ${psdPath.split('/').pop()} — töröld vagy nevezd át a meglévő fájlt`);
+      this.logger.info(`${tag} PSD már létezik, újrageneráljuk`);
+      const existingDocName = psdPath.split('/').pop() ?? undefined;
+      await ps.closeDocumentWithoutSaving(existingDocName);
     }
     checkAbort();
 
@@ -84,12 +94,13 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     // 2. Layer nevek javítása (kötőjel → alulvonás) + Guide-ok
     onStep(2);
     await this.fixLayerNames(persons);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await this.wait(2000);
 
     const guideResult = await ps.addGuides(docName);
     if (!guideResult.success) {
-      this.logger.warn('Guide-ok sikertelen', guideResult.error);
+      this.logger.warn(`${tag} Guide-ok sikertelen`, guideResult.error);
     }
+    await this.wait();
     checkAbort();
 
     // 3. Felirat layerek
@@ -102,9 +113,10 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (subtitles.length > 0) {
       const subResult = await ps.addSubtitleLayers(subtitles, docName);
       if (!subResult.success) {
-        this.logger.warn('Felirat layerek sikertelen', subResult.error);
+        this.logger.warn(`${tag} Feliratok sikertelen`, subResult.error);
       }
     }
+    await this.wait();
     checkAbort();
 
     // 4. Név layerek
@@ -112,8 +124,9 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (personsData.length > 0) {
       const nameResult = await ps.addNameLayers(personsData, docName);
       if (!nameResult.success) {
-        this.logger.warn('Név layerek sikertelen', nameResult.error);
+        this.logger.warn(`${tag} Név layerek sikertelen`, nameResult.error);
       }
+      await this.wait();
     }
     checkAbort();
 
@@ -122,20 +135,25 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     if (personsData.length > 0) {
       const imageResult = await ps.addImageLayers(personsData, undefined, docName);
       if (imageResult.success) {
+        // placed-photos.json létrehozása (fotóváltozás-figyeléshez)
+        await this.createPlacedPhotosJson(personsData, psdPath);
+
+        await this.wait();
         const layoutResult = await ps.arrangeTabloLayout(
           { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
           docName,
         );
         if (!layoutResult.success) {
-          this.logger.warn('Tablóelrendezés sikertelen', layoutResult.error);
+          this.logger.warn(`${tag} Elrendezés sikertelen`, layoutResult.error);
         }
       } else {
-        this.logger.warn('Kép layerek sikertelen', imageResult.error);
+        this.logger.warn(`${tag} Kép layerek sikertelen`, imageResult.error);
       }
+      await this.wait();
     }
     checkAbort();
 
-    // 6. Pillanatkép mentése
+    // 6. Pillanatkép + Mentés és bezárás
     onStep(6);
     const snapshotResult = await ps.saveSnapshot(
       'batch-initial',
@@ -144,7 +162,34 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
       docName,
     );
     if (!snapshotResult.success) {
-      this.logger.warn('Pillanatkép mentés sikertelen (nem kritikus)', snapshotResult.error);
+      this.logger.warn(`${tag} Pillanatkép sikertelen (nem kritikus)`, snapshotResult.error);
+    }
+
+    const closeResult = await ps.saveAndCloseDocument(docName);
+    if (!closeResult.success) {
+      this.logger.warn(`${tag} Bezárás sikertelen`, closeResult.error);
+    }
+    this.logger.info(`${tag} KÉSZ`);
+  }
+
+  /** placed-photos.json létrehozása a fotóváltozás-figyeléshez */
+  private async createPlacedPhotosJson(
+    persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
+    psdPath: string,
+  ): Promise<void> {
+    const layers = persons
+      .filter(p => p.photoUrl)
+      .map(p => {
+        const slug = p.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
+        return { layerName: `${slug}---${p.id}`, photoUrl: p.photoUrl! };
+      });
+    if (layers.length > 0) {
+      await window.electronAPI?.photoshop.refreshPlacedJson({
+        psdFilePath: psdPath,
+        layers,
+        syncBorder: true,
+      });
     }
   }
 

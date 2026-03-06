@@ -163,26 +163,28 @@
       <lucide-icon [name]="ICONS.CHECK" [size]="16" />
       <span>{{ actions.selectedProjectIds().size }} projekt kijelölve</span>
     </div>
-    @if (isElectron && availableBatchActions().length > 0) {
-      <button type="button" class="bulk-btn bulk-btn--primary" (click)="actions.openBatchActionDialog()">
-        <lucide-icon [name]="ICONS.SHOPPING_CART" [size]="15" />
-        Kosárba
-      </button>
+    @if (isElectron) {
+      <div class="bulk-action-bar__actions">
+        <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('generate-psd', projects())">
+          PSD generálás
+        </button>
+        @if (actions.hasSelectedWithPsd(projects())) {
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('generate-sample', projects())">
+            Minta
+          </button>
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('finalize', projects())">
+            Végl.
+          </button>
+          <button type="button" class="bulk-btn" (click)="actions.addSelectedToBatch('refresh-photos', projects())">
+            Képek
+          </button>
+        }
+      </div>
     }
     <button type="button" class="bulk-action-bar__close" (click)="actions.clearSelection()">
       <lucide-icon [name]="ICONS.X" [size]="16" />
     </button>
   </div>
-}
-
-<!-- Batch művelet választó dialog -->
-@if (actions.showBatchActionDialog()) {
-  <app-batch-action-dialog
-    [selectedCount]="actions.selectedProjectIds().size"
-    [availableActions]="availableBatchActions()"
-    (close)="actions.closeBatchActionDialog()"
-    (actionSelected)="actions.onBatchActionSelected($event, projects())"
-  />
 }
 
 <!-- Samples Lightbox -->

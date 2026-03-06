@@ -1009,6 +1009,44 @@ export class PhotoshopService {
   }
 
   /**
+   * Projekt mappa útvonal kiszámítása (PSD fájlnév nélkül).
+   * Ha nincs workDir, null-t ad vissza.
+   */
+  computeProjectFolderPath(
+    context: { projectName: string; schoolName?: string | null; className?: string | null; brandName?: string | null },
+  ): string | null {
+    if (!this.workDir()) return null;
+    const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
+    const folderName = this.buildProjectFolderName(context);
+    const year = new Date().getFullYear().toString();
+    return `${this.workDir()}/${partnerDir}/${year}/${folderName}`;
+  }
+
+  /** Projekt PSD keresése mappa alapján (nem pontos fájlnév, hanem az első .psd a mappában) */
+  async findProjectPsd(folderPath: string): Promise<{
+    exists: boolean; psdPath: string | null; hasLayouts: boolean;
+    hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null;
+  }> {
+    if (!this.api) return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    try {
+      const result = await this.api.findProjectPsd({ folderPath });
+      if (result.success && result.exists) {
+        return {
+          exists: true,
+          psdPath: result.psdPath ?? null,
+          hasLayouts: result.hasLayouts ?? false,
+          hasPlacedPhotos: result.hasPlacedPhotos ?? false,
+          placedPhotos: result.placedPhotos ?? null,
+        };
+      }
+      return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    } catch (err) {
+      this.logger.error('Projekt PSD keresés hiba', err);
+      return { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    }
+  }
+
+  /**
    * Layout pozíció-regiszter kiolvasása a Photoshopból és mentése JSON fájlba a PSD mellé.
    *
    * 1. Futtatja a read-layout.jsx-et → kinyeri a layer pozíciókat
@@ -1323,16 +1361,16 @@ export class PhotoshopService {
   }
 
   /** PSD fájl létezés ellenőrzés (layouts/ mappa + placed-photos.json is) */
-  async checkPsdExists(psdPath: string): Promise<{ exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean }> {
-    if (!this.api) return { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+  async checkPsdExists(psdPath: string): Promise<{ exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null; majorityWithFrame: boolean }> {
+    if (!this.api) return { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null, majorityWithFrame: true };
     try {
       const result = await this.api.checkPsdExists({ psdPath });
       return result.success
-        ? { exists: result.exists, hasLayouts: result.hasLayouts, hasPlacedPhotos: result.hasPlacedPhotos ?? false }
-        : { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+        ? { exists: result.exists, hasLayouts: result.hasLayouts, hasPlacedPhotos: result.hasPlacedPhotos ?? false, placedPhotos: result.placedPhotos ?? null, majorityWithFrame: result.majorityWithFrame ?? true }
+        : { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null, majorityWithFrame: true };
     } catch (err) {
       this.logger.error('PSD létezés ellenőrzés hiba', err);
-      return { exists: false, hasLayouts: false, hasPlacedPhotos: false };
+      return { exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null, majorityWithFrame: true };
     }
   }
 
@@ -1367,6 +1405,30 @@ export class PhotoshopService {
     } catch (err) {
       this.logger.error('Dokumentum mentés/bezárás hiba', err);
       return { success: false, error: 'Váratlan hiba a dokumentum mentésnél' };
+    }
+  }
+
+  /** Dokumentum bezárása mentés nélkül (batch újrageneráláshoz) */
+  async closeDocumentWithoutSaving(targetDocName?: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      const result = await this.runJsx({
+        scriptName: 'actions/close-without-saving.jsx',
+        targetDocName,
+      });
+      if (!result.success) {
+        return { success: false, error: result.error || 'Bezárás sikertelen' };
+      }
+      const output = result.output ?? '';
+      if (output.indexOf('__CLOSE_NOSAVE__OK') === -1) {
+        const errorMatch = output.match(/\[JSX\] HIBA: (.+)/);
+        return { success: false, error: errorMatch?.[1] || 'Ismeretlen hiba a bezárásnál' };
+      }
+      return { success: true };
+    } catch (err) {
+      // Ha nincs nyitva a dok, nem baj
+      this.logger.warn('Dokumentum bezárás sikertelen (valószínűleg nincs nyitva)', err);
+      return { success: true };
     }
   }
 

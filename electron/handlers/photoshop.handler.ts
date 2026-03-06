@@ -956,12 +956,95 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         hasLayouts = jsonFiles.length > 0;
       }
 
-      const hasPlacedPhotos = fs.existsSync(path.join(psdDir, 'placed-photos.json'));
+      const placedJsonPath = path.join(psdDir, 'placed-photos.json');
+      const hasPlacedPhotos = fs.existsSync(placedJsonPath);
 
-      return { success: true, exists: true, hasLayouts, hasPlacedPhotos };
+      // placed-photos.json beolvasása: {personId: mediaId} map + withFrame többség
+      let placedPhotos: Record<string, number> | null = null;
+      let majorityWithFrame = true;
+      if (hasPlacedPhotos) {
+        try {
+          const raw: PlacedPhotosMap = JSON.parse(fs.readFileSync(placedJsonPath, 'utf-8'));
+          placedPhotos = {};
+          let framed = 0;
+          let unframed = 0;
+          for (const [personId, entry] of Object.entries(raw)) {
+            if (entry.mediaId !== null) {
+              placedPhotos[personId] = entry.mediaId;
+            }
+            if (entry.withFrame) framed++; else unframed++;
+          }
+          majorityWithFrame = framed >= unframed;
+        } catch (err) {
+          log.warn('placed-photos.json olvasási hiba:', err);
+        }
+      }
+
+      return { success: true, exists: true, hasLayouts, hasPlacedPhotos, placedPhotos, majorityWithFrame };
     } catch (error) {
       log.error('PSD letezés ellenorzes hiba:', error);
-      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false };
+      return { success: false, exists: false, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null, majorityWithFrame: true };
+    }
+  });
+
+  // Projekt PSD keresése mappa alapján (nem pontos fájlnév, hanem mappában az első .psd)
+  ipcMain.handle('photoshop:find-project-psd', (_event, params: { folderPath: string }) => {
+    try {
+      if (typeof params.folderPath !== 'string' || params.folderPath.length > 500) {
+        return { success: false, exists: false };
+      }
+      if (params.folderPath.includes('..')) {
+        return { success: false, exists: false };
+      }
+
+      if (!fs.existsSync(params.folderPath)) {
+        return { success: true, exists: false };
+      }
+
+      // Első .psd fájl keresése a mappában
+      const files = fs.readdirSync(params.folderPath);
+      const psdFile = files.find(f => f.toLowerCase().endsWith('.psd'));
+      if (!psdFile) {
+        return { success: true, exists: false };
+      }
+
+      const psdPath = path.join(params.folderPath, psdFile);
+
+      // layouts/ mappa ellenőrzés
+      const layoutsDir = path.join(params.folderPath, 'layouts');
+      let hasLayouts = false;
+      if (fs.existsSync(layoutsDir)) {
+        const jsonFiles = fs.readdirSync(layoutsDir).filter(f => f.endsWith('.json'));
+        hasLayouts = jsonFiles.length > 0;
+      }
+
+      // placed-photos.json beolvasása
+      const placedJsonPath = path.join(params.folderPath, 'placed-photos.json');
+      const hasPlacedPhotos = fs.existsSync(placedJsonPath);
+      let placedPhotos: Record<string, number> | null = null;
+      let majorityWithFrame = true;
+      if (hasPlacedPhotos) {
+        try {
+          const raw: PlacedPhotosMap = JSON.parse(fs.readFileSync(placedJsonPath, 'utf-8'));
+          placedPhotos = {};
+          let framed = 0;
+          let unframed = 0;
+          for (const [personId, entry] of Object.entries(raw)) {
+            if (entry.mediaId !== null) {
+              placedPhotos[personId] = entry.mediaId;
+            }
+            if (entry.withFrame) framed++; else unframed++;
+          }
+          majorityWithFrame = framed >= unframed;
+        } catch (err) {
+          log.warn('placed-photos.json olvasási hiba:', err);
+        }
+      }
+
+      return { success: true, exists: true, psdPath, hasLayouts, hasPlacedPhotos, placedPhotos, majorityWithFrame };
+    } catch (error) {
+      log.error('Projekt PSD keresés hiba:', error);
+      return { success: false, exists: false };
     }
   });
 

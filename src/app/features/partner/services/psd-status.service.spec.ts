@@ -13,9 +13,16 @@ describe('PsdStatusService', () => {
   let service: PsdStatusService;
 
   const mockElectron = { isElectron: false };
-  const mockPhotoshop = { workDir: vi.fn(() => null), detectPhotoshop: vi.fn(), openPsdFile: vi.fn(), revealInFinder: vi.fn(), computePsdPath: vi.fn(), checkPsdExists: vi.fn() };
+  const mockPhotoshop = {
+    workDir: vi.fn(() => null),
+    detectPhotoshop: vi.fn(),
+    openPsdFile: vi.fn(),
+    revealInFinder: vi.fn(),
+    computeProjectFolderPath: vi.fn(() => null),
+    findProjectPsd: vi.fn(),
+  };
   const mockBranding = { brandName: vi.fn(() => null) };
-  const mockProjectService = { getTabloSizes: vi.fn() };
+  const mockProjectService = { checkPhotoChanges: vi.fn() };
   const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {

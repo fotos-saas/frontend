@@ -70,5 +70,12 @@ export class FinalizeWorkflow implements BatchWorkflow {
     }
 
     this.logger.info(`Véglegesítés kész: ${job.projectName}`);
+
+    // Dokumentum mentése és bezárása — a következő job tiszta állapottal induljon
+    const docName = psdPath.split('/').pop() ?? undefined;
+    const closeResult = await ps.saveAndCloseDocument(docName);
+    if (!closeResult.success) {
+      this.logger.warn('Dokumentum bezárás sikertelen', closeResult.error);
+    }
   }
 }

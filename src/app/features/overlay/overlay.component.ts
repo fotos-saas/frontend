@@ -122,7 +122,6 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderHasGroups = this.dragOrder.hasGroups;
   readonly dragOrderGroupsRaw = this.dragOrder.groups;
   readonly dragOrderUngroupedRaw = this.dragOrder.ungrouped;
-  readonly dragOrderRowInfo = this.dragOrder.rowInfo;
 
   // Link/unlink eredmény — delegálva qa service-be, alias a template-hez
   readonly linkResult = this.qa.result;

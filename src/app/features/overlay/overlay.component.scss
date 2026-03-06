@@ -1755,31 +1755,6 @@
   font-style: italic;
 }
 
-.drag-order-panel__row-sep {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 8px 1px;
-  margin: 4px 0 2px;
-  font-size: 9px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.3);
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: 0.3px;
-  pointer-events: none;
-  user-select: none;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(34, 197, 94, 0.15);
-  }
-
-  &::before { margin-right: 8px; }
-  &::after { margin-left: 8px; }
-}
 
 .drag-order-panel__placeholder--group {
   background: rgba(255, 255, 255, 0.05);

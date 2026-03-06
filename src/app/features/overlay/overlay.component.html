@@ -817,9 +817,6 @@
               (cdkDropListDropped)="onDropToGroup($event, group.id)"
             >
               @for (person of group.items; track person.id; let i = $index) {
-                @if (!dragOrderSearchQuery() && dragOrderRowInfo().get(person.id)?.isFirstInRow) {
-                  <div class="drag-order-panel__row-sep">{{ dragOrderRowInfo().get(person.id)!.rowIndex + 1 }}. sor ({{ dragOrderRowInfo().get(person.id)!.rowSize }} fő)</div>
-                }
                 <div
                   class="drag-order-panel__item"
                   [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
@@ -881,9 +878,6 @@
         (cdkDropListDropped)="onDropToUngrouped($event)"
       >
         @for (person of dragOrderUngrouped(); track person.id; let i = $index) {
-          @if (!dragOrderSearchQuery() && dragOrderRowInfo().get(person.id)?.isFirstInRow) {
-            <div class="drag-order-panel__row-sep">{{ dragOrderRowInfo().get(person.id)!.rowIndex + 1 }}. sor ({{ dragOrderRowInfo().get(person.id)!.rowSize }} fő)</div>
-          }
           <div
             class="drag-order-panel__item"
             [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"

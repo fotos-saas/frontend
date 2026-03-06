@@ -226,10 +226,7 @@ export class OverlayQuickActionsService {
     }));
 
     if (personsData.length === 0) {
-      const teacherPersons = persons.filter(p => p.type === 'teacher');
-      const personSample = teacherPersons.slice(0, 3).map(p => `${p.id}:${p.name}`).join(', ');
-      const layerSample = layerNames.slice(0, 3).join(', ');
-      this.setResult(false, `Nem párosítható (${teacherPersons.length}/${persons.length} tanár, ${layerNames.length} layer) L:[${layerSample}] P:[${personSample}]`);
+      this.setResult(false, `Nem találtam párosítható személyeket (${persons.length} személy, ${layerNames.length} layer)`);
       return;
     }
 

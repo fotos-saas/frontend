@@ -5,7 +5,7 @@
   theme="blue"
   [icon]="ICONS.REFRESH"
   size="lg"
-  (closed)="close.emit()"
+  (closeEvent)="close.emit()"
 >
   <div dialogBody class="sync-body">
     @if (loading()) {

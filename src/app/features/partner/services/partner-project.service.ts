@@ -94,11 +94,13 @@ export class PartnerProjectService {
     changed: Array<{ personId: number; personName: string; type: string }>;
     unchanged: number;
     notFound: number;
+    newPhotos: Array<{ personId: number; personName: string; type: string }>;
   }> {
     return this.http.post<{
       changed: Array<{ personId: number; personName: string; type: string }>;
       unchanged: number;
       notFound: number;
+      newPhotos: Array<{ personId: number; personName: string; type: string }>;
     }>(`${this.baseUrl}/projects/${projectId}/check-photo-changes`, { placedPhotos });
   }
 

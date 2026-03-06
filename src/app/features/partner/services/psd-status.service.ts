@@ -96,6 +96,7 @@ export class PsdStatusService {
       this.loading.set(false);
 
       // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)
+      this.logger.info(`[PSD] placedMaps: ${placedMaps.size} projekt, IDs: [${[...placedMaps.keys()].join(', ')}]`);
       this.checkPhotoChangesInBackground(newMap, placedMaps).catch(err =>
         this.logger.error('[PSD] Fotó-változás háttér hiba:', err),
       );
@@ -122,9 +123,11 @@ export class PsdStatusService {
         className: project.className,
         brandName,
       });
+      this.logger.info(`[PSD] #${project.id} folderPath=${folderPath}`);
       if (!folderPath) return noResult;
 
       const result = await this.ps.findProjectPsd(folderPath);
+      this.logger.info(`[PSD] #${project.id} exists=${result.exists}, psdPath=${result.psdPath}, hasPlaced=${result.hasPlacedPhotos}, placedKeys=${result.placedPhotos ? Object.keys(result.placedPhotos).length : 0}`);
       if (!result.exists) return noResult;
 
       return {
@@ -161,10 +164,14 @@ export class PsdStatusService {
       const results = await Promise.allSettled(
         batch.map(async (projectId) => {
           const placedPhotos = placedMaps.get(projectId)!;
+          this.logger.info(`[PSD] #${projectId} API hívás: ${Object.keys(placedPhotos).length} placed fotó`);
           const result = await firstValueFrom(
             this.projectService.checkPhotoChanges(projectId, placedPhotos),
           );
-          return { projectId, changedCount: result.changed.length };
+          const newCount = result.newPhotos?.length ?? 0;
+          const totalChanged = result.changed.length + newCount;
+          this.logger.info(`[PSD] #${projectId} API eredmény: ${result.changed.length} változott, ${newCount} új, ${result.unchanged} azonos, ${result.notFound} nem található`);
+          return { projectId, changedCount: totalChanged };
         }),
       );
 

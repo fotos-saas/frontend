@@ -157,7 +157,7 @@
           @if (psdStatus()?.updatedPhotosCount) {
             <span
               class="photo-update-badge"
-              [matTooltip]="psdStatus()!.updatedPhotosCount + ' személy fotója frissült'"
+              [matTooltip]="psdStatus()!.updatedPhotosCount + ' személy fotója változott vagy új'"
             >{{ psdStatus()!.updatedPhotosCount }}</span>
           } @else if (psdStatus()?.hasPlacedPhotos) {
             <span class="placed-dot" matTooltip="Képek elhelyezve"></span>

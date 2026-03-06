@@ -16,7 +16,8 @@ RUN npm install --ignore-scripts
 # Copy source code
 COPY . .
 
-# Build for production
+# Build for production (increase heap for large Angular builds)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # Stage 2: Production Nginx

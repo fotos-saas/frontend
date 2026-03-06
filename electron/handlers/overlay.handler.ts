@@ -146,10 +146,10 @@ export function registerOverlayHandlers(
         dir: typeof doc.dir === 'string' ? doc.dir : null,
       };
 
-      // PSD melletti JSON-bol projectId kinyerese ha a context-ben nincs
-      if (!overlayContext.projectId && lastActiveDoc.path) {
+      // PSD melletti JSON-ból projectId kinyerése — MINDIG, doc váltásnál
+      if (lastActiveDoc.path) {
         const projectId = readProjectIdFromJson(lastActiveDoc.path);
-        if (projectId) {
+        if (projectId && projectId !== overlayContext.projectId) {
           overlayContext = { ...overlayContext, projectId };
           log.info(`ProjectId from PSD JSON: ${projectId}`);
           const ow = getOverlayWindow();

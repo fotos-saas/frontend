@@ -59,3 +59,6 @@ electron/dist/
 
 # Portrait Python venv
 electron/scripts/portrait/python/.venv/
+
+*storybook.log
+storybook-static

@@ -35,7 +35,9 @@
     "cap:build:android": "npm run build && npx cap sync android",
     "cap:run:ios": "npx cap run ios --livereload --external",
     "cap:run:android": "npx cap run android --livereload --external",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "storybook": "ng run frontend-tablo:storybook",
+    "build-storybook": "ng run frontend-tablo:build-storybook"
   },
   "private": true,
   "dependencies": {
@@ -111,7 +113,15 @@
     "typescript": "~5.9.3",
     "vite": "^6.0.0",
     "vitest": "^4.0.18",
-    "wait-on": "^8.0.1"
+    "wait-on": "^8.0.1",
+    "storybook": "^10.2.15",
+    "@storybook/angular": "^10.2.15",
+    "@storybook/addon-a11y": "^10.2.15",
+    "@storybook/addon-docs": "^10.2.15",
+    "@storybook/addon-onboarding": "^10.2.15",
+    "@angular-devkit/architect": "^0.2101.1",
+    "@angular-devkit/core": "^21.1.1",
+    "@compodoc/compodoc": "^1.2.1"
   },
   "build": {
     "appId": "com.photostack.app",

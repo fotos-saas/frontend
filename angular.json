@@ -15,11 +15,14 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/frontend-tablo",
+            "outputPath": {
+              "base": "dist/frontend-tablo",
+              "browser": ""
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -36,6 +39,10 @@
               "node_modules/quill/dist/quill.snow.css"
             ],
             "scripts": [],
+            "allowedCommonJsDependencies": [
+              "pusher-js",
+              "quill-delta"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/styles", "src"]
             }
@@ -63,17 +70,13 @@
               ]
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
             },
             "local": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,

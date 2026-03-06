@@ -12,7 +12,24 @@ export interface PlaceholderTextFormData {
   charLength: number;
 }
 
-const LOREM_SOURCE = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur';
+const LOREM_WORDS = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip commodo consequat aute irure reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat proident sunt culpa qui officia deserunt mollit anim'.split(' ');
+
+function shuffledLorem(length: number): string {
+  let result = '';
+  while (result.length < length) {
+    const word = LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)];
+    result += (result.length === 0 ? '' : ' ') + word;
+  }
+  return result.substring(0, length);
+}
+
+function randomNumbers(length: number): string {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += String(Math.floor(Math.random() * 10));
+  }
+  return result;
+}
 
 @Component({
   selector: 'app-placeholder-text-form',
@@ -51,7 +68,12 @@ const LOREM_SOURCE = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed
       </div>
 
       <div class="form__preview">
-        <span class="form__preview-label">Minta:</span>
+        <div class="form__preview-header">
+          <span class="form__preview-label">Minta:</span>
+          <button type="button" class="form__preview-refresh" (click)="refresh()">
+            <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+          </button>
+        </div>
         <span class="form__preview-text">{{ preview() }}</span>
       </div>
     </div>
@@ -108,12 +130,37 @@ const LOREM_SOURCE = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
+    .form__preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
     .form__preview-label {
       font-size: 0.65rem;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.3);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+    }
+
+    .form__preview-refresh {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      background: transparent;
+      color: rgba(167, 139, 250, 0.6);
+      cursor: pointer;
+      transition: all 0.12s;
+
+      &:hover {
+        background: rgba(167, 139, 250, 0.1);
+        color: #a78bfa;
+      }
     }
 
     .form__preview-text {
@@ -129,6 +176,8 @@ export class PlaceholderTextFormComponent {
 
   readonly textType = signal<'lorem' | 'numbers'>('lorem');
   readonly charLength = signal<number>(20);
+  /** Tick signal a preview újragenerálásához */
+  readonly seed = signal(0);
 
   readonly typeOptions: PsSelectOption[] = [
     { id: 'lorem', label: 'Lorem Ipsum' },
@@ -137,7 +186,10 @@ export class PlaceholderTextFormComponent {
 
   readonly charLengthStr = computed(() => String(this.charLength()));
 
-  readonly preview = computed(() => this.generateText(this.textType(), this.charLength()));
+  readonly preview = computed(() => {
+    this.seed(); // dependency a refresh-hez
+    return this.generateText(this.textType(), this.charLength());
+  });
 
   readonly formData = computed<PlaceholderTextFormData | null>(() => {
     const len = this.charLength();
@@ -146,20 +198,11 @@ export class PlaceholderTextFormComponent {
   });
 
   generateText(type: 'lorem' | 'numbers', length: number): string {
-    if (type === 'numbers') {
-      let result = '';
-      for (let i = 0; i < length; i++) {
-        result += String(Math.floor(Math.random() * 10));
-      }
-      return result;
-    }
+    return type === 'numbers' ? randomNumbers(length) : shuffledLorem(length);
+  }
 
-    // Lorem ipsum — ciklikus ismétlés
-    let result = '';
-    while (result.length < length) {
-      result += LOREM_SOURCE + ' ';
-    }
-    return result.substring(0, length);
+  refresh(): void {
+    this.seed.update(v => v + 1);
   }
 
   onLengthChange(value: string): void {

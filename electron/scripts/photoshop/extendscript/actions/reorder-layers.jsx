@@ -166,30 +166,48 @@ function _doReorderLayers() {
     var imgSlots = _collectSlotPositions(imageLayers);
     _reorderGroupLayers(imgGrp, _orderedNames, imgSlots);
 
-    // --- 2. MINDEN top-level csoport ami tartalmaz subName alcsoportot ---
+    // --- 2. MINDEN top-level csoport ami tartalmaz subName alcsoportot VAGY kozvetlenul slug layereket ---
     // Vegigmegyunk az osszes csoporton (Names, Positions, sdss, barmilyen mas),
     // es ha van benne subName (Students/Teachers) alcsoport azonos nevu layerekkel,
-    // azokat is rendezzuk a sajat slot pozicioikba.
+    // VAGY kozvetlenul vannak slug-mintas (---) artLayerek, azokat is rendezzuk.
     for (var tl = 0; tl < _doc.layerSets.length; tl++) {
       var topGroup = _doc.layerSets[tl];
       if (topGroup.name === "Images") continue; // mar kezeltuk
 
+      // Eloszor probalunk subName (Students/Teachers) alcsoportot keresni
       var subGrp = null;
       try { subGrp = topGroup.layerSets.getByName(subName); } catch(e) {}
-      if (!subGrp || subGrp.artLayers.length === 0) continue;
 
-      // Ellenorizzuk hogy vannak-e azonos nevu layerek mint az Images-ben
-      var hasMatch = false;
-      for (var cm = 0; cm < subGrp.artLayers.length; cm++) {
-        if (subGrp.artLayers[cm].name.indexOf("---") !== -1) {
-          hasMatch = true;
-          break;
+      // Ha van alcsoport, azt rendezzuk
+      if (subGrp && subGrp.artLayers.length > 0) {
+        var hasMatch1 = false;
+        for (var cm1 = 0; cm1 < subGrp.artLayers.length; cm1++) {
+          if (subGrp.artLayers[cm1].name.indexOf("---") !== -1) {
+            hasMatch1 = true;
+            break;
+          }
+        }
+        if (hasMatch1) {
+          var grpSlots1 = _collectSlotPositions(subGrp.artLayers);
+          _reorderGroupLayers(subGrp, _orderedNames, grpSlots1);
         }
       }
-      if (!hasMatch) continue;
 
-      var grpSlots = _collectSlotPositions(subGrp.artLayers);
-      _reorderGroupLayers(subGrp, _orderedNames, grpSlots);
+      // Ha NINCS alcsoport, de kozvetlenul vannak slug-mintas artLayerek a topGroup-ban
+      // (pl. sdss csoport flat strukturaval)
+      if (!subGrp && topGroup.artLayers.length > 0) {
+        var hasMatch2 = false;
+        for (var cm2 = 0; cm2 < topGroup.artLayers.length; cm2++) {
+          if (topGroup.artLayers[cm2].name.indexOf("---") !== -1) {
+            hasMatch2 = true;
+            break;
+          }
+        }
+        if (hasMatch2) {
+          var grpSlots2 = _collectSlotPositions(topGroup.artLayers);
+          _reorderGroupLayers(topGroup, _orderedNames, grpSlots2);
+        }
+      }
     }
 
     totalReordered += imageLayers.length;

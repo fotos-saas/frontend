@@ -57,7 +57,7 @@ export class OverlayGenerateService {
       sizes: [{ name: 'minta', width: sizeWidth }],
     });
     this.ngZone.run(() => {
-      if (result.success) { this.generateResult.set({ success: true, message: `${result.localPaths?.length || 0} mentve, ${result.uploadedCount || 0} feltöltve` }); }
+      if (result.success) { this.generateResult.set({ success: true, message: `Minta kész (feltöltés háttérben)` }); }
       else { this.generateResult.set({ success: false, message: result.error || 'Minta generálás sikertelen' }); }
     });
   }

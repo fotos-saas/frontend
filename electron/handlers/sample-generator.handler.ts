@@ -10,7 +10,7 @@
  * 6. Temp fajlok torlese
  */
 
-import { ipcMain, app } from 'electron';
+import { ipcMain, app, shell } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
@@ -325,7 +325,8 @@ export function registerSampleGeneratorHandlers(): void {
 
       log.info(`Minta generalas indul: ${params.projectName} (${sizes.length} meret)`);
 
-      // 2-3. Resize + watermark minden meretre
+      // 2-3. Resize + watermark + lokalis mentes minden meretre
+      const uploadTasks: Array<{ watermarkedPath: string; fileName: string; sizeName: string }> = [];
       for (const size of sizes) {
         try {
           // Resize
@@ -357,23 +358,8 @@ export function registerSampleGeneratorHandlers(): void {
           localPaths.push(localOutputPath);
           log.info(`Lokalis mentes: ${localOutputPath}`);
 
-          // 5. Upload
-          const resolvedApiUrl = resolveApiBaseUrl(params.apiBaseUrl || '');
-          if (resolvedApiUrl && params.authToken) {
-            const uploadResult = await uploadSampleToBackend(
-              watermarkedPath,
-              resolvedApiUrl,
-              params.projectId,
-              params.authToken,
-              watermarkedFileName,
-            );
-            if (uploadResult.success) {
-              uploadedCount++;
-              log.info(`Feltoltve: ${size.name}`);
-            } else {
-              errors.push(`${size.name}: ${uploadResult.error}`);
-            }
-          }
+          // Upload-hoz megjegyezzuk a temp fajlt (kesobb hatterben fut)
+          uploadTasks.push({ watermarkedPath, fileName: watermarkedFileName, sizeName: size.name });
         } catch (sizeErr) {
           const errMsg = sizeErr instanceof Error ? sizeErr.message : 'Ismeretlen hiba';
           log.error(`Meret feldolgozasi hiba (${size.name}):`, errMsg);
@@ -381,20 +367,51 @@ export function registerSampleGeneratorHandlers(): void {
         }
       }
 
-      // 6. Temp fajlok torlese
-      for (const tempFile of tempFiles) {
-        try {
-          if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
-        } catch (_) { /* ignore */ }
+      const success = localPaths.length > 0;
+      log.info(`Minta generalas ${success ? 'kesz' : 'sikertelen'}: ${localPaths.length} fajl mentve (upload hatterben indul)`);
+
+      // Sikeres generalas utan megnyitjuk az elso mintat a rendszer nezegetoben (pl. Preview.app)
+      if (success && localPaths[0]) {
+        shell.openPath(localPaths[0]).catch((err) => {
+          log.warn('Minta megnyitasa sikertelen:', err);
+        });
       }
 
-      const success = localPaths.length > 0;
-      log.info(`Minta generalas ${success ? 'kesz' : 'sikertelen'}: ${localPaths.length} fajl, ${uploadedCount} feltoltve`);
+      // 5. Upload HATTERBEN — nem blokkoljuk a visszaterest
+      const resolvedApiUrl = resolveApiBaseUrl(params.apiBaseUrl || '');
+      if (resolvedApiUrl && params.authToken && uploadTasks.length > 0) {
+        (async () => {
+          for (const task of uploadTasks) {
+            try {
+              const uploadResult = await uploadSampleToBackend(
+                task.watermarkedPath, resolvedApiUrl, params.projectId, params.authToken, task.fileName,
+              );
+              if (uploadResult.success) {
+                log.info(`Hatter feltoltes kesz: ${task.sizeName}`);
+              } else {
+                log.warn(`Hatter feltoltes sikertelen (${task.sizeName}): ${uploadResult.error}`);
+              }
+            } catch (uploadErr) {
+              log.warn(`Hatter feltoltes hiba (${task.sizeName}):`, uploadErr);
+            }
+          }
+          // Temp fajlok torlese az upload utan
+          for (const tempFile of tempFiles) {
+            try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile); } catch (_) { /* ignore */ }
+          }
+          log.info('Minta hatter feltoltes befejezve, temp fajlok torolve');
+        })();
+      } else {
+        // Nincs upload — temp fajlok azonnali torlese
+        for (const tempFile of tempFiles) {
+          try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile); } catch (_) { /* ignore */ }
+        }
+      }
 
       return {
         success,
         localPaths,
-        uploadedCount,
+        uploadedCount: 0,
         errors: errors.length > 0 ? errors : undefined,
       };
 

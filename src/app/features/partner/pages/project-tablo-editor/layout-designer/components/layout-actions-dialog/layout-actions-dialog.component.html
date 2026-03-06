@@ -109,12 +109,20 @@
               <lucide-icon [name]="ICONS.CIRCLE" [size]="16" />
               <span>A kijelölt képekre kör alakú maszk kerül. Az átmérő a kép szélességéből számolódik, felülről igazítva. Szöveges layereket kihagyja.</span>
             </div>
+            <label class="ps-selected-toggle">
+              <input type="checkbox" [checked]="useSelectedLayers()" (change)="useSelectedLayers.set(!useSelectedLayers())" />
+              <span>Csak a PS-ben kijelölt layerekre</span>
+            </label>
           }
           @case ('remove-masks') {
             <div class="dialog__hint dialog__hint--warning">
               <lucide-icon [name]="ICONS.ERASER" [size]="16" />
               <span>A kijelölt személyek layereiről eltávolítja az összes maszkot (raster és vector).</span>
             </div>
+            <label class="ps-selected-toggle">
+              <input type="checkbox" [checked]="useSelectedLayers()" (change)="useSelectedLayers.set(!useSelectedLayers())" />
+              <span>Csak a PS-ben kijelölt layerekre</span>
+            </label>
           }
         }
       </div>

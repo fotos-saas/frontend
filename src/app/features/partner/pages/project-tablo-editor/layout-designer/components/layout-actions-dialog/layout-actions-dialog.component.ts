@@ -52,6 +52,7 @@ export class LayoutActionsDialogComponent {
 
   readonly selectedAction = signal<string>('upload-to-everyone');
   readonly selectedPersonIds = signal<Set<number>>(new Set());
+  readonly useSelectedLayers = signal(false);
   readonly executing = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
@@ -104,7 +105,7 @@ export class LayoutActionsDialogComponent {
     }
 
     if (action === 'circle-mask' || action === 'remove-masks') {
-      return this.selectedPersonIds().size > 0;
+      return this.useSelectedLayers() || this.selectedPersonIds().size > 0;
     }
 
     return false;
@@ -254,6 +255,13 @@ export class LayoutActionsDialogComponent {
   }
 
   private async executeCircleMask(): Promise<void> {
+    if (this.useSelectedLayers()) {
+      const result = await this.ps.applyCircleMask({ useSelectedLayers: true });
+      if (!result.success) throw new Error(result.error || 'Maszkolás sikertelen');
+      this.executed.emit();
+      return;
+    }
+
     const selectedIds = this.selectedPersonIds();
     const layerNames = this.persons()
       .filter(p => selectedIds.has(p.id))
@@ -269,6 +277,13 @@ export class LayoutActionsDialogComponent {
   }
 
   private async executeRemoveMasks(): Promise<void> {
+    if (this.useSelectedLayers()) {
+      const result = await this.ps.removeMasks({ useSelectedLayers: true });
+      if (!result.success) throw new Error(result.error || 'Maszk eltávolítás sikertelen');
+      this.executed.emit();
+      return;
+    }
+
     const selectedIds = this.selectedPersonIds();
     const layerNames = this.persons()
       .filter(p => selectedIds.has(p.id))

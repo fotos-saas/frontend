@@ -1832,11 +1832,12 @@ export class PhotoshopService {
    * A kor atmeroje = layer szelesseg, top-aligned.
    */
   async applyCircleMask(params: {
-    layerNames: string[];
+    layerNames?: string[];
+    useSelectedLayers?: boolean;
   }): Promise<{ success: boolean; masked?: number; skipped?: number; errors?: number; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
 
-    if (!params.layerNames || params.layerNames.length === 0) {
+    if (!params.useSelectedLayers && (!params.layerNames || params.layerNames.length === 0)) {
       return { success: true, masked: 0 };
     }
 
@@ -1875,11 +1876,12 @@ export class PhotoshopService {
    * Maszkok (raster + vector) eltavolitasa a megadott layerekrol.
    */
   async removeMasks(params: {
-    layerNames: string[];
+    layerNames?: string[];
+    useSelectedLayers?: boolean;
   }): Promise<{ success: boolean; removed?: number; skipped?: number; errors?: number; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron kornyezet' };
 
-    if (!params.layerNames || params.layerNames.length === 0) {
+    if (!params.useSelectedLayers && (!params.layerNames || params.layerNames.length === 0)) {
       return { success: true, removed: 0 };
     }
 

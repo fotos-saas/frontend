@@ -79,6 +79,44 @@ function _deleteVectorMask() {
   executeAction(charIDToTypeID("Dlt "), desc, DialogModes.NO);
 }
 
+// --- PS-ben kijelolt layerek lekerese ---
+function _getSelectedLayers(doc) {
+  var layers = [];
+  try {
+    var ref = new ActionReference();
+    ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    var docDesc = executeActionGet(ref);
+    var idxList = docDesc.getList(stringIDToTypeID("targetLayers"));
+    for (var i = 0; i < idxList.count; i++) {
+      var idx = idxList.getReference(i).getIndex(charIDToTypeID("Lyr "));
+      var layerRef = new ActionReference();
+      layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
+      var layerDesc = executeActionGet(layerRef);
+      var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
+      var found = _findArtLayerByName(doc, layerName);
+      if (found) layers.push(found);
+    }
+  } catch (e) {
+    log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);
+  }
+  return layers;
+}
+
+function _findArtLayerByName(container, name) {
+  try {
+    for (var i = 0; i < container.artLayers.length; i++) {
+      if (container.artLayers[i].name === name) return container.artLayers[i];
+    }
+  } catch (e) { /* */ }
+  try {
+    for (var j = 0; j < container.layerSets.length; j++) {
+      var found = _findArtLayerByName(container.layerSets[j], name);
+      if (found) return found;
+    }
+  } catch (e) { /* */ }
+  return null;
+}
+
 function _doRemoveMasks() {
   var args = parseArgs();
   if (!args.dataFilePath) {
@@ -86,23 +124,27 @@ function _doRemoveMasks() {
   }
   var data = readJsonFile(args.dataFilePath);
 
-  var layerNames = data.layerNames;
-  if (!layerNames || layerNames.length === 0) {
-    log("[JSX] Nincs layer nev — kilep.");
-    return;
-  }
-
   var doc = app.activeDocument;
-
-  var nameSet = {};
-  for (var n = 0; n < layerNames.length; n++) {
-    nameSet[layerNames[n]] = true;
-  }
-
   var foundLayers = [];
-  _findLayersByNames(doc, nameSet, foundLayers);
 
-  log("[JSX] Talalt layerek: " + foundLayers.length + "/" + layerNames.length);
+  if (data.useSelectedLayers) {
+    foundLayers = _getSelectedLayers(doc);
+    log("[JSX] PS kijelolt layerek: " + foundLayers.length);
+  } else {
+    var layerNames = data.layerNames;
+    if (!layerNames || layerNames.length === 0) {
+      log("[JSX] Nincs layer nev — kilep.");
+      return;
+    }
+
+    var nameSet = {};
+    for (var n = 0; n < layerNames.length; n++) {
+      nameSet[layerNames[n]] = true;
+    }
+
+    _findLayersByNames(doc, nameSet, foundLayers);
+    log("[JSX] Talalt layerek: " + foundLayers.length + "/" + layerNames.length);
+  }
 
   for (var i = 0; i < foundLayers.length; i++) {
     var layer = foundLayers[i];

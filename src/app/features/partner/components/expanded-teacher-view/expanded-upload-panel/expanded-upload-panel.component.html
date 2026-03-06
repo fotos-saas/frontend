@@ -25,7 +25,7 @@
         >
           <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
           @if (uploading()) {
-            <span>Feltöltés...</span>
+            <span>Feltöltés... {{ uploadProgress() }}%</span>
           } @else {
             <span>Fotó feltöltés</span>
           }
@@ -44,7 +44,23 @@
             <span>Szinkronizálás</span>
           }
         </button>
+
+        <button
+          class="upload-panel__action-btn upload-panel__action-btn--danger"
+          (click)="onDeleteAll()"
+          [disabled]="uploading() || syncing() || photos().length === 0"
+          matTooltip="Összes feltöltött fotó törlése"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+          <span>Mind törlése</span>
+        </button>
       </div>
+
+      @if (uploading()) {
+        <div class="upload-panel__progress">
+          <div class="upload-panel__progress-bar" [style.width.%]="uploadProgress()"></div>
+        </div>
+      }
 
       <input
         #fileInput
@@ -76,7 +92,7 @@
                   <lucide-icon [name]="ICONS.X" [size]="12" />
                 </button>
               </div>
-              <span class="upload-photo__name">{{ photo.filename }}</span>
+              <span class="upload-photo__name">{{ photo.iptcTitle || photo.filename }}</span>
             </div>
           }
         </div>
@@ -89,3 +105,15 @@
     </div>
   }
 </div>
+
+<!-- Mind törlése megerősítő dialógus -->
+@if (showDeleteAllConfirm()) {
+  <app-confirm-dialog
+    title="Összes fotó törlése"
+    [message]="'Biztosan törölni szeretnéd mind a(z) ' + photos().length + ' feltöltött fotót? Ez a művelet nem vonható vissza.'"
+    confirmText="Mind törlése"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onDeleteAllResult($event)"
+  />
+}

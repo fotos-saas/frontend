@@ -103,6 +103,31 @@
         background: rgb(219 234 254);
       }
     }
+
+    &--danger {
+      background: rgb(254 242 242);
+      border-color: rgb(239 68 68);
+      color: rgb(185 28 28);
+
+      &:hover:not(:disabled) {
+        background: rgb(254 226 226);
+      }
+    }
+  }
+
+  &__progress {
+    height: 4px;
+    background: rgb(229 231 235);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  &__progress-bar {
+    height: 100%;
+    background: rgb(59 130 246);
+    border-radius: 2px;
+    transition: width 0.2s ease;
   }
 
   &__file-input {

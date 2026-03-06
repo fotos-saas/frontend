@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import {
@@ -40,6 +41,7 @@ export class ExpandedTeacherViewDataService {
 
   // Feltöltési terület
   readonly uploadPanelCollapsed = signal(false);
+  readonly uploadProgress = signal<number>(0);
 
   // Computed: session ID
   readonly sessionId = computed<number | null>(() => this.data()?.sessionId ?? null);
@@ -141,21 +143,30 @@ export class ExpandedTeacherViewDataService {
     if (!sid) return;
 
     this.uploading.set(true);
+    this.uploadProgress.set(0);
     this.teacherService.uploadPhotosToSession(sid, files).subscribe({
-      next: (response) => {
-        // Feltöltött fotók hozzáadása a meglévőkhöz
-        const current = this.data();
-        if (current) {
-          this.data.set({
-            ...current,
-            uploadedPhotos: [...response.photos, ...current.uploadedPhotos],
-          });
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          this.uploadProgress.set(Math.round((100 * event.loaded) / event.total));
+        } else if (event instanceof HttpResponse) {
+          const response = event.body;
+          if (response) {
+            const current = this.data();
+            if (current) {
+              this.data.set({
+                ...current,
+                uploadedPhotos: [...response.photos, ...current.uploadedPhotos],
+              });
+            }
+          }
+          this.uploading.set(false);
+          this.uploadProgress.set(0);
         }
-        this.uploading.set(false);
       },
       error: (err) => {
         this.logger.error('Fotó feltöltési hiba', err);
         this.uploading.set(false);
+        this.uploadProgress.set(0);
       },
     });
   }
@@ -173,6 +184,26 @@ export class ExpandedTeacherViewDataService {
       },
       error: (err) => {
         this.logger.error('Fotó törlési hiba', err);
+      },
+    });
+  }
+
+  deleteAllPhotos(): void {
+    const sid = this.sessionId();
+    if (!sid) return;
+
+    this.teacherService.deleteAllSessionPhotos(sid).subscribe({
+      next: () => {
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            uploadedPhotos: [],
+          });
+        }
+      },
+      error: (err) => {
+        this.logger.error('Összes fotó törlési hiba', err);
       },
     });
   }

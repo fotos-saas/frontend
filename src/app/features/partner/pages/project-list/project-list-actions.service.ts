@@ -9,9 +9,7 @@ import { PartnerOrderSyncService } from '../../services/partner-order-sync.servi
 import { PsdStatusService } from '../../services/psd-status.service';
 import { BatchWorkspaceService } from '../../services/batch-workspace.service';
 import { BatchWorkflowType } from '../../models/batch.types';
-import { BatchActionChoice } from '../../components/batch-action-dialog/batch-action-dialog.component';
 import { ElectronService } from '../../../../core/services/electron.service';
-import { ICONS } from '../../../../shared/constants/icons.constants';
 import { SampleLightboxItem } from '../../../../shared/components/samples-lightbox';
 import { ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -73,9 +71,6 @@ export class ProjectListActionsService {
   readonly selectedProjectIds = signal<Set<number>>(new Set());
   private lastSelectedIndex: number | null = null;
 
-  // Batch action dialog
-  readonly showBatchActionDialog = signal(false);
-
   /** Frissitendo callback (parent allitja be) */
   private reloadFn: (() => void) | null = null;
   /** Projektek signal referencia (parent allitja be) */
@@ -96,6 +91,10 @@ export class ProjectListActionsService {
 
   readonly selectedProjects = (projects: PartnerProjectListItem[]) =>
     projects.filter(p => this.selectedProjectIds().has(p.id));
+
+  hasSelectedWithPsd(projects: PartnerProjectListItem[]): boolean {
+    return this.selectedProjects(projects).some(p => this.psdStatusService.getStatus(p.id)?.exists);
+  }
 
   onCardSelect(project: PartnerProjectListItem, event: MouseEvent, index: number, projects: PartnerProjectListItem[]): void {
     if (event.metaKey || event.ctrlKey) {
@@ -138,54 +137,6 @@ export class ProjectListActionsService {
   }
 
   /** Elérhető batch műveletek a kijelölt projektek alapján */
-  getAvailableBatchActions(projects: PartnerProjectListItem[]): BatchActionChoice[] {
-    const selected = this.selectedProjects(projects);
-    if (selected.length === 0) return [];
-
-    const hasWithPsd = selected.some(p => this.psdStatusService.getStatus(p.id)?.exists);
-
-    const actions: BatchActionChoice[] = [
-      {
-        type: 'generate-psd',
-        label: 'PSD generálás',
-        description: 'Tablókép PSD fájl létrehozása (vagy újragenerálása)',
-        icon: ICONS.LAYERS,
-        colorClass: 'purple',
-      },
-    ];
-
-    if (hasWithPsd) {
-      actions.push({
-        type: 'generate-sample',
-        label: 'Fényképek frissítése',
-        description: 'Meglévő PSD-ben a fényképek cseréje és minta generálása',
-        icon: ICONS.IMAGES,
-        colorClass: 'blue',
-      });
-      actions.push({
-        type: 'finalize',
-        label: 'Véglegesítés',
-        description: 'Nyomdakész fájl előkészítése a kijelölt projektekhez',
-        icon: ICONS.SEND,
-        colorClass: 'green',
-      });
-    }
-    return actions;
-  }
-
-  openBatchActionDialog(): void {
-    this.showBatchActionDialog.set(true);
-  }
-
-  closeBatchActionDialog(): void {
-    this.showBatchActionDialog.set(false);
-  }
-
-  onBatchActionSelected(workflowType: BatchWorkflowType, projects: PartnerProjectListItem[]): void {
-    this.showBatchActionDialog.set(false);
-    this.addSelectedToBatch(workflowType, projects);
-  }
-
   viewProject(project: PartnerProjectListItem): void {
     this.router.navigate(['/partner/projects', project.id]);
   }

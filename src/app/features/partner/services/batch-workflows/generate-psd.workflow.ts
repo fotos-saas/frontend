@@ -101,52 +101,64 @@ export class GeneratePsdWorkflow implements BatchWorkflow {
     // 3. Felirat layerek
     onStep(3);
     this.logger.info(`[Batch PSD] Feliratok`);
-    const subtitles = ps.buildSubtitles({
-      schoolName: job.schoolName,
-      className: job.className,
-      classYear: job.classYear,
-    });
-    if (subtitles.length > 0) {
-      const subResult = await ps.addSubtitleLayers(subtitles, docName);
-      if (!subResult.success) {
-        this.logger.warn('[Batch PSD] Felirat layerek sikertelen', subResult.error);
+    try {
+      const subtitles = ps.buildSubtitles({
+        schoolName: job.schoolName,
+        className: job.className,
+        classYear: job.classYear,
+      });
+      if (subtitles.length > 0) {
+        const subResult = await ps.addSubtitleLayers(subtitles, docName);
+        this.logger.info(`[Batch PSD] Feliratok eredmény: success=${subResult.success}, error=${subResult.error}`);
+      } else {
+        this.logger.info(`[Batch PSD] Feliratok: nincs felirat (üres subtitles)`);
       }
+    } catch (err) {
+      this.logger.error('[Batch PSD] Feliratok EXCEPTION:', err);
     }
-    // Várunk a PS-re a következő lépés előtt
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    this.logger.info(`[Batch PSD] checkAbort előtt (3. lépés után)`);
     checkAbort();
+    this.logger.info(`[Batch PSD] checkAbort után (3. lépés után) — TOVÁBBLÉPÜNK`);
 
     // 4. Név layerek
     onStep(4);
     this.logger.info(`[Batch PSD] Név layerek: ${personsData.length} fő`);
-    if (personsData.length > 0) {
-      const nameResult = await ps.addNameLayers(personsData, docName);
-      if (!nameResult.success) {
-        this.logger.warn('[Batch PSD] Név layerek sikertelen', nameResult.error);
+    try {
+      if (personsData.length > 0) {
+        const nameResult = await ps.addNameLayers(personsData, docName);
+        this.logger.info(`[Batch PSD] Név layerek eredmény: success=${nameResult.success}, error=${nameResult.error}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        this.logger.info(`[Batch PSD] Név layerek: SKIP (0 fő)`);
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (err) {
+      this.logger.error('[Batch PSD] Név layerek EXCEPTION:', err);
     }
     checkAbort();
 
     // 5. Kép layerek + Tablóelrendezés
     onStep(5);
     this.logger.info(`[Batch PSD] Kép layerek + Elrendezés`);
-    if (personsData.length > 0) {
-      const imageResult = await ps.addImageLayers(personsData, undefined, docName);
-      if (imageResult.success) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const layoutResult = await ps.arrangeTabloLayout(
-          { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
-          docName,
-        );
-        if (!layoutResult.success) {
-          this.logger.warn('[Batch PSD] Tablóelrendezés sikertelen', layoutResult.error);
+    try {
+      if (personsData.length > 0) {
+        const imageResult = await ps.addImageLayers(personsData, undefined, docName);
+        this.logger.info(`[Batch PSD] Kép layerek eredmény: success=${imageResult.success}, error=${imageResult.error}`);
+        if (imageResult.success) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const layoutResult = await ps.arrangeTabloLayout(
+            { widthCm: dimensions.widthCm, heightCm: dimensions.heightCm },
+            docName,
+          );
+          this.logger.info(`[Batch PSD] Elrendezés eredmény: success=${layoutResult.success}, error=${layoutResult.error}`);
         }
       } else {
-        this.logger.warn('[Batch PSD] Kép layerek sikertelen', imageResult.error);
+        this.logger.info(`[Batch PSD] Kép layerek: SKIP (0 fő)`);
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (err) {
+      this.logger.error('[Batch PSD] Kép layerek EXCEPTION:', err);
     }
+    await new Promise(resolve => setTimeout(resolve, 1000));
     checkAbort();
 
     // 6. Pillanatkép + Mentés és bezárás

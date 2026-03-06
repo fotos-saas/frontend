@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
 import { StepIndicatorComponent } from './step-indicator.component';
 import { ToastService } from '../../../../core/services/toast.service';
-import { action } from '@storybook/addon-actions';
 
 /**
  * Step Indicator Stories
@@ -83,8 +82,6 @@ export const Default: Story = {
   args: {
     currentStep: 'claiming',
     allowClick: true,
-    stepClick: action('step-click'),
-    infoClick: action('info-click'),
   },
 };
 
@@ -150,8 +147,6 @@ export const WithInfoIcon: Story = {
   args: {
     currentStep: 'retouch',
     allowClick: true,
-    stepClick: action('step-click'),
-    infoClick: action('info-click'),
   },
   parameters: {
     docs: {
@@ -175,8 +170,6 @@ export const NoClickAllowed: Story = {
   args: {
     currentStep: 'tablo',
     allowClick: false,
-    stepClick: action('step-click'),
-    infoClick: action('info-click'),
   },
 };
 
@@ -192,16 +185,14 @@ export const DarkModeFirst: Story = {
   parameters: {
     backgrounds: { default: 'dark' },
   },
-  decorators: [
-    (story) => ({
-      template: `
-        <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem;">
-          <app-step-indicator [currentStep]="currentStep" [allowClick]="allowClick" (stepClick)="stepClick($event)"></app-step-indicator>
-        </div>
-      `,
-      props: story.args,
-    }),
-  ],
+  render: (args) => ({
+    props: args,
+    template: `
+      <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem;">
+        <app-step-indicator [currentStep]="currentStep" [allowClick]="allowClick" (stepClick)="stepClick($event)"></app-step-indicator>
+      </div>
+    `,
+  }),
 };
 
 /**
@@ -212,16 +203,14 @@ export const DarkModeMiddle: Story = {
   parameters: {
     backgrounds: { default: 'dark' },
   },
-  decorators: [
-    (story) => ({
-      template: `
-        <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem;">
-          <app-step-indicator [currentStep]="currentStep" [allowClick]="allowClick" (stepClick)="stepClick($event)"></app-step-indicator>
-        </div>
-      `,
-      props: story.args,
-    }),
-  ],
+  render: (args) => ({
+    props: args,
+    template: `
+      <div style="background: #1f2937; padding: 2rem; border-radius: 0.5rem;">
+        <app-step-indicator [currentStep]="currentStep" [allowClick]="allowClick" (stepClick)="stepClick($event)"></app-step-indicator>
+      </div>
+    `,
+  }),
 };
 
 // ============================================================================

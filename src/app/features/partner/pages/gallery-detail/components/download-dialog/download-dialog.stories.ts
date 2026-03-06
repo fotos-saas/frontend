@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
+import { fn } from 'storybook/test';
 import { LucideAngularModule, X, Download } from 'lucide-angular';
 import { DownloadDialogComponent, DownloadOptions } from './download-dialog.component';
-import { action } from '@storybook/addon-actions';
 
 const meta: Meta<DownloadDialogComponent> = {
   title: 'Partner/DownloadDialog',
@@ -27,8 +27,8 @@ export const Default: Story = {
   render: () => ({
     props: {
       defaults: {},
-      onDownload: action('download'),
-      onClose: action('close'),
+      onDownload: fn(),
+      onClose: fn(),
     },
     template: `
       <app-download-dialog
@@ -48,8 +48,8 @@ export const WithDefaults: Story = {
         zipContent: 'retouch_and_tablo',
         fileNaming: 'student_name',
       } as Partial<DownloadOptions>,
-      onDownload: action('download'),
-      onClose: action('close'),
+      onDownload: fn(),
+      onClose: fn(),
     },
     template: `
       <app-download-dialog
@@ -69,8 +69,8 @@ export const RetouchOnly: Story = {
         zipContent: 'retouch_only',
         fileNaming: 'student_name_iptc',
       } as Partial<DownloadOptions>,
-      onDownload: action('download'),
-      onClose: action('close'),
+      onDownload: fn(),
+      onClose: fn(),
     },
     template: `
       <app-download-dialog
@@ -88,8 +88,8 @@ export const DarkMode: Story = {
   render: () => ({
     props: {
       defaults: {},
-      onDownload: action('download'),
-      onClose: action('close'),
+      onDownload: fn(),
+      onClose: fn(),
     },
     template: `
       <app-download-dialog

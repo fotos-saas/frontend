@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { action } from '@storybook/addon-actions';
 import { VotingCardComponent } from './voting-card.component';
 import { Poll } from '../../../core/services/voting.service';
 
@@ -63,7 +62,8 @@ const meta: Meta<VotingCardComponent> = {
       control: 'boolean',
       description: 'Explicit lezárt jelzés',
     },
-    select: {
+    selectEvent: {
+      action: 'selectEvent',
       description: 'Kártya kiválasztás event',
     },
   },
@@ -86,7 +86,6 @@ export const Default: Story = {
   args: {
     poll: createMockPoll(),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -105,7 +104,6 @@ export const WithVote: Story = {
       myVotes: [1],
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -125,7 +123,6 @@ export const Closed: Story = {
       myVotes: [1],
     }),
     isClosed: true,
-    select: action('select'),
   },
 };
 
@@ -143,7 +140,6 @@ export const WithDeadline: Story = {
       closeAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 nap múlva
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -157,7 +153,6 @@ export const DeadlineSoon: Story = {
       closeAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 óra múlva
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -177,7 +172,6 @@ export const MultipleChoice: Story = {
       myVotes: [1, 2],
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -195,7 +189,6 @@ export const CustomType: Story = {
       title: 'Egyéb ötletek a tablóhoz',
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -214,7 +207,6 @@ export const HighParticipation: Story = {
       participationRate: 96,
     }),
     isClosed: false,
-    select: action('select'),
   },
 };
 
@@ -229,7 +221,6 @@ export const DarkMode: Story = {
   args: {
     poll: createMockPoll(),
     isClosed: false,
-    select: action('select'),
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -257,7 +248,6 @@ export const A11y: Story = {
       myVotes: [1],
     }),
     isClosed: false,
-    select: action('select'),
   },
   parameters: {
     a11y: {

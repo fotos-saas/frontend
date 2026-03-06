@@ -27,8 +27,8 @@ export const Default: Story = {
   render: () => ({
     props: {
       activeTab: signal<GalleryTab>('gallery'),
-      onTabChange(tab: GalleryTab) {
-        this.activeTab.set(tab);
+      onTabChange(this: Record<string, any>, tab: GalleryTab) {
+        this['activeTab'].set(tab);
       },
     },
     template: `
@@ -48,8 +48,8 @@ export const MonitoringActive: Story = {
   render: () => ({
     props: {
       activeTab: signal<GalleryTab>('monitoring'),
-      onTabChange(tab: GalleryTab) {
-        this.activeTab.set(tab);
+      onTabChange(this: Record<string, any>, tab: GalleryTab) {
+        this['activeTab'].set(tab);
       },
     },
     template: `
@@ -67,8 +67,8 @@ export const DarkMode: Story = {
   render: () => ({
     props: {
       activeTab: signal<GalleryTab>('gallery'),
-      onTabChange(tab: GalleryTab) {
-        this.activeTab.set(tab);
+      onTabChange(this: Record<string, any>, tab: GalleryTab) {
+        this['activeTab'].set(tab);
       },
     },
     template: `

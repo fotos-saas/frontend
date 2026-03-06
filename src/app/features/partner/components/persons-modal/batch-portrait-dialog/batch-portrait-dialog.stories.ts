@@ -6,9 +6,9 @@ import { BatchPortraitActionsService } from './batch-portrait-actions.service';
 import { TabloPersonItem } from '../persons-modal.types';
 
 const MOCK_PERSONS: TabloPersonItem[] = [
-  { id: 1, name: 'Kiss Anna', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 1, hasOverride: false, title: null, photoType: null, note: null },
-  { id: 2, name: 'Nagy Béla', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 2, hasOverride: false, title: null, photoType: null, note: null },
-  { id: 3, name: 'Tóth Csilla', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 3, hasOverride: false, title: null, photoType: null, note: null },
+  { id: 1, name: 'Kiss Anna', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 1, hasOverride: false, title: null, photoType: null, note: null, linkedGroup: null },
+  { id: 2, name: 'Nagy Béla', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 2, hasOverride: false, title: null, photoType: null, note: null, linkedGroup: null },
+  { id: 3, name: 'Tóth Csilla', type: 'student', hasPhoto: true, email: null, photoThumbUrl: 'https://placehold.co/100', photoUrl: 'https://placehold.co/400', archiveId: 3, hasOverride: false, title: null, photoType: null, note: null, linkedGroup: null },
 ];
 
 const meta: Meta<BatchPortraitDialogComponent> = {
@@ -22,7 +22,6 @@ const meta: Meta<BatchPortraitDialogComponent> = {
   ],
   argTypes: {
     close: { action: 'close' },
-    completed: { action: 'completed' },
   },
 };
 

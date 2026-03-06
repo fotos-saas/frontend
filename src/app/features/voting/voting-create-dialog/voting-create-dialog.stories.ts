@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { action } from '@storybook/addon-actions';
 import { VotingCreateDialogComponent } from './voting-create-dialog.component';
 
 /**
@@ -29,15 +28,16 @@ const meta: Meta<VotingCreateDialogComponent> = {
     },
   },
   argTypes: {
-    errorMessage: {
+    externalErrorMessage: {
       control: 'text',
       description: 'Hibaüzenet a szervertől',
     },
-    isSubmitting: {
+    externalIsSubmitting: {
       control: 'boolean',
       description: 'Küldés folyamatban jelző',
     },
-    result: {
+    resultEvent: {
+      action: 'resultEvent',
       description: 'Form eredmény event (create vagy cancel)',
     },
   },
@@ -59,9 +59,8 @@ type Story = StoryObj<VotingCreateDialogComponent>;
  */
 export const Default: Story = {
   args: {
-    errorMessage: null,
-    isSubmitting: false,
-    result: action('result'),
+    externalErrorMessage: null,
+    externalIsSubmitting: false,
   },
 };
 
@@ -137,7 +136,7 @@ export const ValidationError: Story = {
 export const Submitting: Story = {
   args: {
     ...Default.args,
-    isSubmitting: true,
+    externalIsSubmitting: true,
   },
 };
 
@@ -153,7 +152,7 @@ export const Submitting: Story = {
 export const WithError: Story = {
   args: {
     ...Default.args,
-    errorMessage: 'Hiba történt a szavazás létrehozásakor. Próbáld újra!',
+    externalErrorMessage: 'Hiba történt a szavazás létrehozásakor. Próbáld újra!',
   },
 };
 
@@ -227,7 +226,7 @@ export const DarkMode: Story = {
 export const A11y: Story = {
   args: {
     ...Default.args,
-    errorMessage: 'Teszt hibaüzenet az accessibility teszthez',
+    externalErrorMessage: 'Teszt hibaüzenet az accessibility teszthez',
   },
   parameters: {
     a11y: {

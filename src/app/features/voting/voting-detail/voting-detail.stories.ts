@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of, NEVER, throwError } from 'rxjs';
 import { VotingDetailComponent } from './voting-detail.component';
 import { VotingService, Poll, PollOption } from '../../../core/services/voting.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -101,8 +101,7 @@ const meta: Meta<VotingDetailComponent> = {
     moduleMetadata({
       imports: [
         BrowserAnimationsModule,
-        RouterModule.forRoot([,
-  ], { useHash: true }),
+        RouterModule.forRoot([], { useHash: true }),
       ],
       providers: [
         { provide: VotingService, useValue: mockVotingService },
@@ -368,7 +367,7 @@ export const Loading: Story = {
           provide: VotingService,
           useValue: {
             ...mockVotingService,
-            getPoll: () => new Promise(() => {}), // Never resolves
+            getPoll: () => NEVER, // Never emits
           },
         },
       ],
@@ -393,9 +392,7 @@ export const Error: Story = {
           provide: VotingService,
           useValue: {
             ...mockVotingService,
-            getPoll: () => {
-              throw new Error('Szavazás nem található');
-            },
+            getPoll: () => throwError(() => ({ message: 'Szavazás nem található' })),
           },
         },
       ],

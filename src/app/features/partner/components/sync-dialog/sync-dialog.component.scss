@@ -186,18 +186,22 @@
   &__meta {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     margin-top: 2px;
+    overflow: hidden;
 
     span {
       display: inline-flex;
       align-items: center;
       font-size: 0.72rem;
       color: var(--text-tertiary);
-      margin-right: 12px;
+      margin-right: 10px;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 0;
 
-      lucide-icon { margin-right: 3px; }
+      lucide-icon { margin-right: 3px; flex-shrink: 0; }
     }
   }
 
@@ -205,6 +209,8 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 8px;
   }
 }
 

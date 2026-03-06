@@ -1,6 +1,7 @@
 import { Injectable, inject, NgZone, DestroyRef, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { OverlayUploadService, PsLayerPerson, BatchProgress } from './overlay-upload.service';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
@@ -177,7 +178,10 @@ export class OverlayUploadPanelService {
     const formData = new FormData();
     formData.append('photo', file);
     const url = `${environment.apiUrl}/partner/projects/${pid}/persons/${person.id}/photo`;
-    this.http.post<UploadResult>(url, formData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.http.post<UploadResult>(url, formData).pipe(
+      timeout(120_000),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: (res) => this.ngZone.run(() => {
         this.uploading.set(false);
         this.uploadResult.set(res);
@@ -190,7 +194,7 @@ export class OverlayUploadPanelService {
       }),
       error: (err) => this.ngZone.run(() => {
         this.uploading.set(false);
-        this.uploadResult.set({ success: false, message: err.error?.message || ERROR_MESSAGES.UPLOAD_DOT });
+        this.uploadResult.set({ success: false, message: err.name === 'TimeoutError' ? 'Időtúllépés (2 perc)' : (err.error?.message || ERROR_MESSAGES.UPLOAD_DOT) });
       }),
     });
   }
@@ -295,7 +299,10 @@ export class OverlayUploadPanelService {
       pid, this.psLayers(),
       (progress) => this.ngZone.run(() => this.batchProgress.set(progress)),
       (index, update) => this.ngZone.run(() => this.psLayers.update(layers => layers.map((l, i) => i === index ? { ...l, ...update } : l))),
-    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    ).pipe(
+      timeout(600_000),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: (updated) => {
         const doneCount = updated.filter(l => l.uploadStatus === 'done').length;
         const errCount = updated.filter(l => l.uploadStatus === 'error').length;
@@ -317,7 +324,11 @@ export class OverlayUploadPanelService {
           this.ngZone.run(() => this.batchResult.set({ success: false, message: errCount > 0 ? `${errCount} feltöltés hibás` : 'Nincs feltölthető fotó' }));
         }
       },
-      error: () => this.ngZone.run(() => this.batchUploading.set(false)),
+      error: (err) => this.ngZone.run(() => {
+        this.batchUploading.set(false);
+        this.placing.set(false);
+        this.batchResult.set({ success: false, message: err?.name === 'TimeoutError' ? 'Időtúllépés' : 'Feltöltési hiba történt' });
+      }),
     });
   }
 

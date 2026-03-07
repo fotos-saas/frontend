@@ -2152,6 +2152,27 @@
   color: rgba(255, 255, 255, 0.35);
 }
 
+.qa-unit-toggle {
+  padding: 2px 6px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 4px;
+  background: rgba(34, 211, 238, 0.08);
+  color: #22d3ee;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  min-width: 28px;
+  text-align: center;
+  text-transform: uppercase;
+
+  &:hover {
+    background: rgba(34, 211, 238, 0.18);
+    border-color: rgba(34, 211, 238, 0.4);
+  }
+}
+
 .quick-actions-panel__confirm {
   display: flex;
   align-items: center;

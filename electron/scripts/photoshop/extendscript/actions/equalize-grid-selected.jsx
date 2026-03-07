@@ -224,7 +224,8 @@ function doEqualizeGrid() {
     }
     gapStr += "]";
 
-    _eqResult = '{"mode":"measure","avgGapPx":' + avg + ',"count":' + items.length + ',"gaps":' + gapStr + '}';
+    var dpi = doc.resolution;
+    _eqResult = '{"mode":"measure","avgGapPx":' + avg + ',"count":' + items.length + ',"dpi":' + dpi + ',"gaps":' + gapStr + '}';
     return;
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, inject, NgZone, DestroyRef, signal } from '@angular/core';
+import { Injectable, inject, NgZone, DestroyRef, signal, computed } from '@angular/core';
 import { OverlayPhotoshopService } from './overlay-photoshop.service';
 import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlaySettingsService } from './overlay-settings.service';
@@ -55,6 +55,15 @@ export class OverlayQuickActionsService {
   readonly gridGapPx = signal<number | null>(null);
   readonly gridAlignTop = signal(false);
   readonly gridLayerCount = signal(0);
+  readonly gridUnit = signal<'px' | 'cm'>('px');
+  readonly gridGapDisplay = computed(() => {
+    const px = this.gridGapPx();
+    if (px === null) return null;
+    return this.gridUnit() === 'cm'
+      ? Math.round((px / this.gridDpi) * 2.54 * 100) / 100
+      : px;
+  });
+  private gridDpi = 300;
   readonly result = signal<{ success: boolean; message: string } | null>(null);
   private resultTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -78,6 +87,19 @@ export class OverlayQuickActionsService {
 
   toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); }
   closeGridPanel(): void { this.gridPanelOpen.set(false); }
+
+  toggleGridUnit(): void {
+    this.gridUnit.update(u => u === 'px' ? 'cm' : 'px');
+  }
+
+  /** Az input mezőből érkező érték → gridGapPx-be konvertálva */
+  setGridGapFromDisplay(value: number): void {
+    if (this.gridUnit() === 'cm') {
+      this.gridGapPx.set(Math.round((value / 2.54) * this.gridDpi));
+    } else {
+      this.gridGapPx.set(value);
+    }
+  }
 
   toggleType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
     if (action === 'refresh') {
@@ -291,6 +313,7 @@ export class OverlayQuickActionsService {
           if (data['error']) { this.setResult(false, String(data['error'])); return; }
           if (data['mode'] === 'measure') {
             this.ngZone.run(() => {
+              if (typeof data['dpi'] === 'number') this.gridDpi = data['dpi'] as number;
               this.gridGapPx.set(data['avgGapPx'] as number);
               this.gridLayerCount.set(data['count'] as number);
             });

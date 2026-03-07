@@ -1273,9 +1273,12 @@
         </button>
         @if (qa.gridGapPx() !== null) {
           <input type="number" class="qa-input" min="0"
-            [value]="qa.gridGapPx()"
-            (change)="qa.gridGapPx.set(+$any($event.target).value || 0)" />
-          <span class="qa-unit">px</span>
+            [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+            [value]="qa.gridGapDisplay()"
+            (change)="qa.setGridGapFromDisplay(+$any($event.target).value || 0)" />
+          <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+            {{ qa.gridUnit() }}
+          </button>
         }
       </div>
     </div>

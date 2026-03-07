@@ -2,6 +2,7 @@ import {
   Component, ChangeDetectionStrategy, signal, computed,
   OnInit, DestroyRef, inject, NgZone,
 } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
@@ -68,6 +69,7 @@ export class OverlayComponent implements OnInit {
   readonly dragOrder = inject(OverlayDragOrderService);
   readonly uploadPanel = inject(OverlayUploadPanelService);
   readonly emailService = inject(OverlayEmailService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   // ============ Service signal alias-ok (template backward compat) ============
   readonly context = signal<OverlayContext>({ mode: 'normal' });
@@ -160,7 +162,9 @@ export class OverlayComponent implements OnInit {
   readonly emailTemplates = this.emailService.templates;
   readonly emailSelectedTemplate = this.emailService.selectedTemplateName;
   readonly emailSubject = this.emailService.resolvedSubject;
-  readonly emailBodyHtml = this.emailService.resolvedBodyHtml;
+  readonly emailBodyHtml = computed(() =>
+    this.sanitizer.bypassSecurityTrustHtml(this.emailService.resolvedBodyHtml())
+  );
   readonly emailContactName = this.emailService.contactName;
   readonly emailContactEmail = this.emailService.contactEmail;
   readonly emailCopyFeedback = this.emailService.copyFeedback;

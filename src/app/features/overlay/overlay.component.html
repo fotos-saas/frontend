@@ -959,7 +959,7 @@
           <span class="email-template-panel__field-label">Szövegtörzs</span>
           <button
             class="email-template-panel__copy-btn"
-            (click)="copyEmailHtml(emailBodyHtml(), 'Body'); $event.stopPropagation()"
+            (click)="copyEmailHtml(emailService.resolvedBodyHtml(), 'Body'); $event.stopPropagation()"
             matTooltip="HTML másolás (formázott)"
           >
             <lucide-icon [name]="emailCopyFeedback() === 'Body' ? ICONS.CHECK : ICONS.COPY" [size]="12" />

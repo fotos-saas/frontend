@@ -200,6 +200,11 @@
   gap: 8px;
   align-items: flex-start;
 
+  > ps-autocomplete {
+    flex: 1;
+    min-width: 0;
+  }
+
   &--2col {
     display: grid;
     grid-template-columns: 1fr 1fr;

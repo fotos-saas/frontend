@@ -6,35 +6,27 @@ import {
   signal,
   computed,
   DestroyRef,
-  ElementRef,
-  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { PsInputComponent, PsTextareaComponent, PsAutocompleteComponent, PsFileUploadComponent } from '@shared/components/form';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerService, PartnerProjectListItem, SchoolItem } from '../../services/partner.service';
-import { PartnerFileUploadService } from '../../services/partner-file-upload.service';
-import { OrderValidationService } from '../../../order-finalization/services/order-validation.service';
-import { ContactStepComponent } from '../../../order-finalization/components/steps/contact-step/contact-step.component';
-import { BasicInfoStepComponent } from '../../../order-finalization/components/steps/basic-info-step/basic-info-step.component';
-import { DesignStepComponent } from '../../../order-finalization/components/steps/design-step/design-step.component';
-import { RosterStepComponent } from '../../../order-finalization/components/steps/roster-step/roster-step.component';
+import { ProjectContact } from '../../models/partner.models';
 import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
-import {
-  OrderFinalizationData,
-  EMPTY_ORDER_FINALIZATION_DATA,
-  STEPPER_STEPS,
-  ContactData,
-  BasicInfoData,
-  DesignData,
-  RosterData,
-  FileUploadResponse,
-} from '../../../order-finalization/models/order-finalization.models';
+
+interface WizardContact {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  isPrimary: boolean;
+}
 
 @Component({
   selector: 'app-create-project-wizard-dialog',
@@ -43,19 +35,19 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
+    FormsModule,
     LucideAngularModule,
+    MatTooltipModule,
     DialogWrapperComponent,
-    ContactStepComponent,
-    BasicInfoStepComponent,
-    DesignStepComponent,
-    RosterStepComponent,
+    PsInputComponent,
+    PsTextareaComponent,
+    PsAutocompleteComponent,
+    PsFileUploadComponent,
     AddSchoolModalComponent,
   ],
 })
 export class CreateProjectWizardDialogComponent {
   private readonly partnerService = inject(PartnerService);
-  private readonly fileUpload = inject(PartnerFileUploadService);
-  private readonly validation = inject(OrderValidationService);
   private readonly toast = inject(ToastService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
@@ -64,92 +56,77 @@ export class CreateProjectWizardDialogComponent {
   readonly projectCreated = output<PartnerProjectListItem>();
 
   readonly ICONS = ICONS;
-  readonly steps = STEPPER_STEPS;
 
-  private readonly wizardContent = viewChild<ElementRef<HTMLElement>>('wizardContent');
+  // --- Kapcsolattartók ---
+  readonly contacts = signal<WizardContact[]>([
+    { name: '', email: null, phone: null, isPrimary: true },
+  ]);
 
-  currentStep = signal(0);
-  submitting = signal(false);
-  formData = signal<OrderFinalizationData>({ ...EMPTY_ORDER_FINALIZATION_DATA });
-
-  backgroundFileName = signal<string | null>(null);
-  attachmentFileNames = signal<string[]>([]);
-
-  /** Iskola autocomplete */
-  schoolSuggestions = signal<PsSelectOption[]>([]);
-  schoolLoading = signal(false);
-  showAddSchoolModal = signal(false);
-
-  /** A létrehozott projekt ID-ja (design step fájlfeltöltéshez kell) */
-  private createdProjectId = signal<number | null>(null);
+  // --- Iskola ---
+  readonly schoolName = signal('');
+  readonly schoolSuggestions = signal<PsSelectOption[]>([]);
+  readonly schoolLoading = signal(false);
+  readonly showAddSchoolModal = signal(false);
   private schoolSearchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  isStepValid = computed(() => {
-    const data = this.formData();
-    const step = this.currentStep();
-    switch (step) {
-      case 0: return this.validation.isContactDataValidForPartner(data.contact);
-      case 1: return this.validation.isBasicInfoValidForPartner(data.basicInfo);
-      case 2: return true;
-      case 3: return this.validation.isRosterDataValidForPartner(data.roster);
-      default: return false;
-    }
+  // --- Osztály ---
+  className = '';
+  classYear = '';
+
+  // --- Csatolmányok ---
+  attachmentFiles: File[] = [];
+
+  // --- Megjegyzés ---
+  description = '';
+
+  // --- Állapot ---
+  readonly submitting = signal(false);
+
+  readonly canSubmit = computed(() => {
+    const c = this.contacts();
+    const hasValidContact = c.length > 0 && c.some(ct => ct.name.trim().length > 0);
+    return hasValidContact
+      && this.schoolName().trim().length > 0
+      && this.className.trim().length > 0
+      && this.classYear.trim().length > 0;
   });
 
-  canFinalize = computed(() => {
-    const data = this.formData();
-    return this.validation.isContactDataValidForPartner(data.contact)
-      && this.validation.isBasicInfoValidForPartner(data.basicInfo)
-      && this.validation.isRosterDataValidForPartner(data.roster);
-  });
+  // --- Kapcsolattartó kezelés ---
 
-  /** Upload callback-ek */
-  uploadBackgroundFn = (file: File): Observable<FileUploadResponse> => {
-    const projectId = this.createdProjectId();
-    if (!projectId) {
-      return of({ success: false, fileId: '', filename: '', url: '', message: 'Először hozd létre a projektet' });
-    }
-    return this.fileUpload.uploadBackgroundImage(file);
-  };
-
-  uploadAttachmentFn = (file: File): Observable<FileUploadResponse> => {
-    const projectId = this.createdProjectId();
-    if (!projectId) {
-      return of({ success: false, fileId: '', filename: '', url: '', message: 'Először hozd létre a projektet' });
-    }
-    return this.fileUpload.uploadAttachment(file);
-  };
-
-  deleteFileFn = (fileId: string): Observable<{ success: boolean }> =>
-    this.fileUpload.deleteFile(fileId);
-
-  // --- Step data change handlers ---
-
-  onContactChange(data: ContactData): void {
-    this.formData.update(fd => ({ ...fd, contact: data }));
+  addContact(): void {
+    this.contacts.update(list => [
+      ...list,
+      { name: '', email: null, phone: null, isPrimary: false },
+    ]);
   }
 
-  onBasicInfoChange(data: BasicInfoData): void {
-    this.formData.update(fd => ({ ...fd, basicInfo: data }));
+  removeContact(index: number): void {
+    this.contacts.update(list => {
+      const updated = list.filter((_, i) => i !== index);
+      if (updated.length > 0 && !updated.some(c => c.isPrimary)) {
+        updated[0].isPrimary = true;
+      }
+      return updated;
+    });
   }
 
-  onDesignChange(data: DesignData): void {
-    this.formData.update(fd => ({ ...fd, design: data }));
+  setPrimaryContact(index: number): void {
+    this.contacts.update(list =>
+      list.map((c, i) => ({ ...c, isPrimary: i === index }))
+    );
   }
 
-  onRosterChange(data: RosterData): void {
-    this.formData.update(fd => ({ ...fd, roster: data }));
-  }
-
-  onBackgroundFileNameChange(name: string | null): void {
-    this.backgroundFileName.set(name);
-  }
-
-  onAttachmentFileNamesChange(names: string[]): void {
-    this.attachmentFileNames.set(names);
+  updateContact(index: number, field: keyof WizardContact, value: string): void {
+    this.contacts.update(list =>
+      list.map((c, i) => i === index ? { ...c, [field]: value || null } : c)
+    );
   }
 
   // --- Iskola keresés ---
+
+  onSchoolNameChange(value: string): void {
+    this.schoolName.set(value);
+  }
 
   onSchoolSearch(query: string): void {
     if (this.schoolSearchTimeout) clearTimeout(this.schoolSearchTimeout);
@@ -158,13 +135,7 @@ export class CreateProjectWizardDialogComponent {
   }
 
   onSchoolSelected(option: PsSelectOption): void {
-    // Város kitöltése ha van sublabel (city)
-    if (option.sublabel) {
-      this.formData.update(fd => ({
-        ...fd,
-        basicInfo: { ...fd.basicInfo, schoolName: option.label, city: option.sublabel! }
-      }));
-    }
+    this.schoolName.set(option.label);
   }
 
   openAddSchoolModal(): void {
@@ -177,15 +148,7 @@ export class CreateProjectWizardDialogComponent {
 
   onSchoolCreated(school: SchoolItem): void {
     this.closeAddSchoolModal();
-    // Auto-kitöltés a létrehozott iskolával
-    this.formData.update(fd => ({
-      ...fd,
-      basicInfo: {
-        ...fd.basicInfo,
-        schoolName: school.name,
-        city: school.city || fd.basicInfo.city,
-      }
-    }));
+    this.schoolName.set(school.name);
     this.toast.success('Siker', `"${school.name}" iskola hozzáadva!`);
   }
 
@@ -206,65 +169,34 @@ export class CreateProjectWizardDialogComponent {
         error: () => {
           this.schoolSuggestions.set([]);
           this.schoolLoading.set(false);
-        }
+        },
       });
-  }
-
-  // --- Navigation ---
-
-  prevStep(): void {
-    this.currentStep.update(s => Math.max(0, s - 1));
-    this.scrollContentToTop();
-  }
-
-  nextStep(): void {
-    if (this.isStepValid()) {
-      this.currentStep.update(s => Math.min(this.steps.length - 1, s + 1));
-      this.scrollContentToTop();
-    }
-  }
-
-  goToStep(index: number): void {
-    if (index <= this.currentStep()) {
-      this.currentStep.set(index);
-      this.scrollContentToTop();
-    }
-  }
-
-  private scrollContentToTop(): void {
-    this.wizardContent()?.nativeElement.scrollTo({ top: 0 });
   }
 
   // --- Submit ---
 
   submit(): void {
-    if (!this.canFinalize() || this.submitting()) return;
+    if (!this.canSubmit() || this.submitting()) return;
 
     this.submitting.set(true);
-    const fd = this.formData();
+    const validContacts = this.contacts().filter(c => c.name.trim());
 
     this.partnerService.createProjectWithWizard({
-      contact_name: fd.contact.name,
-      contact_email: fd.contact.email,
-      contact_phone: fd.contact.phone || undefined,
-      school_name: fd.basicInfo.schoolName,
-      city: fd.basicInfo.city || undefined,
-      class_name: fd.basicInfo.className,
-      class_year: fd.basicInfo.classYear,
-      quote: fd.basicInfo.quote || undefined,
-      font_family: fd.design.fontFamily || undefined,
-      font_color: fd.design.fontColor || undefined,
-      description: fd.design.description || undefined,
-      sort_type: fd.roster.sortType || undefined,
-      student_roster: fd.roster.studentRoster || undefined,
-      teacher_roster: fd.roster.teacherRoster || undefined,
+      contacts: validContacts.map(c => ({
+        name: c.name.trim(),
+        email: c.email?.trim() || undefined,
+        phone: c.phone?.trim() || undefined,
+        is_primary: c.isPrimary,
+      })),
+      school_name: this.schoolName().trim(),
+      class_name: this.className.trim(),
+      class_year: this.classYear.trim(),
+      description: this.description.trim() || undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.createdProjectId.set(response.data.id);
-            this.fileUpload.setProjectId(response.data.id);
             this.toast.success('Siker', 'Projekt sikeresen létrehozva!');
             this.projectCreated.emit(response.data);
             this.close.emit();
@@ -277,8 +209,8 @@ export class CreateProjectWizardDialogComponent {
           this.submitting.set(false);
           const msg = err.error?.message || 'Hiba történt a projekt létrehozása során.';
           this.toast.error('Hiba', msg);
-          this.logger.error('Wizard project creation failed', err);
-        }
+          this.logger.error('Partner project creation failed', err);
+        },
       });
   }
 }

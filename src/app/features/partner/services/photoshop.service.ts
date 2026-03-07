@@ -399,6 +399,7 @@ export class PhotoshopService {
     schoolName?: string | null;
     className?: string | null;
     classYear?: string | null;
+    quote?: string | null;
   }): Array<{ name: string; text: string; fontSize?: number }> {
     const subtitles: Array<{ name: string; text: string; fontSize?: number }> = [];
 
@@ -413,8 +414,10 @@ export class PhotoshopService {
     const year = context.classYear || new Date().getFullYear().toString();
     subtitles.push({ name: 'evfolyam', text: year, fontSize: 70 });
 
-    // Idézet — hardcoded placeholder
-    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."', fontSize: 50 });
+    // Idézet — csak ha meg van adva a projektben
+    if (context.quote) {
+      subtitles.push({ name: 'idezet', text: context.quote, fontSize: 50 });
+    }
 
     return subtitles;
   }

@@ -8,6 +8,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { ProjectDetailHeaderComponent } from '@shared/components/project-detail/project-detail-header/project-detail-header.component';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
+import { ToastService } from '../../../../core/services/toast.service';
 import { PartnerService, PartnerProjectDetails } from '../../services/partner.service';
 import { PartnerFinalizationService } from '../../services/partner-finalization.service';
 import { PhotoshopService } from '../../services/photoshop.service';
@@ -41,6 +42,7 @@ export class ProjectTabloEditorComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly partnerService = inject(PartnerService);
   private readonly finalizationService = inject(PartnerFinalizationService);
+  private readonly toast = inject(ToastService);
   private readonly ps = inject(PhotoshopService);
   readonly snapshotService = inject(TabloEditorSnapshotService);
   readonly templateService = inject(TabloEditorTemplateService);
@@ -222,6 +224,7 @@ export class ProjectTabloEditorComponent implements OnInit {
     }
     if (!resolved) resolved = sizes[0];
     this.selectedSize.set(resolved);
+    this.saveTabloSize(resolved.value);
   }
 
   private snapshotsInitLoaded = false;
@@ -247,8 +250,18 @@ export class ProjectTabloEditorComponent implements OnInit {
 
   selectSize(size: TabloSize): void {
     this.selectedSize.set(size);
+    this.saveTabloSize(size.value);
+  }
+
+  private saveTabloSize(sizeValue: string): void {
     const projectId = this.project()?.id;
-    if (projectId) this.finalizationService.updateTabloSize(projectId, size.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    if (!projectId) return;
+    this.finalizationService.updateTabloSize(projectId, sizeValue)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.toast.success('Mentve', 'Tablóméret elmentve'),
+        error: () => this.toast.error('Hiba', 'Tablóméret mentése sikertelen'),
+      });
   }
 
   /** Input event -> szám validáció -> setter hívás */

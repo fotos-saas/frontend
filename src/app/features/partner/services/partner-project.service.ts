@@ -620,8 +620,16 @@ export class PartnerProjectService {
    * Projekt létrehozása wizard módban
    */
   createProjectWithWizard(data: {
-    contact_name: string;
-    contact_email: string;
+    // Új formátum: contacts tömb
+    contacts?: Array<{
+      name: string;
+      email?: string;
+      phone?: string;
+      is_primary?: boolean;
+    }>;
+    // Backward compat: régi single contact
+    contact_name?: string;
+    contact_email?: string;
     contact_phone?: string;
     school_name: string;
     city?: string;

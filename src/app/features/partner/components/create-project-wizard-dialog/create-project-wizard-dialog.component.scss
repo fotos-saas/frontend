@@ -6,98 +6,225 @@
 }
 
 // ============================================================================
-// STEPPER
+// FORM LAYOUT
 // ============================================================================
 
-.wizard-stepper {
+.wizard-form {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid get-color('gray', 100);
-  gap: 0;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
 
-  &__step {
+// ============================================================================
+// SECTIONS
+// ============================================================================
+
+.wizard-section {
+  &__header {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border: none;
-    background: none;
-    border-radius: 8px;
-    cursor: default;
-    @include transition-fast;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
 
-    &.clickable {
-      cursor: pointer;
+  &__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: get-color('gray', 800);
+    margin: 0;
 
-      &:hover {
-        background: get-color('gray', 100);
-      }
+    .wizard-section__header & {
+      margin-bottom: 0;
     }
 
-    &:disabled {
-      opacity: 0.5;
-    }
-
-    &.active .wizard-stepper__number {
-      background: var(--primary, #7c3aed);
-      color: #fff;
-    }
-
-    &.completed .wizard-stepper__number {
-      background: #10b981;
-      color: #fff;
+    // Ha nincs header wrapper, közvetlenül a section-ben van
+    .wizard-section > &:first-child {
+      margin-bottom: 12px;
     }
   }
 
-  &__number {
+  &__desc {
+    font-size: 13px;
+    color: get-color('gray', 500);
+    margin: -8px 0 12px;
+  }
+
+  &__empty {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: get-color('gray', 400);
+    border: 2px dashed get-color('gray', 200);
+    border-radius: 10px;
+  }
+}
+
+// ============================================================================
+// CONTACT CARDS
+// ============================================================================
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-card {
+  border: 1px solid get-color('gray', 200);
+  border-radius: 10px;
+  padding: 12px;
+  @include transition-fast;
+
+  &--primary {
+    border-color: var(--primary, #7c3aed);
+    background: rgba(124, 58, 237, 0.02);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  &__primary-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 600;
-    background: get-color('gray', 200);
-    color: get-color('gray', 500);
-    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border: 1px solid get-color('gray', 200);
+    border-radius: 6px;
+    background: white;
+    color: get-color('gray', 400);
+    cursor: pointer;
     @include transition-fast;
+
+    &:hover {
+      border-color: get-color('gray', 300);
+      color: get-color('gray', 600);
+    }
+
+    &.active {
+      background: #fbbf24;
+      border-color: #f59e0b;
+      color: white;
+    }
   }
 
   &__label {
     font-size: 13px;
     font-weight: 500;
-    color: get-color('gray', 700);
-    white-space: nowrap;
+    color: get-color('gray', 600);
+    flex: 1;
+  }
 
-    @media (max-width: 640px) {
-      display: none;
+  &__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: get-color('gray', 400);
+    cursor: pointer;
+    @include transition-fast;
+
+    &:hover {
+      background: get-color('error', 50);
+      color: get-color('error', 500);
     }
   }
 
-  &__line {
-    width: 24px;
-    height: 2px;
-    background: get-color('gray', 200);
-    flex-shrink: 0;
-    transition: background 0.15s;
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-    &.completed {
-      background: #10b981;
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
     }
   }
 }
 
 // ============================================================================
-// CONTENT
+// ADD BUTTONS
 // ============================================================================
 
-.wizard-content {
-  min-height: 280px;
-  max-height: 55vh;
-  overflow-y: auto;
+.btn-add-contact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary, #7c3aed);
+  background: transparent;
+  border: 1px solid var(--primary, #7c3aed);
+  border-radius: 6px;
+  cursor: pointer;
+  @include transition-fast;
+
+  &:hover {
+    background: rgba(124, 58, 237, 0.05);
+  }
+}
+
+.btn-add-school {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  margin-top: 22px; // label magassághoz igazítás
+  border: 1px solid get-color('gray', 200);
+  border-radius: 8px;
+  background: white;
+  color: get-color('gray', 600);
+  cursor: pointer;
+  @include transition-fast;
+
+  &:hover {
+    background: get-color('gray', 50);
+    border-color: get-color('gray', 300);
+  }
+}
+
+// ============================================================================
+// FIELD LAYOUT
+// ============================================================================
+
+.field-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  &--2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  ps-autocomplete {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 // ============================================================================
@@ -107,24 +234,9 @@
 .wizard-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 8px;
   width: 100%;
-
-  &__left,
-  &__right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  @media (max-width: 480px) {
-    gap: 6px;
-
-    &__left,
-    &__right {
-      gap: 6px;
-    }
-  }
 }
 
 // ============================================================================

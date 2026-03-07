@@ -2,117 +2,197 @@
   headerStyle="flat"
   [icon]="ICONS.PLUS"
   title="Új projekt létrehozása"
-  description="Varázsló — 4 lépésben"
+  description="Projekt adatok kitöltése"
   theme="purple"
   size="lg"
-  variant="wizard"
+  variant="create"
   [isSubmitting]="submitting()"
   (closeEvent)="close.emit()"
+  (submitEvent)="submit()"
 >
-  <!-- Body -->
-  <div dialogBody>
-    <!-- Stepper -->
-    <div class="wizard-stepper">
-      @for (step of steps; track $index) {
-        <button
-          class="wizard-stepper__step"
-          [class.active]="currentStep() === $index"
-          [class.completed]="$index < currentStep()"
-          [class.clickable]="$index <= currentStep()"
-          [disabled]="$index > currentStep()"
-          (click)="goToStep($index)"
-        >
-          <span class="wizard-stepper__number">{{ $index + 1 }}</span>
-          <span class="wizard-stepper__label">{{ step }}</span>
-        </button>
-        @if ($index < steps.length - 1) {
-          <div class="wizard-stepper__line" [class.completed]="$index < currentStep()"></div>
+  <div dialogBody class="wizard-form">
+    <!-- 1. Kapcsolattartók -->
+    <section class="wizard-section">
+      <div class="wizard-section__header">
+        <h3 class="wizard-section__title">Kapcsolattartók</h3>
+        @if (contacts().length < 10) {
+          <button
+            type="button"
+            class="btn-add-contact"
+            (click)="addContact()"
+          >
+            <lucide-icon [name]="ICONS.USER_PLUS" [size]="14" />
+            Hozzáadás
+          </button>
         }
-      }
-    </div>
+      </div>
 
-    <!-- Content -->
-    <div class="wizard-content" #wizardContent>
-      @switch (currentStep()) {
-        @case (0) {
-          <app-contact-step
-            [data]="formData().contact"
-            [partnerMode]="true"
-            (dataChange)="onContactChange($event)"
-          />
-        }
-        @case (1) {
-          <app-basic-info-step
-            [data]="formData().basicInfo"
-            [partnerMode]="true"
-            [schoolSuggestions]="schoolSuggestions()"
-            [schoolLoading]="schoolLoading()"
-            (dataChange)="onBasicInfoChange($event)"
-            (schoolSearch)="onSchoolSearch($event)"
-            (schoolSelected)="onSchoolSelected($event)"
-            (addSchool)="openAddSchoolModal()"
-          />
-        }
-        @case (2) {
-          <app-design-step
-            [data]="formData().design"
-            [backgroundFileName]="backgroundFileName()"
-            [attachmentFileNames]="attachmentFileNames()"
-            [uploadBackgroundFn]="uploadBackgroundFn"
-            [uploadAttachmentFn]="uploadAttachmentFn"
-            [deleteFileFn]="deleteFileFn"
-            (dataChange)="onDesignChange($event)"
-            (backgroundFileNameChange)="onBackgroundFileNameChange($event)"
-            (attachmentFileNamesChange)="onAttachmentFileNamesChange($event)"
-          />
-        }
-        @case (3) {
-          <app-roster-step
-            [data]="formData().roster"
-            [partnerMode]="true"
-            (dataChange)="onRosterChange($event)"
-          />
-        }
+      @if (contacts().length === 0) {
+        <div class="wizard-section__empty">
+          Még nincs kapcsolattartó. Kattints a "Hozzáadás" gombra.
+        </div>
+      } @else {
+        <div class="contact-list">
+          @for (contact of contacts(); track $index; let i = $index) {
+            <div class="contact-card" [class.contact-card--primary]="contact.isPrimary">
+              <div class="contact-card__header">
+                <button
+                  type="button"
+                  class="contact-card__primary-btn"
+                  [class.active]="contact.isPrimary"
+                  (click)="setPrimaryContact(i)"
+                  matTooltip="Elsődleges kapcsolattartó"
+                >
+                  <lucide-icon [name]="contact.isPrimary ? ICONS.STAR : ICONS.STAR" [size]="14" />
+                </button>
+                <span class="contact-card__label">
+                  {{ contact.isPrimary ? 'Elsődleges' : (i + 1) + '. kapcsolattartó' }}
+                </span>
+                <button
+                  type="button"
+                  class="contact-card__remove"
+                  (click)="removeContact(i)"
+                  matTooltip="Eltávolítás"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="14" />
+                </button>
+              </div>
+              <div class="contact-card__fields">
+                <ps-input
+                  label="Név"
+                  placeholder="pl. Kovács János"
+                  [ngModel]="contact.name"
+                  (ngModelChange)="updateContact(i, 'name', $event)"
+                  [name]="'contact_name_' + i"
+                  [required]="true"
+                  size="full"
+                />
+                <div class="contact-card__row">
+                  <ps-input
+                    type="email"
+                    label="Email"
+                    placeholder="pl. kovacs@iskola.hu"
+                    [ngModel]="contact.email"
+                    (ngModelChange)="updateContact(i, 'email', $event)"
+                    [name]="'contact_email_' + i"
+                    size="full"
+                  />
+                  <ps-input
+                    type="tel"
+                    label="Telefon"
+                    placeholder="+36 30 123 4567"
+                    [ngModel]="contact.phone"
+                    (ngModelChange)="updateContact(i, 'phone', $event)"
+                    [name]="'contact_phone_' + i"
+                    size="full"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
       }
-    </div>
+    </section>
+
+    <!-- 2. Iskola és osztály -->
+    <section class="wizard-section">
+      <h3 class="wizard-section__title">Iskola és osztály</h3>
+
+      <div class="field-row">
+        <ps-autocomplete
+          label="Iskola neve"
+          placeholder="Keresés vagy új iskola..."
+          [options]="schoolSuggestions()"
+          [loading]="schoolLoading()"
+          [ngModel]="schoolName()"
+          (ngModelChange)="onSchoolNameChange($event)"
+          (search)="onSchoolSearch($event)"
+          (optionSelected)="onSchoolSelected($event)"
+          name="school_name"
+          [required]="true"
+          size="full"
+        />
+        <button
+          type="button"
+          class="btn-add-school"
+          (click)="openAddSchoolModal()"
+          matTooltip="Új iskola hozzáadása"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+        </button>
+      </div>
+
+      <div class="field-row field-row--2col">
+        <ps-input
+          label="Osztály neve"
+          placeholder="pl. 12.A"
+          [(ngModel)]="className"
+          name="class_name"
+          [required]="true"
+          size="full"
+        />
+        <ps-input
+          label="Évfolyam"
+          placeholder="pl. 2022-2026"
+          [(ngModel)]="classYear"
+          name="class_year"
+          [required]="true"
+          size="full"
+        />
+      </div>
+    </section>
+
+    <!-- 3. Csatolmányok -->
+    <section class="wizard-section">
+      <h3 class="wizard-section__title">Csatolmányok</h3>
+      <p class="wizard-section__desc">Csatolj képeket, referenciákat vagy bármit ami segíti a munkát.</p>
+
+      <ps-file-upload
+        [(ngModel)]="attachmentFiles"
+        name="attachments"
+        [multiple]="true"
+        [maxFiles]="10"
+        [maxSizeMB]="20"
+        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx"
+        acceptLabel="JPG, PNG, WebP, PDF, DOC, DOCX, XLS, XLSX"
+        variant="compact"
+        dropzoneText="Húzd ide a fájlokat vagy kattints"
+        dropzoneHint="Max. 10 fájl, egyenként max. 20 MB"
+      />
+    </section>
+
+    <!-- 4. Megjegyzés -->
+    <section class="wizard-section">
+      <h3 class="wizard-section__title">Megjegyzés</h3>
+      <ps-textarea
+        placeholder="Bármilyen megjegyzés, kérés, elképzelés... (pl. emailből másolt szöveg)"
+        [(ngModel)]="description"
+        name="description"
+        [rows]="4"
+        size="full"
+      />
+    </section>
   </div>
 
   <!-- Footer -->
   <div dialogFooter class="wizard-footer">
-    <div class="wizard-footer__left">
-      @if (currentStep() > 0) {
-        <button class="btn btn--outline" (click)="prevStep()">
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-          Előző
-        </button>
-      }
-    </div>
-    <div class="wizard-footer__right">
-      @if (currentStep() < steps.length - 1) {
-        <button
-          class="btn btn--purple"
-          [disabled]="!isStepValid()"
-          (click)="nextStep()"
-        >
-          Következő
-          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
+    <button type="button" class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--purple"
+      [disabled]="!canSubmit() || submitting()"
+      (click)="submit()"
+    >
+      @if (submitting()) {
+        <div class="spinner spinner--small spin"></div>
+        Létrehozás...
       } @else {
-        <button
-          class="btn btn--purple"
-          [disabled]="!canFinalize() || submitting()"
-          (click)="submit()"
-        >
-          @if (submitting()) {
-            <div class="spinner spinner--small spin"></div>
-            Létrehozás...
-          } @else {
-            <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-            Projekt létrehozása
-          }
-        </button>
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        Projekt létrehozása
       }
-    </div>
+    </button>
   </div>
 </app-dialog-wrapper>
 

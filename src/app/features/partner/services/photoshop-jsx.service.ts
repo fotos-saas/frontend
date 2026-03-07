@@ -38,13 +38,14 @@ export class PhotoshopJsxService {
     schoolName?: string | null;
     className?: string | null;
     classYear?: string | null;
+    quote?: string | null;
   }): Array<{ name: string; text: string; fontSize?: number }> {
     const subtitles: Array<{ name: string; text: string; fontSize?: number }> = [];
     if (context.schoolName) subtitles.push({ name: 'iskola-neve', text: context.schoolName, fontSize: 80 });
     if (context.className) subtitles.push({ name: 'osztaly', text: context.className, fontSize: 70 });
     const year = context.classYear || new Date().getFullYear().toString();
     subtitles.push({ name: 'evfolyam', text: year, fontSize: 70 });
-    subtitles.push({ name: 'idezet', text: '„Nem az a fontos, amit adnak, hanem amit adunk."', fontSize: 50 });
+    if (context.quote) subtitles.push({ name: 'idezet', text: context.quote, fontSize: 50 });
     return subtitles;
   }
 

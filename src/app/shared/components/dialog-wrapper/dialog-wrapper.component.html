@@ -65,6 +65,7 @@
               <p class="dw__desc">{{ description() }}</p>
             }
           </div>
+          <ng-content select="[dialogHeaderExtra]" />
         </div>
       }
       @case ('minimal') {

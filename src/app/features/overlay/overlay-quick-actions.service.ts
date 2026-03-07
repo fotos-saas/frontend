@@ -61,7 +61,7 @@ export class OverlayQuickActionsService {
   readonly gridCols = signal(5);
   readonly gridRows = signal(0); // 0 = auto
   readonly gridGapH = signal(2);
-  readonly gridGapV = signal(2);
+  readonly gridGapV = signal(3);
   readonly gridAlign = signal<'left' | 'center' | 'right'>('center');
   readonly gridGapDisplay = computed(() => {
     const px = this.gridGapPx();

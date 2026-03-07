@@ -7,7 +7,8 @@
  * 1. Image layer nevekbol kiszedi a ---ID reszt
  * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos ID-ju layert (batch)
  *    Igy akkor is linkel ha a slug mas (pl. nev valtozas utan)
- * 3. OSSZES talalt layert EGYSZERRE kijeloli es linkeli (egy link csoport)
+ * 3. SZEMELYENKENT linkeli: minden szemely layereit KULON link csoportba
+ *    (pl. kep + nev text = 1 csoport, NEM mindenkit egybe!)
  * 4. suspendHistory: egyetlen Undo lepes
  *
  * Kimenet: JSON { "linked": 5, "names": ["bela---2342", "agi---2243"] }
@@ -154,28 +155,24 @@ function doLinkAll() {
   var resultMap = {};
   findLayersByIds(doc, idToName, resultMap);
 
-  // 4. OSSZES talalt layer ID-t osszegyujtjuk, EGYETLEN linkeles
-  var allIds = [];
+  // 4. SZEMELYENKENT linkelunk: minden szemely layereit KULON link csoportba
   var linkedNames = [];
   var skippedNames = [];
+  var totalLinked = 0;
   for (var n = 0; n < uniqueNames.length; n++) {
     var found = resultMap[uniqueNames[n]];
     if (found && found.length >= 2) {
+      var personIds = [];
       for (var f = 0; f < found.length; f++) {
-        allIds.push(found[f].id);
+        personIds.push(found[f].id);
       }
+      selectLayersById(personIds);
+      linkSelected();
+      totalLinked += personIds.length;
       linkedNames.push(uniqueNames[n]);
     } else {
       skippedNames.push(uniqueNames[n]);
     }
-  }
-
-  // Egyetlen kijeloles + egyetlen linkeles — igy nem szedi szet a meglevo linkeket
-  var totalLinked = 0;
-  if (allIds.length >= 2) {
-    selectLayersById(allIds);
-    linkSelected();
-    totalLinked = allIds.length;
   }
 
   // 5. Vegso kijeles: CSAK Images csoport layerei maradjanak kijelelve

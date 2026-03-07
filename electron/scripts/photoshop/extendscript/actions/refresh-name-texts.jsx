@@ -122,10 +122,7 @@ function doRefreshNameTexts() {
     try {
       var textItem = nl.textItem;
       var newText = breakName(dbName, breakAfter);
-      // Sortores-mentes osszehasonlitas: csak a tényleges szoveg valtozast nezzuk
-      var oldPlain = textItem.contents.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
-      var newPlain = newText.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
-      if (oldPlain !== newPlain) {
+      if (textItem.contents !== newText) {
         textItem.contents = newText;
         refreshed++;
       } else {

@@ -201,7 +201,12 @@ export class OverlayQuickActionsService {
 
     const label = this.targetLabel(target);
     this.handleJsxResult(result,
-      r => `${r['refreshed']} felirat frissítve (${label}) [map:${r['nameMapCount']}]`,
+      r => {
+        const noMatch = r['noMatch'] || 0;
+        const skipped = r['skipped'] || 0;
+        const debug = r['debugNoMatch'] ? ` [nincs match: ${(r['debugNoMatch'] as string[]).join(', ')}]` : '';
+        return `${r['refreshed']} frissítve, ${skipped} változatlan, ${noMatch} nem párosított (${label}) [map:${r['nameMapCount']}, total:${r['total']}]${debug}`;
+      },
       `Frissítés kész (${label})`,
     );
   }

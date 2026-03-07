@@ -106,10 +106,17 @@ function doRefreshNameTexts() {
   }
 
   var refreshed = 0;
+  var skipped = 0;
+  var noMatch = 0;
+  var debugNames = [];
   for (var j = 0; j < nameLayers.length; j++) {
     var nl = nameLayers[j];
     var dbName = nameMap[nl.name];
-    if (!dbName) continue;
+    if (!dbName) {
+      noMatch++;
+      if (debugNames.length < 5) debugNames.push(escapeJsonStr(nl.name));
+      continue;
+    }
 
     try {
       var textItem = nl.textItem;
@@ -120,13 +127,16 @@ function doRefreshNameTexts() {
       if (oldPlain !== newPlain) {
         textItem.contents = newText;
         refreshed++;
+      } else {
+        skipped++;
       }
     } catch (e) {
       // nem text layer — skip
     }
   }
 
-  _refreshResult = '{"refreshed":' + refreshed + ',"nameMapCount":' + nameMapCount + ',"total":' + nameLayers.length + '}';
+  var debugStr = debugNames.length > 0 ? ',"debugNoMatch":["' + debugNames.join('","') + '"]' : '';
+  _refreshResult = '{"refreshed":' + refreshed + ',"nameMapCount":' + nameMapCount + ',"total":' + nameLayers.length + ',"noMatch":' + noMatch + ',"skipped":' + skipped + debugStr + '}';
 }
 
 try {

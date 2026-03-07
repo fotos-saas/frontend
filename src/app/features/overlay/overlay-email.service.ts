@@ -137,10 +137,17 @@ export class OverlayEmailService {
 
   /**
    * Rich text (HTML) vágólapra másolás — Gmail-be paste-olva formázott marad.
+   * A <p> tageknek inline margin kell, különben Gmail-ben összefolynak.
    */
   async copyHtml(html: string, label: string): Promise<void> {
     try {
-      const blob = new Blob([html], { type: 'text/html' });
+      // <p> tagek amiknek már van style attribútumuk: margin-t hozzáfűzzük
+      // <p> tagek style nélkül: margin-bottom-ot adunk
+      const enriched = html
+        .replace(/<p style="/g, '<p style="margin: 0 0 10px 0; ')
+        .replace(/<p>/g, '<p style="margin: 0 0 10px 0;">');
+
+      const blob = new Blob([enriched], { type: 'text/html' });
       const plainText = this.htmlToPlainText(html);
       const textBlob = new Blob([plainText], { type: 'text/plain' });
       const item = new ClipboardItem({

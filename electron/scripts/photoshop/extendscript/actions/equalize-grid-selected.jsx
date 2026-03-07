@@ -9,6 +9,10 @@
  *   CONFIG.GAP_H_PX       — vizszintes gap (px), ha ures = meresi mod
  *   CONFIG.ALIGN_TOP       — "true" / "false" — felso el igazitas
  *   CONFIG.ALIGN_TOP_ONLY  — "true" → CSAK felso el igazitas, gap nelkul
+ *   CONFIG.GRID_COLS       — oszlopszam (ha megvan, grid mod)
+ *   CONFIG.GRID_GAP_H_PX   — vizszintes gap pixelben (grid mod)
+ *   CONFIG.GRID_GAP_V_PX   — fuggoleges gap pixelben (grid mod)
+ *   CONFIG.GRID_ALIGN      — "left" / "center" / "right" (soron beluli igazitas)
  */
 
 // #include "../lib/config.jsx"
@@ -227,6 +231,72 @@ function doEqualizeGrid() {
   var gapHPxStr = typeof CONFIG !== "undefined" && CONFIG.GAP_H_PX ? CONFIG.GAP_H_PX : "";
   var alignTop = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP === "true";
   var alignTopOnly = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP_ONLY === "true";
+  var gridColsStr = typeof CONFIG !== "undefined" && CONFIG.GRID_COLS ? CONFIG.GRID_COLS : "";
+
+  // --- GRID MOD: racsba rendezes ---
+  if (gridColsStr !== "") {
+    var gridCols = parseInt(gridColsStr, 10);
+    if (isNaN(gridCols) || gridCols < 1) gridCols = 1;
+    var gridGapH = typeof CONFIG !== "undefined" && CONFIG.GRID_GAP_H_PX ? parseInt(CONFIG.GRID_GAP_H_PX, 10) : 0;
+    var gridGapV = typeof CONFIG !== "undefined" && CONFIG.GRID_GAP_V_PX ? parseInt(CONFIG.GRID_GAP_V_PX, 10) : 0;
+    var gridAlign = typeof CONFIG !== "undefined" && CONFIG.GRID_ALIGN ? CONFIG.GRID_ALIGN : "left";
+    if (isNaN(gridGapH)) gridGapH = 0;
+    if (isNaN(gridGapV)) gridGapV = 0;
+
+    // Unlink az erintett layerekrol
+    for (var gu = 0; gu < items.length; gu++) {
+      unlinkByName(doc, items[gu].name);
+    }
+
+    // Elso kep = referencia pont
+    var startLeft = items[0].bounds.left;
+    var startTop = items[0].bounds.top;
+    var photoW = items[0].bounds.right - items[0].bounds.left;
+    var photoH = items[0].bounds.bottom - items[0].bounds.top;
+
+    var totalRows = Math.ceil(items.length / gridCols);
+    var placed = 0;
+
+    for (var gi = 0; gi < items.length; gi++) {
+      var col = gi % gridCols;
+      var row = Math.floor(gi / gridCols);
+      var targetLeft = startLeft + col * (photoW + gridGapH);
+      var targetTop = startTop + row * (photoH + gridGapV);
+
+      // Utolso (nem teli) sor igazitasa
+      var isLastRow = (row === totalRows - 1);
+      var itemsInLastRow = items.length - row * gridCols;
+      if (isLastRow && itemsInLastRow < gridCols && gridAlign !== "left") {
+        var totalRowWidth = itemsInLastRow * photoW + (itemsInLastRow - 1) * gridGapH;
+        var fullRowWidth = gridCols * photoW + (gridCols - 1) * gridGapH;
+        var offsetX = 0;
+        if (gridAlign === "center") offsetX = Math.round((fullRowWidth - totalRowWidth) / 2);
+        else if (gridAlign === "right") offsetX = fullRowWidth - totalRowWidth;
+        targetLeft = startLeft + offsetX + col * (photoW + gridGapH);
+      }
+
+      var gdx = targetLeft - items[gi].bounds.left;
+      var gdy = targetTop - items[gi].bounds.top;
+
+      if (gdx === 0 && gdy === 0) { placed++; continue; }
+
+      translateLayer(items[gi].id, gdx, gdy);
+
+      // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
+      var gridSibs = [];
+      findAllLayersByName(doc, items[gi].name, gridSibs);
+      for (var gs = 0; gs < gridSibs.length; gs++) {
+        if (gridSibs[gs].id === items[gi].id) continue;
+        translateLayer(gridSibs[gs].id, gdx, gdy);
+      }
+
+      placed++;
+    }
+
+    restoreSelection(selected);
+    _eqResult = '{"mode":"grid","placed":' + placed + ',"cols":' + gridCols + ',"rows":' + totalRows + '}';
+    return;
+  }
 
   // --- CSAK FELSO EL IGAZITAS (gap nelkul) ---
   if (alignTopOnly) {
@@ -340,7 +410,7 @@ function doEqualizeGrid() {
 
 try {
   if (app.documents.length > 0) {
-    app.activeDocument.suspendHistory("Egyenletes elosztas", "doEqualizeGrid()");
+    app.activeDocument.suspendHistory("Racs / egyenletes elosztas", "doEqualizeGrid()");
   }
 } catch (e) {
   _eqResult = '{"error":"' + e.message.replace(/"/g, '\\"') + '"}';

@@ -1961,6 +1961,12 @@
     padding: 8px 10px;
   }
 
+  &__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 8px 0;
+  }
+
   &__status {
     display: flex;
     align-items: center;
@@ -2145,6 +2151,16 @@
   &:focus { border-color: rgba(34, 211, 238, 0.5); }
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  &--narrow { width: 40px; }
+}
+
+.qa-align-toggle {
+  &--active {
+    background: rgba(34, 211, 238, 0.15);
+    border-color: rgba(34, 211, 238, 0.35);
+    color: #22d3ee;
+  }
 }
 
 .qa-unit {

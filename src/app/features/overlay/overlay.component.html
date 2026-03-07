@@ -1310,6 +1310,66 @@
         Elosztás ({{ qa.gridLayerCount() }} kép)
       </button>
     }
+
+    <!-- Rácsba rendezés szekció -->
+    <div class="grid-panel__divider"></div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Oszlopok</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--sm" (click)="qa.gridCols.update(v => Math.max(1, v - 1))">−</button>
+        <input type="number" class="qa-input qa-input--narrow" min="1"
+          [value]="qa.gridCols()"
+          (change)="qa.gridCols.set(Math.max(1, +$any($event.target).value || 1))" />
+        <button class="qa-btn qa-btn--sm" (click)="qa.gridCols.update(v => v + 1)">+</button>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Vízsz. köz</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input" min="0"
+          [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+          [value]="qa.gridGapHDisplay()"
+          (change)="qa.setGridGapHFromDisplay(+$any($event.target).value || 0)" />
+        <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+          {{ qa.gridUnit() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Függ. köz</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input" min="0"
+          [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+          [value]="qa.gridGapVDisplay()"
+          (change)="qa.setGridGapVFromDisplay(+$any($event.target).value || 0)" />
+        <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+          {{ qa.gridUnit() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Igazítás</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'left'"
+          (click)="qa.gridAlign.set('left')">Bal</button>
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'center'"
+          (click)="qa.gridAlign.set('center')">Közép</button>
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'right'"
+          (click)="qa.gridAlign.set('right')">Jobb</button>
+      </div>
+    </div>
+
+    <button class="qa-btn qa-btn--cyan qa-btn--full" [disabled]="qa.loading()"
+      (click)="qa.onAction('grid-arrange', 'selected')">
+      Rácsba rendezés
+    </button>
   </div>
 
   @if (qa.loading()) {
@@ -1319,7 +1379,7 @@
     </div>
   }
 
-  @if (qa.confirm()?.action === 'equalize-grid' && !qa.loading()) {
+  @if ((qa.confirm()?.action === 'equalize-grid' || qa.confirm()?.action === 'grid-arrange') && !qa.loading()) {
     <div class="grid-panel__status">
       <span>Biztosan indítod?</span>
       <button class="qa-btn qa-btn--green qa-btn--sm" (click)="qa.confirmAction()">

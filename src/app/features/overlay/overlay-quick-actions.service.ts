@@ -56,12 +56,28 @@ export class OverlayQuickActionsService {
   readonly gridAlignTop = signal(false);
   readonly gridLayerCount = signal(0);
   readonly gridUnit = signal<'px' | 'cm'>('px');
+
+  // === Grid rendezés ===
+  readonly gridCols = signal(5);
+  readonly gridGapH = signal(2);
+  readonly gridGapV = signal(2);
+  readonly gridAlign = signal<'left' | 'center' | 'right'>('center');
   readonly gridGapDisplay = computed(() => {
     const px = this.gridGapPx();
     if (px === null) return null;
     return this.gridUnit() === 'cm'
       ? Math.round((px / this.gridDpi) * 2.54 * 100) / 100
       : px;
+  });
+  readonly gridGapHDisplay = computed(() => {
+    return this.gridUnit() === 'cm'
+      ? this.gridGapH()
+      : Math.round((this.gridGapH() / 2.54) * this.gridDpi);
+  });
+  readonly gridGapVDisplay = computed(() => {
+    return this.gridUnit() === 'cm'
+      ? this.gridGapV()
+      : Math.round((this.gridGapV() / 2.54) * this.gridDpi);
   });
   private gridDpi = 300;
   readonly result = signal<{ success: boolean; message: string } | null>(null);
@@ -90,6 +106,16 @@ export class OverlayQuickActionsService {
 
   toggleGridUnit(): void {
     this.gridUnit.update(u => u === 'px' ? 'cm' : 'px');
+  }
+
+  /** Grid gap H setter: display értékből cm-be */
+  setGridGapHFromDisplay(value: number): void {
+    this.gridGapH.set(this.gridUnit() === 'cm' ? value : Math.round((value / this.gridDpi) * 2.54 * 100) / 100);
+  }
+
+  /** Grid gap V setter: display értékből cm-be */
+  setGridGapVFromDisplay(value: number): void {
+    this.gridGapV.set(this.gridUnit() === 'cm' ? value : Math.round((value / this.gridDpi) * 2.54 * 100) / 100);
   }
 
   /** Az input mezőből érkező érték → gridGapPx-be konvertálva */
@@ -133,6 +159,8 @@ export class OverlayQuickActionsService {
         await this.executeRepositionToImage();
       } else if (c.action === 'equalize-grid') {
         await this.executeEqualizeGrid();
+      } else if (c.action === 'grid-arrange') {
+        await this.executeGridArrange();
       }
     } finally {
       this.loading.set(false);
@@ -358,6 +386,30 @@ export class OverlayQuickActionsService {
     this.handleJsxResult(result,
       data => `${data['moved']} kép elosztva`,
       'Elosztás kész',
+    );
+  }
+
+  // === Grid rácsba rendezés ===
+
+  private async executeGridArrange(): Promise<void> {
+    const cols = this.gridCols();
+    if (cols < 1) { this.setResult(false, 'Az oszlopszám legalább 1 legyen'); return; }
+
+    const dpi = this.gridDpi || 300;
+    const cmToPx = (cm: number) => Math.round((cm / 2.54) * dpi);
+
+    const result = await this.ps.runJsx(
+      'equalize-grid', 'actions/equalize-grid-selected.jsx', {
+        GRID_COLS: String(cols),
+        GRID_GAP_H_PX: String(cmToPx(this.gridGapH())),
+        GRID_GAP_V_PX: String(cmToPx(this.gridGapV())),
+        GRID_ALIGN: this.gridAlign(),
+      },
+    );
+
+    this.handleJsxResult(result,
+      data => `${data['placed']} kép rácsba rendezve (${data['cols']}×${data['rows']})`,
+      'Rácsba rendezés kész',
     );
   }
 

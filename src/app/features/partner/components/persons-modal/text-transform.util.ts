@@ -67,7 +67,7 @@ const POSITION_ABBREVIATIONS: [string, string][] = [
  */
 const LANGUAGE_ABBREVIATIONS: string[] = [
   'angol', 'német', 'francia', 'olasz', 'japán', 'kínai',
-  'spanyol', 'orosz', 'latin', 'magyar',
+  'spanyol', 'orosz', 'latin',
 ];
 
 /**
@@ -130,13 +130,18 @@ export function normalizePosition(text: string): string {
     result = result.replace(regex, `${lang} nyelv`);
   }
 
-  // 8. Dupla "nyelv nyelv..." tisztítása (biztonsági háló)
+  // 8. "magyar" → "magyar nyelv és irodalom" (CSAK ha nincs már kifejtve)
+  if (result.match(/\bmagyar\b/) && !result.includes('magyar nyelv')) {
+    result = result.replace(/\bmagyar\b/g, 'magyar nyelv és irodalom');
+  }
+
+  // 9. Dupla "nyelv nyelv..." tisztítása (biztonsági háló)
   result = result.replace(/(\bnyelv)(\s+nyelv)+/gi, '$1');
 
-  // 9. Zárójelek eltávolítása az elejéről/végéről
+  // 10. Zárójelek eltávolítása az elejéről/végéről
   result = result.replace(/^[(\[{]+|[)\]}]+$/g, '');
 
-  // 10. Pont eltávolítása elejéről/végéről, végső trim
+  // 11. Pont eltávolítása elejéről/végéről, végső trim
   result = result.replace(/^\.+|\.+$/g, '').trim();
 
   return result;

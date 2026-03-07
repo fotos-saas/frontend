@@ -26,6 +26,7 @@ import { TeacherLinkDialogComponent } from '../../teacher-link-dialog/teacher-li
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
 import { getPersonCategory, getCategoryOrder } from '../person-category.util';
 import { PersonsModalActionsService } from '../persons-modal-actions.service';
+import { TEXT_TRANSFORMS, TextTransformType, TextTransformOption } from '../text-transform.util';
 
 /**
  * Persons Modal - Személyek listája (grid + szerkesztő lista nézet + lightbox).
@@ -75,6 +76,15 @@ export class PersonsModalComponent implements OnInit {
 
   // Crop beállítás
   cropEnabled = signal(false);
+
+  // Szövegtranszformáció
+  readonly transformOptions = TEXT_TRANSFORMS;
+  readonly selectedTransform = signal<TextTransformType>('normalize_position');
+  readonly transformCustomValue = signal('');
+  readonly transformTarget = signal<'name' | 'title'>('title');
+  readonly selectedTransformOption = computed(() =>
+    TEXT_TRANSFORMS.find(t => t.type === this.selectedTransform()) ?? null
+  );
 
   // Extra nevek (tanítottak még)
   extraNames = signal<{ students: string; teachers: string }>({ students: '', teachers: '' });
@@ -246,6 +256,19 @@ export class PersonsModalComponent implements OnInit {
     navigator.clipboard.writeText(text);
     this.extraNamesCopied.set(true);
     setTimeout(() => this.extraNamesCopied.set(false), TIMEOUTS.ID_COPY_FEEDBACK);
+  }
+
+  // --- Szövegtranszformáció ---
+
+  applyTransform(): void {
+    const opt = this.selectedTransformOption();
+    if (!opt) return;
+    this.actions.applyTransform(
+      this.transformTarget(),
+      this.selectedTransform(),
+      this.transformCustomValue(),
+      this.filteredPersons(),
+    );
   }
 
   // --- Kijelölés / kártya kattintás ---

@@ -94,6 +94,46 @@
           <p>{{ emptyState().text }}</p>
         </div>
       } @else if (actions.editMode()) {
+        <!-- Szövegtranszformáló toolbar -->
+        <div class="transform-toolbar">
+          <div class="transform-toolbar__row">
+            <label class="transform-toolbar__label">
+              <lucide-icon [name]="ICONS.WAND" [size]="13" />
+              Átalakítás
+            </label>
+            <select class="transform-toolbar__select" [ngModel]="selectedTransform()" (ngModelChange)="selectedTransform.set($event)">
+              @for (opt of transformOptions; track opt.type) {
+                <option [value]="opt.type">{{ opt.label }}</option>
+              }
+            </select>
+            @if (selectedTransformOption()?.needsCustomValue) {
+              <input
+                type="text"
+                class="transform-toolbar__input"
+                placeholder="Egyéni érték..."
+                [ngModel]="transformCustomValue()"
+                (ngModelChange)="transformCustomValue.set($event)"
+              />
+            }
+            <select class="transform-toolbar__select transform-toolbar__select--target" [ngModel]="transformTarget()" (ngModelChange)="transformTarget.set($event)">
+              <option value="name">Nevek</option>
+              <option value="title">Pozíciók</option>
+            </select>
+            <button
+              type="button"
+              class="transform-toolbar__apply"
+              matTooltip="Átalakítás alkalmazása a szűrt személyekre"
+              (click)="applyTransform()"
+            >
+              <lucide-icon [name]="ICONS.CHECK" [size]="13" />
+              Alkalmaz
+            </button>
+          </div>
+          @if (actions.lastTransformCount(); as count) {
+            <span class="transform-toolbar__result">{{ count }} módosítva</span>
+          }
+        </div>
+
         <!-- Szerkesztő lista nézet -->
         <div class="edit-list">
           @for (person of filteredPersons(); track person.id; let i = $index) {

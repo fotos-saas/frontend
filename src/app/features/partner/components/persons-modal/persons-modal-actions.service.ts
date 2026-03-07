@@ -5,6 +5,7 @@ import { PartnerProjectService } from '../../services/partner-project.service';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../../models/teacher.models';
 import { TabloPersonItem } from './persons-modal.types';
+import { TextTransformType, applyTextTransform } from './text-transform.util';
 
 /** Szerkesztési sor state */
 export interface EditRow {
@@ -354,4 +355,48 @@ export class PersonsModalActionsService {
     this.showPhotoChooserDialog.set(false);
     reload();
   }
+
+  // --- Szövegtranszformáció (batch) ---
+
+  /**
+   * Transzformáció alkalmazása a szűrt személyekre (editData-ban).
+   * @param field 'name' | 'title' — melyik mezőre hat
+   * @param type a transzformáció típusa
+   * @param customValue egyéni érték (trim_start/trim_end-hez)
+   * @param filteredPersons az aktuálisan szűrt (látható) személyek
+   */
+  applyTransform(
+    field: 'name' | 'title',
+    type: TextTransformType,
+    customValue: string,
+    filteredPersons: TabloPersonItem[],
+  ): void {
+    const data = new Map(this.editData());
+    const filteredIds = new Set(filteredPersons.map(p => p.id));
+    let changed = 0;
+
+    for (const person of filteredPersons) {
+      if (!filteredIds.has(person.id)) continue;
+      const row = data.get(person.id);
+      if (!row) continue;
+
+      const original = row[field];
+      const transformed = applyTextTransform(original, type, customValue);
+      if (transformed !== original) {
+        data.set(person.id, {
+          ...row,
+          [field]: transformed,
+          dirty: transformed !== (field === 'name' ? person.name : (person.title || ''))
+            || (field === 'name' ? row.title !== (person.title || '') : row.name !== person.name)
+            || row.note !== (person.note || ''),
+        });
+        changed++;
+      }
+    }
+
+    this.editData.set(data);
+    this.lastTransformCount.set(changed);
+  }
+
+  readonly lastTransformCount = signal(0);
 }

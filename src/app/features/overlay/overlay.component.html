@@ -1288,7 +1288,17 @@
       <div class="qa-section__buttons">
         <button class="qa-btn qa-btn--toggle"
           [class.qa-btn--active]="qa.gridAlignTop()"
-          (click)="qa.gridAlignTop.update(v => !v)">
+          (click)="qa.gridAlignTop.update(v => !v)"
+          matTooltip="Elosztásnál is igazít">
+          @if (qa.gridAlignTop()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          } @else {
+            <lucide-icon [name]="ICONS.MINUS" [size]="12" />
+          }
+        </button>
+        <button class="qa-btn qa-btn--cyan" [disabled]="qa.loading()"
+          (click)="qa.alignTopOnly()"
+          matTooltip="Csak felső él igazítás, térköz nélkül">
           Felső él
         </button>
       </div>

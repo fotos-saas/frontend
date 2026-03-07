@@ -6,8 +6,9 @@
  *   2. VEGREHAJTAS: GAP_H_PX megadva → kepek + nev/pozicio layerek mozgatasa
  *
  * CONFIG parameterek:
- *   CONFIG.GAP_H_PX   — vizszintes gap (px), ha ures = meresi mod
- *   CONFIG.ALIGN_TOP   — "true" / "false" — felso el igazitas
+ *   CONFIG.GAP_H_PX       — vizszintes gap (px), ha ures = meresi mod
+ *   CONFIG.ALIGN_TOP       — "true" / "false" — felso el igazitas
+ *   CONFIG.ALIGN_TOP_ONLY  — "true" → CSAK felso el igazitas, gap nelkul
  */
 
 // #include "../lib/config.jsx"
@@ -225,6 +226,36 @@ function doEqualizeGrid() {
   // CONFIG parameterek
   var gapHPxStr = typeof CONFIG !== "undefined" && CONFIG.GAP_H_PX ? CONFIG.GAP_H_PX : "";
   var alignTop = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP === "true";
+  var alignTopOnly = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP_ONLY === "true";
+
+  // --- CSAK FELSO EL IGAZITAS (gap nelkul) ---
+  if (alignTopOnly) {
+    var refTop = items[0].bounds.top;
+    var aligned = 0;
+
+    for (var a = 0; a < items.length; a++) {
+      unlinkByName(doc, items[a].name);
+    }
+
+    for (var t = 1; t < items.length; t++) {
+      var dy2 = refTop - items[t].bounds.top;
+      if (dy2 === 0) continue;
+
+      translateLayer(items[t].id, 0, dy2);
+
+      var sibs = [];
+      findAllLayersByName(doc, items[t].name, sibs);
+      for (var sb = 0; sb < sibs.length; sb++) {
+        if (sibs[sb].id === items[t].id) continue;
+        translateLayer(sibs[sb].id, 0, dy2);
+      }
+      aligned++;
+    }
+
+    restoreSelection(selected);
+    _eqResult = '{"mode":"align-top","aligned":' + aligned + '}';
+    return;
+  }
 
   // --- MERESI MOD ---
   if (gapHPxStr === "") {

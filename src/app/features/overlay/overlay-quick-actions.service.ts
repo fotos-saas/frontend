@@ -301,6 +301,22 @@ export class OverlayQuickActionsService {
 
   // === Grid egyenletes elosztás ===
 
+  async alignTopOnly(): Promise<void> {
+    this.loading.set(true);
+    try {
+      const result = await this.ps.runJsx(
+        'equalize-grid', 'actions/equalize-grid-selected.jsx',
+        { ALIGN_TOP_ONLY: 'true' },
+      );
+      this.handleJsxResult(result,
+        data => `${data['aligned']} kép egy szintre igazítva`,
+        'Felső él igazítás kész',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   async measureGridGaps(): Promise<void> {
     this.loading.set(true);
     try {

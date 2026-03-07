@@ -177,7 +177,7 @@
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  margin-top: 22px; // label magassághoz igazítás
+  align-self: flex-end;
   border: 1px solid get-color('gray', 200);
   border-radius: 8px;
   background: white;

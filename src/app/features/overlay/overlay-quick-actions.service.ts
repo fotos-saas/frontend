@@ -51,6 +51,7 @@ export class OverlayQuickActionsService {
   readonly confirm = signal<{ action: string; target: string } | null>(null);
   readonly loading = signal(false);
   readonly reorderTarget = signal<QaTarget>('all');
+  readonly gridPanelOpen = signal(false);
   readonly gridGapPx = signal<number | null>(null);
   readonly gridAlignTop = signal(false);
   readonly gridLayerCount = signal(0);
@@ -72,8 +73,11 @@ export class OverlayQuickActionsService {
 
   // === Panel kezelés ===
 
-  togglePanel(): void { this.panelOpen.update(v => !v); }
+  togglePanel(): void { this.panelOpen.update(v => !v); this.gridPanelOpen.set(false); }
   closePanel(): void { this.panelOpen.set(false); }
+
+  toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); }
+  closeGridPanel(): void { this.gridPanelOpen.set(false); }
 
   toggleType(action: 'refresh' | 'position', type: 'names' | 'positions'): void {
     if (action === 'refresh') {

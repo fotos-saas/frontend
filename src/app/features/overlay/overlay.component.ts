@@ -356,6 +356,7 @@ export class OverlayComponent implements OnInit {
   // ============ Quick actions (delegálva: OverlayQuickActionsService) ============
   toggleQuickActions(): void { this.qa.togglePanel(); }
   closeQuickActions(): void { this.qa.closePanel(); }
+  toggleGridPanel(): void { this.qa.toggleGridPanel(); }
 
   // ============ Email Panel (delegálva: OverlayEmailService) ============
   toggleEmailPanel(): void {

@@ -1,12 +1,13 @@
 /**
- * link-selected.jsx — Kijelolt layerek osszelinkelese nev alapjan
+ * link-selected.jsx — Layerek osszelinkelese ID alapjan
  *
- * Bemenet: NINCS (a kijelolt layerekbol indul ki)
+ * Bemenet: CONFIG.LAYER_NAMES (pipe-szeparalt Image layer nevek) VAGY kijelolt layerek
  *
  * Mukodes:
- * 1. Lekerdezi a kijelolt layerek neveit (ActionManager)
- * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos nevu layert (batch)
- * 3. Nev-csoportonkent batch kijeloles + linkeles
+ * 1. Image layer nevekbol kiszedi a ---ID reszt
+ * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos ID-ju layert (batch)
+ *    Igy akkor is linkel ha a slug mas (pl. nev valtozas utan)
+ * 3. ID-csoportonkent batch kijeloles + linkeles
  * 4. suspendHistory: egyetlen Undo lepes
  *
  * Kimenet: JSON { "linked": 5, "names": ["bela---2342", "agi---2243"] }
@@ -52,20 +53,25 @@ function getSelectedLayerNames() {
   return names;
 }
 
-// --- BATCH: Egyetlen bejarassal tobb nevet keres, resultMap-be gyujt ---
-function findLayersByNames(container, nameSet, resultMap) {
+// --- BATCH: Egyetlen bejarassal ID alapjan keres, resultMap-be gyujt ---
+// idToName: {"---42": "slug---42", ...} — a layer ---ID resze alapjan csoportosit
+function findLayersByIds(container, idToName, resultMap) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
       var name = container.artLayers[i].name;
-      if (nameSet[name]) {
-        if (!resultMap[name]) resultMap[name] = [];
-        resultMap[name].push(container.artLayers[i]);
+      var sep = name.indexOf("---");
+      if (sep === -1) continue;
+      var idPart = name.substring(sep); // "---42"
+      var originalName = idToName[idPart];
+      if (originalName) {
+        if (!resultMap[originalName]) resultMap[originalName] = [];
+        resultMap[originalName].push(container.artLayers[i]);
       }
     }
   } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      findLayersByNames(container.layerSets[j], nameSet, resultMap);
+      findLayersByIds(container.layerSets[j], idToName, resultMap);
     }
   } catch (e) {}
 }
@@ -134,13 +140,24 @@ function doLinkAll() {
     }
   }
 
-  // 3. EGYETLEN bejaras — osszes nev egyszerre
+  // 3. ID-alapu lookup map epitese: "---42" → "slug---42"
+  var idToName = {};
+  for (var m = 0; m < uniqueNames.length; m++) {
+    var sep = uniqueNames[m].indexOf("---");
+    if (sep !== -1) {
+      var idPart = uniqueNames[m].substring(sep); // "---42"
+      idToName[idPart] = uniqueNames[m];
+    }
+  }
+
+  // 4. EGYETLEN bejaras — ID alapjan keres az egesz dokumentumban
   var resultMap = {};
-  findLayersByNames(doc, nameSet, resultMap);
+  findLayersByIds(doc, idToName, resultMap);
 
   // 4. Nev-csoportonkent batch kijeloles + linkeles
   var totalLinked = 0;
   var linkedNames = [];
+  var skippedNames = [];
   for (var n = 0; n < uniqueNames.length; n++) {
     var found = resultMap[uniqueNames[n]];
     if (found && found.length >= 2) {
@@ -152,6 +169,8 @@ function doLinkAll() {
       linkSelected();
       totalLinked += found.length;
       linkedNames.push(uniqueNames[n]);
+    } else {
+      skippedNames.push(uniqueNames[n]);
     }
   }
 
@@ -163,7 +182,9 @@ function doLinkAll() {
     var collectImageIds = function(container) {
       try {
         for (var ci = 0; ci < container.artLayers.length; ci++) {
-          if (nameSet[container.artLayers[ci].name]) {
+          var ln = container.artLayers[ci].name;
+          var lnSep = ln.indexOf("---");
+          if (lnSep !== -1 && idToName[ln.substring(lnSep)]) {
             finalIds.push(container.artLayers[ci].id);
           }
         }

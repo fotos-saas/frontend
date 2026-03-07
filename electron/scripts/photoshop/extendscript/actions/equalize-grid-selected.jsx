@@ -141,6 +141,31 @@ function buildRelatedCaches(doc) {
   return { names: names, positions: positions };
 }
 
+// --- Rekurziv layer kereses nev alapjan (unlink-hez) ---
+function findAllLayersByName(container, targetName, result) {
+  try {
+    for (var i = 0; i < container.artLayers.length; i++) {
+      if (container.artLayers[i].name === targetName) {
+        result.push(container.artLayers[i]);
+      }
+    }
+  } catch (e) {}
+  try {
+    for (var j = 0; j < container.layerSets.length; j++) {
+      findAllLayersByName(container.layerSets[j], targetName, result);
+    }
+  } catch (e) {}
+}
+
+// --- Unlink minden azonos nevu layert ---
+function unlinkByName(doc, layerName) {
+  var found = [];
+  findAllLayersByName(doc, layerName, found);
+  for (var i = 0; i < found.length; i++) {
+    try { found[i].unlink(); } catch (e) {}
+  }
+}
+
 // --- Layer translate (dx, dy) ActionManager-rel ---
 function translateLayer(layerId, dx, dy) {
   if (dx === 0 && dy === 0) return;
@@ -260,6 +285,11 @@ function doEqualizeGrid() {
   var cache = buildRelatedCaches(doc);
   var firstTop = items[0].bounds.top;
   var moved = 0;
+
+  // Unlink az erintett layerekrol (kulonben a linkelt nevek/poziciok duplán mozdulnak)
+  for (var u = 0; u < items.length; u++) {
+    unlinkByName(doc, items[u].name);
+  }
 
   for (var e = 1; e < items.length; e++) {
     var prevRight = items[e - 1].bounds.right;

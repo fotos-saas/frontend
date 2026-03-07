@@ -12,6 +12,7 @@ export interface ProjectMeta {
   contactEmail: string;
   partnerName: string;
   partnerCompany: string;
+  partnerEmail: string;
 }
 
 export interface PersonItem {

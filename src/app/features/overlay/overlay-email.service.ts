@@ -31,17 +31,26 @@ export class OverlayEmailService {
   readonly templates = signal<EmailTemplateListItem[]>([]);
   readonly selectedTemplateName = signal<string | null>(null);
   readonly resolvedSubject = signal('');
-  readonly resolvedBody = signal('');
+  /** HTML body — megjelenítéshez és rich text copy-hoz */
+  readonly resolvedBodyHtml = signal('');
   readonly contactName = signal('');
   readonly contactEmail = signal('');
   readonly copyFeedback = signal<string | null>(null);
 
   private meta: ProjectMeta | null = null;
 
+  /** Overlay sablonok (tablo_sample_ready, tablo_modifications_done, stb.) */
+  private readonly OVERLAY_TEMPLATES = new Set([
+    'tablo_sample_ready',
+    'tablo_modifications_done',
+    'tablo_pre_finalization',
+    'tablo_finalized_sent',
+  ]);
+
   readonly hasTemplates = computed(() => this.templates().length > 0);
 
   /**
-   * Panel megnyitása: meta adatok + tablo kategóriás sablonok lekérése.
+   * Panel megnyitása: meta adatok + overlay-specifikus sablonok lekérése.
    */
   async openPanel(projectId: number | null): Promise<void> {
     if (!projectId) return;
@@ -49,7 +58,6 @@ export class OverlayEmailService {
     this.loading.set(true);
 
     try {
-      // Meta adatok és sablonlista párhuzamosan
       const [meta, templatesRes] = await Promise.all([
         this.projectService.fetchProjectMeta(projectId),
         firstValueFrom(this.http.get<{ data: EmailTemplateListItem[] }>(
@@ -59,20 +67,20 @@ export class OverlayEmailService {
 
       this.meta = meta;
 
-      // Csak tablo kategóriás sablonok
-      const tabloTemplates = (templatesRes.data || []).filter(t => t.category === 'tablo');
+      // Csak a kiküldős overlay sablonok
+      const overlayTemplates = (templatesRes.data || [])
+        .filter(t => this.OVERLAY_TEMPLATES.has(t.name));
 
       this.ngZone.run(() => {
-        this.templates.set(tabloTemplates);
+        this.templates.set(overlayTemplates);
         this.contactName.set(meta?.contactName ?? '');
         this.contactEmail.set(meta?.contactEmail ?? '');
 
-        // Ha van tablo_sample_ready, azt válasszuk alapból
-        const defaultTemplate = tabloTemplates.find(t => t.name === 'tablo_sample_ready');
+        const defaultTemplate = overlayTemplates.find(t => t.name === 'tablo_sample_ready');
         if (defaultTemplate) {
           this.selectTemplate(defaultTemplate.name);
-        } else if (tabloTemplates.length > 0) {
-          this.selectTemplate(tabloTemplates[0].name);
+        } else if (overlayTemplates.length > 0) {
+          this.selectTemplate(overlayTemplates[0].name);
         }
 
         this.loading.set(false);
@@ -96,11 +104,11 @@ export class OverlayEmailService {
 
       const template = res.data;
       const subject = this.replacePlaceholders(template.subject);
-      const body = this.stripHtmlTags(this.replacePlaceholders(template.body));
+      const bodyHtml = this.replacePlaceholders(template.body);
 
       this.ngZone.run(() => {
         this.resolvedSubject.set(subject);
-        this.resolvedBody.set(body);
+        this.resolvedBodyHtml.set(bodyHtml);
       });
     } catch (e) {
       this.logger.error('[EMAIL] selectTemplate error:', e);
@@ -111,21 +119,46 @@ export class OverlayEmailService {
     this.panelOpen.set(false);
     this.selectedTemplateName.set(null);
     this.resolvedSubject.set('');
-    this.resolvedBody.set('');
+    this.resolvedBodyHtml.set('');
     this.templates.set([]);
   }
 
   /**
-   * Szöveg vágólapra másolása + rövid feedback.
+   * Plain text vágólapra másolás (címzett, tárgy).
    */
-  async copyToClipboard(text: string, label: string): Promise<void> {
+  async copyText(text: string, label: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
-      this.copyFeedback.set(label);
-      setTimeout(() => this.ngZone.run(() => this.copyFeedback.set(null)), 1500);
+      this.showFeedback(label);
     } catch (e) {
       this.logger.error('[EMAIL] clipboard error:', e);
     }
+  }
+
+  /**
+   * Rich text (HTML) vágólapra másolás — Gmail-be paste-olva formázott marad.
+   */
+  async copyHtml(html: string, label: string): Promise<void> {
+    try {
+      const blob = new Blob([html], { type: 'text/html' });
+      const plainText = this.htmlToPlainText(html);
+      const textBlob = new Blob([plainText], { type: 'text/plain' });
+      const item = new ClipboardItem({
+        'text/html': blob,
+        'text/plain': textBlob,
+      });
+      await navigator.clipboard.write([item]);
+      this.showFeedback(label);
+    } catch (e) {
+      // Fallback: plain text copy
+      this.logger.error('[EMAIL] rich copy fallback:', e);
+      await this.copyText(this.htmlToPlainText(html), label);
+    }
+  }
+
+  private showFeedback(label: string): void {
+    this.copyFeedback.set(label);
+    setTimeout(() => this.ngZone.run(() => this.copyFeedback.set(null)), 1500);
   }
 
   /**
@@ -141,6 +174,7 @@ export class OverlayEmailService {
       '{class_name}': this.meta.className,
       '{partner_name}': this.meta.partnerName,
       '{partner_company}': this.meta.partnerCompany,
+      '{partner_email}': this.meta.partnerEmail,
     };
 
     let result = text;
@@ -151,9 +185,9 @@ export class OverlayEmailService {
   }
 
   /**
-   * HTML tagek eltávolítása (plain text-hez a copy-hoz).
+   * HTML → plain text (fallback clipboard-hoz).
    */
-  private stripHtmlTags(html: string): string {
+  private htmlToPlainText(html: string): string {
     return html
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/p>/gi, '\n\n')

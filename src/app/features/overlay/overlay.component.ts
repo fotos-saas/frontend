@@ -160,7 +160,7 @@ export class OverlayComponent implements OnInit {
   readonly emailTemplates = this.emailService.templates;
   readonly emailSelectedTemplate = this.emailService.selectedTemplateName;
   readonly emailSubject = this.emailService.resolvedSubject;
-  readonly emailBody = this.emailService.resolvedBody;
+  readonly emailBodyHtml = this.emailService.resolvedBodyHtml;
   readonly emailContactName = this.emailService.contactName;
   readonly emailContactEmail = this.emailService.contactEmail;
   readonly emailCopyFeedback = this.emailService.copyFeedback;
@@ -367,7 +367,8 @@ export class OverlayComponent implements OnInit {
   }
   closeEmailPanel(): void { this.emailService.closePanel(); }
   onEmailTemplateChange(name: string): void { this.emailService.selectTemplate(name); }
-  copyEmail(text: string, label: string): void { this.emailService.copyToClipboard(text, label); }
+  copyEmailText(text: string, label: string): void { this.emailService.copyText(text, label); }
+  copyEmailHtml(html: string, label: string): void { this.emailService.copyHtml(html, label); }
 
   // ============ Turbo & UI ============
   toggleTurbo(): void { this.polling.toggleTurbo(); }

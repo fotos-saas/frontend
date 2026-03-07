@@ -212,7 +212,7 @@ export class OverlayQuickActionsService {
   }
 
   private async executeSyncPositions(target: string): Promise<void> {
-    const persons = await this.ensurePersons();
+    const persons = await this.forceRefreshPersons();
     if (persons.length === 0) { this.setResult(false, 'Nincsenek személyek betöltve'); return; }
 
     const layerNames = await this.getLayerNames(target);

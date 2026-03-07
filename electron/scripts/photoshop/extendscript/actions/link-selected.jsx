@@ -7,8 +7,8 @@
  * 1. Image layer nevekbol kiszedi a ---ID reszt
  * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos ID-ju layert (batch)
  *    Igy akkor is linkel ha a slug mas (pl. nev valtozas utan)
- * 3. SZEMELYENKENT linkeli: minden szemely layereit KULON link csoportba
- *    (pl. kep + nev text = 1 csoport, NEM mindenkit egybe!)
+ * 3. SZEMELYENKENT: eloszor UNLINK (regi linkek feloldasa), aztan ujra LINK
+ *    Igy tiszta allapotbol indul, nincs invalid/regi link csoport
  * 4. suspendHistory: egyetlen Undo lepes
  *
  * Kimenet: JSON { "linked": 5, "names": ["bela---2342", "agi---2243"] }
@@ -155,13 +155,18 @@ function doLinkAll() {
   var resultMap = {};
   findLayersByIds(doc, idToName, resultMap);
 
-  // 4. SZEMELYENKENT linkelunk: minden szemely layereit KULON link csoportba
+  // 4. SZEMELYENKENT: eloszor UNLINK (regi linkek feloldasa), aztan LINK ujra
   var linkedNames = [];
   var skippedNames = [];
   var totalLinked = 0;
   for (var n = 0; n < uniqueNames.length; n++) {
     var found = resultMap[uniqueNames[n]];
     if (found && found.length >= 2) {
+      // Eloszor unlink: regi/invalid linkek feloldasa
+      for (var u = 0; u < found.length; u++) {
+        try { found[u].unlink(); } catch (e) { /* nem volt linkelve */ }
+      }
+      // Aztan link: szemely layereit KULON csoportba
       var personIds = [];
       for (var f = 0; f < found.length; f++) {
         personIds.push(found[f].id);

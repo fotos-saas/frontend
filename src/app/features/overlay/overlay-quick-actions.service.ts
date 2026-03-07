@@ -185,8 +185,8 @@ export class OverlayQuickActionsService {
       return;
     }
 
-    // CSAK nevek frissítése
-    const persons = await this.ensurePersons();
+    // MINDIG friss adatot kérünk a DB-ből (ne a cache-ből)
+    const persons = await this.forceRefreshPersons();
     if (persons.length === 0) { this.setResult(false, 'Nincsenek személyek betöltve'); return; }
 
     const layerNames = await this.getLayerNames(target);
@@ -260,6 +260,13 @@ export class OverlayQuickActionsService {
       if (pid) persons = await this.projectService.fetchPersons(pid);
     }
     return persons;
+  }
+
+  /** Persons MINDIG frissítés DB-ből (feliratok frissítéséhez kell a legfrissebb adat) */
+  private async forceRefreshPersons(): Promise<PersonItem[]> {
+    const pid = this.projectService.getLastProjectId() || this.projectIdResolver();
+    if (pid) return await this.projectService.fetchPersons(pid);
+    return this.projectService.persons();
   }
 
   /** PS Image layer nevek target alapján */

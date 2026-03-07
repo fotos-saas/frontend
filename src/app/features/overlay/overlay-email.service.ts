@@ -45,6 +45,7 @@ export class OverlayEmailService {
     'tablo_modifications_done',
     'tablo_pre_finalization',
     'tablo_finalized_sent',
+    'tablo_finalized_simple',
   ]);
 
   readonly hasTemplates = computed(() => this.templates().length > 0);

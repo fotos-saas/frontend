@@ -43,7 +43,7 @@
                   (click)="setPrimaryContact(i)"
                   matTooltip="Elsődleges kapcsolattartó"
                 >
-                  <lucide-icon [name]="contact.isPrimary ? ICONS.STAR : ICONS.STAR" [size]="14" />
+                  <lucide-icon [name]="contact.isPrimary ? ICONS.USER_CHECK : ICONS.USER" [size]="14" />
                 </button>
                 <span class="contact-card__label">
                   {{ contact.isPrimary ? 'Elsődleges' : (i + 1) + '. kapcsolattartó' }}

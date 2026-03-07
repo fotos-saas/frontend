@@ -170,6 +170,28 @@ function sortByLeft(items) {
   return items;
 }
 
+// --- Eredeti kijeloles visszaallitasa ---
+function restoreSelection(selected) {
+  if (selected.length === 0) return;
+  var selDesc = new ActionDescriptor();
+  var selRef = new ActionReference();
+  selRef.putIdentifier(charIDToTypeID("Lyr "), selected[0].id);
+  selDesc.putReference(charIDToTypeID("null"), selRef);
+  executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
+  for (var k = 1; k < selected.length; k++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), selected[k].id);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
+}
+
 // Globalis eredmeny
 var _eqResult = '{"error":"Nem futott le"}';
 
@@ -224,6 +246,7 @@ function doEqualizeGrid() {
     }
     gapStr += "]";
 
+    restoreSelection(selected);
     var dpi = doc.resolution;
     _eqResult = '{"mode":"measure","avgGapPx":' + avg + ',"count":' + items.length + ',"dpi":' + dpi + ',"gaps":' + gapStr + '}';
     return;
@@ -274,26 +297,7 @@ function doEqualizeGrid() {
     moved++;
   }
 
-  // Eredeti kijeloles visszaallitasa
-  if (selected.length > 0) {
-    var selDesc = new ActionDescriptor();
-    var selRef = new ActionReference();
-    selRef.putIdentifier(charIDToTypeID("Lyr "), selected[0].id);
-    selDesc.putReference(charIDToTypeID("null"), selRef);
-    executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-    for (var k = 1; k < selected.length; k++) {
-      var addDesc = new ActionDescriptor();
-      var addRef = new ActionReference();
-      addRef.putIdentifier(charIDToTypeID("Lyr "), selected[k].id);
-      addDesc.putReference(charIDToTypeID("null"), addRef);
-      addDesc.putEnumerated(
-        stringIDToTypeID("selectionModifier"),
-        stringIDToTypeID("selectionModifierType"),
-        stringIDToTypeID("addToSelection")
-      );
-      executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-    }
-  }
+  restoreSelection(selected);
 
   _eqResult = '{"mode":"execute","moved":' + moved + '}';
 

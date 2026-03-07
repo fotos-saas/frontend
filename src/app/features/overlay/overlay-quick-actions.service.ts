@@ -212,14 +212,7 @@ export class OverlayQuickActionsService {
   private async executeArrange(target: string, doNames: boolean, doPositions: boolean): Promise<void> {
     if (!doNames && !doPositions) { this.setResult(false, 'Válassz típust (Nevek és/vagy Pozíciók)'); return; }
 
-    let nameMapJson = '';
-    if (doNames) {
-      const persons = await this.ensurePersons();
-      const layerNames = await this.getLayerNames(target);
-      const nameMap = this.buildNameMap(layerNames, persons);
-      nameMapJson = JSON.stringify(nameMap);
-    }
-
+    // Pozícionálás NEM küld NAME_MAP-ot — csak koordinátákat állít, tartalmat nem módosít
     const result = await this.ps.runJsx('arrange-names', 'actions/arrange-names-selected.jsx', {
       TEXT_ALIGN: 'center',
       BREAK_AFTER: String(this.settings.nameBreakAfter()),
@@ -227,7 +220,6 @@ export class OverlayQuickActionsService {
       TARGET_GROUP: this.targetGroup(target),
       SKIP_NAMES: doNames ? 'false' : 'true',
       SKIP_POSITIONS: doPositions ? 'false' : 'true',
-      NAME_MAP: nameMapJson,
     });
 
     const label = this.targetLabel(target);

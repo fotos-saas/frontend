@@ -70,25 +70,17 @@ export class OverlaySettingsService {
     this.saveNameSetting('nameGapCm', next);
   }
 
-  /** Betölti a név + minta beállításokat Electron-ból és a backend-ből */
+  /** Betölti a név beállításokat Electron-ból, minta beállításokat KIZÁRÓLAG DB-ből */
   async loadSettings(projectId?: number | null): Promise<void> {
     if (!window.electronAPI || this.nameSettingsLoaded) return;
     try {
-      const [gap, breakAfter, sampleSettings] = await Promise.all([
+      const [gap, breakAfter] = await Promise.all([
         window.electronAPI.photoshop.getNameGap(),
         window.electronAPI.photoshop.getNameBreakAfter(),
-        window.electronAPI.sample.getSettings(),
       ]);
       this.ngZone.run(() => {
         if (gap !== undefined) this.nameGapCm.set(gap);
         if (breakAfter !== undefined) this.nameBreakAfter.set(breakAfter);
-        if (sampleSettings.success && sampleSettings.settings) {
-          const s = sampleSettings.settings;
-          this.sampleUseLargeSize.set(s.useLargeSize);
-          this.sampleWatermarkColor.set(s.watermarkColor);
-          this.sampleWatermarkOpacity.set(s.watermarkOpacity);
-          this.sampleVersion.set(s.sampleVersion ?? '');
-        }
         this.nameSettingsLoaded = true;
       });
       if (projectId) {
@@ -101,14 +93,12 @@ export class OverlaySettingsService {
 
   toggleSampleSize(projectId?: number | null): void {
     this.sampleUseLargeSize.update(v => !v);
-    window.electronAPI?.sample.setSettings({ useLargeSize: this.sampleUseLargeSize() });
     this.saveSampleSettingsToBackend(projectId ?? null, { sample_use_large_size: this.sampleUseLargeSize() });
   }
 
   toggleWatermarkColor(projectId?: number | null): void {
     const next = this.sampleWatermarkColor() === 'white' ? 'black' : 'white';
     this.sampleWatermarkColor.set(next);
-    window.electronAPI?.sample.setSettings({ watermarkColor: next });
     this.saveSampleSettingsToBackend(projectId ?? null, { sample_watermark_color: next });
   }
 
@@ -116,7 +106,6 @@ export class OverlaySettingsService {
     const pct = Math.round(this.sampleWatermarkOpacity() * 100);
     const next = Math.min(50, Math.max(5, pct + direction)) / 100;
     this.sampleWatermarkOpacity.set(next);
-    window.electronAPI?.sample.setSettings({ watermarkOpacity: next });
     this.saveSampleSettingsToBackend(projectId ?? null, { sample_watermark_opacity: Math.round(next * 100) });
   }
 
@@ -126,7 +115,6 @@ export class OverlaySettingsService {
     const next = Math.max(0, (isNaN(num) ? 0 : num) + direction);
     const val = next === 0 ? '' : String(next);
     this.sampleVersion.set(val);
-    window.electronAPI?.sample.setSettings({ sampleVersion: val });
     this.saveSampleSettingsToBackend(projectId ?? null, { sample_version: val });
   }
 
@@ -144,8 +132,14 @@ export class OverlaySettingsService {
     ).subscribe();
   }
 
-  /** Backend-ről betölti a sample settings-et egy adott projekthez */
+  /** Backend-ről betölti a sample settings-et egy adott projekthez. Ha nincs adat: white + 15% */
   loadSampleSettingsForProject(projectId: number): void {
+    // Azonnal reset-eljük a defaultokra amíg a DB válasz megérkezik
+    this.sampleUseLargeSize.set(false);
+    this.sampleWatermarkColor.set('white');
+    this.sampleWatermarkOpacity.set(0.15);
+    this.sampleVersion.set('');
+
     this.http.get<{
       data: {
         sample_use_large_size: boolean | null;
@@ -157,13 +151,14 @@ export class OverlaySettingsService {
       .subscribe({
         next: (res) => {
           const d = res.data;
-          this.sampleUseLargeSize.set(d.sample_use_large_size ?? false);
-          this.sampleWatermarkColor.set(d.sample_watermark_color ?? 'white');
-          this.sampleWatermarkOpacity.set(
-            d.sample_watermark_opacity !== null ? d.sample_watermark_opacity / 100 : 0.15,
-          );
-          this.sampleVersion.set(d.sample_version ?? '');
-          window.electronAPI?.sample.setSettings({ sampleVersion: d.sample_version ?? '' });
+          this.ngZone.run(() => {
+            this.sampleUseLargeSize.set(d.sample_use_large_size ?? false);
+            this.sampleWatermarkColor.set(d.sample_watermark_color ?? 'white');
+            this.sampleWatermarkOpacity.set(
+              d.sample_watermark_opacity !== null ? d.sample_watermark_opacity / 100 : 0.15,
+            );
+            this.sampleVersion.set(d.sample_version ?? '');
+          });
         },
       });
   }

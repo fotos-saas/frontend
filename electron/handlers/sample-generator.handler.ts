@@ -307,13 +307,12 @@ export function registerSampleGeneratorHandlers(): void {
         return { success: false, error: 'A flatten temp JPG nem talalhato. Eloszor futtasd a flatten-export JSX-et!' };
       }
 
-      // Beallitasok (param > store > default)
-      const watermarkText = params.watermarkText || sampleStore.get('sampleWatermarkText', 'MINTA');
-      const watermarkColor = params.watermarkColor || sampleStore.get('sampleWatermarkColor', 'white') as 'white' | 'black';
-      const watermarkOpacity = params.watermarkOpacity ?? sampleStore.get('sampleWatermarkOpacity', 0.15);
+      // Beallitasok (param > default — Electron Store NINCS, DB az igazsag forrasa)
+      const watermarkText = params.watermarkText || 'MINTA';
+      const watermarkColor = params.watermarkColor || 'white' as 'white' | 'black';
+      const watermarkOpacity = params.watermarkOpacity ?? 0.15;
       const sizes = params.sizes || [
-        { name: 'nagy', width: sampleStore.get('sampleSizeLarge', 4000) },
-        { name: 'kicsi', width: sampleStore.get('sampleSizeSmall', 2000) },
+        { name: 'minta', width: 2000 },
       ];
 
       // A projectName-bol generalunk fajlnevet (underscore szeparator, PSD-vel egységes)
@@ -341,7 +340,7 @@ export function registerSampleGeneratorHandlers(): void {
           log.info(`Resize kesz: ${size.name} (${size.width}px)`);
 
           // Fájlnév: MINTA_ vagy MINTA_v1_ ha verzió van
-          const version = params.sampleVersion || sampleStore.get('sampleVersion', '');
+          const version = params.sampleVersion || '';
           const versionPrefix = version ? `MINTA_v${version}_` : 'MINTA_';
           const watermarkedFileName = sizes.length === 1
             ? `${versionPrefix}${sanitizedName}.jpg`

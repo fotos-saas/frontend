@@ -205,6 +205,28 @@ function sortByLeft(items) {
   return items;
 }
 
+// --- Rendezes top majd left alapjan (soronkent, azon belul balrol jobbra) ---
+function sortByTopLeft(items) {
+  // Elso pass: meghatarozza a sorok kuszoberteket (felmeret tolerancia)
+  // Ha ket kep top erteke kozel van (< fele magassag), ugyanabban a sorban vannak
+  var rowThreshold = 10;
+  if (items.length > 0) {
+    rowThreshold = (items[0].bounds.bottom - items[0].bounds.top) / 2;
+  }
+  for (var i = 0; i < items.length - 1; i++) {
+    for (var j = i + 1; j < items.length; j++) {
+      var topDiff = items[j].bounds.top - items[i].bounds.top;
+      var sameRow = (topDiff > -rowThreshold && topDiff < rowThreshold);
+      if (!sameRow && items[j].bounds.top < items[i].bounds.top) {
+        var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
+      } else if (sameRow && items[j].bounds.left < items[i].bounds.left) {
+        var tmp2 = items[i]; items[i] = items[j]; items[j] = tmp2;
+      }
+    }
+  }
+  return items;
+}
+
 // --- Eredeti kijeloles visszaallitasa ---
 function restoreSelection(selected) {
   if (selected.length === 0) return;
@@ -266,6 +288,8 @@ function doEqualizeGrid() {
 
   // --- GRID MOD: racsba rendezes ---
   if (gridColsStr !== "") {
+    // Grid modhoz top+left rendezes (soronkent, azon belul balrol jobbra)
+    items = sortByTopLeft(items);
     var gridCols = parseInt(gridColsStr, 10);
     if (isNaN(gridCols) || gridCols < 1) gridCols = 1;
     var gridGapH = typeof CONFIG !== "undefined" && CONFIG.GRID_GAP_H_PX ? parseInt(CONFIG.GRID_GAP_H_PX, 10) : 0;

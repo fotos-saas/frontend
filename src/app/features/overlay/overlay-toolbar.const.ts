@@ -65,6 +65,7 @@ export const TOOLBAR_GROUPS: ToolbarGroup[] = [
     items: [
       { id: 'generate-sample', icon: ICONS.IMAGE, label: 'Minta generálása', accent: 'amber' },
       { id: 'generate-final', icon: ICONS.CHECK_CIRCLE, label: 'Véglegesítés', accent: 'green' },
+      { id: 'email-template', icon: ICONS.MAIL, label: 'Email sablon', accent: 'blue' },
     ],
   },
   {

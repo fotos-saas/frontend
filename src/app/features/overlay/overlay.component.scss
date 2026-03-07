@@ -2085,6 +2085,178 @@
   to { transform: rotate(360deg); }
 }
 
+// ============ Email Template Panel ============
+.email-template-panel {
+  pointer-events: auto;
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #1e1e3a;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  animation: panel-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  width: 380px;
+  max-height: 400px;
+}
+
+.email-template-panel__header {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  font-weight: 500;
+  color: #a0a0c0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
+  lucide-icon {
+    margin-right: 6px;
+    color: #60a5fa;
+  }
+
+  span { flex: 1; }
+}
+
+.email-template-panel__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #555;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ef4444;
+  }
+}
+
+.email-template-panel__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Safari gap fallback
+  > * + * { margin-left: 8px; }
+  height: 80px;
+  color: #555;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.email-template-panel__body {
+  padding: 8px 10px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    &:hover { background: rgba(255, 255, 255, 0.2); }
+  }
+}
+
+.email-template-panel__selector {
+  margin-bottom: 8px;
+}
+
+.email-template-panel__select {
+  width: 100%;
+  padding: 5px 8px;
+  background: #12122a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  outline: none;
+  cursor: pointer;
+
+  &:focus { border-color: #6366f1; }
+
+  option {
+    background: #1e1e3a;
+    color: #e0e0e0;
+  }
+}
+
+.email-template-panel__field {
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.email-template-panel__field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.email-template-panel__field-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.email-template-panel__copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.12s;
+
+  &:hover {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+}
+
+.email-template-panel__field-value {
+  font-size: 12px;
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  word-break: break-word;
+  user-select: text;
+
+  &--multiline {
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.5;
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

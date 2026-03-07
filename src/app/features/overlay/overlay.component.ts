@@ -26,6 +26,7 @@ import { TeacherPhotoChooserDialogComponent } from '../partner/components/teache
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { OverlayDragOrderService } from './overlay-drag-order.service';
+import { OverlayEmailService } from './overlay-email.service';
 import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
 
 @Component({
@@ -39,6 +40,7 @@ import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
     OverlayQuickActionsService,
     OverlayDragOrderService,
     OverlayUploadPanelService,
+    OverlayEmailService,
   ],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
@@ -65,6 +67,7 @@ export class OverlayComponent implements OnInit {
   readonly qa = inject(OverlayQuickActionsService);
   readonly dragOrder = inject(OverlayDragOrderService);
   readonly uploadPanel = inject(OverlayUploadPanelService);
+  readonly emailService = inject(OverlayEmailService);
 
   // ============ Service signal alias-ok (template backward compat) ============
   readonly context = signal<OverlayContext>({ mode: 'normal' });
@@ -151,6 +154,17 @@ export class OverlayComponent implements OnInit {
   readonly matching = this.uploadPanel.matching;
   readonly batchResult = this.uploadPanel.batchResult;
 
+  // Email panel — alias-ok
+  readonly emailPanelOpen = this.emailService.panelOpen;
+  readonly emailLoading = this.emailService.loading;
+  readonly emailTemplates = this.emailService.templates;
+  readonly emailSelectedTemplate = this.emailService.selectedTemplateName;
+  readonly emailSubject = this.emailService.resolvedSubject;
+  readonly emailBody = this.emailService.resolvedBody;
+  readonly emailContactName = this.emailService.contactName;
+  readonly emailContactEmail = this.emailService.contactEmail;
+  readonly emailCopyFeedback = this.emailService.copyFeedback;
+
   // Generate state (alias)
   readonly generating = this.generateService.generating;
   readonly generateResult = this.generateService.generateResult;
@@ -193,6 +207,7 @@ export class OverlayComponent implements OnInit {
 
   onCommand(commandId: string): void {
     if (commandId === 'upload-photo') { this.toggleUploadPanel(); return; }
+    if (commandId === 'email-template') { this.toggleEmailPanel(); return; }
     if (SUBMENU_IDS.has(commandId)) {
       const isOpen = this.openSubmenu() === commandId;
       this.openSubmenu.set(isOpen ? null : commandId);
@@ -217,6 +232,7 @@ export class OverlayComponent implements OnInit {
       if (this.openSubmenu()) this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.dragOrderPanelOpen()) this.closeDragOrderPanel();
+      if (this.emailPanelOpen()) this.closeEmailPanel();
     }
   }
 
@@ -336,6 +352,22 @@ export class OverlayComponent implements OnInit {
   // ============ Quick actions (delegálva: OverlayQuickActionsService) ============
   toggleQuickActions(): void { this.qa.togglePanel(); }
   closeQuickActions(): void { this.qa.closePanel(); }
+
+  // ============ Email Panel (delegálva: OverlayEmailService) ============
+  toggleEmailPanel(): void {
+    if (this.emailPanelOpen()) {
+      this.emailService.closePanel();
+    } else {
+      this.closeSubmenu();
+      if (this.uploadPanelOpen()) this.closeUploadPanel();
+      if (this.dragOrderPanelOpen()) this.closeDragOrderPanel();
+      if (this.qa.panelOpen()) this.closeQuickActions();
+      this.emailService.openPanel(this.pid);
+    }
+  }
+  closeEmailPanel(): void { this.emailService.closePanel(); }
+  onEmailTemplateChange(name: string): void { this.emailService.selectTemplate(name); }
+  copyEmail(text: string, label: string): void { this.emailService.copyToClipboard(text, label); }
 
   // ============ Turbo & UI ============
   toggleTurbo(): void { this.polling.toggleTurbo(); }

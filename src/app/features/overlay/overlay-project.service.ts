@@ -5,6 +5,15 @@ import { environment } from '../../../environments/environment';
 import { OverlayContext } from '../../core/services/electron.types';
 import { LoggerService } from '../../core/services/logger.service';
 
+export interface ProjectMeta {
+  schoolName: string;
+  className: string;
+  contactName: string;
+  contactEmail: string;
+  partnerName: string;
+  partnerCompany: string;
+}
+
 export interface PersonItem {
   id: number;
   name: string;
@@ -34,6 +43,9 @@ export class OverlayProjectService {
   readonly persons = signal<PersonItem[]>([]);
   readonly loadingPersons = signal(false);
   readonly isLoggedOut = signal(false);
+
+  /** Projekt meta adatok (email sablonhoz) */
+  readonly projectMeta = signal<ProjectMeta | null>(null);
 
   /**
    * ProjectId feloldása — context → lastProjectId → Electron IPC fallback.
@@ -114,6 +126,22 @@ export class OverlayProjectService {
       }
     } catch { /* API nem elérhető */ }
     return null;
+  }
+
+  /**
+   * Projekt meta adatok lekérése (iskola, osztály, kapcsolattartó, partner).
+   */
+  async fetchProjectMeta(projectId: number): Promise<ProjectMeta | null> {
+    try {
+      const url = `${environment.apiUrl}/partner/projects/${projectId}/meta`;
+      const res = await firstValueFrom(this.http.get<{ data: ProjectMeta }>(url));
+      const meta = res.data || null;
+      this.ngZone.run(() => this.projectMeta.set(meta));
+      return meta;
+    } catch (e) {
+      this.logger.error('[PROJECT] fetch meta error:', e);
+      return null;
+    }
   }
 
   /** Auth recovery: ha kijelentkezve, próbáljuk újra */

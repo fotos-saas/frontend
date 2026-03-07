@@ -5,7 +5,7 @@
 <div
   class="toolbar"
   [class.toolbar--has-collapse]="openSubmenu()"
-  [class.toolbar--panel-open]="uploadPanelOpen() || dragOrderPanelOpen()"
+  [class.toolbar--panel-open]="uploadPanelOpen() || dragOrderPanelOpen() || emailPanelOpen()"
   (mouseenter)="onCollapseEnter()"
   (mouseleave)="onCollapseLeave()"
 >
@@ -896,6 +896,88 @@
       }
     </button>
   </div>
+</div>
+}
+
+<!-- Email Sablon Panel -->
+@if (emailPanelOpen()) {
+<div class="email-template-panel">
+  <div class="email-template-panel__header">
+    <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+    <span>Email sablon</span>
+    <button class="email-template-panel__close" (click)="closeEmailPanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  @if (emailLoading()) {
+    <div class="email-template-panel__loading">
+      <span class="toolbar__spinner"></span>
+      Betöltés...
+    </div>
+  } @else {
+    <div class="email-template-panel__body">
+      <!-- Sablon választó (ha több van) -->
+      @if (emailTemplates().length > 1) {
+        <div class="email-template-panel__selector">
+          <select
+            class="email-template-panel__select"
+            [value]="emailSelectedTemplate()"
+            (change)="onEmailTemplateChange($any($event.target).value)"
+          >
+            @for (tmpl of emailTemplates(); track tmpl.name) {
+              <option [value]="tmpl.name">{{ tmpl.display_name }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Címzett -->
+      <div class="email-template-panel__field">
+        <div class="email-template-panel__field-header">
+          <span class="email-template-panel__field-label">Címzett</span>
+          <button
+            class="email-template-panel__copy-btn"
+            (click)="copyEmail(emailContactEmail(), 'Címzett'); $event.stopPropagation()"
+            matTooltip="Vágólapra másolás"
+          >
+            <lucide-icon [name]="emailCopyFeedback() === 'Címzett' ? ICONS.CHECK : ICONS.COPY" [size]="12" />
+          </button>
+        </div>
+        <div class="email-template-panel__field-value">{{ emailContactEmail() || '—' }}</div>
+      </div>
+
+      <!-- Tárgy -->
+      <div class="email-template-panel__field">
+        <div class="email-template-panel__field-header">
+          <span class="email-template-panel__field-label">Tárgy</span>
+          <button
+            class="email-template-panel__copy-btn"
+            (click)="copyEmail(emailSubject(), 'Tárgy'); $event.stopPropagation()"
+            matTooltip="Vágólapra másolás"
+          >
+            <lucide-icon [name]="emailCopyFeedback() === 'Tárgy' ? ICONS.CHECK : ICONS.COPY" [size]="12" />
+          </button>
+        </div>
+        <div class="email-template-panel__field-value">{{ emailSubject() }}</div>
+      </div>
+
+      <!-- Body -->
+      <div class="email-template-panel__field email-template-panel__field--body">
+        <div class="email-template-panel__field-header">
+          <span class="email-template-panel__field-label">Szövegtörzs</span>
+          <button
+            class="email-template-panel__copy-btn"
+            (click)="copyEmail(emailBody(), 'Body'); $event.stopPropagation()"
+            matTooltip="Vágólapra másolás"
+          >
+            <lucide-icon [name]="emailCopyFeedback() === 'Body' ? ICONS.CHECK : ICONS.COPY" [size]="12" />
+          </button>
+        </div>
+        <div class="email-template-panel__field-value email-template-panel__field-value--multiline">{{ emailBody() }}</div>
+      </div>
+    </div>
+  }
 </div>
 }
 

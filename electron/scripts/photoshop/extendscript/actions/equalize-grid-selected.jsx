@@ -115,33 +115,7 @@ function filterImageLayers(doc, selected) {
   return result;
 }
 
-// --- CACHE: nev→layer Map-ek (Names + Positions) ---
-function buildRelatedCaches(doc) {
-  var names = {};
-  var positions = {};
-  var nameGroups = [["Names", "Students"], ["Names", "Teachers"]];
-  var posGroups = [["Positions", "Students"], ["Positions", "Teachers"]];
-
-  for (var g = 0; g < nameGroups.length; g++) {
-    var grp = getGroupByPath(doc, nameGroups[g]);
-    if (!grp) continue;
-    for (var i = 0; i < grp.artLayers.length; i++) {
-      var nm = grp.artLayers[i].name;
-      if (!names[nm]) names[nm] = grp.artLayers[i];
-    }
-  }
-  for (var p = 0; p < posGroups.length; p++) {
-    var pGrp = getGroupByPath(doc, posGroups[p]);
-    if (!pGrp) continue;
-    for (var j = 0; j < pGrp.artLayers.length; j++) {
-      var pName = pGrp.artLayers[j].name;
-      if (!positions[pName]) positions[pName] = pGrp.artLayers[j];
-    }
-  }
-  return { names: names, positions: positions };
-}
-
-// --- Rekurziv layer kereses nev alapjan (unlink-hez) ---
+// --- Rekurziv layer kereses nev alapjan ---
 function findAllLayersByName(container, targetName, result) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
@@ -281,8 +255,6 @@ function doEqualizeGrid() {
   var gapHPx = parseInt(gapHPxStr, 10);
   if (isNaN(gapHPx)) gapHPx = 0;
 
-  // Kapcsolodo layerek cache
-  var cache = buildRelatedCaches(doc);
   var firstTop = items[0].bounds.top;
   var moved = 0;
 
@@ -308,14 +280,13 @@ function doEqualizeGrid() {
     // Kep mozgatasa
     translateLayer(items[e].id, dx, dy);
 
-    // Kapcsolodo layerek mozgatasa (Names/, Positions/)
-    var nameLayer = cache.names[items[e].name];
-    if (nameLayer) {
-      translateLayer(nameLayer.id, dx, dy);
-    }
-    var posLayer = cache.positions[items[e].name];
-    if (posLayer) {
-      translateLayer(posLayer.id, dx, dy);
+    // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
+    var siblings = [];
+    findAllLayersByName(doc, items[e].name, siblings);
+    for (var s = 0; s < siblings.length; s++) {
+      // A kepet mar mozgattuk, azt kihagyjuk
+      if (siblings[s].id === items[e].id) continue;
+      translateLayer(siblings[s].id, dx, dy);
     }
 
     // Bounds frissitese a kovetkezo iteraciohoz

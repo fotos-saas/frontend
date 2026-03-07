@@ -1288,7 +1288,7 @@
       <div class="qa-section__buttons">
         <button class="qa-btn qa-btn--toggle"
           [class.qa-btn--active]="qa.gridAlignTop()"
-          (click)="qa.gridAlignTop.update(v => !v)"
+          (click)="qa.gridAlignTop.set(!qa.gridAlignTop())"
           matTooltip="Elosztásnál is igazít">
           @if (qa.gridAlignTop()) {
             <lucide-icon [name]="ICONS.CHECK" [size]="12" />

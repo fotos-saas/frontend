@@ -1216,9 +1216,9 @@
             Mérés
           </button>
           @if (qa.gridGapPx() !== null) {
-            <input type="number" class="qa-input"
+            <input type="number" class="qa-input" min="0"
               [value]="qa.gridGapPx()"
-              (change)="qa.gridGapPx.set(+$any($event.target).value)" />
+              (change)="qa.gridGapPx.set(+$any($event.target).value || 0)" />
             <span class="qa-unit">px</span>
           }
         </div>

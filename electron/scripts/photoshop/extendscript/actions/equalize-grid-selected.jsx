@@ -178,11 +178,11 @@ function doEqualizeGrid() {
   var oldRulerUnits = app.preferences.rulerUnits;
   app.preferences.rulerUnits = Units.PIXELS;
 
+  try {
   // Kijelolt layerek
   var selected = getSelectedLayerInfo();
   if (selected.length < 2) {
     _eqResult = '{"error":"Legalabb 2 kepet jelolj ki"}';
-    app.preferences.rulerUnits = oldRulerUnits;
     return;
   }
 
@@ -190,7 +190,6 @@ function doEqualizeGrid() {
   var imageLayers = filterImageLayers(doc, selected);
   if (imageLayers.length < 2) {
     _eqResult = '{"error":"Legalabb 2 Images csoportbeli layer kell"}';
-    app.preferences.rulerUnits = oldRulerUnits;
     return;
   }
 
@@ -226,7 +225,6 @@ function doEqualizeGrid() {
     gapStr += "]";
 
     _eqResult = '{"mode":"measure","avgGapPx":' + avg + ',"count":' + items.length + ',"gaps":' + gapStr + '}';
-    app.preferences.rulerUnits = oldRulerUnits;
     return;
   }
 
@@ -250,8 +248,7 @@ function doEqualizeGrid() {
     var dy = alignTop ? (firstTop - currTop) : 0;
 
     if (dx === 0 && dy === 0) {
-      // Bounds frissitese a kovetkezo iteraciohoz (nem mozdult, de kell)
-      continue;
+      continue; // Nincs mozgas, bounds valtozatlan
     }
 
     // Kep mozgatasa
@@ -297,8 +294,11 @@ function doEqualizeGrid() {
     }
   }
 
-  app.preferences.rulerUnits = oldRulerUnits;
   _eqResult = '{"mode":"execute","moved":' + moved + '}';
+
+  } finally {
+    app.preferences.rulerUnits = oldRulerUnits;
+  }
 }
 
 try {

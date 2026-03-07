@@ -160,6 +160,37 @@ function translateLayer(layerId, dx, dy) {
   executeAction(charIDToTypeID("move"), desc, DialogModes.NO);
 }
 
+// --- Tobb layer kijelolese ID alapjan ---
+function selectLayersById(layerIds) {
+  if (layerIds.length === 0) return;
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+  desc.putReference(charIDToTypeID("null"), ref);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+  for (var i = 1; i < layerIds.length; i++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
+}
+
+// --- Link action ---
+function linkSelectedLayers() {
+  var linkDesc = new ActionDescriptor();
+  var linkRef = new ActionReference();
+  linkRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  linkDesc.putReference(charIDToTypeID("null"), linkRef);
+  executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
+}
+
 // --- Buborekrendezes left coord alapjan ---
 function sortByLeft(items) {
   for (var i = 0; i < items.length - 1; i++) {
@@ -249,12 +280,26 @@ function doEqualizeGrid() {
     // Ha sorok megadva, csak annyi kepet rendezunk
     var maxItems = gridMaxRows > 0 ? Math.min(items.length, gridCols * gridMaxRows) : items.length;
 
-    // Unlink az erintett layerekrol
+    // 1. Unlink az erintett layerekrol
     for (var gu = 0; gu < items.length; gu++) {
       unlinkByName(doc, items[gu].name);
     }
 
-    // Elso kep = referencia pont
+    // 2. Relink: szemelye nkent minden azonos nevu layer ossze
+    for (var rl = 0; rl < items.length; rl++) {
+      var relinkSibs = [];
+      findAllLayersByName(doc, items[rl].name, relinkSibs);
+      if (relinkSibs.length >= 2) {
+        var relinkIds = [];
+        for (var ri = 0; ri < relinkSibs.length; ri++) {
+          relinkIds.push(relinkSibs[ri].id);
+        }
+        selectLayersById(relinkIds);
+        linkSelectedLayers();
+      }
+    }
+
+    // 3. Grid pozicio szamitas es linkelt eltolas
     var startLeft = items[0].bounds.left;
     var startTop = items[0].bounds.top;
     var photoW = items[0].bounds.right - items[0].bounds.left;
@@ -286,15 +331,14 @@ function doEqualizeGrid() {
 
       if (gdx === 0 && gdy === 0) { placed++; continue; }
 
+      // Linkelt mozgatas: a kep mozgatasa magaval viszi az osszes linkelt layert
       translateLayer(items[gi].id, gdx, gdy);
 
-      // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
-      var gridSibs = [];
-      findAllLayersByName(doc, items[gi].name, gridSibs);
-      for (var gs = 0; gs < gridSibs.length; gs++) {
-        if (gridSibs[gs].id === items[gi].id) continue;
-        translateLayer(gridSibs[gs].id, gdx, gdy);
-      }
+      // Bounds frissitese a kovetkezo iteraciohoz
+      items[gi].bounds.left += gdx;
+      items[gi].bounds.right += gdx;
+      items[gi].bounds.top += gdy;
+      items[gi].bounds.bottom += gdy;
 
       placed++;
     }

@@ -69,13 +69,16 @@
 .contact-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
-.contact-card {
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
   border: 1px solid get-color('gray', 200);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
   @include transition-fast;
 
   &--primary {
@@ -83,19 +86,19 @@
     background: rgba(124, 58, 237, 0.02);
   }
 
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
+  // Az input mezők egyenletesen osztoznak
+  ps-input {
+    flex: 1;
+    min-width: 0;
   }
 
-  &__primary-btn {
+  &__star {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
     border: 1px solid get-color('gray', 200);
     border-radius: 6px;
     background: white;
@@ -115,19 +118,13 @@
     }
   }
 
-  &__label {
-    font-size: 13px;
-    font-weight: 500;
-    color: get-color('gray', 600);
-    flex: 1;
-  }
-
   &__remove {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
     border: none;
     border-radius: 6px;
     background: transparent;
@@ -141,19 +138,11 @@
     }
   }
 
-  &__fields {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
 
-  &__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-
-    @media (max-width: 480px) {
-      grid-template-columns: 1fr;
+    ps-input {
+      flex: 1 1 45%;
     }
   }
 }

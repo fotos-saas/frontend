@@ -34,60 +34,47 @@
       } @else {
         <div class="contact-list">
           @for (contact of contacts(); track $index; let i = $index) {
-            <div class="contact-card" [class.contact-card--primary]="contact.isPrimary">
-              <div class="contact-card__header">
-                <button
-                  type="button"
-                  class="contact-card__primary-btn"
-                  [class.active]="contact.isPrimary"
-                  (click)="setPrimaryContact(i)"
-                  matTooltip="Elsődleges kapcsolattartó"
-                >
-                  <lucide-icon [name]="contact.isPrimary ? ICONS.USER_CHECK : ICONS.USER" [size]="14" />
-                </button>
-                <span class="contact-card__label">
-                  {{ contact.isPrimary ? 'Elsődleges' : (i + 1) + '. kapcsolattartó' }}
-                </span>
-                <button
-                  type="button"
-                  class="contact-card__remove"
-                  (click)="removeContact(i)"
-                  matTooltip="Eltávolítás"
-                >
-                  <lucide-icon [name]="ICONS.X" [size]="14" />
-                </button>
-              </div>
-              <div class="contact-card__fields">
-                <ps-input
-                  label="Név"
-                  placeholder="pl. Kovács János"
-                  [ngModel]="contact.name"
-                  (ngModelChange)="updateContact(i, 'name', $event)"
-                  [name]="'contact_name_' + i"
-                  [required]="true"
-                  size="full"
-                />
-                <div class="contact-card__row">
-                  <ps-input
-                    type="email"
-                    label="Email"
-                    placeholder="pl. kovacs@iskola.hu"
-                    [ngModel]="contact.email"
-                    (ngModelChange)="updateContact(i, 'email', $event)"
-                    [name]="'contact_email_' + i"
-                    size="full"
-                  />
-                  <ps-input
-                    type="tel"
-                    label="Telefon"
-                    placeholder="+36 30 123 4567"
-                    [ngModel]="contact.phone"
-                    (ngModelChange)="updateContact(i, 'phone', $event)"
-                    [name]="'contact_phone_' + i"
-                    size="full"
-                  />
-                </div>
-              </div>
+            <div class="contact-row" [class.contact-row--primary]="contact.isPrimary">
+              <button
+                type="button"
+                class="contact-row__star"
+                [class.active]="contact.isPrimary"
+                (click)="setPrimaryContact(i)"
+                [matTooltip]="contact.isPrimary ? 'Elsődleges' : 'Elsődlegesnek jelölés'"
+              >
+                <lucide-icon [name]="contact.isPrimary ? ICONS.USER_CHECK : ICONS.USER" [size]="14" />
+              </button>
+              <ps-input
+                placeholder="Név *"
+                [ngModel]="contact.name"
+                (ngModelChange)="updateContact(i, 'name', $event)"
+                [name]="'contact_name_' + i"
+                size="full"
+              />
+              <ps-input
+                type="email"
+                placeholder="Email"
+                [ngModel]="contact.email"
+                (ngModelChange)="updateContact(i, 'email', $event)"
+                [name]="'contact_email_' + i"
+                size="full"
+              />
+              <ps-input
+                type="tel"
+                placeholder="Telefon"
+                [ngModel]="contact.phone"
+                (ngModelChange)="updateContact(i, 'phone', $event)"
+                [name]="'contact_phone_' + i"
+                size="full"
+              />
+              <button
+                type="button"
+                class="contact-row__remove"
+                (click)="removeContact(i)"
+                matTooltip="Eltávolítás"
+              >
+                <lucide-icon [name]="ICONS.X" [size]="14" />
+              </button>
             </div>
           }
         </div>

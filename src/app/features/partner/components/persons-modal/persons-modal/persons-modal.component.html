@@ -127,17 +127,15 @@
                   (input)="actions.onEditFieldChange(person.id, 'name', $any($event.target).value, allPersons())"
                   (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
                 />
-                <!-- Title input (csak tanárnál) -->
-                @if (person.type === 'teacher') {
-                  <input
-                    type="text"
-                    class="edit-field edit-field--title"
-                    placeholder="Pozíció/tantárgy"
-                    [value]="row?.title ?? (person.title || '')"
-                    (input)="actions.onEditFieldChange(person.id, 'title', $any($event.target).value, allPersons())"
-                    (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
-                  />
-                }
+                <!-- Title input -->
+                <input
+                  type="text"
+                  class="edit-field edit-field--title"
+                  placeholder="Pozíció/tantárgy"
+                  [value]="row?.title ?? (person.title || '')"
+                  (input)="actions.onEditFieldChange(person.id, 'title', $any($event.target).value, allPersons())"
+                  (keydown.enter)="actions.saveRow(projectId(), person.id, updatePersonInList.bind(this))"
+                />
                 <!-- Megjegyzés -->
                 <input
                   type="text"
@@ -364,17 +362,15 @@
         (input)="actions.inlineEditData.set({ ...editData!, name: $any($event.target).value })"
         (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
       />
-      @if (editPerson?.type === 'teacher') {
-        <label class="edit-dialog__label">Pozíció / tantárgy</label>
-        <input
-          type="text"
-          class="edit-dialog__input"
-          placeholder="Pozíció/tantárgy"
-          [value]="editData?.title ?? ''"
-          (input)="actions.inlineEditData.set({ ...editData!, title: $any($event.target).value })"
-          (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
-        />
-      }
+      <label class="edit-dialog__label">Pozíció / tantárgy</label>
+      <input
+        type="text"
+        class="edit-dialog__input"
+        placeholder="Pozíció/tantárgy"
+        [value]="editData?.title ?? ''"
+        (input)="actions.inlineEditData.set({ ...editData!, title: $any($event.target).value })"
+        (keydown.enter)="actions.saveInlineEdit(projectId(), updatePersonInList.bind(this))"
+      />
       <label class="edit-dialog__label">Megjegyzés</label>
       <input
         type="text"

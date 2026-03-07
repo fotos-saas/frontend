@@ -1379,6 +1379,13 @@
       (click)="qa.onAction('grid-arrange', 'selected')">
       Rácsba rendezés
     </button>
+
+    <div class="grid-panel__divider"></div>
+
+    <button class="qa-btn qa-btn--teal qa-btn--full" [disabled]="qa.loading()"
+      (click)="qa.executeCenterSelected()">
+      Középre igazítás
+    </button>
   </div>
 
   @if (qa.loading()) {

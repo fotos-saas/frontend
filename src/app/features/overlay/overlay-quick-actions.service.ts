@@ -418,6 +418,26 @@ export class OverlayQuickActionsService {
     );
   }
 
+  // === Középre igazítás ===
+
+  async executeCenterSelected(): Promise<void> {
+    this.loading.set(true);
+    try {
+      const result = await this.ps.runJsx(
+        'center-selected', 'actions/center-selected.jsx', {},
+      );
+      this.handleJsxResult(result,
+        data => {
+          if (data['dx'] === 0) return String(data['message']) || 'Már középen van';
+          return `${data['count']} kép középre igazítva (${data['dx']}px)`;
+        },
+        'Középre igazítás kész',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   /** Dokumentum DPI lekérése mérés futtatásával */
   private async fetchDocDpi(): Promise<void> {
     try {

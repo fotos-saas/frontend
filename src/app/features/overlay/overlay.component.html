@@ -1189,6 +1189,19 @@
       </div>
     </div>
 
+    <!-- Kijelöltek visszahelyezése -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.PIN" [size]="11" />
+        Kijelöltek visszahelyezése
+      </div>
+      <div class="qa-section__row">
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--teal" [disabled]="qa.loading()" (click)="qa.onAction('reposition-to-image', 'selected')">Visszahelyezés</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Pozíciók pótlása -->
     <div class="qa-section">
       <div class="qa-section__label">

@@ -100,6 +100,8 @@ export class OverlayQuickActionsService {
         await this.executeRefreshLabels(c.target, this.refreshNames(), this.refreshPositions());
       } else if (c.action === 'sync-positions') {
         await this.executeSyncPositions(c.target);
+      } else if (c.action === 'reposition-to-image') {
+        await this.executeRepositionToImage();
       }
     } finally {
       this.loading.set(false);
@@ -253,6 +255,17 @@ export class OverlayQuickActionsService {
         this.setResult(true, `Pozíciók frissítve (${label})`);
       }
     } catch { this.setResult(true, `Pozíciók frissítve (${label})`); }
+  }
+
+  private async executeRepositionToImage(): Promise<void> {
+    const result = await this.ps.runJsx(
+      'reposition-to-image', 'actions/reposition-to-image.jsx', {},
+    );
+
+    this.handleJsxResult(result,
+      data => `${data['moved']} layer visszahelyezve`,
+      'Visszahelyezés kész',
+    );
   }
 
   // === Private: Közös helperek ===

@@ -358,24 +358,22 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
   selectLayerById(nameLayer.id);
   doc.activeLayer = nameLayer;
 
-  // Text igazitas + sortores
+  // Text igazitas + tartalom frissites (csak ha NAME_MAP van vagy breakAfter aktiv)
   try {
     var textItem = nameLayer.textItem;
     var alignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
     if (alignMap[textAlign]) {
       textItem.justification = alignMap[textAlign];
     }
-    // Ha van NAME_MAP es tartalmazza a layer nevet → DB-bol vett helyes nev
-    var plainName;
+    // Tartalom modositas CSAK ha NAME_MAP-bol jon uj nev
     if (nameMap && nameMap[nameLayer.name]) {
-      plainName = nameMap[nameLayer.name];
-    } else {
-      plainName = textItem.contents.replace(/[\r\n]/g, " ").replace(/  +/g, " ");
+      var plainName = nameMap[nameLayer.name];
+      var newText = breakName(plainName, breakAfter);
+      if (textItem.contents !== newText) {
+        textItem.contents = newText;
+      }
     }
-    var newText = breakName(plainName, breakAfter);
-    if (textItem.contents !== newText) {
-      textItem.contents = newText;
-    }
+    // Ha nincs NAME_MAP → a meglevo szoveget NEM bantjuk (megtartjuk az eredeti sortorest)
   } catch (e) {
     return null;
   }

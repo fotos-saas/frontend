@@ -396,6 +396,8 @@ export class OverlayQuickActionsService {
     const cols = this.gridCols();
     if (cols < 1) { this.setResult(false, 'Az oszlopszám legalább 1 legyen'); return; }
 
+    // DPI lekérés a dokumentumból (mérés nélkül is pontos legyen)
+    await this.fetchDocDpi();
     const dpi = this.gridDpi || 300;
     const cmToPx = (cm: number) => Math.round((cm / 2.54) * dpi);
 
@@ -414,6 +416,19 @@ export class OverlayQuickActionsService {
       data => `${data['placed']} kép rácsba rendezve (${data['cols']}×${data['rows']})`,
       'Rácsba rendezés kész',
     );
+  }
+
+  /** Dokumentum DPI lekérése mérés futtatásával */
+  private async fetchDocDpi(): Promise<void> {
+    try {
+      const result = await this.ps.runJsx(
+        'equalize-grid', 'actions/equalize-grid-selected.jsx', {},
+      );
+      if (result?.output) {
+        const data: Record<string, unknown> = JSON.parse(result.output.trim());
+        if (typeof data['dpi'] === 'number') this.gridDpi = data['dpi'] as number;
+      }
+    } catch { /* DPI marad az előző érték */ }
   }
 
   // === Private: Közös helperek ===

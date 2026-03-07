@@ -52,7 +52,6 @@ import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
 })
 export class OverlayComponent implements OnInit {
   protected readonly ICONS = ICONS;
-  protected readonly Math = Math;
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
   private readonly teacherService = inject(PartnerTeacherService);

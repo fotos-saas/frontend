@@ -55,10 +55,11 @@ export class OverlayQuickActionsService {
   readonly gridGapPx = signal<number | null>(null);
   readonly gridAlignTop = signal(false);
   readonly gridLayerCount = signal(0);
-  readonly gridUnit = signal<'px' | 'cm'>('px');
+  readonly gridUnit = signal<'px' | 'cm'>('cm');
 
   // === Grid rendezés ===
   readonly gridCols = signal(5);
+  readonly gridRows = signal(0); // 0 = auto
   readonly gridGapH = signal(2);
   readonly gridGapV = signal(2);
   readonly gridAlign = signal<'left' | 'center' | 'right'>('center');
@@ -398,9 +399,11 @@ export class OverlayQuickActionsService {
     const dpi = this.gridDpi || 300;
     const cmToPx = (cm: number) => Math.round((cm / 2.54) * dpi);
 
+    const rows = this.gridRows();
     const result = await this.ps.runJsx(
       'equalize-grid', 'actions/equalize-grid-selected.jsx', {
         GRID_COLS: String(cols),
+        GRID_ROWS: rows > 0 ? String(rows) : '',
         GRID_GAP_H_PX: String(cmToPx(this.gridGapH())),
         GRID_GAP_V_PX: String(cmToPx(this.gridGapV())),
         GRID_ALIGN: this.gridAlign(),

@@ -240,8 +240,14 @@ function doEqualizeGrid() {
     var gridGapH = typeof CONFIG !== "undefined" && CONFIG.GRID_GAP_H_PX ? parseInt(CONFIG.GRID_GAP_H_PX, 10) : 0;
     var gridGapV = typeof CONFIG !== "undefined" && CONFIG.GRID_GAP_V_PX ? parseInt(CONFIG.GRID_GAP_V_PX, 10) : 0;
     var gridAlign = typeof CONFIG !== "undefined" && CONFIG.GRID_ALIGN ? CONFIG.GRID_ALIGN : "left";
+    var gridRowsStr = typeof CONFIG !== "undefined" && CONFIG.GRID_ROWS ? CONFIG.GRID_ROWS : "";
+    var gridMaxRows = gridRowsStr !== "" ? parseInt(gridRowsStr, 10) : 0;
     if (isNaN(gridGapH)) gridGapH = 0;
     if (isNaN(gridGapV)) gridGapV = 0;
+    if (isNaN(gridMaxRows) || gridMaxRows < 0) gridMaxRows = 0;
+
+    // Ha sorok megadva, csak annyi kepet rendezunk
+    var maxItems = gridMaxRows > 0 ? Math.min(items.length, gridCols * gridMaxRows) : items.length;
 
     // Unlink az erintett layerekrol
     for (var gu = 0; gu < items.length; gu++) {
@@ -254,10 +260,10 @@ function doEqualizeGrid() {
     var photoW = items[0].bounds.right - items[0].bounds.left;
     var photoH = items[0].bounds.bottom - items[0].bounds.top;
 
-    var totalRows = Math.ceil(items.length / gridCols);
+    var totalRows = Math.ceil(maxItems / gridCols);
     var placed = 0;
 
-    for (var gi = 0; gi < items.length; gi++) {
+    for (var gi = 0; gi < maxItems; gi++) {
       var col = gi % gridCols;
       var row = Math.floor(gi / gridCols);
       var targetLeft = startLeft + col * (photoW + gridGapH);
@@ -265,7 +271,7 @@ function doEqualizeGrid() {
 
       // Utolso (nem teli) sor igazitasa
       var isLastRow = (row === totalRows - 1);
-      var itemsInLastRow = items.length - row * gridCols;
+      var itemsInLastRow = maxItems - row * gridCols;
       if (isLastRow && itemsInLastRow < gridCols && gridAlign !== "left") {
         var totalRowWidth = itemsInLastRow * photoW + (itemsInLastRow - 1) * gridGapH;
         var fullRowWidth = gridCols * photoW + (gridCols - 1) * gridGapH;

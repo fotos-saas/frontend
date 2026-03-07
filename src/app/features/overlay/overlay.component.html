@@ -1317,11 +1317,20 @@
     <div class="qa-section__row">
       <span class="qa-section__row-label">Oszlopok</span>
       <div class="qa-section__buttons">
-        <button class="qa-btn qa-btn--sm" (click)="qa.gridCols.update(v => Math.max(1, v - 1))">−</button>
         <input type="number" class="qa-input qa-input--narrow" min="1"
           [value]="qa.gridCols()"
-          (change)="qa.gridCols.set(Math.max(1, +$any($event.target).value || 1))" />
-        <button class="qa-btn qa-btn--sm" (click)="qa.gridCols.update(v => v + 1)">+</button>
+          (change)="qa.gridCols.set(+$any($event.target).value || 1)" />
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Sorok</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input qa-input--narrow" min="0"
+          placeholder="auto"
+          [value]="qa.gridRows() || ''"
+          (change)="qa.gridRows.set(+$any($event.target).value || 0)" />
+        <span class="qa-unit" style="font-size: 9px; opacity: 0.4">0 = auto</span>
       </div>
     </div>
 

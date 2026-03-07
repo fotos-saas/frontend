@@ -17,14 +17,6 @@
   <!-- Separator after drag -->
   <div class="toolbar__sep"></div>
 
-  @if (isLoggedOut()) {
-    <!-- Logged out: login gomb -->
-    <button class="toolbar__btn toolbar__btn--login" (click)="showLogin()" matTooltip="Bejelentkezés szükséges">
-      <lucide-icon [name]="ICONS.LOG_IN" [size]="16" />
-    </button>
-    <span class="toolbar__login-label" (click)="showLogin()">Bejelentkezés</span>
-    <div class="toolbar__spacer"></div>
-  } @else {
     <!-- Toolbar groups -->
     @for (group of groups(); track group.id; let last = $last) {
       @for (item of group.items; track item.id) {
@@ -322,7 +314,6 @@
     >
       <lucide-icon [name]="ICONS.ZAPS" [size]="16" />
     </button>
-  }
 
   <!-- Hide button -->
   <button class="toolbar__btn toolbar__btn--close" (click)="hide()" matTooltip="Elrejtés (Ctrl+K)">

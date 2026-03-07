@@ -54,6 +54,7 @@ export const TOOLBAR_GROUPS: ToolbarGroup[] = [
     id: 'photoshop',
     items: [
       { id: 'sync-photos', icon: ICONS.IMAGE_DOWN, label: 'Fotók szinkronizálása', accent: 'green' },
+      { id: 'refresh-roster', icon: ICONS.USERS_ROUND, label: 'Névsor frissítés', tooltip: 'Új személyek hozzáadása / törölt személyek eltávolítása a PSD-ből', accent: 'amber' },
       { id: 'arrange-names', icon: ICONS.ALIGN_CENTER, label: 'Nevek igazítása', tooltip: 'Nevek a képek alá (kijelölt képeknél csak azokat, egyébként mindet). Unlinkeli a párokat.', accent: 'purple' },
       { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
       { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },

@@ -1202,6 +1202,51 @@
       </div>
     </div>
 
+    <!-- Kijelöltek egyenletes elosztása -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.COLUMNS_3" [size]="11" />
+        Egyenletes elosztás
+      </div>
+
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Térköz</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--cyan" [disabled]="qa.loading()" (click)="qa.measureGridGaps()">
+            Mérés
+          </button>
+          @if (qa.gridGapPx() !== null) {
+            <input type="number" class="qa-input"
+              [value]="qa.gridGapPx()"
+              (change)="qa.gridGapPx.set(+$any($event.target).value)" />
+            <span class="qa-unit">px</span>
+          }
+        </div>
+      </div>
+
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Egy szinten</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--toggle"
+            [class.qa-btn--active]="qa.gridAlignTop()"
+            (click)="qa.gridAlignTop.update(v => !v)">
+            Felső él
+          </button>
+        </div>
+      </div>
+
+      @if (qa.gridGapPx() !== null) {
+        <div class="qa-section__row">
+          <div class="qa-section__buttons">
+            <button class="qa-btn qa-btn--cyan qa-btn--full" [disabled]="qa.loading()"
+              (click)="qa.onAction('equalize-grid', 'selected')">
+              Elosztás ({{ qa.gridLayerCount() }} kép)
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
     <!-- Pozíciók pótlása -->
     <div class="qa-section">
       <div class="qa-section__label">

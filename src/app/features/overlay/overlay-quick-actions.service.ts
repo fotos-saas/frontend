@@ -51,6 +51,9 @@ export class OverlayQuickActionsService {
   readonly confirm = signal<{ action: string; target: string } | null>(null);
   readonly loading = signal(false);
   readonly reorderTarget = signal<QaTarget>('all');
+  readonly gridGapPx = signal<number | null>(null);
+  readonly gridAlignTop = signal(false);
+  readonly gridLayerCount = signal(0);
   readonly result = signal<{ success: boolean; message: string } | null>(null);
   private resultTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -102,6 +105,8 @@ export class OverlayQuickActionsService {
         await this.executeSyncPositions(c.target);
       } else if (c.action === 'reposition-to-image') {
         await this.executeRepositionToImage();
+      } else if (c.action === 'equalize-grid') {
+        await this.executeEqualizeGrid();
       }
     } finally {
       this.loading.set(false);
@@ -265,6 +270,51 @@ export class OverlayQuickActionsService {
     this.handleJsxResult(result,
       data => `${data['moved']} layer visszahelyezve`,
       'Visszahelyezés kész',
+    );
+  }
+
+  // === Grid egyenletes elosztás ===
+
+  async measureGridGaps(): Promise<void> {
+    this.loading.set(true);
+    try {
+      const result = await this.ps.runJsx(
+        'equalize-grid', 'actions/equalize-grid-selected.jsx', {},
+      );
+      try {
+        if (result?.output) {
+          const data: Record<string, unknown> = JSON.parse(result.output.trim());
+          if (data['error']) { this.setResult(false, String(data['error'])); return; }
+          if (data['mode'] === 'measure') {
+            this.ngZone.run(() => {
+              this.gridGapPx.set(data['avgGapPx'] as number);
+              this.gridLayerCount.set(data['count'] as number);
+            });
+            this.setResult(true, `${data['count']} kép, átlag gap: ${data['avgGapPx']} px`);
+          }
+        } else {
+          this.setResult(false, 'Nincs válasz a Photoshoptól');
+        }
+      } catch { this.setResult(false, 'Hiba a válasz feldolgozásában'); }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private async executeEqualizeGrid(): Promise<void> {
+    const gap = this.gridGapPx();
+    if (gap === null) { this.setResult(false, 'Előbb mérd meg a térközt'); return; }
+
+    const result = await this.ps.runJsx(
+      'equalize-grid', 'actions/equalize-grid-selected.jsx', {
+        GAP_H_PX: String(gap),
+        ALIGN_TOP: this.gridAlignTop() ? 'true' : 'false',
+      },
+    );
+
+    this.handleJsxResult(result,
+      data => `${data['moved']} kép elosztva`,
+      'Elosztás kész',
     );
   }
 

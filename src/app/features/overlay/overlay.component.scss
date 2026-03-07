@@ -2043,6 +2043,13 @@
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 
+  &--cyan {
+    border-color: rgba(34, 211, 238, 0.25);
+    color: #22d3ee;
+    &:hover { background: rgba(34, 211, 238, 0.12); border-color: rgba(34, 211, 238, 0.4); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
   &--full {
     width: 100%;
     justify-content: center;
@@ -2050,6 +2057,29 @@
     padding: 5px 10px;
     gap: 5px;
   }
+}
+
+.qa-input {
+  width: 60px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  -moz-appearance: textfield;
+
+  &:focus { border-color: rgba(34, 211, 238, 0.5); }
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+}
+
+.qa-unit {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .quick-actions-panel__confirm {

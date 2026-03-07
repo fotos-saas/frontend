@@ -2245,11 +2245,9 @@
     max-height: 220px;
     overflow-y: auto;
     font-size: 11px;
-    line-height: 1.5;
+    line-height: 1.6;
 
-    p { margin: 0 0 8px 0; }
     strong { font-weight: 600; }
-    em { font-style: italic; }
     a { color: #60a5fa; text-decoration: underline; }
 
     &::-webkit-scrollbar { width: 4px; }

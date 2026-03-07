@@ -13,6 +13,7 @@ export interface ProjectMeta {
   partnerName: string;
   partnerCompany: string;
   partnerEmail: string;
+  partnerPhone: string;
 }
 
 export interface PersonItem {

@@ -1,6 +1,13 @@
 /**
  * Szövegtranszformációk személynevekhez és pozíciókhoz.
- * A régi fotocms-admin rendszer normalizePosition() logikájából portolva.
+ * A régi fotocms-admin rendszer normalizePosition() logikájából portolva + javítva.
+ *
+ * Valós DB pozíciók alapján (57 egyedi title):
+ * igazgató, igazgatóhelyettes, főigazgató, főigazgató-helyettes,
+ * osztályfőnök, osztályfőnök-helyettes, matematika, angol nyelv,
+ * német nyelv, olasz nyelv, orosz nyelv, francia, földrajz, történelem,
+ * fizika, biológia, kémia, informatika, testnevelés, ének-zene,
+ * vizuális kultúra, mozgóképkultúra, rajz, magyar nyelv, stb.
  */
 
 export type TextTransformType =
@@ -31,40 +38,61 @@ export const TEXT_TRANSFORMS: TextTransformOption[] = [
   { type: 'trim_brackets', label: 'Zárójelek eltávolítása', needsCustomValue: false, target: 'both' },
 ];
 
-/** Rövidítés → teljes forma párok (szóhatár-érzékeny csere) */
+/**
+ * Rövidítés → teljes forma párok.
+ * FONTOS: A csere CSAK AKKOR történik, ha a teljes forma NINCS már jelen.
+ * A sorrend számít: hosszabb rövidítéseket előre! (pl. "igh" előbb mint "ig")
+ */
 const POSITION_ABBREVIATIONS: [string, string][] = [
-  ['of', 'osztályfőnök'],
+  // Beosztások
   ['igh', 'igazgatóhelyettes'],
+  ['of', 'osztályfőnök'],
+  ['ig', 'igazgató'],
+  ['kp', 'kollégiumi pedagógus'],
+  ['szkt', 'szakmai tantárgyak'],
+  // Tantárgyak
   ['tesi', 'testnevelés'],
   ['info', 'informatika'],
   ['matek', 'matematika'],
-  ['fiz', 'fizika'],
   ['biosz', 'biológia'],
   ['kem', 'kémia'],
   ['föci', 'földrajz'],
   ['töri', 'történelem'],
-  ['angol', 'angol nyelv'],
-  ['német', 'német nyelv'],
-  ['francia', 'francia nyelv'],
-  ['olasz', 'olasz nyelv'],
-  ['japán', 'japán nyelv'],
-  ['kínai', 'kínai nyelv'],
-  ['spanyol', 'spanyol nyelv'],
-  ['orosz', 'orosz nyelv'],
-  ['latin', 'latin nyelv'],
-  ['ig', 'igazgató'],
-  ['kp', 'kollégiumi pedagógus'],
-  ['szkt', 'szakmai tantárgyak'],
+  ['fiz', 'fizika'],
 ];
 
 /**
- * Pozíció normalizálása — régi rendszerből portolva.
+ * Nyelv rövidítések: "angol" → "angol nyelv", DE CSAK ha "angol nyelv" nincs már benne.
+ * Külön kezeljük mert ezek ÖNÁLLÓ szóként is érvényesek lehetnek.
+ */
+const LANGUAGE_ABBREVIATIONS: string[] = [
+  'angol', 'német', 'francia', 'olasz', 'japán', 'kínai',
+  'spanyol', 'orosz', 'latin', 'magyar',
+];
+
+/**
+ * Kötőjeles összetételek normalizálása.
+ * "igazgató-helyettes" → "igazgatóhelyettes"
+ * "osztályfőnök-helyettes" → "osztályfőnökhelyettes" — NEM, mert a DB-ben kötőjellel van!
+ * Valós DB: "igazgatóhelyettes" (egybeírva), "osztályfőnök-helyettes" (kötőjellel)
+ * Tehát: CSAK az "igazgató-helyettes" → "igazgatóhelyettes" cserét csináljuk.
+ */
+const HYPHEN_FIXES: [string, string][] = [
+  ['igazgató-helyettes', 'igazgatóhelyettes'],
+  ['intézményegység-vezető', 'intézményegységvezető'],
+];
+
+/**
+ * Pozíció normalizálása.
+ *
  * 1. Kisbetűsre
  * 2. Szóközök normalizálása
- * 3. Pontosvessző → vessző
- * 4. Zárójelek eltávolítása
- * 5. Rövidítések kifejtése
- * 6. Pont eltávolítása elejéről/végéről
+ * 3. Pontosvessző → vessző, szóköz biztosítása
+ * 4. Kötőjeles összetételek javítása
+ * 5. Rövidítések kifejtése (CSAK ha a teljes forma nincs már jelen)
+ * 6. Nyelv rövidítések ("angol" → "angol nyelv", ha nincs már)
+ * 7. Dupla "nyelv nyelv..." tisztítása
+ * 8. Pont eltávolítása elejéről/végéről
  */
 export function normalizePosition(text: string): string {
   if (!text?.trim()) return text;
@@ -79,12 +107,15 @@ export function normalizePosition(text: string): string {
   result = result.replace(/;/g, ',');
   result = result.replace(/,(\S)/g, ', $1');
 
-  // 4. Zárójelek eltávolítása
-  result = result.replace(/^[(\[{]+|[)\]}]+$/g, '');
-  result = result.trim();
+  // 4. Kötőjeles összetételek javítása
+  for (const [from, to] of HYPHEN_FIXES) {
+    result = result.replace(new RegExp(escapeRegex(from), 'g'), to);
+  }
 
-  // 5. Rövidítések kifejtése (szóhatár-érzékeny)
+  // 5. Rövidítések kifejtése — CSAK ha a teljes forma nincs már jelen
   for (const [abbr, full] of POSITION_ABBREVIATIONS) {
+    // Ha a teljes forma már benne van, skip
+    if (result.includes(full)) continue;
     const regex = new RegExp(`\\b${escapeRegex(abbr)}\\b`, 'gi');
     result = result.replace(regex, full);
   }
@@ -92,7 +123,20 @@ export function normalizePosition(text: string): string {
   // 6. "ny." → "nyelv" (pont miatt nem szóhatár)
   result = result.replace(/\bny\.\s*/gi, 'nyelv ');
 
-  // 7. Pont eltávolítása elejéről/végéről
+  // 7. Nyelv rövidítések: "angol" → "angol nyelv" (CSAK ha nincs utána már "nyelv")
+  for (const lang of LANGUAGE_ABBREVIATIONS) {
+    // Match: a nyelv szó NINCS utána közvetlenül "nyelv"
+    const regex = new RegExp(`\\b${escapeRegex(lang)}\\b(?!\\s+nyelv)`, 'gi');
+    result = result.replace(regex, `${lang} nyelv`);
+  }
+
+  // 8. Dupla "nyelv nyelv..." tisztítása (biztonsági háló)
+  result = result.replace(/(\bnyelv)(\s+nyelv)+/gi, '$1');
+
+  // 9. Zárójelek eltávolítása az elejéről/végéről
+  result = result.replace(/^[(\[{]+|[)\]}]+$/g, '');
+
+  // 10. Pont eltávolítása elejéről/végéről, végső trim
   result = result.replace(/^\.+|\.+$/g, '').trim();
 
   return result;

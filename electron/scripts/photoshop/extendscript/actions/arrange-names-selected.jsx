@@ -208,7 +208,7 @@ function breakName(name, breakAfter) {
   for (var c = 0; c < words.length; c++) {
     if (!isPrefix(words[c])) realCount++;
   }
-  if (realCount < 3) return name;
+  // Kotojelnel: ha van kotojeles szo es legalabb 2 szo van, torjuk a kotojel utan
   var hyphenIndex = -1;
   for (var h = 0; h < words.length; h++) {
     if (words[h].indexOf("-") !== -1) { hyphenIndex = h; break; }
@@ -216,6 +216,7 @@ function breakName(name, breakAfter) {
   if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
     return words.slice(0, hyphenIndex + 1).join(" ") + "\r" + words.slice(hyphenIndex + 1).join(" ");
   }
+  if (realCount < 3) return name;
   var realWordCount = 0;
   var breakIndex = -1;
   for (var i = 0; i < words.length; i++) {

@@ -54,6 +54,8 @@ export class ExpandedTeacherPopupComponent {
   readonly loadingPhotos = signal(false);
   readonly showPhotoChooser = signal(false);
   readonly linking = signal(false);
+  /** Auto-link után beállított linkedGroup (amíg a data reload nem frissíti) */
+  private linkedGroupOverride = signal<string | null>(null);
 
   readonly occurrences = computed<OccurrenceItem[]>(() => {
     const viewData = this.dataService.data();
@@ -134,7 +136,7 @@ export class ExpandedTeacherPopupComponent {
   });
 
   readonly photoChooserMode = computed<PhotoChooserMode | null>(() => {
-    const lg = this.firstLinkedGroup();
+    const lg = this.linkedGroupOverride() ?? this.firstLinkedGroup();
     if (lg) return { kind: 'linkedGroup', linkedGroup: lg };
     const aid = this.firstArchiveId();
     if (aid) return { kind: 'individual', archiveId: aid, teacherName: this.teacherName() };
@@ -182,6 +184,12 @@ export class ExpandedTeacherPopupComponent {
   }
 
   openPhotoChooser(): void {
+    const archiveIds = this.allArchiveIds();
+    // Ha több nem-linkelt archívum van, csendben link-eljük → data reload → utána nyitjuk
+    if (!this.firstLinkedGroup() && archiveIds.length > 1) {
+      this.autoLinkThenOpen(archiveIds);
+      return;
+    }
     this.showPhotoChooser.set(true);
   }
 
@@ -201,7 +209,7 @@ export class ExpandedTeacherPopupComponent {
   }
 
   selectArchivePhoto(photo: LinkedGroupPhoto): void {
-    const linkedGroup = this.firstLinkedGroup();
+    const linkedGroup = this.linkedGroupOverride() ?? this.firstLinkedGroup();
     const archiveIds = this.allArchiveIds();
 
     if (linkedGroup) {
@@ -227,7 +235,7 @@ export class ExpandedTeacherPopupComponent {
     const activePhoto = this.activeArchivePhoto();
     if (!activePhoto) return;
 
-    const linkedGroup = this.firstLinkedGroup();
+    const linkedGroup = this.linkedGroupOverride() ?? this.firstLinkedGroup();
     const archiveIds = this.allArchiveIds();
 
     if (linkedGroup) {
@@ -290,17 +298,32 @@ export class ExpandedTeacherPopupComponent {
   private autoLinkAndSetPhoto(archiveIds: number[], mediaId: number): void {
     this.teacherService.linkTeachers(archiveIds)
       .pipe(
-        switchMap(res =>
-          this.teacherService.setGroupActivePhoto(res.data.linkedGroup, mediaId)
-        ),
+        switchMap(res => {
+          this.linkedGroupOverride.set(res.data.linkedGroup);
+          return this.teacherService.setGroupActivePhoto(res.data.linkedGroup, mediaId);
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ next: () => this.dataService.reloadData() });
+      .subscribe({ next: () => { this.reloadPhotos(); this.dataService.reloadData(); } });
+  }
+
+  /** Csendben link-el, majd megnyitja a fotóválasztó dialógust linkedGroup módban */
+  private autoLinkThenOpen(archiveIds: number[]): void {
+    this.teacherService.linkTeachers(archiveIds)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.linkedGroupOverride.set(res.data.linkedGroup);
+          this.archivePhotos.set(res.data.photos);
+          this.dataService.reloadData();
+          this.showPhotoChooser.set(true);
+        },
+      });
   }
 
   /** Fotólista újratöltése a jelenlegi állapot szerint */
   private reloadPhotos(): void {
-    const linkedGroup = this.firstLinkedGroup();
+    const linkedGroup = this.linkedGroupOverride() ?? this.firstLinkedGroup();
     if (linkedGroup) {
       this.teacherService.getLinkedGroupPhotos(linkedGroup)
         .pipe(takeUntilDestroyed(this.destroyRef))

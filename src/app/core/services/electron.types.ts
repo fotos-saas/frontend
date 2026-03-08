@@ -102,14 +102,12 @@ interface OverlayAPI {
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
 }
 
-type TabCleanupFn = () => void;
-
 interface TabAPI {
-  onNewTab: (callback: () => void) => TabCleanupFn;
-  onCloseTab: (callback: () => void) => TabCleanupFn;
-  onNextTab: (callback: () => void) => TabCleanupFn;
-  onPrevTab: (callback: () => void) => TabCleanupFn;
-  onSwitchTo: (callback: (index: number) => void) => TabCleanupFn;
+  onNewTab: (callback: () => void) => CleanupFn;
+  onCloseTab: (callback: () => void) => CleanupFn;
+  onNextTab: (callback: () => void) => CleanupFn;
+  onPrevTab: (callback: () => void) => CleanupFn;
+  onSwitchTo: (callback: (index: number) => void) => CleanupFn;
 }
 
 interface TouchBarAPI {

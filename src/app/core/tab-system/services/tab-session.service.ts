@@ -2,7 +2,7 @@
  * TabSessionService — tab session perzisztencia electron-store-ba
  */
 
-import { Injectable, inject, NgZone, DestroyRef } from '@angular/core';
+import { Injectable, inject, DestroyRef } from '@angular/core';
 import { ElectronService } from '../../services/electron.service';
 import { LoggerService } from '../../services/logger.service';
 import type { TabSession } from '../models/tab.model';
@@ -13,7 +13,6 @@ const SESSION_KEY = 'tab-session';
 export class TabSessionService {
   private readonly electronService = inject(ElectronService);
   private readonly logger = inject(LoggerService);
-  private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
   private pendingSession: TabSession | null = null;
@@ -78,6 +77,17 @@ export class TabSessionService {
       if (!Array.isArray(session.tabs) || session.tabs.length === 0) {
         return null;
       }
+
+      // URL biztonsagi validalas: csak belso route-ok elfogadasa
+      session.tabs = session.tabs.filter(t =>
+        typeof t.url === 'string' &&
+        t.url.startsWith('/') &&
+        !t.url.startsWith('//') &&
+        typeof t.title === 'string' &&
+        t.title.length < 200
+      );
+
+      if (session.tabs.length === 0) return null;
 
       this.logger.info('Tab session betoltve', { tabCount: session.tabs.length });
       return session;

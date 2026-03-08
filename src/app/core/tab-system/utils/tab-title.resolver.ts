@@ -46,7 +46,7 @@ export class TabTitleResolver {
     // Fallback: URL utolso szegmensebol
     const segments = url.split('/').filter(Boolean);
     const last = segments[segments.length - 1] || 'Uj tab';
-    const title = last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, ' ');
+    const title = (last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, ' ')).slice(0, 50);
     return { title, icon: ICONS.FILE };
   }
 

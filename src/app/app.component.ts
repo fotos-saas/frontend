@@ -1,8 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, DestroyRef, computed } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, take } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, take } from 'rxjs/operators';
 import { CapacitorService } from './core/services/capacitor.service';
 import { AppUpdateService } from './core/services/app-update.service';
 import { SentryService } from './core/services/sentry.service';
@@ -41,6 +41,20 @@ export class AppComponent implements OnInit {
     readonly tabManager = inject(TabManagerService);
     private readonly tabKeyboard = inject(TabKeyboardService);
 
+    /** Aktualis URL signal (NavigationEnd-bol) */
+    private readonly currentUrl = toSignal(
+        this.router.events.pipe(
+            filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+            map(e => e.urlAfterRedirects),
+        ),
+        { initialValue: this.router.url },
+    );
+
+    /** Tab bar CSAK Electron-ban jelenik meg ES NEM overlay route-on */
+    readonly showTabBar = computed(() =>
+        this.tabManager.isTabSystemEnabled() && !this.currentUrl().startsWith('/overlay')
+    );
+
     ngOnInit(): void {
         // Setup deep link handling for mobile app
         this.setupDeepLinkHandler();
@@ -56,8 +70,9 @@ export class AppComponent implements OnInit {
         // Splash screen eltüntetése az első NavigationEnd-re
         this.hideSplashOnFirstNavigation();
 
-        // Tab rendszer inicializalasa (csak Electron modban)
-        if (this.tabManager.isTabSystemEnabled()) {
+        // Tab rendszer inicializalasa (csak Electron modban, overlay kivetelevel)
+        const isOverlay = this.router.url.startsWith('/overlay');
+        if (this.tabManager.isTabSystemEnabled() && !isOverlay) {
             this.tabManager.initialize().catch(err => {
                 console.error('[TabSystem] Inicializalas hiba:', err);
             });

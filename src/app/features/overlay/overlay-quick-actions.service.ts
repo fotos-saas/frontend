@@ -442,6 +442,28 @@ export class OverlayQuickActionsService {
     this.borderRadius.set(Math.max(1, Math.round(value)));
   }
 
+  /** Toolbar gombról: mindig csak kijelölt layerekre */
+  async applyBorderRadiusSelected(): Promise<void> {
+    if (this.loading()) return;
+    this.loading.set(true);
+    try {
+      const radius = this.borderRadius();
+      if (radius <= 0) { this.setResult(false, 'A sugár legalább 1px legyen'); return; }
+
+      const result = await this.ps.runJsx(
+        'border-radius', 'actions/apply-border-radius.jsx',
+        { radius, useSelectedLayers: true },
+      );
+
+      this.handleJsxResult(result,
+        data => `${data['masked']} layer lekerekítve (${data['skipped']} kihagyva)`,
+        'Lekerekítés kész',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   private async executeBorderRadius(): Promise<void> {
     const radius = this.borderRadius();
     if (radius <= 0) { this.setResult(false, 'A sugár legalább 1px legyen'); return; }

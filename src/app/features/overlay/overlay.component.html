@@ -303,6 +303,39 @@
       <span class="toolbar__btn-label">Gyors akciók</span>
     </button>
 
+    <!-- Lekerekítés gomb (csak kijelölt layerekre) -->
+    <div class="toolbar__btn-wrap">
+      <button
+        class="toolbar__btn toolbar__btn--amber"
+        [class.toolbar__btn--active]="openSubmenu() === 'border-radius'"
+        [class.toolbar__btn--busy]="qa.loading()"
+        [disabled]="qa.loading()"
+        (click)="onCommand('border-radius')"
+        matTooltip="Lekerekítés (kijelöltek)"
+      >
+        @if (qa.loading()) {
+          <span class="toolbar__spinner"></span>
+        } @else {
+          <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="16" />
+        }
+      </button>
+      <div
+        class="toolbar__inline-collapse"
+        [class.toolbar__inline-collapse--open]="openSubmenu() === 'border-radius'"
+      >
+        <div class="toolbar__inline-collapse-inner">
+          <input type="number" class="toolbar__input toolbar__input--narrow" min="1" max="500"
+            [value]="qa.borderRadius()"
+            (change)="qa.setBorderRadius(+$any($event.target).value || 30)"
+            (click)="$event.stopPropagation()" />
+          <span class="toolbar__input-label">px</span>
+          <button class="toolbar__btn toolbar__btn--sm toolbar__btn--amber" [disabled]="qa.loading()" (click)="applyBorderRadius(); $event.stopPropagation()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Grid elosztás gomb -->
     <button
       class="toolbar__btn toolbar__btn--cyan"
@@ -1228,40 +1261,6 @@
       </div>
     </div>
 
-    <!-- Lekerekítés -->
-    <div class="qa-section">
-      <div class="qa-section__label">
-        <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="11" />
-        Lekerekítés
-      </div>
-      <div class="qa-section__row">
-        <span class="qa-section__row-label">Sugár (px)</span>
-        <div class="qa-section__buttons">
-          <input type="number" class="qa-input qa-input--narrow" min="1" max="500"
-            [value]="qa.borderRadius()"
-            (change)="qa.setBorderRadius(+$any($event.target).value || 30)" />
-        </div>
-      </div>
-      <div class="qa-section__row">
-        <span class="qa-section__row-label">Csak kijelöltek</span>
-        <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--toggle"
-            [class.qa-btn--active]="qa.borderRadiusUseSelected()"
-            (click)="qa.borderRadiusUseSelected.set(!qa.borderRadiusUseSelected())">
-            @if (qa.borderRadiusUseSelected()) {
-              <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-            } @else {
-              <lucide-icon [name]="ICONS.MINUS" [size]="12" />
-            }
-          </button>
-        </div>
-      </div>
-      <div class="qa-section__row">
-        <div class="qa-section__buttons">
-          <button class="qa-btn qa-btn--amber" [disabled]="qa.loading()" (click)="qa.onAction('border-radius', 'all')">Alkalmazás</button>
-        </div>
-      </div>
-    </div>
 
   </div>
 

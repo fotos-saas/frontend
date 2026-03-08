@@ -85,5 +85,5 @@ export const ALIGN_MAP: Record<string, string> = {
 };
 
 export const SUBMENU_IDS = new Set([
-  'arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu', 'refresh-placed-json',
+  'arrange-names', 'sync-photos', 'generate-sample', 'generate-final', 'sort-menu', 'refresh-placed-json', 'border-radius',
 ]);

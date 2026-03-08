@@ -357,6 +357,7 @@ export class OverlayComponent implements OnInit {
   toggleQuickActions(): void { this.qa.togglePanel(); }
   closeQuickActions(): void { this.qa.closePanel(); }
   toggleGridPanel(): void { this.qa.toggleGridPanel(); }
+  applyBorderRadius(): void { this.qa.applyBorderRadiusSelected(); }
 
   // ============ Email Panel (delegálva: OverlayEmailService) ============
   toggleEmailPanel(): void {

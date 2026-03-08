@@ -3,11 +3,25 @@
 
 .pagination {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 16px;
+}
+
+.pagination__per-page {
+  flex-shrink: 0;
+}
+
+.per-page-select {
+  min-width: 100px;
+}
+
+.pagination__nav-wrapper {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  margin-top: 24px;
-  padding: 16px;
 }
 
 .pagination__nav {
@@ -65,6 +79,8 @@
 
 @media (max-width: 640px) {
   .pagination {
+    flex-direction: column;
+    gap: 12px;
     padding: 12px 8px;
     margin-top: 16px;
   }

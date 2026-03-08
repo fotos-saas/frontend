@@ -226,6 +226,8 @@
       [currentPage]="state.filterState.page()"
       [totalPages]="state.totalPages()"
       [totalItems]="state.totalTeachers()"
+      [perPage]="state.perPage()"
+      (perPageChange)="state.onPerPageChange($event)"
       itemLabel="tanár"
       (pageChange)="state.filterState.setPage($event)"
     />

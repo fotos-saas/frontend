@@ -86,18 +86,14 @@
       }
     </div>
 
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="page-btn" [disabled]="filterState.page() <= 1"
-          (click)="filterState.setPage(filterState.page() - 1)">
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" /> Előző
-        </button>
-        <span class="page-info">{{ filterState.page() }} / {{ totalPages() }}</span>
-        <button class="page-btn" [disabled]="filterState.page() >= totalPages()"
-          (click)="filterState.setPage(filterState.page() + 1)">
-          Következő <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
-      </div>
-    }
+    <app-list-pagination
+      [currentPage]="filterState.page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalBookings()"
+      itemLabel="foglalás"
+      [perPage]="perPage()"
+      (pageChange)="filterState.setPage($event)"
+      (perPageChange)="onPerPageChange($event)"
+    />
   }
 </div>

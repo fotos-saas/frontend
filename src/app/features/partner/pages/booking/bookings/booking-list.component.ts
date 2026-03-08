@@ -69,6 +69,7 @@ export class BookingListComponent implements OnInit {
 
   bookings = signal<Booking[]>([]);
   totalPages = signal(1);
+  totalBookings = signal(0);
 
   ngOnInit(): void {
     this.loadBookings();
@@ -99,6 +100,7 @@ export class BookingListComponent implements OnInit {
         next: (res) => {
           this.bookings.set(res.data ?? []);
           this.totalPages.set((res.meta?.['last_page'] as number) ?? 1);
+          this.totalBookings.set((res.meta?.['total'] as number) ?? 0);
           this.filterState.loading.set(false);
         },
         error: () => this.filterState.loading.set(false),

@@ -4,6 +4,7 @@ import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { PartnerSchoolService } from '../../services/partner-school.service';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { TeacherListItem, TeacherGroupRow, SyncResultItem } from '../../models/teacher.models';
 import { SchoolItem } from '../../models/partner.models';
 import { ArchivePersonInSchool, ArchiveSchoolGroup } from '../../models/archive.models';
@@ -20,8 +21,10 @@ import { useFilterState } from '../../../../shared/utils/use-filter-state';
 export class TeacherListStateService {
   private readonly teacherService = inject(PartnerTeacherService);
   private readonly schoolService = inject(PartnerSchoolService);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly perPage = signal(this.paginationPrefs.getPerPage(18));
   readonly teachers = signal<TeacherListItem[]>([]);
   readonly totalPages = signal(1);
   readonly totalTeachers = signal(0);
@@ -82,7 +85,7 @@ export class TeacherListStateService {
 
     this.teacherService.getTeachers({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       school_id: schoolId ? parseInt(schoolId, 10) : undefined,
       class_year: classYear || undefined,
@@ -115,6 +118,12 @@ export class TeacherListStateService {
           });
         },
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadTeachers();
   }
 
   deleteTeacher(id: number): void {

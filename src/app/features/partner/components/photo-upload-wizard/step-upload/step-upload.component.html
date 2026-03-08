@@ -52,13 +52,17 @@
               </button>
             </div>
             <div class="photo-info">
-              <span class="photo-name" [title]="photo.filename">
-                {{ photo.filename | slice:0:20 }}{{ photo.filename.length > 20 ? '...' : '' }}
-              </span>
               @if (photo.iptcTitle) {
-                <span class="iptc-badge" title="IPTC név: {{ photo.iptcTitle }}">
-                  <lucide-icon [name]="ICONS.USER" [size]="10" />
+                <span class="photo-name" [title]="photo.iptcTitle">
                   {{ photo.iptcTitle }}
+                </span>
+                <span class="iptc-badge" [title]="photo.filename">
+                  <lucide-icon [name]="ICONS.FILE" [size]="10" />
+                  {{ photo.filename | slice:0:16 }}{{ photo.filename.length > 16 ? '...' : '' }}
+                </span>
+              } @else {
+                <span class="photo-name" [title]="photo.filename">
+                  {{ photo.filename | slice:0:20 }}{{ photo.filename.length > 20 ? '...' : '' }}
                 </span>
               }
             </div>

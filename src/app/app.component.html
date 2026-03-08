@@ -9,8 +9,8 @@
   Ugrás a fő tartalomra
 </a>
 
-<!-- Tab bar (csak Electron modban, overlay kivetelevel) -->
-@if (showTabBar()) {
+<!-- Tab bar (csak Electron modban) -->
+@if (tabManager.isTabSystemEnabled()) {
   <app-tab-bar></app-tab-bar>
   <app-tab-content-host>
     <router-outlet></router-outlet>

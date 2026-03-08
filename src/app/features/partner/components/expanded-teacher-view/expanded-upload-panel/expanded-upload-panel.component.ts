@@ -5,11 +5,12 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
 import { ExpandedUploadedPhoto } from '../expanded-teacher-view.types';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { DropZoneComponent } from '@shared/components/drop-zone/drop-zone.component';
 
 @Component({
   selector: 'app-expanded-upload-panel',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, ConfirmDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, ConfirmDialogComponent, DropZoneComponent],
   templateUrl: './expanded-upload-panel.component.html',
   styleUrl: './expanded-upload-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,12 @@ export class ExpandedUploadPanelComponent {
     if (input.files?.length) {
       this.dataService.uploadPhotos(Array.from(input.files));
       input.value = '';
+    }
+  }
+
+  onDropZoneFiles(files: File[]): void {
+    if (files.length > 0) {
+      this.dataService.uploadPhotos(files);
     }
   }
 

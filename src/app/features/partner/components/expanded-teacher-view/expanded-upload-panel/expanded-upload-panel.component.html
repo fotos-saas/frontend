@@ -96,10 +96,14 @@
           }
         </div>
       } @else {
-        <div class="upload-panel__empty">
-          <lucide-icon [name]="ICONS.IMAGE" [size]="32" />
-          <span>Húzd ide a fotókat, vagy kattints a "Fotó feltöltés" gombra</span>
-        </div>
+        <app-drop-zone
+          [uploading]="uploading()"
+          [uploadProgress]="uploadProgress()"
+          accept=".jpg,.jpeg,.png"
+          hint="JPG vagy PNG"
+          maxSize="max. 50 kép"
+          (filesSelected)="onDropZoneFiles($event)"
+        />
       }
     </div>
   }

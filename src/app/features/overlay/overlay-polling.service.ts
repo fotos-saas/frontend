@@ -14,6 +14,7 @@ export class OverlayPollingService {
   private readonly ngZone = inject(NgZone);
 
   readonly isTurbo = signal(false);
+  readonly isEnabled = signal(true);
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -55,7 +56,19 @@ export class OverlayPollingService {
     destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', handler));
   }
 
+  toggleEnabled(): void {
+    const enabling = !this.isEnabled();
+    this.isEnabled.set(enabling);
+    if (enabling) {
+      this.resumePolling();
+    } else {
+      if (this.isTurbo()) this.stopTurbo();
+      this.pausePolling();
+    }
+  }
+
   toggleTurbo(): void {
+    if (!this.isEnabled()) return;
     if (this.isTurbo()) {
       this.stopTurbo();
     } else {
@@ -105,13 +118,14 @@ export class OverlayPollingService {
   }
 
   private resumePolling(): void {
+    if (!this.isEnabled()) return;
     const interval = this.isTurbo() ? POLL_TURBO : this.lastPollInterval;
     this.executePoll();
     this.pollTimer = setInterval(() => this.executePoll(), interval);
   }
 
   private executePoll(): void {
-    if (!this.isVisible || !this.pollCallback) return;
+    if (!this.isEnabled() || !this.isVisible || !this.pollCallback) return;
     this.pollCallback();
   }
 }

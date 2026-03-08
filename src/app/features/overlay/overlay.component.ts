@@ -81,6 +81,7 @@ export class OverlayComponent implements OnInit {
   // Alias-ok a service signal-ekre (template compatibility)
   readonly activeDoc = this.polling.activeDoc;
   readonly isTurbo = this.polling.isTurbo;
+  readonly isPollingEnabled = this.polling.isEnabled;
   readonly busyCommand = this.ps.busyCommand;
   readonly persons = this.projectService.persons;
   readonly loadingPersons = this.projectService.loadingPersons;
@@ -379,6 +380,7 @@ export class OverlayComponent implements OnInit {
   copyEmailHtml(html: string, label: string): void { this.emailService.copyHtml(html, label); }
 
   // ============ Turbo & UI ============
+  togglePolling(): void { this.polling.toggleEnabled(); }
   toggleTurbo(): void { this.polling.toggleTurbo(); }
   hide(): void { window.electronAPI?.overlay.hide(); }
   showLogin(): void { window.electronAPI?.overlay.showMainWindow(); }

@@ -358,10 +358,22 @@
 
     <div class="toolbar__sep"></div>
 
+    <!-- PS polling ki/be -->
+    <button
+      class="toolbar__btn"
+      [class.toolbar__btn--polling-off]="!isPollingEnabled()"
+      [class.toolbar__btn--polling-on]="isPollingEnabled()"
+      (click)="togglePolling()"
+      [matTooltip]="isPollingEnabled() ? 'PS polling kikapcsolása' : 'PS polling bekapcsolása'"
+    >
+      <lucide-icon [name]="isPollingEnabled() ? ICONS.WIFI : ICONS.WIFI_OFF" [size]="16" />
+    </button>
+
     <!-- Turbo gomb -->
     <button
       class="toolbar__btn"
       [class.toolbar__btn--turbo-active]="isTurbo()"
+      [disabled]="!isPollingEnabled()"
       (click)="toggleTurbo()"
       [matTooltip]="isTurbo() ? 'Turbo kikapcsolás' : 'Turbo polling'"
     >

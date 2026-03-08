@@ -2,7 +2,7 @@
  * TabSessionService — tab session perzisztencia electron-store-ba
  */
 
-import { Injectable, inject, NgZone, DestroyRef } from '@angular/core';
+import { Injectable, inject, NgZone } from '@angular/core';
 import { ElectronService } from '../../services/electron.service';
 import { LoggerService } from '../../services/logger.service';
 import type { TabSession } from '../models/tab.model';
@@ -14,29 +14,11 @@ export class TabSessionService {
   private readonly electronService = inject(ElectronService);
   private readonly logger = inject(LoggerService);
   private readonly ngZone = inject(NgZone);
-  private readonly destroyRef = inject(DestroyRef);
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
-  private pendingSession: TabSession | null = null;
-
-  constructor() {
-    this.destroyRef.onDestroy(() => {
-      // Fuggeben levo mentes vegrehajtasa es timeout takaritasa
-      if (this.saveTimeout) {
-        clearTimeout(this.saveTimeout);
-        this.saveTimeout = null;
-      }
-      if (this.pendingSession) {
-        this.saveImmediate(this.pendingSession);
-        this.pendingSession = null;
-      }
-    });
-  }
 
   /** Session mentes (debounce-olt, 500ms) */
   save(session: TabSession): void {
     if (!this.electronService.isElectron) return;
-
-    this.pendingSession = session;
 
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
@@ -45,7 +27,6 @@ export class TabSessionService {
     this.saveTimeout = setTimeout(() => {
       this.saveImmediate(session);
       this.saveTimeout = null;
-      this.pendingSession = null;
     }, 500);
   }
 

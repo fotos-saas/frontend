@@ -37,11 +37,8 @@ export class TabKeyboardService {
     });
   }
 
-  /** Angular oldalon kezelt billentyuk (CSAK nem-Electron modban — Electron-ben IPC kezeli) */
+  /** Angular oldalon kezelt billentyuk (fallback ha az Electron IPC nem fogja el) */
   private setupBrowserKeyboardShortcuts(): void {
-    // Electron modban az IPC kezeli a billentyuparancsokat (before-input-event)
-    if (this.electronService.isElectron) return;
-
     fromEvent<KeyboardEvent>(document, 'keydown').pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(event => {

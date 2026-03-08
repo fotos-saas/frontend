@@ -10,27 +10,10 @@ import log from 'electron-log/main';
 
 export function registerTabHandlers(mainWindow: BrowserWindow): void {
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.type !== 'keyDown') return;
+    const isMod = process.platform === 'darwin' ? input.meta : input.control;
+    if (!isMod || input.type !== 'keyDown') return;
 
-    const isMac = process.platform === 'darwin';
-    const isMod = isMac ? input.meta : input.control;
-    const key = input.key.toLowerCase();
-
-    // Ctrl+Tab / Ctrl+Shift+Tab — mindket platformon Ctrl-tel (macOS-en Cmd+Tab rendszer szintu)
-    if (key === 'tab' && input.control) {
-      event.preventDefault();
-      if (input.shift) {
-        mainWindow.webContents.send('tab:prev-tab');
-      } else {
-        mainWindow.webContents.send('tab:next-tab');
-      }
-      return;
-    }
-
-    // Cmd/Ctrl + billentyuk
-    if (!isMod) return;
-
-    switch (key) {
+    switch (input.key.toLowerCase()) {
       case 't':
         event.preventDefault();
         mainWindow.webContents.send('tab:new-tab');
@@ -39,6 +22,18 @@ export function registerTabHandlers(mainWindow: BrowserWindow): void {
       case 'w':
         event.preventDefault();
         mainWindow.webContents.send('tab:close-tab');
+        break;
+
+      case 'tab':
+        // Ctrl+Tab (NEM Cmd+Tab macOS-en, az rendszer szintu)
+        if (!input.meta || !input.control) {
+          event.preventDefault();
+          if (input.shift) {
+            mainWindow.webContents.send('tab:prev-tab');
+          } else {
+            mainWindow.webContents.send('tab:next-tab');
+          }
+        }
         break;
 
       default: {

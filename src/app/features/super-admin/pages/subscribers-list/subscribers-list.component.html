@@ -104,6 +104,8 @@
       [totalPages]="totalPages()"
       [totalItems]="totalSubscribers()"
       itemLabel="előfizető"
+      [perPage]="perPage()"
+      (perPageChange)="onPerPageChange($event)"
       (pageChange)="filterState.setPage($event)"
     />
   }

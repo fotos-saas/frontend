@@ -131,6 +131,8 @@
       [totalPages]="totalPages()"
       [totalItems]="totalClients()"
       itemLabel="ügyfél"
+      [perPage]="perPage()"
+      (perPageChange)="onPerPageChange($event)"
       (pageChange)="filterState.setPage($event)"
     />
     </div>

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { PartnerOrdersService, PartnerClient } from '../../../services/partner-orders.service';
 import { ClientEditModalComponent } from '../../../components/client-edit-modal/client-edit-modal.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -39,6 +40,7 @@ export class PartnerClientListComponent implements OnInit {
   private readonly ordersService = inject(PartnerOrdersService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
 
@@ -57,6 +59,8 @@ export class PartnerClientListComponent implements OnInit {
     defaultSortDir: 'asc',
     onStateChange: () => this.loadClients(),
   });
+
+  perPage = signal(this.paginationPrefs.getPerPage(18));
 
   clients = signal<PartnerClient[]>([]);
   totalPages = signal(1);
@@ -77,7 +81,7 @@ export class PartnerClientListComponent implements OnInit {
 
     this.ordersService.getClients({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -146,6 +150,12 @@ export class PartnerClientListComponent implements OnInit {
           this.closeDeleteConfirm();
         }
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadClients();
   }
 
   getInitials(name: string): string {

@@ -54,6 +54,8 @@
       [totalPages]="totalPages()"
       [totalItems]="totalSchools()"
       itemLabel="iskola"
+      [perPage]="perPage()"
+      (perPageChange)="onPerPageChange($event)"
       (pageChange)="filterState.setPage($event)"
     />
   }

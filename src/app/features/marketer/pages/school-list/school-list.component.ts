@@ -3,6 +3,7 @@ import { LoggerService } from '@core/services/logger.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { MarketerService, SchoolListItem, PaginatedResponse } from '../../services/marketer.service';
 import { useFilterState, FilterStateApi } from '../../../../shared/utils/use-filter-state';
 import { SmartFilterBarComponent } from '../../../../shared/components/smart-filter-bar';
@@ -25,6 +26,7 @@ export class SchoolListComponent implements OnInit {
   private marketerService = inject(MarketerService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   // Filter state - központosított perzisztencia rendszerrel
   readonly filterState = useFilterState({
@@ -34,6 +36,8 @@ export class SchoolListComponent implements OnInit {
     defaultSortDir: 'asc',
     onStateChange: () => this.loadSchools(),
   });
+
+  perPage = signal(this.paginationPrefs.getPerPage(18));
 
   schools = signal<SchoolListItem[]>([]);
   cities = signal<string[]>([]);
@@ -71,7 +75,7 @@ export class SchoolListComponent implements OnInit {
     const filters = this.filterState.filters();
     this.marketerService.getSchools({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       city: filters['city'] || undefined
     })
@@ -88,6 +92,12 @@ export class SchoolListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadSchools();
   }
 
   viewSchoolProjects(school: SchoolListItem): void {

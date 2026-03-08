@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { SuperAdminService, SubscriberListItem } from '../../services/super-admin.service';
 import { ICONS, getSubscriptionStatusLabel } from '../../../../shared/constants';
 import { useFilterState } from '../../../../shared/utils/use-filter-state';
@@ -39,6 +40,7 @@ export class SubscribersListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly plansService = inject(PlansService);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
 
@@ -96,6 +98,8 @@ export class SubscribersListComponent implements OnInit {
     },
   ]);
 
+  perPage = signal(this.paginationPrefs.getPerPage(18));
+
   subscribers = signal<SubscriberListItem[]>([]);
   totalPages = signal(1);
   totalSubscribers = signal(0);
@@ -116,7 +120,7 @@ export class SubscribersListComponent implements OnInit {
 
     this.service.getSubscribers({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       plan: this.filterState.filters().plan || undefined,
       status: this.filterState.filters().status || undefined,
@@ -135,6 +139,12 @@ export class SubscribersListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadSubscribers();
   }
 
   // Központi konstansból (rövid verzió)

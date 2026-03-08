@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { MarketerService, ProjectListItem, PaginatedResponse } from '../../services/marketer.service';
 import { SharedQrCodeModalComponent } from '../../../../shared/components/qr-code-modal/qr-code-modal.component';
 import { IQrCodeService } from '../../../../shared/interfaces/qr-code.interface';
@@ -30,6 +31,7 @@ export class ProjectListComponent implements OnInit {
   private marketerService = inject(MarketerService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   /** ICONS konstansok a template-hez */
   readonly ICONS = ICONS;
@@ -63,6 +65,8 @@ export class ProjectListComponent implements OnInit {
     onStateChange: () => this.loadProjects(),
   });
 
+  perPage = signal(this.paginationPrefs.getPerPage(15));
+
   projects = signal<ProjectListItem[]>([]);
   totalPages = signal(1);
   totalProjects = signal(0);
@@ -81,7 +85,7 @@ export class ProjectListComponent implements OnInit {
 
     this.marketerService.getProjects({
       page: this.filterState.page(),
-      per_page: 15,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       sort_by: this.filterState.sortBy() as 'created_at' | 'class_year',
       sort_dir: this.filterState.sortDir()
@@ -118,6 +122,12 @@ export class ProjectListComponent implements OnInit {
 
   onQrCodeChanged(): void {
     // Frissítjük a listát, mert QR kód változott
+    this.loadProjects();
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
     this.loadProjects();
   }
 

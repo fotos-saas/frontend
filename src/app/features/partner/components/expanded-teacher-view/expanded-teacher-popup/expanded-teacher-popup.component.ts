@@ -200,6 +200,23 @@ export class ExpandedTeacherPopupComponent {
     this.dataService.reloadData();
   }
 
+  selectArchivePhoto(photo: LinkedGroupPhoto): void {
+    const linkedGroup = this.firstLinkedGroup();
+    const archiveIds = this.allArchiveIds();
+
+    if (linkedGroup) {
+      this.teacherService.setGroupActivePhoto(linkedGroup, photo.mediaId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: () => { this.reloadPhotos(); this.dataService.reloadData(); } });
+    } else if (archiveIds.length > 1) {
+      this.autoLinkAndSetPhoto(archiveIds, photo.mediaId);
+    } else if (archiveIds.length === 1) {
+      this.teacherService.setActivePhotoByMedia(archiveIds[0], photo.mediaId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: () => { this.reloadPhotos(); this.dataService.reloadData(); } });
+    }
+  }
+
   applyOverride(personId: number): void {
     const activePhoto = this.activeArchivePhoto();
     if (!activePhoto) return;

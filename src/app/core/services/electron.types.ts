@@ -102,6 +102,16 @@ interface OverlayAPI {
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
 }
 
+type TabCleanupFn = () => void;
+
+interface TabAPI {
+  onNewTab: (callback: () => void) => TabCleanupFn;
+  onCloseTab: (callback: () => void) => TabCleanupFn;
+  onNextTab: (callback: () => void) => TabCleanupFn;
+  onPrevTab: (callback: () => void) => TabCleanupFn;
+  onSwitchTo: (callback: (index: number) => void) => TabCleanupFn;
+}
+
 interface TouchBarAPI {
   setContext: (context: string) => Promise<boolean>;
   setItems: (items: unknown[]) => Promise<boolean>;
@@ -585,6 +595,7 @@ export interface ElectronAPI {
   };
   nativeDrag: NativeDragAPI;
   overlay: OverlayAPI;
+  tab: TabAPI;
   touchBar: TouchBarAPI;
   autoUpdate: AutoUpdateAPI;
   photoshop: PhotoshopAPI;

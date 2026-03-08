@@ -622,6 +622,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
   },
 
+  // ============ Tab rendszer (billentyuparancsok IPC) ============
+  tab: {
+    onNewTab: (callback: () => void): CleanupFn => {
+      const handler = () => callback();
+      ipcRenderer.on('tab:new-tab', handler);
+      return () => ipcRenderer.removeListener('tab:new-tab', handler);
+    },
+    onCloseTab: (callback: () => void): CleanupFn => {
+      const handler = () => callback();
+      ipcRenderer.on('tab:close-tab', handler);
+      return () => ipcRenderer.removeListener('tab:close-tab', handler);
+    },
+    onNextTab: (callback: () => void): CleanupFn => {
+      const handler = () => callback();
+      ipcRenderer.on('tab:next-tab', handler);
+      return () => ipcRenderer.removeListener('tab:next-tab', handler);
+    },
+    onPrevTab: (callback: () => void): CleanupFn => {
+      const handler = () => callback();
+      ipcRenderer.on('tab:prev-tab', handler);
+      return () => ipcRenderer.removeListener('tab:prev-tab', handler);
+    },
+    onSwitchTo: (callback: (index: number) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, index: number) => callback(index);
+      ipcRenderer.on('tab:switch-to', handler);
+      return () => ipcRenderer.removeListener('tab:switch-to', handler);
+    },
+  },
+
   // ============ Touch Bar (MacBook Pro 2016-2020) ============
   touchBar: {
     /**

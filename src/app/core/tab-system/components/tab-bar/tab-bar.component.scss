@@ -1,0 +1,250 @@
+// ============================================
+// Chrome-szeru Tab Bar
+// ============================================
+
+// CSS Custom Properties (light/dark temazas)
+:host {
+  --tab-bar-bg: #dee1e6;
+  --tab-bar-border: rgba(0, 0, 0, 0.08);
+  --tab-active-bg: #ffffff;
+  --tab-hover-bg: rgba(0, 0, 0, 0.04);
+  --tab-text: #5f6368;
+  --tab-active-text: #1a1a1a;
+  --tab-close-hover: rgba(0, 0, 0, 0.08);
+  --dirty-dot-color: #f59e0b;
+
+  display: block;
+}
+
+:host-context(.dark) {
+  --tab-bar-bg: #1f2125;
+  --tab-bar-border: rgba(255, 255, 255, 0.06);
+  --tab-active-bg: #292b2f;
+  --tab-hover-bg: rgba(255, 255, 255, 0.06);
+  --tab-text: #9aa0a6;
+  --tab-active-text: #e8eaed;
+  --tab-close-hover: rgba(255, 255, 255, 0.1);
+}
+
+.tab-bar {
+  display: flex;
+  align-items: flex-end;
+  height: 38px;
+  background: var(--tab-bar-bg);
+  border-bottom: 1px solid var(--tab-bar-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  // Rejtett scrollbar
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// macOS traffic lights drag region
+.drag-region {
+  -webkit-app-region: drag;
+  min-width: 78px; // Traffic lights szelesseg
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.drag-region-right {
+  -webkit-app-region: drag;
+  flex: 1;
+  min-width: 40px;
+  height: 100%;
+}
+
+// ============================================
+// Tab elem
+// ============================================
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-width: 120px;
+  max-width: 240px;
+  padding: 0 8px 0 12px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  flex-shrink: 1;
+  -webkit-app-region: no-drag;
+  color: var(--tab-text);
+  font-size: 13px;
+  position: relative;
+  user-select: none;
+
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+
+  // Aktiv tab
+  &.active {
+    background: var(--tab-active-bg);
+    color: var(--tab-active-text);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
+
+    .tab-close {
+      opacity: 1;
+    }
+  }
+
+  // Hover (inaktiv)
+  &:not(.active):hover {
+    background: var(--tab-hover-bg);
+
+    .tab-close {
+      opacity: 1;
+    }
+  }
+
+  // Rogzitett tab
+  &.pinned {
+    min-width: 40px;
+    max-width: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  // Focus allapot (a11y)
+  &:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: -2px;
+    border-radius: 8px 8px 0 0;
+  }
+}
+
+// ============================================
+// Tab belso elemek
+// ============================================
+
+.tab-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+
+  .active & {
+    opacity: 1;
+  }
+}
+
+.tab-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  padding: 0;
+
+  transition: opacity 100ms, background-color 100ms;
+
+  &:hover {
+    background: var(--tab-close-hover);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid #7c3aed;
+    outline-offset: -1px;
+  }
+}
+
+.dirty-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dirty-dot-color);
+  flex-shrink: 0;
+}
+
+// ============================================
+// Drag & Drop
+// ============================================
+
+.tab-drag-placeholder {
+  height: 32px;
+  min-width: 120px;
+  border-radius: 8px 8px 0 0;
+  background: rgba(124, 58, 237, 0.1);
+  border: 2px dashed rgba(124, 58, 237, 0.3);
+}
+
+.tab-item.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+// ============================================
+// Uj tab gomb
+// ============================================
+
+.new-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 4px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--tab-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+  padding: 0;
+
+  transition: background-color 150ms;
+
+  &:hover:not(:disabled) {
+    background: var(--tab-hover-bg);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: -1px;
+  }
+}
+
+// ============================================
+// A11y: csökkentett mozgás
+// ============================================
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-item,
+  .tab-close,
+  .new-tab-btn {
+    transition-duration: 0ms !important;
+  }
+
+  .tab-item.cdk-drag-animating {
+    transition: none !important;
+  }
+}

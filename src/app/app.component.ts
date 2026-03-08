@@ -10,6 +10,10 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { TopLoadingBarComponent } from './shared/components/top-loading-bar/top-loading-bar.component';
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback-dialog/error-feedback-dialog.component';
+import { TabManagerService } from './core/tab-system/services/tab-manager.service';
+import { TabKeyboardService } from './core/tab-system/services/tab-keyboard.service';
+import { TabBarComponent } from './core/tab-system/components/tab-bar/tab-bar.component';
+import { TabContentHostComponent } from './core/tab-system/components/tab-content-host/tab-content-host.component';
 
 @Component({
     selector: 'app-root',
@@ -21,6 +25,8 @@ import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback
         TopLoadingBarComponent,
         OfflineBannerComponent,
         ErrorFeedbackDialogComponent,
+        TabBarComponent,
+        TabContentHostComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -31,6 +37,9 @@ export class AppComponent implements OnInit {
     private sentryService = inject(SentryService);
     private destroyRef = inject(DestroyRef);
     private document = inject(DOCUMENT);
+
+    readonly tabManager = inject(TabManagerService);
+    private readonly tabKeyboard = inject(TabKeyboardService);
 
     ngOnInit(): void {
         // Setup deep link handling for mobile app
@@ -46,6 +55,12 @@ export class AppComponent implements OnInit {
 
         // Splash screen eltüntetése az első NavigationEnd-re
         this.hideSplashOnFirstNavigation();
+
+        // Tab rendszer inicializalasa (csak Electron modban)
+        if (this.tabManager.isTabSystemEnabled()) {
+            this.tabManager.initialize();
+            this.tabKeyboard.initialize();
+        }
     }
 
     private setupDeepLinkHandler(): void {

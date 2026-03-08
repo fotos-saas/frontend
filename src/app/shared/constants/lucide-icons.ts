@@ -252,6 +252,11 @@ import {
   Workflow,
   // Crop kalibráció
   SlidersHorizontal,
+  // Tab rendszer
+  PanelLeftClose,
+  PanelRightClose,
+  Columns2,
+  CopyPlus,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -500,4 +505,9 @@ export const LUCIDE_ICONS_MAP = {
   Workflow,
   // Crop kalibráció
   SlidersHorizontal,
+  // Tab rendszer
+  PanelLeftClose,
+  PanelRightClose,
+  Columns2,
+  CopyPlus,
 };

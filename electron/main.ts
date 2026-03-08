@@ -20,6 +20,7 @@ import { registerOverlayHandlers } from './handlers/overlay.handler';
 import { registerPortraitHandlers } from './handlers/portrait.handler';
 import { registerSyncHandlers } from './handlers/sync.handler';
 import { registerCropHandlers } from './handlers/crop.handler';
+import { registerTabHandlers } from './handlers/tab.handler';
 
 // Background mód service-ek
 import { TrayManagerService } from './services/tray-manager.service';
@@ -779,6 +780,11 @@ app.whenReady().then(async () => {
 
   // LAN szinkronizálás IPC handlerek regisztralasa
   registerSyncHandlers(mainWindow || undefined);
+
+  // Tab rendszer billentyuparancs handlerek
+  if (mainWindow) {
+    registerTabHandlers(mainWindow);
+  }
 
   // Normal modban is: daemon token mentes login utan (IPC)
   ipcMain.handle('workflow:store-daemon-token', async (_event, token: string) => {

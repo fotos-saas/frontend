@@ -450,6 +450,12 @@ export const ICONS = {
 
   // Workflow
   WORKFLOW: 'workflow',
+
+  // Tab rendszer
+  PANEL_LEFT_CLOSE: 'panel-left-close',
+  PANEL_RIGHT_CLOSE: 'panel-right-close',
+  COLUMNS: 'columns-2',
+  COPY_PLUS: 'copy-plus',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

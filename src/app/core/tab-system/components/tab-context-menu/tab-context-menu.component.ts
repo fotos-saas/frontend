@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, ElementRef, DestroyRef, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, inject, ElementRef, HostListener } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { TabManagerService } from '../../services/tab-manager.service';
@@ -111,12 +111,60 @@ export class TabContextMenuComponent {
   private readonly tabManager = inject(TabManagerService);
   private readonly elementRef = inject(ElementRef);
 
-  readonly menuActions = signal<TabContextMenuAction[]>([]);
+  readonly menuActions = computed<TabContextMenuAction[]>(() => {
+    const tab = this.tab();
+    const tabs = this.tabManager.tabs();
+    const tabIndex = tabs.findIndex(t => t.id === tab.id);
+    const hasTabsToRight = tabIndex < tabs.length - 1;
+    const hasOtherTabs = tabs.length > 1;
+    const activeId = this.tabManager.activeTabId();
+    const canSplit = activeId !== tab.id && hasOtherTabs;
 
-  constructor() {
-    // Menu akciok osszerakasa a tab allapota alapjan
-    setTimeout(() => this.buildMenuActions(), 0);
-  }
+    return [
+      {
+        id: 'pin',
+        label: tab.isPinned ? 'Feloldas' : 'Tab rogzitese',
+        icon: ICONS.PIN,
+      },
+      {
+        id: 'duplicate',
+        label: 'Tab duplikalasa',
+        icon: ICONS.COPY,
+      },
+      { id: 'sep1', label: '', separator: true },
+      {
+        id: 'close-others',
+        label: 'Tobbi tab bezarasa',
+        icon: ICONS.X,
+        disabled: !hasOtherTabs,
+      },
+      {
+        id: 'close-right',
+        label: 'Jobbra levo tabok bezarasa',
+        disabled: !hasTabsToRight,
+      },
+      { id: 'sep2', label: '', separator: true },
+      {
+        id: 'split-h',
+        label: 'Felosztott nezet - Vizszintes',
+        icon: ICONS.COLUMNS_3,
+        disabled: !canSplit,
+      },
+      {
+        id: 'split-v',
+        label: 'Felosztott nezet - Fuggoleges',
+        icon: ICONS.ROWS_3,
+        disabled: !canSplit,
+      },
+      { id: 'sep3', label: '', separator: true },
+      {
+        id: 'close',
+        label: 'Tab bezarasa',
+        icon: ICONS.X,
+        disabled: tab.isPinned,
+      },
+    ];
+  });
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -166,60 +214,5 @@ export class TabContextMenuComponent {
     if (activeId && activeId !== tabId) {
       this.tabManager.splitView(activeId, tabId, mode);
     }
-  }
-
-  private buildMenuActions(): void {
-    const tab = this.tab();
-    const tabs = this.tabManager.tabs();
-    const tabIndex = tabs.findIndex(t => t.id === tab.id);
-    const hasTabsToRight = tabIndex < tabs.length - 1;
-    const hasOtherTabs = tabs.length > 1;
-    const activeId = this.tabManager.activeTabId();
-    const canSplit = activeId !== tab.id && hasOtherTabs;
-
-    this.menuActions.set([
-      {
-        id: 'pin',
-        label: tab.isPinned ? 'Feloldas' : 'Tab rogzitese',
-        icon: ICONS.PIN,
-      },
-      {
-        id: 'duplicate',
-        label: 'Tab duplikalasa',
-        icon: ICONS.COPY,
-      },
-      { id: 'sep1', label: '', separator: true },
-      {
-        id: 'close-others',
-        label: 'Tobbi tab bezarasa',
-        icon: ICONS.X,
-        disabled: !hasOtherTabs,
-      },
-      {
-        id: 'close-right',
-        label: 'Jobbra levo tabok bezarasa',
-        disabled: !hasTabsToRight,
-      },
-      { id: 'sep2', label: '', separator: true },
-      {
-        id: 'split-h',
-        label: 'Felosztott nezet - Vizszintes',
-        icon: ICONS.COLUMNS_3,
-        disabled: !canSplit,
-      },
-      {
-        id: 'split-v',
-        label: 'Felosztott nezet - Fuggoleges',
-        icon: ICONS.ROWS_3,
-        disabled: !canSplit,
-      },
-      { id: 'sep3', label: '', separator: true },
-      {
-        id: 'close',
-        label: 'Tab bezarasa',
-        icon: ICONS.X,
-        disabled: tab.isPinned,
-      },
-    ]);
   }
 }

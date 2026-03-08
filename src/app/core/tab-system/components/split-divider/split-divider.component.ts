@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, ElementRef, inject, signal, DestroyRef, NgZone } from '@angular/core';
 import type { SplitMode } from '../../models/tab.model';
 
 @Component({
@@ -97,7 +97,16 @@ export class SplitDividerComponent {
   readonly ratioChange = output<number>();
 
   private readonly elementRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly ngZone = inject(NgZone);
   readonly isDragging = signal(false);
+
+  private activeMoveListener: ((e: MouseEvent) => void) | null = null;
+  private activeUpListener: (() => void) | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.cleanupDragListeners());
+  }
 
   onMouseDown(event: MouseEvent): void {
     event.preventDefault();
@@ -109,7 +118,10 @@ export class SplitDividerComponent {
     const isHorizontal = this.mode() === 'horizontal';
     const containerRect = container.getBoundingClientRect();
 
-    const onMouseMove = (e: MouseEvent) => {
+    // Elozo listenerek takaritasa
+    this.cleanupDragListeners();
+
+    this.activeMoveListener = (e: MouseEvent) => {
       let newRatio: number;
       if (isHorizontal) {
         newRatio = (e.clientX - containerRect.left) / containerRect.width;
@@ -119,21 +131,31 @@ export class SplitDividerComponent {
 
       // Min/max korlat (20%-80%)
       newRatio = Math.max(0.2, Math.min(0.8, newRatio));
-      this.ratioChange.emit(newRatio);
+      this.ngZone.run(() => this.ratioChange.emit(newRatio));
     };
 
-    const onMouseUp = () => {
-      this.isDragging.set(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+    this.activeUpListener = () => {
+      this.ngZone.run(() => this.isDragging.set(false));
+      this.cleanupDragListeners();
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', this.activeMoveListener);
+    document.addEventListener('mouseup', this.activeUpListener);
     document.body.style.cursor = isHorizontal ? 'col-resize' : 'row-resize';
     document.body.style.userSelect = 'none';
+  }
+
+  private cleanupDragListeners(): void {
+    if (this.activeMoveListener) {
+      document.removeEventListener('mousemove', this.activeMoveListener);
+      this.activeMoveListener = null;
+    }
+    if (this.activeUpListener) {
+      document.removeEventListener('mouseup', this.activeUpListener);
+      this.activeUpListener = null;
+    }
   }
 
   onDoubleClick(): void {

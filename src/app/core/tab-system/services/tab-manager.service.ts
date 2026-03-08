@@ -13,7 +13,9 @@ import { ElectronService } from '../../services/electron.service';
 import { LoggerService } from '../../services/logger.service';
 import { TabSessionService } from './tab-session.service';
 import { TabTitleResolver } from '../utils/tab-title.resolver';
+import { RouteReuseStrategy } from '@angular/router';
 import { Tab, SplitMode, CreateTabOptions, DEFAULT_TAB_URL, MAX_TABS } from '../models/tab.model';
+import type { TabRouteReuseStrategy } from '../strategies/tab-route-reuse.strategy';
 
 @Injectable({ providedIn: 'root' })
 export class TabManagerService {
@@ -24,10 +26,11 @@ export class TabManagerService {
   private readonly titleResolver = inject(TabTitleResolver);
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly routeReuseStrategy = inject(RouteReuseStrategy) as TabRouteReuseStrategy;
 
   // === Belso allapot flag-ek ===
   private _isTabSwitchNavigation = false;
-  private _initialized = false;
+  private readonly _initialized = signal(false);
 
   // === Allapot ===
   readonly tabs = signal<Tab[]>([]);
@@ -52,8 +55,9 @@ export class TabManagerService {
       const split = this.splitMode();
       const ratio = this.splitRatio();
 
-      if (!this._initialized || tabList.length === 0) return;
+      if (!this._initialized() || tabList.length === 0) return;
 
+      const activeIndex = tabList.findIndex(t => t.id === activeId);
       this.sessionService.save({
         tabs: tabList.map(t => ({
           url: t.url,
@@ -62,6 +66,7 @@ export class TabManagerService {
           isPinned: t.isPinned,
         })),
         activeTabId: activeId,
+        activeTabIndex: activeIndex >= 0 ? activeIndex : 0,
         splitMode: split,
         splitRatio: ratio,
         savedAt: Date.now(),
@@ -83,7 +88,7 @@ export class TabManagerService {
 
   /** Tab rendszer inicializalas (app indulaskor hivando) */
   async initialize(): Promise<void> {
-    if (!this.isTabSystemEnabled() || this._initialized) return;
+    if (!this.isTabSystemEnabled() || this._initialized()) return;
 
     // Session visszaallitas
     const session = await this.sessionService.load();
@@ -102,8 +107,9 @@ export class TabManagerService {
 
       this.tabs.set(restoredTabs);
 
-      // Aktiv tab: utolso aktiv vagy elso
-      const activeTab = restoredTabs[0];
+      // Aktiv tab: mentett index alapjan (uj ID-k generaltunk, eredeti ID nem hasznalhato)
+      const activeIndex = Math.min(session.activeTabIndex ?? 0, restoredTabs.length - 1);
+      const activeTab = restoredTabs[Math.max(0, activeIndex)];
       if (activeTab) {
         this.activeTabId.set(activeTab.id);
         this._isTabSwitchNavigation = true;
@@ -121,7 +127,7 @@ export class TabManagerService {
       this.activeTabId.set(tab.id);
     }
 
-    this._initialized = true;
+    this._initialized.set(true);
     this.logger.info('Tab rendszer inicializalva', { tabCount: this.tabs().length });
   }
 
@@ -162,6 +168,9 @@ export class TabManagerService {
     const isActive = tabId === this.activeTabId();
     const newTabs = currentTabs.filter(t => t.id !== tabId);
 
+    // Route cache takaritasa a bezart tabhoz
+    this.routeReuseStrategy.clearCacheForTab?.(tabId);
+
     // Split mod kezelese
     const split = this.splitTabs();
     if (split && (split[0] === tabId || split[1] === tabId)) {
@@ -193,8 +202,14 @@ export class TabManagerService {
     const tab = this.tabs().find(t => t.id === tabId);
     if (!tab) return;
 
-    const pinnedTabs = this.tabs().filter(t => t.isPinned && t.id !== tabId);
-    this.tabs.set([...pinnedTabs, tab]);
+    // Eredeti sorrend megtartasa: megmaradt tabok = pinned + target
+    const keptTabs = this.tabs().filter(t => t.id === tabId || (t.isPinned && t.id !== tabId));
+
+    // Bezart tabok cache takaritasa
+    const closedIds = this.tabs().filter(t => !keptTabs.includes(t)).map(t => t.id);
+    closedIds.forEach(id => this.routeReuseStrategy.clearCacheForTab?.(id));
+
+    this.tabs.set(keptTabs);
     this.unsplit();
     this.activateTab(tabId);
   }
@@ -297,6 +312,8 @@ export class TabManagerService {
   /** Kovetkezo tab */
   nextTab(): void {
     const currentTabs = this.tabs();
+    if (currentTabs.length < 2) return;
+
     const activeId = this.activeTabId();
     const index = currentTabs.findIndex(t => t.id === activeId);
     const nextIndex = (index + 1) % currentTabs.length;
@@ -306,6 +323,8 @@ export class TabManagerService {
   /** Elozo tab */
   previousTab(): void {
     const currentTabs = this.tabs();
+    if (currentTabs.length < 2) return;
+
     const activeId = this.activeTabId();
     const index = currentTabs.findIndex(t => t.id === activeId);
     const prevIndex = (index - 1 + currentTabs.length) % currentTabs.length;

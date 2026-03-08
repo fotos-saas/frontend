@@ -29,6 +29,8 @@ export type SplitMode = 'none' | 'horizontal' | 'vertical';
 export interface TabSession {
   tabs: Array<{ url: string; title: string; icon: string; isPinned: boolean }>;
   activeTabId: string | null;
+  /** Aktiv tab indexe (restore-hoz, mert az ID-k uj UUID-t kapnak) */
+  activeTabIndex: number;
   splitMode: SplitMode;
   splitRatio: number;
   savedAt: number;

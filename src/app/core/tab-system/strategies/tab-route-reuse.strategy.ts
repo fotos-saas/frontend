@@ -3,43 +3,51 @@
  *
  * Tab valtaskor a korabbi tab komponenset detach-olja (nem destroyolja),
  * igy a form allapot, scroll pozicio, stb. megmarad.
+ *
+ * FONTOS: NEM inject-alja kozvetlenul a TabManagerService-t a konstruktorban,
+ * mert az circular dependency-t okoz (Router -> RouteReuseStrategy -> TabManager -> Router).
+ * Helyette Injector.get()-tel lazy modon eri el.
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector } from '@angular/core';
 import { RouteReuseStrategy, ActivatedRouteSnapshot, DetachedRouteHandle } from '@angular/router';
-import { TabManagerService } from '../services/tab-manager.service';
+import { TAB_MANAGER_TOKEN } from '../models/tab-manager.token';
 
 @Injectable({ providedIn: 'root' })
 export class TabRouteReuseStrategy implements RouteReuseStrategy {
-  private readonly tabManager = inject(TabManagerService);
+  private readonly injector = inject(Injector);
   private readonly routeCache = new Map<string, DetachedRouteHandle>();
   private readonly MAX_CACHED = 10;
+  private _tabManager: any = null;
+
+  /** Lazy TabManager eleres — circular dependency elkerulese */
+  private getTabManager() {
+    if (!this._tabManager) {
+      this._tabManager = this.injector.get(TAB_MANAGER_TOKEN, null);
+    }
+    return this._tabManager;
+  }
 
   /** Tarolnunk kell-e az elhagyott route-ot? */
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    // Csak tab valtas eseten detach-olunk
-    if (!this.tabManager.isTabSystemEnabled()) return false;
-    if (!this.tabManager.isTabSwitchNavigation) return false;
-
-    // Csak ha van aktiv tab
-    const activeTab = this.tabManager.activeTab();
-    return !!activeTab;
+    const tm = this.getTabManager();
+    if (!tm) return false;
+    if (!tm.isTabSystemEnabled()) return false;
+    if (!tm.isTabSwitchNavigation) return false;
+    return !!tm.activeTab();
   }
 
   /** Mentjuk a route-ot a korabbi tab ID-vel */
   store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void {
-    // Az elozo tab ID-je kell (nem az uj aktiv)
-    // A store ELOTT mar beallitottuk az uj active tab-ot,
-    // szoval az elozo tab-ot keressuk a tabs listaban
-    const tabs = this.tabManager.tabs();
-    const activeId = this.tabManager.activeTabId();
+    const tm = this.getTabManager();
+    if (!tm) return;
 
-    // Keressuk azt a tab-ot, aminek az URL-je egyezik a route URL-jevel
+    const tabs = tm.tabs();
+    const activeId = tm.activeTabId();
     const routeUrl = this.getRouteUrl(route);
-    const sourceTab = tabs.find(t => t.id !== activeId && t.url === routeUrl);
+    const sourceTab = tabs.find((t: any) => t.id !== activeId && t.url === routeUrl);
 
     if (handle && sourceTab) {
-      // Cache meret korlatozas
       if (this.routeCache.size >= this.MAX_CACHED) {
         const oldest = this.findOldestCacheKey();
         if (oldest) {
@@ -52,20 +60,23 @@ export class TabRouteReuseStrategy implements RouteReuseStrategy {
 
   /** Van-e mentett route a cel tab-hoz? */
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    if (!this.tabManager.isTabSystemEnabled()) return false;
-
-    const tabId = this.tabManager.activeTabId();
+    const tm = this.getTabManager();
+    if (!tm) return false;
+    if (!tm.isTabSystemEnabled()) return false;
+    const tabId = tm.activeTabId();
     return !!tabId && this.routeCache.has(tabId);
   }
 
   /** Visszaadjuk a mentett route-ot */
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    const tabId = this.tabManager.activeTabId();
+    const tm = this.getTabManager();
+    if (!tm) return null;
+
+    const tabId = tm.activeTabId();
     if (!tabId) return null;
 
     const handle = this.routeCache.get(tabId) ?? null;
     if (handle) {
-      // Felhasznaltas utan toroljuk (egy tab-hoz csak egyszer attach-olunk)
       this.routeCache.delete(tabId);
     }
     return handle;
@@ -96,7 +107,6 @@ export class TabRouteReuseStrategy implements RouteReuseStrategy {
   }
 
   private findOldestCacheKey(): string | null {
-    // FIFO — az elso elem a Map-bol
     const firstKey = this.routeCache.keys().next().value;
     return firstKey ?? null;
   }

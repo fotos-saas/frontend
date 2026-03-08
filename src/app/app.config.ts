@@ -11,6 +11,8 @@ import { provideSentry, SentryService } from './core/services/sentry.service';
 import { LUCIDE_ICONS_MAP } from './shared/constants/lucide-icons';
 import { RoleBasedPreloadingStrategy } from './core/strategies/role-based-preloading.strategy';
 import { TabRouteReuseStrategy } from './core/tab-system/strategies/tab-route-reuse.strategy';
+import { TabManagerService } from './core/tab-system/services/tab-manager.service';
+import { TAB_MANAGER_TOKEN } from './core/tab-system/models/tab-manager.token';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,7 +27,8 @@ export const appConfig: ApplicationConfig = {
       multi: true
     },
     ...provideSentry(),
-    // Tab route reuse strategy (Electron modban aktiv, bongeszos modban pass-through)
+    // Tab rendszer: token a circular dependency feloldasahoz
+    { provide: TAB_MANAGER_TOKEN, useExisting: TabManagerService },
     { provide: RouteReuseStrategy, useClass: TabRouteReuseStrategy },
   ]
 };

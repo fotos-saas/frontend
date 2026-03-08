@@ -11,3 +11,4 @@ export { SplitDividerComponent } from './components/split-divider/split-divider.
 export { TabLinkDirective } from './directives/tab-link.directive';
 export type { Tab, TabSession, SplitMode, CreateTabOptions, TabContextMenuAction } from './models/tab.model';
 export { DEFAULT_TAB_URL, MAX_TABS } from './models/tab.model';
+export { TAB_MANAGER_TOKEN } from './models/tab-manager.token';

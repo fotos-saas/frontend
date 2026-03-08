@@ -5,14 +5,15 @@
  * Csak Electron modban aktiv.
  */
 
-import { Injectable, inject, Injector, signal, computed, effect, NgZone, DestroyRef } from '@angular/core';
-import { Router, NavigationEnd, RouteReuseStrategy } from '@angular/router';
+import { Injectable, inject, signal, computed, effect, NgZone, DestroyRef } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { ElectronService } from '../../services/electron.service';
 import { LoggerService } from '../../services/logger.service';
 import { TabSessionService } from './tab-session.service';
 import { TabTitleResolver } from '../utils/tab-title.resolver';
+import { RouteReuseStrategy } from '@angular/router';
 import { Tab, SplitMode, CreateTabOptions, DEFAULT_TAB_URL, MAX_TABS } from '../models/tab.model';
 import type { TabRouteReuseStrategy } from '../strategies/tab-route-reuse.strategy';
 
@@ -25,12 +26,11 @@ export class TabManagerService {
   private readonly titleResolver = inject(TabTitleResolver);
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly injector = inject(Injector);
+  private readonly routeReuseStrategy = inject(RouteReuseStrategy) as TabRouteReuseStrategy;
 
   // === Belso allapot flag-ek ===
   private _isTabSwitchNavigation = false;
   private readonly _initialized = signal(false);
-  private _routeReuseStrategy: TabRouteReuseStrategy | null = null;
 
   // === Allapot ===
   readonly tabs = signal<Tab[]>([]);
@@ -169,7 +169,7 @@ export class TabManagerService {
     const newTabs = currentTabs.filter(t => t.id !== tabId);
 
     // Route cache takaritasa a bezart tabhoz
-    this.getRouteReuseStrategy().clearCacheForTab(tabId);
+    this.routeReuseStrategy.clearCacheForTab?.(tabId);
 
     // Split mod kezelese
     const split = this.splitTabs();
@@ -207,7 +207,7 @@ export class TabManagerService {
 
     // Bezart tabok cache takaritasa
     const closedIds = this.tabs().filter(t => !keptTabs.includes(t)).map(t => t.id);
-    closedIds.forEach(id => this.getRouteReuseStrategy().clearCacheForTab(id));
+    closedIds.forEach(id => this.routeReuseStrategy.clearCacheForTab?.(id));
 
     this.tabs.set(keptTabs);
     this.unsplit();
@@ -362,14 +362,6 @@ export class TabManagerService {
   }
 
   // === Belso segedmetodusok ===
-
-  /** RouteReuseStrategy lazy eleres (circular dependency elkerulese) */
-  private getRouteReuseStrategy(): TabRouteReuseStrategy {
-    if (!this._routeReuseStrategy) {
-      this._routeReuseStrategy = this.injector.get(RouteReuseStrategy) as TabRouteReuseStrategy;
-    }
-    return this._routeReuseStrategy;
-  }
 
   private createTabObject(url: string, info: { title?: string; icon?: string }): Tab {
     return {

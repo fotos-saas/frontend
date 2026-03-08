@@ -90,9 +90,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 16px;
     height: 16px;
-    padding: 0 4px;
+    padding: 0 5px;
     border-radius: 8px;
     background-color: rgb(219 234 254);
     color: rgb(37 99 235);
@@ -101,6 +100,10 @@
     line-height: 1;
     margin-left: 4px;
     flex-shrink: 0;
+
+    lucide-icon {
+      margin-right: 2px;
+    }
   }
 
   &__title {

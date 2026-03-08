@@ -31,7 +31,10 @@
     <span class="teacher-card__name">
       {{ teacher().name }}
       @if (linkedGroupNumber(); as num) {
-        <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">{{ num }}</span>
+        <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">
+          <lucide-icon [name]="ICONS.LINK" [size]="10" />
+          {{ num }}
+        </span>
       }
     </span>
     @if (teacher().title) {

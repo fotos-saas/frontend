@@ -90,19 +90,15 @@
   &__link-badge {
     position: absolute;
     bottom: -2px;
-    right: -2px;
+    right: -4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 14px;
-    height: 14px;
-    padding: 0 3px;
-    border-radius: 7px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
     background-color: rgb(59 130 246);
     color: white;
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1;
     border: 1.5px solid white;
   }
 

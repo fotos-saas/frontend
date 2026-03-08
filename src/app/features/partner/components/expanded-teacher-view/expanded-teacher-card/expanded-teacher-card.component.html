@@ -26,7 +26,9 @@
       </div>
     }
     @if (linkedGroupNumber(); as num) {
-      <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">{{ num }}</span>
+      <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">
+        <lucide-icon [name]="ICONS.LINK" [size]="8" />
+      </span>
     }
   </div>
 

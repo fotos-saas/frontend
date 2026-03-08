@@ -1,6 +1,9 @@
 /**
  * apply-border-radius.jsx — Lekerekitett sarku raster mask alkalmazasa image layerekre
  *
+ * Megoldas: shape layer letrehozas → pixel select → mask → shape torles
+ * (tablokiraly eredeti border-radius.jsx logikaja alapjan)
+ *
  * Bemenet (CONFIG.DATA_FILE_PATH JSON):
  * {
  *   "radius": 30,
@@ -11,8 +14,6 @@
  * Ha useSelectedLayers=true: a PS-ben kijelolt layerekre alkalmazza.
  * Ha false: a layerNames tombben levo nevekre keres rekurzivan.
  * Ha mar van mask → kihagyja.
- *
- * Futtatas: osascript -e 'tell app id "com.adobe.Photoshop" to do javascript file ...'
  */
 
 // #include "../lib/config.jsx"
@@ -35,23 +36,14 @@ function _getSelectedLayers(doc) {
     ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
     var docDesc = executeActionGet(ref);
     var idxList = docDesc.getList(stringIDToTypeID("targetLayers"));
-    log("[JSX] targetLayers count: " + idxList.count);
     for (var i = 0; i < idxList.count; i++) {
       var idx = idxList.getReference(i).getIndex(charIDToTypeID("Lyr "));
-      // Layer ID lekerese index alapjan
       var layerRef = new ActionReference();
       layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
       var layerDesc = executeActionGet(layerRef);
       var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
-      var layerKind = layerDesc.getInteger(stringIDToTypeID("layerKind"));
-      log("[JSX] Layer[" + i + "]: " + layerName + " kind=" + layerKind + " idx=" + idx);
-      // layerKind: 1=pixel, 3=text, 7=group — csak pixel layereket akarjuk
       var found = _findArtLayerByName(doc, layerName);
-      if (found) {
-        layers.push(found);
-      } else {
-        log("[JSX] WARN: Nem talalt ArtLayer: " + layerName);
-      }
+      if (found) layers.push(found);
     }
   } catch (e) {
     log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);
@@ -109,36 +101,59 @@ function _hasMask(layerId) {
   return false;
 }
 
-// --- Lekerekitett teglalap selection letrehozasa ---
-function _createRoundedRectSelection(left, top, width, height, radius) {
-  var right = left + width;
-  var bottom = top + height;
+// --- Rounded rectangle shape layer letrehozasa (eredeti tablokiraly logika) ---
+function _createRoundedRectShapeLayer(doc, layerName, left, top, width, height, radius) {
+  var idMk = charIDToTypeID("Mk  ");
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putClass(stringIDToTypeID("contentLayer"));
+  desc.putReference(charIDToTypeID("null"), ref);
 
+  var contentDesc = new ActionDescriptor();
+
+  // Feher szin
+  var colorDesc = new ActionDescriptor();
+  var rgbDesc = new ActionDescriptor();
+  rgbDesc.putDouble(charIDToTypeID("Rd  "), 255.0);
+  rgbDesc.putDouble(charIDToTypeID("Grn "), 255.0);
+  rgbDesc.putDouble(charIDToTypeID("Bl  "), 255.0);
+  colorDesc.putObject(charIDToTypeID("Clr "), charIDToTypeID("RGBC"), rgbDesc);
+  contentDesc.putObject(charIDToTypeID("Type"), stringIDToTypeID("solidColorLayer"), colorDesc);
+
+  // Shape koordinatok + radius
+  var shapeDesc = new ActionDescriptor();
+  shapeDesc.putUnitDouble(charIDToTypeID("Top "), charIDToTypeID("#Pxl"), top);
+  shapeDesc.putUnitDouble(charIDToTypeID("Left"), charIDToTypeID("#Pxl"), left);
+  shapeDesc.putUnitDouble(charIDToTypeID("Btom"), charIDToTypeID("#Pxl"), top + height);
+  shapeDesc.putUnitDouble(charIDToTypeID("Rght"), charIDToTypeID("#Pxl"), left + width);
+  shapeDesc.putUnitDouble(stringIDToTypeID("radius"), charIDToTypeID("#Pxl"), radius);
+
+  contentDesc.putObject(charIDToTypeID("Shp "), charIDToTypeID("Rctn"), shapeDesc);
+  desc.putObject(charIDToTypeID("Usng"), stringIDToTypeID("contentLayer"), contentDesc);
+
+  executeAction(idMk, desc, DialogModes.NO);
+  doc.activeLayer.name = layerName;
+}
+
+// --- Shape layer pixeleinek kivalasztasa (Ctrl+click equivalent) ---
+function _selectShapeLayerPixels(layer) {
   var desc = new ActionDescriptor();
   var ref = new ActionReference();
   ref.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
   desc.putReference(charIDToTypeID("null"), ref);
 
-  var shapeDesc = new ActionDescriptor();
-  shapeDesc.putUnitDouble(charIDToTypeID("Top "), charIDToTypeID("#Pxl"), top);
-  shapeDesc.putUnitDouble(charIDToTypeID("Left"), charIDToTypeID("#Pxl"), left);
-  shapeDesc.putUnitDouble(charIDToTypeID("Btom"), charIDToTypeID("#Pxl"), bottom);
-  shapeDesc.putUnitDouble(charIDToTypeID("Rght"), charIDToTypeID("#Pxl"), right);
+  var ref2 = new ActionReference();
+  ref2.putEnumerated(charIDToTypeID("Path"), charIDToTypeID("Path"), stringIDToTypeID("vectorMask"));
+  ref2.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+  desc.putReference(charIDToTypeID("T   "), ref2);
 
-  var radiiDesc = new ActionDescriptor();
-  radiiDesc.putUnitDouble(stringIDToTypeID("topLeft"), charIDToTypeID("#Pxl"), radius);
-  radiiDesc.putUnitDouble(stringIDToTypeID("topRight"), charIDToTypeID("#Pxl"), radius);
-  radiiDesc.putUnitDouble(stringIDToTypeID("bottomRight"), charIDToTypeID("#Pxl"), radius);
-  radiiDesc.putUnitDouble(stringIDToTypeID("bottomLeft"), charIDToTypeID("#Pxl"), radius);
-  shapeDesc.putObject(stringIDToTypeID("radii"), stringIDToTypeID("radii"), radiiDesc);
-
-  desc.putObject(charIDToTypeID("T   "), stringIDToTypeID("roundedRectangle"), shapeDesc);
   desc.putBoolean(charIDToTypeID("AntA"), true);
+  desc.putUnitDouble(charIDToTypeID("Fthr"), charIDToTypeID("#Pxl"), 0);
 
   executeAction(charIDToTypeID("setd"), desc, DialogModes.NO);
 }
 
-// --- Raster mask letrehozasa a szelekciobool (Reveal Selection) ---
+// --- Layer mask letrehozasa szelekciobool (Reveal Selection) ---
 function _makeLayerMaskFromSelection() {
   var desc = new ActionDescriptor();
   desc.putClass(charIDToTypeID("Nw  "), charIDToTypeID("Chnl"));
@@ -152,18 +167,12 @@ function _makeLayerMaskFromSelection() {
   executeAction(charIDToTypeID("Mk  "), desc, DialogModes.NO);
 }
 
-// --- Szelekció megszuntetese ---
-function _deselect() {
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-  desc.putReference(charIDToTypeID("null"), ref);
-  desc.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
-  executeAction(charIDToTypeID("setd"), desc, DialogModes.NO);
-}
-
 // --- Lekerekitett sarok mask alkalmazasa egy layerre ---
-function _applyBorderRadiusMask(layer, radius) {
+// Logika: shape layer → select pixels → mask cel layer-re → shape torles
+function _applyBorderRadiusMask(doc, layer, radius) {
+  var originalRulerUnits = app.preferences.rulerUnits;
+  app.preferences.rulerUnits = Units.PIXELS;
+
   var bounds = layer.bounds;
   var layerLeft = bounds[0].as("px");
   var layerTop = bounds[1].as("px");
@@ -174,6 +183,7 @@ function _applyBorderRadiusMask(layer, radius) {
   var layerH = layerBottom - layerTop;
 
   if (layerW <= 0 || layerH <= 0) {
+    app.preferences.rulerUnits = originalRulerUnits;
     return false;
   }
 
@@ -181,15 +191,26 @@ function _applyBorderRadiusMask(layer, radius) {
   var maxRadius = Math.min(layerW, layerH) / 2;
   var r = Math.min(radius, maxRadius);
 
-  // 1. Lekerekitett teglalap szelekció
-  _createRoundedRectSelection(layerLeft, layerTop, layerW, layerH, r);
+  // 1. Shape layer letrehozasa (lekerekitett teglalap)
+  _createRoundedRectShapeLayer(doc, layer.name + "_br_temp", layerLeft, layerTop, layerW, layerH, r);
+  var shapeLayer = doc.activeLayer;
 
-  // 2. Raster mask a szelekciobool
+  // 2. Shape layer pixeleinek kivalasztasa
+  _selectShapeLayerPixels(shapeLayer);
+
+  // 3. Cel layer aktivalasa
+  doc.activeLayer = layer;
+
+  // 4. Mask alkalmazasa a szelekciobool
   _makeLayerMaskFromSelection();
 
-  // 3. Szelekció megszuntetese
-  _deselect();
+  // 5. Szelekció megszuntetese
+  doc.selection.deselect();
 
+  // 6. Shape layer torlese
+  shapeLayer.remove();
+
+  app.preferences.rulerUnits = originalRulerUnits;
   return true;
 }
 
@@ -244,7 +265,7 @@ function _doApplyBorderRadius() {
       selectLayerById(layer.id);
       doc.activeLayer = layer;
 
-      var ok = _applyBorderRadiusMask(layer, radius);
+      var ok = _applyBorderRadiusMask(doc, layer, radius);
       if (ok) {
         _masked++;
       } else {

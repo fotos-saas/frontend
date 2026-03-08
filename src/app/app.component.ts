@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, DestroyRef, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, DestroyRef, computed, effect } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -50,10 +50,30 @@ export class AppComponent implements OnInit {
         { initialValue: this.router.url },
     );
 
-    /** Tab bar CSAK Electron-ban jelenik meg ES NEM overlay route-on */
-    readonly showTabBar = computed(() =>
-        this.tabManager.isTabSystemEnabled() && !this.currentUrl().startsWith('/overlay')
-    );
+    /** Tab bar CSAK Electron-ban jelenik meg, munkafolulet route-okon (NEM auth/overlay oldalakon) */
+    readonly showTabBar = computed(() => {
+        if (!this.tabManager.isTabSystemEnabled()) return false;
+        const url = this.currentUrl();
+        // Tabot NEM mutato route-ok: overlay, auth oldalak, partner-select, session-chooser
+        const noTabRoutes = ['/overlay', '/login', '/register', '/partner-select', '/choose-session', '/forgot-password', '/reset-password', '/verify-email', '/auth/'];
+        return !noTabRoutes.some(prefix => url.startsWith(prefix));
+    });
+
+    private tabInitialized = false;
+
+    constructor() {
+        // Tab rendszer inicializalasa — reaktivan figyeli a showTabBar-t,
+        // igy ha az app partner-select-en indul, majd atnavigal /partner-re, akkor is elindul
+        effect(() => {
+            if (this.showTabBar() && !this.tabInitialized) {
+                this.tabInitialized = true;
+                this.tabManager.initialize().catch(err => {
+                    console.error('[TabSystem] Inicializalas hiba:', err);
+                });
+                this.tabKeyboard.initialize();
+            }
+        });
+    }
 
     ngOnInit(): void {
         // Setup deep link handling for mobile app
@@ -69,15 +89,6 @@ export class AppComponent implements OnInit {
 
         // Splash screen eltüntetése az első NavigationEnd-re
         this.hideSplashOnFirstNavigation();
-
-        // Tab rendszer inicializalasa (csak Electron modban, overlay kivetelevel)
-        const isOverlay = this.router.url.startsWith('/overlay');
-        if (this.tabManager.isTabSystemEnabled() && !isOverlay) {
-            this.tabManager.initialize().catch(err => {
-                console.error('[TabSystem] Inicializalas hiba:', err);
-            });
-            this.tabKeyboard.initialize();
-        }
     }
 
     private setupDeepLinkHandler(): void {

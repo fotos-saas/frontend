@@ -41,14 +41,29 @@ function _getSelectedLayers(doc) {
       var layerRef = new ActionReference();
       layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
       var layerDesc = executeActionGet(layerRef);
-      var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
-      var found = _findArtLayerByName(doc, layerName);
+      var layerId = layerDesc.getInteger(stringIDToTypeID("layerID"));
+      var found = _findArtLayerById(doc, layerId);
       if (found) layers.push(found);
     }
   } catch (e) {
     log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);
   }
   return layers;
+}
+
+function _findArtLayerById(container, id) {
+  try {
+    for (var i = 0; i < container.artLayers.length; i++) {
+      if (container.artLayers[i].id === id) return container.artLayers[i];
+    }
+  } catch (e) { /* */ }
+  try {
+    for (var j = 0; j < container.layerSets.length; j++) {
+      var found = _findArtLayerById(container.layerSets[j], id);
+      if (found) return found;
+    }
+  } catch (e) { /* */ }
+  return null;
 }
 
 function _findArtLayerByName(container, name) {

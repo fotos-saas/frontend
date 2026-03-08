@@ -1,4 +1,4 @@
-@if (totalPages() > 1) {
+@if (totalItems() > 0) {
   <div class="pagination">
     <div class="pagination__per-page">
       <ps-select
@@ -11,45 +11,51 @@
     </div>
 
     <div class="pagination__nav-wrapper">
-      <div class="pagination__nav">
-        <button
-          class="page-btn"
-          [disabled]="currentPage() === 1"
-          (click)="goToPage(currentPage() - 1)"
-          aria-label="Előző oldal"
-        >
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-          <span class="btn-text">Előző</span>
-        </button>
+      @if (totalPages() > 1) {
+        <div class="pagination__nav">
+          <button
+            class="page-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+            aria-label="Előző oldal"
+          >
+            <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+            <span class="btn-text">Előző</span>
+          </button>
 
-        <ps-select
-          class="page-select"
-          size="sm"
-          [options]="pageOptions()"
-          [ngModel]="'' + currentPage()"
-          (ngModelChange)="onSelectChange($event)"
-        />
+          <ps-select
+            class="page-select"
+            size="sm"
+            [options]="pageOptions()"
+            [ngModel]="'' + currentPage()"
+            (ngModelChange)="onSelectChange($event)"
+          />
 
-        <span class="page-context page-context--inline">
+          <span class="page-context page-context--inline">
+            {{ totalPages() }}-ból
+            <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
+          </span>
+
+          <button
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+            aria-label="Következő oldal"
+          >
+            <span class="btn-text">Következő</span>
+            <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+          </button>
+        </div>
+
+        <span class="page-context page-context--below">
           {{ totalPages() }}-ból
           <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
         </span>
-
-        <button
-          class="page-btn"
-          [disabled]="currentPage() === totalPages()"
-          (click)="goToPage(currentPage() + 1)"
-          aria-label="Következő oldal"
-        >
-          <span class="btn-text">Következő</span>
-          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
-      </div>
-
-      <span class="page-context page-context--below">
-        {{ totalPages() }}-ból
-        <span class="total-count">({{ totalItems() }} {{ itemLabel() }})</span>
-      </span>
+      } @else {
+        <span class="page-context">
+          <span class="total-count">{{ totalItems() }} {{ itemLabel() }}</span>
+        </span>
+      }
     </div>
   </div>
 }

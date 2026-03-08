@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -187,26 +187,16 @@ export class ExpandedTeacherPopupComponent {
 
   onPhotoChooserSaved(selectedMediaId: number): void {
     this.showPhotoChooser.set(false);
-    const linkedGroup = this.firstLinkedGroup();
     const archiveIds = this.allArchiveIds();
 
-    // Ha a dialógus csak 1 archívumra állított, a többit is szinkronizáljuk
-    if (!linkedGroup && archiveIds.length > 1) {
-      const mode = this.photoChooserMode();
-      if (mode?.kind === 'individual') {
-        const otherIds = archiveIds.filter(id => id !== mode.archiveId);
-        this.syncPhotoToArchives(otherIds, selectedMediaId);
-      }
+    // Ha több nem-linkelt archívum van, csendben összekapcsoljuk + fotó beállítás
+    if (!this.firstLinkedGroup() && archiveIds.length > 1) {
+      this.autoLinkAndSetPhoto(archiveIds, selectedMediaId);
+      return;
     }
 
     // Fotók újratöltés
-    if (linkedGroup) {
-      this.teacherService.getLinkedGroupPhotos(linkedGroup)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({ next: (res) => this.archivePhotos.set(res.data) });
-    } else if (archiveIds.length > 0) {
-      this.loadAllArchivePhotos(archiveIds);
-    }
+    this.reloadPhotos();
     this.dataService.reloadData();
   }
 
@@ -220,17 +210,20 @@ export class ExpandedTeacherPopupComponent {
     const activePhoto = this.activeArchivePhoto();
     if (!activePhoto) return;
 
-    const mode = this.photoChooserMode();
-    if (!mode) return;
+    const linkedGroup = this.firstLinkedGroup();
+    const archiveIds = this.allArchiveIds();
 
-    if (mode.kind === 'linkedGroup') {
-      this.teacherService.setGroupActivePhoto(mode.linkedGroup, activePhoto.mediaId)
+    if (linkedGroup) {
+      this.teacherService.setGroupActivePhoto(linkedGroup, activePhoto.mediaId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({ next: () => this.dataService.reloadData() });
-    } else {
-      // Minden archívumra beállítjuk — nem csak az elsőre
-      const archiveIds = this.allArchiveIds();
-      this.syncPhotoToArchives(archiveIds, activePhoto.mediaId);
+    } else if (archiveIds.length > 1) {
+      // Több nem-linkelt archívum → csendben összekapcsoljuk + fotó beállítás
+      this.autoLinkAndSetPhoto(archiveIds, activePhoto.mediaId);
+    } else if (archiveIds.length === 1) {
+      this.teacherService.setActivePhotoByMedia(archiveIds[0], activePhoto.mediaId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: () => this.dataService.reloadData() });
     }
   }
 
@@ -276,16 +269,29 @@ export class ExpandedTeacherPopupComponent {
       });
   }
 
-  /** Beállítja az aktív fotót több archívumra egyszerre */
-  private syncPhotoToArchives(archiveIds: number[], mediaId: number): void {
-    if (archiveIds.length === 0) return;
-
-    const requests = archiveIds.map(id =>
-      this.teacherService.setActivePhotoByMedia(id, mediaId)
-    );
-    forkJoin(requests)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+  /** Csendben összekapcsolja a tanárokat, majd beállítja a fotót a csoportra */
+  private autoLinkAndSetPhoto(archiveIds: number[], mediaId: number): void {
+    this.teacherService.linkTeachers(archiveIds)
+      .pipe(
+        switchMap(res =>
+          this.teacherService.setGroupActivePhoto(res.data.linkedGroup, mediaId)
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({ next: () => this.dataService.reloadData() });
+  }
+
+  /** Fotólista újratöltése a jelenlegi állapot szerint */
+  private reloadPhotos(): void {
+    const linkedGroup = this.firstLinkedGroup();
+    if (linkedGroup) {
+      this.teacherService.getLinkedGroupPhotos(linkedGroup)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: (res) => this.archivePhotos.set(res.data) });
+    } else {
+      const archiveIds = this.allArchiveIds();
+      if (archiveIds.length > 0) this.loadAllArchivePhotos(archiveIds);
+    }
   }
 
   linkTeachers(): void {

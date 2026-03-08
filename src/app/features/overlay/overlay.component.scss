@@ -2015,6 +2015,30 @@
   }
 }
 
+// ============ Rotate Panel ============
+.rotate-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 140px;
+  width: 220px;
+  background: rgba(20, 16, 34, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(96, 165, 250, 0.12);
+  border-radius: 12px;
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: qa-slide-up 0.15s ease-out;
+
+  &__hint {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.35);
+    padding: 4px 0 2px;
+    line-height: 1.4;
+  }
+}
+
 // --- Section ---
 .qa-section {
   padding: 6px 4px;

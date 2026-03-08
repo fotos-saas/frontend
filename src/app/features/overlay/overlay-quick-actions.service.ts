@@ -57,6 +57,11 @@ export class OverlayQuickActionsService {
   readonly gridLayerCount = signal(0);
   readonly gridUnit = signal<'px' | 'cm'>('cm');
 
+  // === Forgatás ===
+  readonly rotatePanelOpen = signal(false);
+  readonly rotateAngle = signal(2);
+  readonly rotateRandom = signal(true);
+
   // === Border radius ===
   readonly borderRadius = signal(30);
   readonly borderRadiusUseSelected = signal(false);
@@ -103,11 +108,14 @@ export class OverlayQuickActionsService {
 
   // === Panel kezelés ===
 
-  togglePanel(): void { this.panelOpen.update(v => !v); this.gridPanelOpen.set(false); }
+  togglePanel(): void { this.panelOpen.update(v => !v); this.gridPanelOpen.set(false); this.rotatePanelOpen.set(false); }
   closePanel(): void { this.panelOpen.set(false); }
 
-  toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); }
+  toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); this.rotatePanelOpen.set(false); }
   closeGridPanel(): void { this.gridPanelOpen.set(false); }
+
+  toggleRotatePanel(): void { this.rotatePanelOpen.update(v => !v); this.panelOpen.set(false); this.gridPanelOpen.set(false); }
+  closeRotatePanel(): void { this.rotatePanelOpen.set(false); }
 
   toggleGridUnit(): void {
     this.gridUnit.update(u => u === 'px' ? 'cm' : 'px');
@@ -437,6 +445,41 @@ export class OverlayQuickActionsService {
   }
 
   // === Border radius ===
+
+  // === Forgatás ===
+
+  setRotateAngle(value: number): void {
+    this.rotateAngle.set(Math.max(0.1, Math.round(value * 10) / 10));
+  }
+
+  toggleRotateRandom(): void {
+    this.rotateRandom.update(v => !v);
+  }
+
+  /** Toolbar gombról: kijelölt layerek forgatása */
+  async applyRotateSelected(): Promise<void> {
+    if (this.loading()) return;
+    this.loading.set(true);
+    try {
+      const angle = this.rotateAngle();
+      if (angle <= 0) { this.setResult(false, 'A szög legalább 0.1° legyen'); return; }
+
+      const result = await this.ps.runJsx(
+        'rotate-selected', 'actions/rotate-selected.jsx',
+        { angle, random: this.rotateRandom() },
+      );
+
+      this.handleJsxResult(result,
+        data => {
+          const mode = this.rotateRandom() ? `random ±${angle}°` : `${angle}°`;
+          return `${data['rotated']} layer forgatva (${mode}, ${data['skipped']} kihagyva)`;
+        },
+        'Forgatás kész',
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
 
   setBorderRadius(value: number): void {
     this.borderRadius.set(Math.max(1, Math.round(value)));

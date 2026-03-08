@@ -56,6 +56,8 @@ export class ExpandedTeacherPopupComponent {
   readonly linking = signal(false);
   /** Auto-link után beállított linkedGroup (amíg a data reload nem frissíti) */
   private linkedGroupOverride = signal<string | null>(null);
+  /** Kiválasztott fotó a strip-ből — döntésre vár (mindenkinek / csak itt) */
+  readonly pendingPhoto = signal<LinkedGroupPhoto | null>(null);
 
   readonly occurrences = computed<OccurrenceItem[]>(() => {
     const viewData = this.dataService.data();
@@ -209,17 +211,48 @@ export class ExpandedTeacherPopupComponent {
   }
 
   selectArchivePhoto(photo: LinkedGroupPhoto): void {
+    // Ha több előfordulás van, kérdezzük meg: mindenkinek vagy csak itt
+    if (this.occurrences().length > 1) {
+      this.pendingPhoto.set(photo);
+      return;
+    }
+    // Egyetlen előfordulás → egyből alkalmazzuk mindenkire
+    this.applyPhotoToAll(photo.mediaId);
+  }
+
+  /** Pending fotó alkalmazása mindenkire (archív aktív fotó) */
+  confirmPhotoForAll(): void {
+    const photo = this.pendingPhoto();
+    if (!photo) return;
+    this.pendingPhoto.set(null);
+    this.applyPhotoToAll(photo.mediaId);
+  }
+
+  /** Pending fotó alkalmazása csak az aktuális személyhez (override) */
+  confirmPhotoForCurrent(): void {
+    const photo = this.pendingPhoto();
+    if (!photo) return;
+    this.pendingPhoto.set(null);
+    this.dataService.setOverrideFromArchive(this.personId(), photo.mediaId);
+  }
+
+  cancelPendingPhoto(): void {
+    this.pendingPhoto.set(null);
+  }
+
+  /** Fotó beállítása az összes előfordulásra (archív aktív fotó) */
+  private applyPhotoToAll(mediaId: number): void {
     const linkedGroup = this.linkedGroupOverride() ?? this.firstLinkedGroup();
     const archiveIds = this.allArchiveIds();
 
     if (linkedGroup) {
-      this.teacherService.setGroupActivePhoto(linkedGroup, photo.mediaId)
+      this.teacherService.setGroupActivePhoto(linkedGroup, mediaId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({ next: () => { this.reloadPhotos(); this.dataService.reloadData(); } });
     } else if (archiveIds.length > 1) {
-      this.autoLinkAndSetPhoto(archiveIds, photo.mediaId);
+      this.autoLinkAndSetPhoto(archiveIds, mediaId);
     } else if (archiveIds.length === 1) {
-      this.teacherService.setActivePhotoByMedia(archiveIds[0], photo.mediaId)
+      this.teacherService.setActivePhotoByMedia(archiveIds[0], mediaId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({ next: () => { this.reloadPhotos(); this.dataService.reloadData(); } });
     }

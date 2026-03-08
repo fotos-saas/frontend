@@ -59,6 +59,27 @@
             </div>
           }
         </div>
+        @if (pendingPhoto(); as pending) {
+          <div class="popup-photo-action">
+            <div class="popup-photo-action__preview">
+              @if (pending.thumbUrl) {
+                <img [src]="pending.thumbUrl" [alt]="pending.teacherName" />
+              }
+            </div>
+            <span class="popup-photo-action__label">Alkalmazás:</span>
+            <button class="popup-photo-action__btn popup-photo-action__btn--primary" (click)="confirmPhotoForAll()">
+              <lucide-icon [name]="ICONS.USERS" [size]="14" />
+              Mindenkinek
+            </button>
+            <button class="popup-photo-action__btn" (click)="confirmPhotoForCurrent()">
+              <lucide-icon [name]="ICONS.USER" [size]="14" />
+              Csak itt
+            </button>
+            <button class="popup-photo-action__close" (click)="cancelPendingPhoto()">
+              <lucide-icon [name]="ICONS.X" [size]="14" />
+            </button>
+          </div>
+        }
       </div>
     } @else if (loadingPhotos()) {
       <div class="popup-section">

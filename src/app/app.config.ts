@@ -1,5 +1,5 @@
 import { ApplicationConfig, APP_INITIALIZER, importProvidersFrom } from '@angular/core';
-import { provideRouter, withPreloading, RouteReuseStrategy } from '@angular/router';
+import { provideRouter, withPreloading } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,7 +10,6 @@ import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { provideSentry, SentryService } from './core/services/sentry.service';
 import { LUCIDE_ICONS_MAP } from './shared/constants/lucide-icons';
 import { RoleBasedPreloadingStrategy } from './core/strategies/role-based-preloading.strategy';
-import { TabRouteReuseStrategy } from './core/tab-system/strategies/tab-route-reuse.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,7 +24,5 @@ export const appConfig: ApplicationConfig = {
       multi: true
     },
     ...provideSentry(),
-    // Tab route reuse strategy (Electron modban aktiv, bongeszos modban pass-through)
-    { provide: RouteReuseStrategy, useClass: TabRouteReuseStrategy },
   ]
 };

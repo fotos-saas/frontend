@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LoggerService } from '../../../../../../core/services/logger.service';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { SmartFilterBarComponent, SearchConfig, SortDef } from '@shared/components/smart-filter-bar';
 import { FilterConfig } from '@shared/components/expandable-filters';
 import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
@@ -34,7 +35,10 @@ export class ActivitySummaryTabComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private logger = inject(LoggerService);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   readonly ICONS = ICONS;
+
+  perPage = signal(this.paginationPrefs.getPerPage(20));
 
   items = signal<ProjectActivitySummary[]>([]);
   total = signal(0);
@@ -127,7 +131,7 @@ export class ActivitySummaryTabComponent implements OnInit {
     const f = this.filterState.filters();
     const filters: ActivitySummaryFilters = {
       page: this.filterState.page(),
-      per_page: 20,
+      per_page: this.perPage(),
       sort_by: this.filterState.sortBy() || 'last_activity_at',
       sort_dir: this.filterState.sortDir() as 'asc' | 'desc',
     };
@@ -150,6 +154,12 @@ export class ActivitySummaryTabComponent implements OnInit {
           this.filterState.loading.set(false);
         },
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadData();
   }
 
   goToProject(projectId: number): void {

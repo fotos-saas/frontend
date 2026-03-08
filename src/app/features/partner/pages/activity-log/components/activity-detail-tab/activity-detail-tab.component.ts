@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { SmartFilterBarComponent, SearchConfig, SortDef, SearchableFilterDef } from '@shared/components/smart-filter-bar';
 import { FilterConfig } from '@shared/components/expandable-filters';
 import { PsInputComponent } from '@shared/components/form/ps-input/ps-input.component';
@@ -31,7 +32,10 @@ export class ActivityDetailTabComponent implements OnInit {
   private partnerService = inject(PartnerService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   readonly ICONS = ICONS;
+
+  perPage = signal(this.paginationPrefs.getPerPage(20));
 
   items = signal<ActivityLogItem[]>([]);
   total = signal(0);
@@ -119,6 +123,12 @@ export class ActivityDetailTabComponent implements OnInit {
       });
   }
 
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadData();
+  }
+
   clearDateFilter(): void {
     this.filterState.setFilter('date_from', '');
     this.filterState.setFilter('date_to', '');
@@ -136,7 +146,7 @@ export class ActivityDetailTabComponent implements OnInit {
     const f = this.filterState.filters();
     const filters: ActivityLogFilters = {
       page: this.filterState.page(),
-      per_page: 20,
+      per_page: this.perPage(),
     };
 
     if (this.filterState.search()) filters.search = this.filterState.search();

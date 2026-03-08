@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../../../../shared/constants/icons.constants';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
 import { InvoiceService } from '../../../../../services/invoice.service';
@@ -20,11 +21,12 @@ import { formatAmount, formatPrice } from '@shared/utils/formatters.util';
 import { saveFile } from '@shared/utils/file.util';
 import { InvoiceCreateDialogComponent } from '../../components/invoice-create-dialog/invoice-create-dialog.component';
 import { TableHeaderComponent, TableColumn } from '../../../../../../../shared/components/table-header';
+import { ListPaginationComponent } from '../../../../../../../shared/components/list-pagination/list-pagination.component';
 
 @Component({
   selector: 'app-invoice-list',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, InvoiceCreateDialogComponent, TableHeaderComponent],
+  imports: [DatePipe, FormsModule, LucideAngularModule, MatTooltipModule, PsInputComponent, PsSelectComponent, InvoiceCreateDialogComponent, TableHeaderComponent, ListPaginationComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-list.component.html',
   styleUrl: './invoice-list.component.scss',
@@ -33,6 +35,7 @@ export class InvoiceListComponent implements OnInit {
   private invoiceService = inject(InvoiceService);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
   readonly STATUS_LABELS = PARTNER_INVOICE_STATUS_LABELS;
@@ -59,6 +62,8 @@ export class InvoiceListComponent implements OnInit {
 
   readonly yearOptions: PsSelectOption[] = this.getYearOptions().map(y => ({ id: y, label: '' + y }));
 
+  perPage = signal(this.paginationPrefs.getPerPage(15));
+
   readonly loading = signal(true);
   readonly invoices = signal<Invoice[]>([]);
   readonly statistics = signal<InvoiceStatistics | null>(null);
@@ -82,7 +87,7 @@ export class InvoiceListComponent implements OnInit {
     this.loading.set(true);
     this.invoiceService.getInvoices({
       page: this.currentPage(),
-      per_page: 15,
+      per_page: this.perPage(),
       status: this.statusFilter() || undefined,
       year: this.yearFilter() || undefined,
       search: this.searchTerm() || undefined,
@@ -127,6 +132,12 @@ export class InvoiceListComponent implements OnInit {
     this.currentPage.set(1);
     this.loadInvoices();
     this.loadStatistics();
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadInvoices();
   }
 
   onPageChange(page: number): void {

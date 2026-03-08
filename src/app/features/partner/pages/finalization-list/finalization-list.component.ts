@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { LoggerService } from '@core/services/logger.service';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 import { ToastService } from '@core/services/toast.service';
 import { PartnerFinalizationService, PrintFileType } from '../../services/partner-finalization.service';
 import { FinalizationListItem, TabloSize } from '../../models/partner.models';
@@ -42,6 +43,7 @@ export class FinalizationListComponent implements OnInit {
   private readonly finalizationService = inject(PartnerFinalizationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
 
@@ -85,6 +87,8 @@ export class FinalizationListComponent implements OnInit {
     onStateChange: () => this.loadFinalizations(),
   });
 
+  perPage = signal(this.paginationPrefs.getPerPage(15));
+
   items = signal<FinalizationListItem[]>([]);
   totalPages = signal(1);
   totalItems = signal(0);
@@ -121,7 +125,7 @@ export class FinalizationListComponent implements OnInit {
 
     this.finalizationService.getFinalizations({
       page: this.filterState.page(),
-      per_page: 15,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       sort_by: this.filterState.sortBy() as 'created_at' | 'finalized_at' | 'school_name' | 'class_year',
       sort_dir: this.filterState.sortDir(),
@@ -143,6 +147,12 @@ export class FinalizationListComponent implements OnInit {
           this.filterState.loading.set(false);
         },
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadFinalizations();
   }
 
   viewProject(item: FinalizationListItem): void {

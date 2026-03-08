@@ -127,6 +127,8 @@
   [currentPage]="filterState.page()"
   [totalPages]="lastPage()"
   [totalItems]="total()"
+  [perPage]="perPage()"
   itemLabel="bejegyzés"
   (pageChange)="filterState.setPage($event)"
+  (perPageChange)="onPerPageChange($event)"
 />

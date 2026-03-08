@@ -111,25 +111,15 @@
   </div>
 
   <!-- Lapozó -->
-  @if (totalPages() > 1) {
-    <div class="pagination">
-      <button
-        class="page-btn"
-        [disabled]="currentPage() === 1"
-        (click)="onPageChange(currentPage() - 1)"
-      >
-        <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-      </button>
-      <span class="page-info">{{ currentPage() }} / {{ totalPages() }}</span>
-      <button
-        class="page-btn"
-        [disabled]="currentPage() === totalPages()"
-        (click)="onPageChange(currentPage() + 1)"
-      >
-        <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-      </button>
-    </div>
-  }
+  <app-list-pagination
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [totalItems]="total()"
+    [perPage]="perPage()"
+    itemLabel="számla"
+    (pageChange)="onPageChange($event)"
+    (perPageChange)="onPerPageChange($event)"
+  />
 }
 
 <!-- Számla készítés dialog -->

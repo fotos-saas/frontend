@@ -69,8 +69,10 @@
       [currentPage]="filterState.page()"
       [totalPages]="totalPages()"
       [totalItems]="totalItems()"
+      [perPage]="perPage()"
       itemLabel="véglegesítés"
       (pageChange)="filterState.setPage($event)"
+      (perPageChange)="onPerPageChange($event)"
     />
   }
 </div>

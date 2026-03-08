@@ -116,6 +116,8 @@
   [currentPage]="filterState.page()"
   [totalPages]="lastPage()"
   [totalItems]="total()"
+  [perPage]="perPage()"
   itemLabel="projekt"
   (pageChange)="filterState.setPage($event)"
+  (perPageChange)="onPerPageChange($event)"
 />

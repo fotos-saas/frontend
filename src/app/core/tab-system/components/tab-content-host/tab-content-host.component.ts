@@ -1,12 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { TabManagerService } from '../../services/tab-manager.service';
 import { SplitDividerComponent } from '../split-divider/split-divider.component';
 
 @Component({
   selector: 'app-tab-content-host',
   standalone: true,
-  imports: [RouterOutlet, SplitDividerComponent],
+  imports: [SplitDividerComponent],
   template: `
     <div class="tab-content-host"
          [class.split-horizontal]="tabManager.splitMode() === 'horizontal'"

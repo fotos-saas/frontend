@@ -37,7 +37,7 @@ export class TeacherPhotoChooserDialogComponent {
   readonly mode = input.required<PhotoChooserMode>();
 
   readonly closeEvent = output<void>();
-  readonly savedEvent = output<void>();
+  readonly savedEvent = output<number>();
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -112,7 +112,7 @@ export class TeacherPhotoChooserDialogComponent {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.savedEvent.emit();
+        this.savedEvent.emit(mediaId);
       },
       error: (err) => {
         this.isSubmitting.set(false);

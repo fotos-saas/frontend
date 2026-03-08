@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -107,6 +108,12 @@ export class ExpandedTeacherPopupComponent {
     return items.find(i => i.archiveId)?.archiveId ?? null;
   });
 
+  /** Összes egyedi archiveId az előfordulások között */
+  readonly allArchiveIds = computed<number[]>(() => {
+    const items = this.occurrences();
+    return [...new Set(items.map(i => i.archiveId).filter((id): id is number => id !== null))];
+  });
+
   readonly firstLinkedGroup = computed<string | null>(() => {
     const items = this.occurrences();
     return items.find(i => i.linkedGroup)?.linkedGroup ?? null;
@@ -150,7 +157,7 @@ export class ExpandedTeacherPopupComponent {
   constructor() {
     effect(() => {
       const linkedGroup = this.firstLinkedGroup();
-      const archiveId = this.firstArchiveId();
+      const archiveIds = this.allArchiveIds();
 
       if (linkedGroup) {
         this.loadingPhotos.set(true);
@@ -163,17 +170,9 @@ export class ExpandedTeacherPopupComponent {
             },
             error: () => this.loadingPhotos.set(false),
           });
-      } else if (archiveId) {
+      } else if (archiveIds.length > 0) {
         this.loadingPhotos.set(true);
-        this.teacherService.getTeacherPhotos(archiveId)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (res) => {
-              this.archivePhotos.set(res.data);
-              this.loadingPhotos.set(false);
-            },
-            error: () => this.loadingPhotos.set(false),
-          });
+        this.loadAllArchivePhotos(archiveIds);
       }
     });
   }
@@ -186,19 +185,27 @@ export class ExpandedTeacherPopupComponent {
     this.showPhotoChooser.set(true);
   }
 
-  onPhotoChooserSaved(): void {
+  onPhotoChooserSaved(selectedMediaId: number): void {
     this.showPhotoChooser.set(false);
-    // Fotók újratöltés
     const linkedGroup = this.firstLinkedGroup();
-    const archiveId = this.firstArchiveId();
+    const archiveIds = this.allArchiveIds();
+
+    // Ha a dialógus csak 1 archívumra állított, a többit is szinkronizáljuk
+    if (!linkedGroup && archiveIds.length > 1) {
+      const mode = this.photoChooserMode();
+      if (mode?.kind === 'individual') {
+        const otherIds = archiveIds.filter(id => id !== mode.archiveId);
+        this.syncPhotoToArchives(otherIds, selectedMediaId);
+      }
+    }
+
+    // Fotók újratöltés
     if (linkedGroup) {
       this.teacherService.getLinkedGroupPhotos(linkedGroup)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({ next: (res) => this.archivePhotos.set(res.data) });
-    } else if (archiveId) {
-      this.teacherService.getTeacherPhotos(archiveId)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({ next: (res) => this.archivePhotos.set(res.data) });
+    } else if (archiveIds.length > 0) {
+      this.loadAllArchivePhotos(archiveIds);
     }
     this.dataService.reloadData();
   }
@@ -216,18 +223,69 @@ export class ExpandedTeacherPopupComponent {
     const mode = this.photoChooserMode();
     if (!mode) return;
 
-    // Archívum szinten állítjuk be az aktív fotót — NEM override-ként
-    const request$ = mode.kind === 'linkedGroup'
-      ? this.teacherService.setGroupActivePhoto(mode.linkedGroup, activePhoto.mediaId)
-      : this.teacherService.setActivePhotoByMedia(mode.archiveId, activePhoto.mediaId);
-
-    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.dataService.reloadData(),
-    });
+    if (mode.kind === 'linkedGroup') {
+      this.teacherService.setGroupActivePhoto(mode.linkedGroup, activePhoto.mediaId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: () => this.dataService.reloadData() });
+    } else {
+      // Minden archívumra beállítjuk — nem csak az elsőre
+      const archiveIds = this.allArchiveIds();
+      this.syncPhotoToArchives(archiveIds, activePhoto.mediaId);
+    }
   }
 
   removeOverride(personId: number): void {
     this.dataService.removeOverride(personId);
+  }
+
+  /** Több archívum fotóit egyszerre betölti és deduplikálva összevonja */
+  private loadAllArchivePhotos(archiveIds: number[]): void {
+    if (archiveIds.length === 1) {
+      this.teacherService.getTeacherPhotos(archiveIds[0])
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res) => {
+            this.archivePhotos.set(res.data);
+            this.loadingPhotos.set(false);
+          },
+          error: () => this.loadingPhotos.set(false),
+        });
+      return;
+    }
+
+    const requests = archiveIds.map(id => this.teacherService.getTeacherPhotos(id));
+    forkJoin(requests)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (results) => {
+          // Összes fotó összevonása, mediaId alapján deduplikálva
+          const seen = new Set<number>();
+          const merged: LinkedGroupPhoto[] = [];
+          for (const res of results) {
+            for (const photo of res.data) {
+              if (!seen.has(photo.mediaId)) {
+                seen.add(photo.mediaId);
+                merged.push(photo);
+              }
+            }
+          }
+          this.archivePhotos.set(merged);
+          this.loadingPhotos.set(false);
+        },
+        error: () => this.loadingPhotos.set(false),
+      });
+  }
+
+  /** Beállítja az aktív fotót több archívumra egyszerre */
+  private syncPhotoToArchives(archiveIds: number[], mediaId: number): void {
+    if (archiveIds.length === 0) return;
+
+    const requests = archiveIds.map(id =>
+      this.teacherService.setActivePhotoByMedia(id, mediaId)
+    );
+    forkJoin(requests)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.dataService.reloadData() });
   }
 
   linkTeachers(): void {

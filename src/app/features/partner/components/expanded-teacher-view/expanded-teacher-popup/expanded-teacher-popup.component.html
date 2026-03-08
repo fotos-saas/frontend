@@ -164,6 +164,6 @@
     [photos]="archivePhotos()"
     [mode]="photoChooserMode()!"
     (closeEvent)="showPhotoChooser.set(false)"
-    (savedEvent)="onPhotoChooserSaved()"
+    (savedEvent)="onPhotoChooserSaved($event)"
   />
 }

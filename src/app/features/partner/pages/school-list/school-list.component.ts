@@ -11,6 +11,7 @@ import { SelectionDownloadResult } from '../../components/selection-download-dia
 import { saveFile } from '../../../../shared/utils/file.util';
 import { abbreviateMiddle } from '../../../../shared/utils/string.util';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PaginationPreferencesService } from '../../../../core/services/pagination-preferences.service';
 import { SchoolEditModalComponent } from '../../components/school-edit-modal/school-edit-modal.component';
 import { SchoolLinkDialogComponent } from '../../components/school-link-dialog/school-link-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -56,6 +57,7 @@ export class PartnerSchoolListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   readonly tourService = inject(GuidedTourService);
 
   private readonly downloadDialogContainer = viewChild('downloadDialogContainer', { read: ViewContainerRef });
@@ -86,6 +88,8 @@ export class PartnerSchoolListComponent implements OnInit {
     defaultSortDir: 'asc',
     onStateChange: () => this.loadSchools(),
   });
+
+  perPage = signal(this.paginationPrefs.getPerPage(18));
 
   schools = signal<SchoolListItem[]>([]);
   totalPages = signal(1);
@@ -182,7 +186,7 @@ export class PartnerSchoolListComponent implements OnInit {
     const filters = this.filterState.filters();
     this.partnerService.getSchools({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       graduation_year: filters['graduation_year'] ? parseInt(filters['graduation_year'], 10) : undefined,
     })
@@ -199,6 +203,12 @@ export class PartnerSchoolListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadSchools();
   }
 
   openSchoolDetail(school: SchoolListItem): void {

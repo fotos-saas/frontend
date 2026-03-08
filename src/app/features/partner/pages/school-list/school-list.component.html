@@ -199,8 +199,10 @@
       [currentPage]="filterState.page()"
       [totalPages]="totalPages()"
       [totalItems]="totalSchools()"
+      [perPage]="perPage()"
       itemLabel="iskola"
       (pageChange)="filterState.setPage($event)"
+      (perPageChange)="onPerPageChange($event)"
     />
     </div>
   }

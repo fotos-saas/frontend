@@ -16,6 +16,7 @@ import {
 import { useFilterState } from '../../../../../shared/utils/use-filter-state';
 import { ListPaginationComponent } from '../../../../../shared/components/list-pagination/list-pagination.component';
 import { SmartFilterBarComponent } from '../../../../../shared/components/smart-filter-bar';
+import { PaginationPreferencesService } from '../../../../../core/services/pagination-preferences.service';
 
 @Component({
   selector: 'app-booking-list',
@@ -31,6 +32,7 @@ import { SmartFilterBarComponent } from '../../../../../shared/components/smart-
 export class BookingListComponent implements OnInit {
   private readonly bookingService = inject(PartnerBookingService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
   readonly BOOKING_STATUS_CONFIG = BOOKING_STATUS_CONFIG;
@@ -63,10 +65,18 @@ export class BookingListComponent implements OnInit {
     onStateChange: () => this.loadBookings(),
   });
 
+  perPage = signal(this.paginationPrefs.getPerPage(20));
+
   bookings = signal<Booking[]>([]);
   totalPages = signal(1);
 
   ngOnInit(): void {
+    this.loadBookings();
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
     this.loadBookings();
   }
 
@@ -75,7 +85,7 @@ export class BookingListComponent implements OnInit {
 
     const params: Record<string, string | number | undefined> = {
       page: this.filterState.page(),
-      per_page: 20,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       status: this.filterState.filters().status || undefined,
       source: this.filterState.filters().source || undefined,

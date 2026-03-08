@@ -16,6 +16,7 @@ import {
   WORKFLOW_STATUS_LABELS,
 } from '../../models/workflow.models';
 import { WorkflowStatusBadgeComponent } from '../../components/workflow-status-badge/workflow-status-badge.component';
+import { PaginationPreferencesService } from '../../../../core/services/pagination-preferences.service';
 
 @Component({
   selector: 'app-workflow-list',
@@ -29,7 +30,10 @@ export class WorkflowListComponent implements OnInit {
   private workflowService = inject(PartnerWorkflowService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   readonly ICONS = ICONS;
+
+  perPage = signal(this.paginationPrefs.getPerPage(20));
 
   items = signal<WorkflowListItem[]>([]);
   total = signal(0);
@@ -86,7 +90,7 @@ export class WorkflowListComponent implements OnInit {
     const f = this.filterState.filters();
     const params: Record<string, string | number> = {
       page: this.filterState.page(),
-      per_page: 20,
+      per_page: this.perPage(),
     };
     if (f['status']) params['status'] = f['status'];
     if (f['type']) params['type'] = f['type'];
@@ -105,6 +109,12 @@ export class WorkflowListComponent implements OnInit {
           this.filterState.loading.set(false);
         },
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadData();
   }
 
   goToDetail(workflow: WorkflowListItem): void {

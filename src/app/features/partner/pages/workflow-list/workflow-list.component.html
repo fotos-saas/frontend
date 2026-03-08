@@ -62,7 +62,9 @@
     [currentPage]="filterState.page()"
     [totalPages]="lastPage()"
     [totalItems]="total()"
+    [perPage]="perPage()"
     itemLabel="munkafolyamat"
     (pageChange)="filterState.setPage($event)"
+    (perPageChange)="onPerPageChange($event)"
   />
 </div>

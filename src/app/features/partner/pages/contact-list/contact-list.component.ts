@@ -18,6 +18,7 @@ import { TableHeaderComponent, TableColumn } from '../../../../shared/components
 import { DialogWrapperComponent } from '../../../../shared/components/dialog-wrapper/dialog-wrapper.component';
 import { PsFileUploadComponent } from '@shared/components/form';
 import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
+import { PaginationPreferencesService } from '../../../../core/services/pagination-preferences.service';
 
 /**
  * Partner Contact List - Kapcsolattartók listája a partner felületen.
@@ -49,6 +50,7 @@ export class PartnerContactListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly clipboardService = inject(ClipboardService);
 
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
   readonly ICONS = ICONS;
   protected readonly featureToggle = inject(FeatureToggleService);
 
@@ -68,6 +70,8 @@ export class PartnerContactListComponent implements OnInit {
     defaultSortDir: 'asc',
     onStateChange: () => this.loadContacts(),
   });
+
+  perPage = signal(this.paginationPrefs.getPerPage(18));
 
   contacts = signal<ContactListItem[]>([]);
   totalPages = signal(1);
@@ -97,7 +101,7 @@ export class PartnerContactListComponent implements OnInit {
 
     this.partnerService.getContacts({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -113,6 +117,12 @@ export class PartnerContactListComponent implements OnInit {
           this.filterState.loading.set(false);
         }
       });
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadContacts();
   }
 
   viewProject(contact: ContactListItem): void {

@@ -174,8 +174,10 @@
       [currentPage]="filterState.page()"
       [totalPages]="totalPages()"
       [totalItems]="totalContacts()"
+      [perPage]="perPage()"
       itemLabel="kapcsolat"
       (pageChange)="filterState.setPage($event)"
+      (perPageChange)="onPerPageChange($event)"
     />
     </div>
   }

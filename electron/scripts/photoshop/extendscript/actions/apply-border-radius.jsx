@@ -35,14 +35,23 @@ function _getSelectedLayers(doc) {
     ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
     var docDesc = executeActionGet(ref);
     var idxList = docDesc.getList(stringIDToTypeID("targetLayers"));
+    log("[JSX] targetLayers count: " + idxList.count);
     for (var i = 0; i < idxList.count; i++) {
       var idx = idxList.getReference(i).getIndex(charIDToTypeID("Lyr "));
+      // Layer ID lekerese index alapjan
       var layerRef = new ActionReference();
       layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
       var layerDesc = executeActionGet(layerRef);
       var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
+      var layerKind = layerDesc.getInteger(stringIDToTypeID("layerKind"));
+      log("[JSX] Layer[" + i + "]: " + layerName + " kind=" + layerKind + " idx=" + idx);
+      // layerKind: 1=pixel, 3=text, 7=group — csak pixel layereket akarjuk
       var found = _findArtLayerByName(doc, layerName);
-      if (found) layers.push(found);
+      if (found) {
+        layers.push(found);
+      } else {
+        log("[JSX] WARN: Nem talalt ArtLayer: " + layerName);
+      }
     }
   } catch (e) {
     log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);

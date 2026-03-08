@@ -150,6 +150,8 @@
       [currentPage]="filterState.page()"
       [totalPages]="totalPages()"
       [totalItems]="totalProjects()"
+      [perPage]="perPage()"
+      (perPageChange)="onPerPageChange($event)"
       itemLabel="projekt"
       (pageChange)="filterState.setPage($event)"
     />
@@ -241,6 +243,7 @@
   <app-create-project-wizard-dialog
     (close)="actions.closeCreateWizard()"
     (projectCreated)="actions.onProjectCreated()"
+    (uploadRequested)="actions.onWizardUploadRequested($event)"
   />
 }
 

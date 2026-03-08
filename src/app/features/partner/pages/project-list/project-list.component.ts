@@ -32,6 +32,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
 import { ProjectListActionsService } from './project-list-actions.service';
 import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
 import { SyncDialogComponent } from '../../components/sync-dialog/sync-dialog.component';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 
 /**
  * Partner Project List - Projektek listája a fotós felületen.
@@ -72,6 +73,7 @@ export class PartnerProjectListComponent implements OnInit {
   private readonly psdStatusService = inject(PsdStatusService);
   private readonly electronService = inject(ElectronService);
   private readonly authService = inject(AuthService);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   /** Kiemelt akciók service */
   readonly actions = inject(ProjectListActionsService);
@@ -118,6 +120,8 @@ export class PartnerProjectListComponent implements OnInit {
     },
     onStateChange: () => this.loadProjects(),
   });
+
+  perPage = signal(this.paginationPrefs.getPerPage(12));
 
   projects = signal<PartnerProjectListItem[]>([]);
   totalPages = signal(1);
@@ -185,6 +189,12 @@ export class PartnerProjectListComponent implements OnInit {
   // Computed-ok amik a service-t hívják
   readonly selectedProjects = computed(() => this.actions.selectedProjects(this.projects()));
 
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadProjects();
+  }
+
   toggleOrderSort(): void {
     this.filterState.setSortBy(this.filterState.sortBy() === 'order_submitted_at' ? 'created_at' : 'order_submitted_at');
   }
@@ -239,7 +249,7 @@ export class PartnerProjectListComponent implements OnInit {
     const filters = this.filterState.filters();
     this.partnerService.getProjects({
       page: this.filterState.page(),
-      per_page: 12,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       sort_by: this.filterState.sortBy() as 'created_at' | 'photo_date' | 'class_year' | 'school_name' | 'tablo_status' | 'missing_count' | 'samples_count' | 'order_submitted_at' | 'last_content_update' | 'last_activity_at',
       sort_dir: this.filterState.sortDir(),

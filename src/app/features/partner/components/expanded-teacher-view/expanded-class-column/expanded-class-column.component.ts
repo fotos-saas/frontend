@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LucideAngularModule } from 'lucide-angular';
 import { ExpandedClassData, ExpandedClassTeacher } from '../expanded-teacher-view.types';
@@ -8,7 +10,7 @@ import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.se
 @Component({
   selector: 'app-expanded-class-column',
   standalone: true,
-  imports: [LucideAngularModule, ExpandedTeacherCardComponent],
+  imports: [LucideAngularModule, ExpandedTeacherCardComponent, FormsModule, MatTooltipModule],
   templateUrl: './expanded-class-column.component.html',
   styleUrl: './expanded-class-column.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,6 +18,9 @@ import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.se
 export class ExpandedClassColumnComponent {
   readonly ICONS = ICONS;
   private dataService = inject(ExpandedTeacherViewDataService);
+
+  readonly showAddForm = signal(false);
+  readonly newTeacherName = signal('');
 
   readonly classData = input.required<ExpandedClassData>();
   readonly listEl = viewChild<ElementRef<HTMLElement>>('listRef');
@@ -98,5 +103,29 @@ export class ExpandedClassColumnComponent {
 
   onRemoveOverride(personId: number): void {
     this.dataService.removeOverride(personId);
+  }
+
+  toggleAddForm(): void {
+    this.showAddForm.update(v => !v);
+    if (!this.showAddForm()) {
+      this.newTeacherName.set('');
+    }
+  }
+
+  submitAddTeacher(): void {
+    const name = this.newTeacherName().trim();
+    if (!name) return;
+    this.dataService.addTeacher(this.classData().projectId, name);
+    this.newTeacherName.set('');
+    this.showAddForm.set(false);
+  }
+
+  onAddKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.submitAddTeacher();
+    } else if (event.key === 'Escape') {
+      this.showAddForm.set(false);
+      this.newTeacherName.set('');
+    }
   }
 }

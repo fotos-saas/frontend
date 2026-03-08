@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
+import { PartnerProjectService } from '../../services/partner-project.service';
 import {
   ExpandedViewResponse,
   ExpandedUploadedPhoto,
@@ -116,6 +117,7 @@ export class ExpandedTeacherViewDataService {
     return groupMap;
   });
 
+  private projectService = inject(PartnerProjectService);
   private sourceProjectId: number | null = null;
 
   loadData(projectId: number): void {
@@ -468,6 +470,61 @@ export class ExpandedTeacherViewDataService {
       error: (err) => {
         this.logger.error('Tömeges override beállítási hiba', err);
       },
+    });
+  }
+
+  /** Tanár hozzáadása egy projekthez (osztályhoz) */
+  addTeacher(projectId: number, name: string): void {
+    this.projectService.addPersons(projectId, name, 'teacher').subscribe({
+      next: () => this.reloadData(),
+      error: (err) => this.logger.error('Tanár hozzáadási hiba', err),
+    });
+  }
+
+  /** Tanár nevének/pozíciójának módosítása */
+  updateTeacher(projectId: number, personId: number, data: { name?: string; title?: string | null }): void {
+    this.projectService.updatePerson(projectId, personId, data).subscribe({
+      next: (response) => {
+        const result = response.data;
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            classes: current.classes.map(cls => ({
+              ...cls,
+              teachers: cls.teachers.map(t =>
+                t.personId === personId
+                  ? { ...t, name: result.name, title: result.title }
+                  : t
+              ),
+            })),
+          });
+        }
+      },
+      error: (err) => this.logger.error('Tanár módosítási hiba', err),
+    });
+  }
+
+  /** Tanár törlése egy projektből */
+  deleteTeacher(projectId: number, personId: number): void {
+    this.projectService.deletePerson(projectId, personId).subscribe({
+      next: () => {
+        const current = this.data();
+        if (current) {
+          this.data.set({
+            ...current,
+            classes: current.classes.map(cls => ({
+              ...cls,
+              teachers: cls.teachers.filter(t => t.personId !== personId),
+            })),
+          });
+        }
+        // Ha a törölt tanár volt kiválasztva, zárd be a popup-ot
+        if (this.selectedPersonId() === personId) {
+          this.selectedPersonId.set(null);
+        }
+      },
+      error: (err) => this.logger.error('Tanár törlési hiba', err),
     });
   }
 

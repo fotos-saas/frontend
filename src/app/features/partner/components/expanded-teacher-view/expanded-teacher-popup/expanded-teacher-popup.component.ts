@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { forkJoin, switchMap } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -17,12 +18,14 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
 import { PartnerTeacherService } from '../../../services/partner-teacher.service';
 import { TeacherPhotoChooserDialogComponent } from '../../teacher-photo-chooser-dialog/teacher-photo-chooser-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import type { LinkedGroupPhoto, PhotoChooserMode } from '../../../models/teacher.models';
 
 interface OccurrenceItem {
   personId: number;
   projectId: number;
   name: string;
+  title: string | null;
   className: string;
   schoolName: string;
   hasPhoto: boolean;
@@ -35,7 +38,7 @@ interface OccurrenceItem {
 @Component({
   selector: 'app-expanded-teacher-popup',
   standalone: true,
-  imports: [LucideAngularModule, MatTooltipModule, TeacherPhotoChooserDialogComponent],
+  imports: [LucideAngularModule, MatTooltipModule, TeacherPhotoChooserDialogComponent, ConfirmDialogComponent, FormsModule],
   templateUrl: './expanded-teacher-popup.component.html',
   styleUrl: './expanded-teacher-popup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +61,14 @@ export class ExpandedTeacherPopupComponent {
   private linkedGroupOverride = signal<string | null>(null);
   /** Kiválasztott fotó a strip-ből — döntésre vár (mindenkinek / csak itt) */
   readonly pendingPhoto = signal<LinkedGroupPhoto | null>(null);
+
+  // Szerkesztés
+  readonly editingPersonId = signal<number | null>(null);
+  readonly editName = signal('');
+  readonly editTitle = signal('');
+
+  // Törlés
+  readonly deleteConfirmPersonId = signal<number | null>(null);
 
   readonly occurrences = computed<OccurrenceItem[]>(() => {
     const viewData = this.dataService.data();
@@ -82,6 +93,7 @@ export class ExpandedTeacherPopupComponent {
             personId: t.personId,
             projectId: cls.projectId,
             name: t.name,
+            title: t.title,
             className: cls.className,
             schoolName: cls.schoolName,
             hasPhoto: t.hasPhoto,
@@ -385,5 +397,56 @@ export class ExpandedTeacherPopupComponent {
         },
         error: () => this.linking.set(false),
       });
+  }
+
+  // Szerkesztés
+  startEdit(item: OccurrenceItem): void {
+    this.editingPersonId.set(item.personId);
+    this.editName.set(item.name);
+    this.editTitle.set(item.title ?? '');
+  }
+
+  cancelEdit(): void {
+    this.editingPersonId.set(null);
+    this.editName.set('');
+    this.editTitle.set('');
+  }
+
+  saveEdit(item: OccurrenceItem): void {
+    const name = this.editName().trim();
+    if (!name) return;
+    this.dataService.updateTeacher(item.projectId, item.personId, {
+      name,
+      title: this.editTitle().trim() || null,
+    });
+    this.editingPersonId.set(null);
+  }
+
+  onEditKeydown(event: KeyboardEvent, item: OccurrenceItem): void {
+    if (event.key === 'Enter') {
+      this.saveEdit(item);
+    } else if (event.key === 'Escape') {
+      this.cancelEdit();
+    }
+  }
+
+  // Törlés
+  confirmDelete(personId: number): void {
+    this.deleteConfirmPersonId.set(personId);
+  }
+
+  onDeleteResult(result: ConfirmDialogResult): void {
+    const personId = this.deleteConfirmPersonId();
+    this.deleteConfirmPersonId.set(null);
+    if (result.action !== 'confirm' || !personId) return;
+
+    const item = this.occurrences().find(o => o.personId === personId);
+    if (!item) return;
+
+    this.dataService.deleteTeacher(item.projectId, personId);
+    // Ha nincs több előfordulás, zárd be a popup-ot
+    if (this.occurrences().length <= 1) {
+      this.close.emit();
+    }
   }
 }

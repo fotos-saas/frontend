@@ -113,39 +113,88 @@
                 </div>
               }
             </div>
-            <div class="popup-item__info">
-              <span class="popup-item__name" [class.popup-item__name--diff]="item.name !== teacherName()">
-                {{ item.name }}
-              </span>
-              <span class="popup-item__class">{{ item.schoolName }} — {{ item.className }}</span>
-            </div>
-            <div class="popup-item__actions">
-              @if (item.hasOverride) {
-                <span class="popup-item__badge">Felülírva</span>
+            @if (editingPersonId() === item.personId) {
+              <!-- Inline szerkesztés mód -->
+              <div class="popup-item__edit-form">
+                <input
+                  type="text"
+                  class="popup-item__edit-input"
+                  placeholder="Név"
+                  [ngModel]="editName()"
+                  (ngModelChange)="editName.set($event)"
+                  (keydown)="onEditKeydown($event, item)"
+                  autofocus
+                />
+                <input
+                  type="text"
+                  class="popup-item__edit-input popup-item__edit-input--small"
+                  placeholder="Pozíció (opcionális)"
+                  [ngModel]="editTitle()"
+                  (ngModelChange)="editTitle.set($event)"
+                  (keydown)="onEditKeydown($event, item)"
+                />
+                <div class="popup-item__edit-actions">
+                  <button class="popup-item__action-btn popup-item__action-btn--save" matTooltip="Mentés" (click)="saveEdit(item)">
+                    <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                  </button>
+                  <button class="popup-item__action-btn" matTooltip="Mégse" (click)="cancelEdit()">
+                    <lucide-icon [name]="ICONS.X" [size]="14" />
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <!-- Normál nézet -->
+              <div class="popup-item__info">
+                <span class="popup-item__name" [class.popup-item__name--diff]="item.name !== teacherName()">
+                  {{ item.name }}
+                </span>
+                @if (item.title) {
+                  <span class="popup-item__title">{{ item.title }}</span>
+                }
+                <span class="popup-item__class">{{ item.schoolName }} — {{ item.className }}</span>
+              </div>
+              <div class="popup-item__actions">
+                <button
+                  class="popup-item__action-btn"
+                  matTooltip="Szerkesztés"
+                  (click)="startEdit(item)"
+                >
+                  <lucide-icon [name]="ICONS.EDIT" [size]="14" />
+                </button>
                 <button
                   class="popup-item__action-btn popup-item__action-btn--danger"
-                  matTooltip="Override eltávolítás"
-                  (click)="removeOverride(item.personId)"
+                  matTooltip="Törlés"
+                  (click)="confirmDelete(item.personId)"
                 >
-                  <lucide-icon [name]="ICONS.X" [size]="14" />
+                  <lucide-icon [name]="ICONS.DELETE" [size]="14" />
                 </button>
-              } @else {
-                @if (item.hasPhoto) {
-                  <lucide-icon [name]="ICONS.CHECK" [size]="16" class="popup-item__check" />
-                } @else {
-                  <lucide-icon [name]="ICONS.X" [size]="16" class="popup-item__missing" />
-                }
-                @if (activeArchivePhoto()) {
+                @if (item.hasOverride) {
+                  <span class="popup-item__badge">Felülírva</span>
                   <button
-                    class="popup-item__action-btn"
-                    matTooltip="Archív fotó alkalmazása"
-                    (click)="applyOverride(item.personId)"
+                    class="popup-item__action-btn popup-item__action-btn--danger"
+                    matTooltip="Override eltávolítás"
+                    (click)="removeOverride(item.personId)"
                   >
-                    <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
+                    <lucide-icon [name]="ICONS.X" [size]="14" />
                   </button>
+                } @else {
+                  @if (item.hasPhoto) {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="16" class="popup-item__check" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.X" [size]="16" class="popup-item__missing" />
+                  }
+                  @if (activeArchivePhoto()) {
+                    <button
+                      class="popup-item__action-btn"
+                      matTooltip="Archív fotó alkalmazása"
+                      (click)="applyOverride(item.personId)"
+                    >
+                      <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
+                    </button>
+                  }
                 }
-              }
-            </div>
+              </div>
+            }
           </div>
         }
       </div>
@@ -179,6 +228,18 @@
     }
   </div>
 </div>
+
+<!-- Törlés megerősítő dialógus -->
+@if (deleteConfirmPersonId()) {
+  <app-confirm-dialog
+    title="Tanár törlése"
+    message="Biztosan törölni szeretnéd ezt a tanárt ebből az osztályból? Ez a művelet nem vonható vissza."
+    confirmText="Törlés"
+    cancelText="Mégse"
+    confirmType="danger"
+    (resultEvent)="onDeleteResult($event)"
+  />
+}
 
 <!-- Fotóválasztó dialog -->
 @if (showPhotoChooser() && photoChooserMode()) {

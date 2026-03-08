@@ -1,8 +1,39 @@
 <div class="class-column">
   <div class="class-column__header">
-    <span class="class-column__school">{{ classData().schoolName }}</span>
-    <span class="class-column__name">{{ classData().className }}</span>
-    <span class="class-column__count">({{ filteredTeachers().length }})</span>
+    <div class="class-column__header-top">
+      <div class="class-column__header-info">
+        <span class="class-column__school">{{ classData().schoolName }}</span>
+        <span class="class-column__name">{{ classData().className }}</span>
+        <span class="class-column__count">({{ filteredTeachers().length }})</span>
+      </div>
+      <button
+        class="class-column__add-btn"
+        matTooltip="Tanár hozzáadása"
+        (click)="toggleAddForm()"
+      >
+        <lucide-icon [name]="showAddForm() ? ICONS.X : ICONS.PLUS" [size]="14" />
+      </button>
+    </div>
+    @if (showAddForm()) {
+      <div class="class-column__add-form">
+        <input
+          type="text"
+          class="class-column__add-input"
+          placeholder="Tanár neve..."
+          [ngModel]="newTeacherName()"
+          (ngModelChange)="newTeacherName.set($event)"
+          (keydown)="onAddKeydown($event)"
+          autofocus
+        />
+        <button
+          class="class-column__add-submit"
+          [disabled]="!newTeacherName().trim()"
+          (click)="submitAddTeacher()"
+        >
+          <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        </button>
+      </div>
+    }
   </div>
 
   <div class="class-column__list" #listRef>

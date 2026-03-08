@@ -1228,6 +1228,41 @@
       </div>
     </div>
 
+    <!-- Lekerekítés -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="11" />
+        Lekerekítés
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Sugár (px)</span>
+        <div class="qa-section__buttons">
+          <input type="number" class="qa-input qa-input--narrow" min="1" max="500"
+            [value]="qa.borderRadius()"
+            (change)="qa.setBorderRadius(+$any($event.target).value || 30)" />
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Csak kijelöltek</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--toggle"
+            [class.qa-btn--active]="qa.borderRadiusUseSelected()"
+            (click)="qa.borderRadiusUseSelected.set(!qa.borderRadiusUseSelected())">
+            @if (qa.borderRadiusUseSelected()) {
+              <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+            } @else {
+              <lucide-icon [name]="ICONS.MINUS" [size]="12" />
+            }
+          </button>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--amber" [disabled]="qa.loading()" (click)="qa.onAction('border-radius', 'all')">Alkalmazás</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Loading bar -->

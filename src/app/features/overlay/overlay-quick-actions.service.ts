@@ -57,6 +57,10 @@ export class OverlayQuickActionsService {
   readonly gridLayerCount = signal(0);
   readonly gridUnit = signal<'px' | 'cm'>('cm');
 
+  // === Border radius ===
+  readonly borderRadius = signal(30);
+  readonly borderRadiusUseSelected = signal(false);
+
   // === Grid rendezés ===
   readonly gridCols = signal(5);
   readonly gridRows = signal(0); // 0 = auto
@@ -162,6 +166,8 @@ export class OverlayQuickActionsService {
         await this.executeEqualizeGrid();
       } else if (c.action === 'grid-arrange') {
         await this.executeGridArrange();
+      } else if (c.action === 'border-radius') {
+        await this.executeBorderRadius();
       }
     } finally {
       this.loading.set(false);
@@ -428,6 +434,35 @@ export class OverlayQuickActionsService {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  // === Border radius ===
+
+  setBorderRadius(value: number): void {
+    this.borderRadius.set(Math.max(1, Math.round(value)));
+  }
+
+  private async executeBorderRadius(): Promise<void> {
+    const radius = this.borderRadius();
+    if (radius <= 0) { this.setResult(false, 'A sugár legalább 1px legyen'); return; }
+
+    const useSelected = this.borderRadiusUseSelected();
+    const jsonData: Record<string, unknown> = { radius, useSelectedLayers: useSelected };
+
+    if (!useSelected) {
+      const layerNames = await this.getLayerNames('all');
+      if (layerNames.length === 0) { this.setResult(false, 'Nincsenek image layerek'); return; }
+      jsonData['layerNames'] = layerNames;
+    }
+
+    const result = await this.ps.runJsx(
+      'border-radius', 'actions/apply-border-radius.jsx', jsonData,
+    );
+
+    this.handleJsxResult(result,
+      data => `${data['masked']} layer lekerekítve (${data['skipped']} kihagyva)`,
+      'Lekerekítés kész',
+    );
   }
 
   /** Dokumentum DPI lekérése mérés futtatásával */

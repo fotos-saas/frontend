@@ -82,6 +82,25 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.3;
+    display: flex;
+    align-items: center;
+  }
+
+  &__link-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: rgb(219 234 254);
+    color: rgb(37 99 235);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    margin-left: 4px;
+    flex-shrink: 0;
   }
 
   &__title {

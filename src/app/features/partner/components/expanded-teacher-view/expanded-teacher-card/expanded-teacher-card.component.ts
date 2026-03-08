@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ExpandedClassTeacher } from '../expanded-teacher-view.types';
+import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.service';
 
 @Component({
   selector: 'app-expanded-teacher-card',
@@ -14,10 +15,18 @@ import { ExpandedClassTeacher } from '../expanded-teacher-view.types';
 })
 export class ExpandedTeacherCardComponent {
   readonly ICONS = ICONS;
+  private dataService = inject(ExpandedTeacherViewDataService);
 
   readonly teacher = input.required<ExpandedClassTeacher>();
   readonly isHighlighted = input(false);
   readonly highlightType = input<'exact' | 'similar' | 'missing' | null>(null);
+
+  /** Linked group sorszám badge (1, 2, 3...) — null ha nincs linkedGroup */
+  readonly linkedGroupNumber = computed<number | null>(() => {
+    const lg = this.teacher().linkedGroup;
+    if (!lg) return null;
+    return this.dataService.linkedGroupNumbers().get(lg) ?? null;
+  });
 
   readonly hover = output<{ normalizedName: string; personId: number } | null>();
   readonly select = output<number>();

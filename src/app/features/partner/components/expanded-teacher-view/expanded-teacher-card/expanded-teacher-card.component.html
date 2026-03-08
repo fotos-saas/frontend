@@ -30,6 +30,9 @@
   <div class="teacher-card__info">
     <span class="teacher-card__name">
       {{ teacher().name }}
+      @if (linkedGroupNumber(); as num) {
+        <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">{{ num }}</span>
+      }
     </span>
     @if (teacher().title) {
       <span class="teacher-card__title">{{ teacher().title }}</span>

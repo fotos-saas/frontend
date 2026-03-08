@@ -87,6 +87,23 @@ export class ExpandedTeacherViewDataService {
   readonly classes = computed<ExpandedClassData[]>(() => this.data()?.classes ?? []);
   readonly similarityGroups = computed<SimilarityGroup[]>(() => this.data()?.similarityGroups ?? []);
 
+  /** linkedGroup UUID → sorszám (1, 2, 3...) mapping, csak ha legalább 2 előfordulás van */
+  readonly linkedGroupNumbers = computed<Map<string, number>>(() => {
+    const viewData = this.data();
+    if (!viewData) return new Map();
+
+    const groupMap = new Map<string, number>();
+    let counter = 1;
+    for (const cls of viewData.classes) {
+      for (const teacher of cls.teachers) {
+        if (teacher.linkedGroup && !groupMap.has(teacher.linkedGroup)) {
+          groupMap.set(teacher.linkedGroup, counter++);
+        }
+      }
+    }
+    return groupMap;
+  });
+
   private sourceProjectId: number | null = null;
 
   loadData(projectId: number): void {

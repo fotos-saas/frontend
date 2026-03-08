@@ -23,6 +23,7 @@ import { SmartFilterBarComponent, SearchableFilterDef } from '../../../../shared
 import { ListPaginationComponent } from '../../../../shared/components/list-pagination/list-pagination.component';
 import { TableHeaderComponent, TableColumn } from '../../../../shared/components/table-header';
 import { ViewModeToggleComponent, ViewModeOption } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 
 @Component({
   selector: 'app-partner-student-list',
@@ -54,6 +55,7 @@ export class PartnerStudentListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly paginationPrefs = inject(PaginationPreferencesService);
 
   readonly ICONS = ICONS;
 
@@ -87,6 +89,7 @@ export class PartnerStudentListComponent implements OnInit {
   totalStudents = signal(0);
   schools = signal<SchoolItem[]>([]);
   classYears = signal<SelectOption[]>([]);
+  perPage = signal(this.paginationPrefs.getPerPage(18));
 
   schoolOptions = computed<SelectOption[]>(() =>
     this.schools().map(s => ({
@@ -169,7 +172,7 @@ export class PartnerStudentListComponent implements OnInit {
 
     this.studentService.getStudents({
       page: this.filterState.page(),
-      per_page: 18,
+      per_page: this.perPage(),
       search: this.filterState.search() || undefined,
       school_id: schoolId ? parseInt(schoolId, 10) : undefined,
       class_name: className || undefined,
@@ -198,6 +201,12 @@ export class PartnerStudentListComponent implements OnInit {
 
   onClassNameChange(value: string): void {
     this.filterState.setFilter('class_name', value);
+  }
+
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.paginationPrefs.setPerPage(value);
+    this.loadStudents();
   }
 
   openCreateModal(): void {

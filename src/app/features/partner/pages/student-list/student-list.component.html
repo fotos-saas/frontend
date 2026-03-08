@@ -130,6 +130,8 @@
       [totalPages]="totalPages()"
       [totalItems]="totalStudents()"
       itemLabel="diák"
+      [perPage]="perPage()"
+      (perPageChange)="onPerPageChange($event)"
       (pageChange)="filterState.setPage($event)"
     />
     </div>

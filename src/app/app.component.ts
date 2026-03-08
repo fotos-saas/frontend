@@ -58,9 +58,7 @@ export class AppComponent implements OnInit {
 
         // Tab rendszer inicializalasa (csak Electron modban)
         if (this.tabManager.isTabSystemEnabled()) {
-            this.tabManager.initialize().catch(err => {
-                console.error('[TabSystem] Inicializalas hiba:', err);
-            });
+            this.tabManager.initialize();
             this.tabKeyboard.initialize();
         }
     }

@@ -81,6 +81,23 @@
         <app-expanded-upload-panel />
       </div>
 
+      <!-- Tanár kereső -->
+      <div class="expanded-view__search">
+        <lucide-icon [name]="ICONS.SEARCH" [size]="16" class="expanded-view__search-icon" />
+        <input
+          type="text"
+          class="expanded-view__search-input"
+          placeholder="Tanár keresése..."
+          [ngModel]="dataService.teacherSearch()"
+          (ngModelChange)="dataService.teacherSearch.set($event)"
+        />
+        @if (dataService.teacherSearch()) {
+          <button class="expanded-view__search-clear" (click)="dataService.teacherSearch.set('')">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        }
+      </div>
+
       <!-- Osztály oszlopok -->
       <div class="expanded-view__classes">
         @for (cls of classes(); track cls.projectId) {

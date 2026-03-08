@@ -89,6 +89,8 @@ export class ExpandedTeacherViewComponent implements OnInit {
     } else if (this.showDropdown) {
       this.showDropdown = false;
       this.dropdownSearch.set('');
+    } else if (this.dataService.teacherSearch()) {
+      this.dataService.teacherSearch.set('');
     } else if (this.selectedPersonId()) {
       this.dataService.onTeacherSelect(null);
     } else {

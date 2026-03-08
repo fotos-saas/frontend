@@ -2,11 +2,11 @@
   <div class="class-column__header">
     <span class="class-column__school">{{ classData().schoolName }}</span>
     <span class="class-column__name">{{ classData().className }}</span>
-    <span class="class-column__count">({{ classData().teachers.length }})</span>
+    <span class="class-column__count">({{ filteredTeachers().length }})</span>
   </div>
 
   <div class="class-column__list" #listRef>
-    @for (teacher of classData().teachers; track teacher.personId) {
+    @for (teacher of filteredTeachers(); track teacher.personId) {
       <app-expanded-teacher-card
         [attr.data-person-id]="teacher.personId"
         [teacher]="teacher"

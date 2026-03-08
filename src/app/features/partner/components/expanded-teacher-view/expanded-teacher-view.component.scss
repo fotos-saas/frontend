@@ -266,6 +266,63 @@
     flex-shrink: 0;
   }
 
+  // Teacher search
+  &__search {
+    display: flex;
+    align-items: center;
+    margin: 0 24px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: border-color 0.15s ease;
+
+    &:focus-within {
+      border-color: rgb(147 197 253);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &__search-icon {
+    color: rgb(156 163 175);
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  &__search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: rgb(17 24 39);
+    background: transparent;
+
+    &::placeholder {
+      color: rgb(156 163 175);
+    }
+  }
+
+  &__search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgb(243 244 246);
+    color: rgb(107 114 128);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgb(229 231 235);
+      color: rgb(55 65 81);
+    }
+  }
+
   // Classes
   &__classes {
     flex: 1;

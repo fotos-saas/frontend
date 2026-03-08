@@ -39,6 +39,9 @@ export class ExpandedTeacherViewDataService {
   readonly hoveredNormalizedName = signal<string | null>(null);
   readonly selectedPersonId = signal<number | null>(null);
 
+  // Tanár keresés
+  readonly teacherSearch = signal('');
+
   // Feltöltési terület
   readonly uploadPanelCollapsed = signal(false);
   readonly uploadProgress = signal<number>(0);

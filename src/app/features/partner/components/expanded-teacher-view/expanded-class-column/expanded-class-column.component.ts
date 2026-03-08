@@ -24,6 +24,13 @@ export class ExpandedClassColumnComponent {
   readonly hoveredPersonId = computed(() => this.dataService.hoveredPersonId());
   readonly similarityGroup = computed(() => this.dataService.highlightedSimilarityGroup());
 
+  readonly filteredTeachers = computed(() => {
+    const query = this.dataService.teacherSearch().trim().toLowerCase();
+    const teachers = this.classData().teachers;
+    if (!query) return teachers;
+    return teachers.filter(t => t.name.toLowerCase().includes(query));
+  });
+
   constructor() {
     effect(() => {
       const hoveredId = this.hoveredPersonId();

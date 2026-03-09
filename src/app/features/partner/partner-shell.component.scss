@@ -471,6 +471,14 @@
   margin-top: 8px;
 }
 
+.version-hash {
+  padding: 4px 16px 8px;
+  font-size: 10px;
+  color: rgba(148, 163, 184, 0.4);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .nav-item--bottom {
   opacity: 0.75;
   font-size: 0.8125rem;

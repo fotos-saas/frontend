@@ -30,7 +30,10 @@ function getGitBranch() {
   }
 }
 
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+
 const version = {
+  version: pkg.version,
   hash: getGitHash(),
   timestamp: new Date().toISOString(),
   buildTime: Date.now(),
@@ -46,8 +49,9 @@ if (!fs.existsSync(jsonDir)) {
 fs.writeFileSync(jsonPath, JSON.stringify(version, null, 2), 'utf8');
 
 // 2. build-version.ts generalasa (TypeScript importhoz)
-const tsContent = `// AUTO-GENERALT FAJL - NE MODOSITSD KEZZEL!
-// Generalva: ${version.timestamp}
+const tsContent = `// AUTO-GENERÁLT FÁJL - NE MÓDOSÍTSD KÉZZEL!
+// Generálva: ${version.timestamp}
+export const BUILD_VERSION = '${version.version}';
 export const BUILD_HASH = '${version.hash}';
 export const BUILD_TIMESTAMP = '${version.timestamp}';
 export const BUILD_TIME = ${version.buildTime};

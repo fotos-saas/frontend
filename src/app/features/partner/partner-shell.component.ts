@@ -26,6 +26,7 @@ import { PartnerSwitcherDropdownComponent } from '../../shared/components/partne
 import { BatchWorkspacePanelComponent } from './components/batch-workspace-panel/batch-workspace-panel.component';
 import { FeatureToggleService } from '../../core/services/feature-toggle.service';
 import { ROLE_BADGES, buildPartnerMenu, buildTeamMemberMenu, filterMenuItems } from './partner-shell-menu.config';
+import { BUILD_VERSION, BUILD_HASH } from '../../core/constants/build-version';
 
 /**
  * Partner Shell - Layout komponens a fotós/partner felülethez.
@@ -73,6 +74,7 @@ export class PartnerShellComponent implements OnInit {
   private router = inject(Router);
   protected sidebarState = inject(SidebarStateService);
   protected readonly ICONS = ICONS;
+  protected readonly buildHash = `${BUILD_VERSION} (${BUILD_HASH})`;
   protected chatOpen = signal(false);
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);

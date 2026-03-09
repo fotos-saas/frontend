@@ -2,7 +2,6 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SidebarStateService } from '../../services/sidebar-state.service';
 import { MenuConfigService } from '../../services/menu-config.service';
 import { SidebarMenuItemComponent } from '../sidebar-menu-item/sidebar-menu-item.component';
-import { BUILD_HASH } from '../../../constants/build-version';
 
 /**
  * Sidebar Component
@@ -35,12 +34,6 @@ import { BUILD_HASH } from '../../../constants/build-version';
           />
         }
 
-        <!-- Verzió hash a menü végén -->
-        @if (!sidebarState.isTablet()) {
-          <div class="px-4 pt-3 pb-1 text-[10px] text-slate-500 select-none">
-            v.{{ buildHash }}
-          </div>
-        }
       </nav>
 
       <!-- Bottom Items (sticky footer) -->
@@ -85,5 +78,4 @@ import { BUILD_HASH } from '../../../constants/build-version';
 export class SidebarComponent {
   protected readonly sidebarState = inject(SidebarStateService);
   protected readonly menuConfig = inject(MenuConfigService);
-  protected readonly buildHash = BUILD_HASH;
 }

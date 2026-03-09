@@ -45,11 +45,13 @@ import { BUILD_HASH } from '../../../constants/build-version';
               [collapsed]="sidebarState.isTablet()"
             />
           }
-          @if (!sidebarState.isTablet()) {
-            <div class="px-4 pt-1 pb-1 text-[10px] text-slate-600 select-none">
-              v.{{ buildHash }}
-            </div>
-          }
+        </div>
+      }
+
+      <!-- Verzió -->
+      @if (!sidebarState.isTablet()) {
+        <div class="px-4 py-2 text-[10px] text-slate-500 select-none flex-shrink-0">
+          v.{{ buildHash }}
         </div>
       }
     </aside>

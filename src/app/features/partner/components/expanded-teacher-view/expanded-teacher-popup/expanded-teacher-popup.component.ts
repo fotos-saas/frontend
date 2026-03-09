@@ -33,6 +33,8 @@ interface OccurrenceItem {
   hasOverride: boolean;
   archiveId: number | null;
   linkedGroup: string | null;
+  isPortraitProcessed?: boolean;
+  isCropProcessed?: boolean;
 }
 
 @Component({
@@ -101,6 +103,8 @@ export class ExpandedTeacherPopupComponent {
             hasOverride: t.hasOverride,
             archiveId: t.archiveId,
             linkedGroup: t.linkedGroup,
+            isPortraitProcessed: t.isPortraitProcessed,
+            isCropProcessed: t.isCropProcessed,
           });
         }
       }

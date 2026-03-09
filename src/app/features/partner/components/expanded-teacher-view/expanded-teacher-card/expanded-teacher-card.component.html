@@ -25,6 +25,16 @@
         <span>{{ initials() }}</span>
       </div>
     }
+    @if (teacher().isPortraitProcessed) {
+      <span class="teacher-card__portrait-badge" matTooltip="Háttércserés fotó">
+        <lucide-icon [name]="ICONS.SCAN_FACE" [size]="10" />
+      </span>
+    }
+    @if (teacher().isCropProcessed) {
+      <span class="teacher-card__crop-badge" matTooltip="Automatikusan vágott fotó">
+        <lucide-icon [name]="ICONS.CROP" [size]="10" />
+      </span>
+    }
     @if (linkedGroupNumber(); as num) {
       <span class="teacher-card__link-badge" [matTooltip]="'Összekapcsolt csoport #' + num">
         <lucide-icon [name]="ICONS.LINK" [size]="8" />

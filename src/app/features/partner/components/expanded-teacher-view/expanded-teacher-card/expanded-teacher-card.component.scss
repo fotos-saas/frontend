@@ -87,6 +87,36 @@
     line-height: 1.3;
   }
 
+  &__portrait-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background-color: #7c3aed;
+    color: white;
+    border: 1.5px solid white;
+  }
+
+  &__crop-badge {
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background-color: #3b82f6;
+    color: white;
+    border: 1.5px solid white;
+  }
+
   &__link-badge {
     position: absolute;
     bottom: -3px;

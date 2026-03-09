@@ -112,6 +112,16 @@
                   <lucide-icon [name]="ICONS.USER" [size]="16" />
                 </div>
               }
+              @if (item.isPortraitProcessed) {
+                <span class="popup-item__portrait-badge" matTooltip="Háttércserés fotó">
+                  <lucide-icon [name]="ICONS.SCAN_FACE" [size]="8" />
+                </span>
+              }
+              @if (item.isCropProcessed) {
+                <span class="popup-item__crop-badge" matTooltip="Automatikusan vágott fotó">
+                  <lucide-icon [name]="ICONS.CROP" [size]="8" />
+                </span>
+              }
             </div>
             @if (editingPersonId() === item.personId) {
               <!-- Inline szerkesztés mód -->

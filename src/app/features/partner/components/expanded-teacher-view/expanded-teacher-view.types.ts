@@ -42,6 +42,8 @@ export interface ExpandedClassTeacher {
   hasOverride: boolean;
   linkedGroup: string | null;
   normalizedName: string;
+  isPortraitProcessed?: boolean;
+  isCropProcessed?: boolean;
 }
 
 export interface SimilarityGroup {

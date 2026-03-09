@@ -40,6 +40,8 @@
   &__header-left {
     display: flex;
     align-items: center;
+    min-width: 0;
+    flex: 1;
   }
 
   &__header-icon {
@@ -52,6 +54,10 @@
     font-weight: 600;
     color: rgb(17 24 39);
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
   &__close {
@@ -106,9 +112,11 @@
     font-weight: 500;
 
     &--source {
-      background: rgb(220 252 231);
-      border-color: rgb(134 239 172);
-      color: rgb(22 101 52);
+      background: rgb(37 99 235);
+      border-color: rgb(37 99 235);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
     }
   }
 

@@ -4,7 +4,7 @@
     <div class="expanded-view__header">
       <div class="expanded-view__header-left">
         <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="20" class="expanded-view__header-icon" />
-        <h2 class="expanded-view__title">Bővített nézet</h2>
+        <h2 class="expanded-view__title">{{ headerTitle() }}</h2>
       </div>
       <button class="expanded-view__close" (click)="close.emit()" matTooltip="Bezárás (Esc)">
         <lucide-icon [name]="ICONS.X" [size]="20" />
@@ -16,7 +16,7 @@
       <span class="expanded-view__schools-label">Osztályok:</span>
       @for (project of projects(); track project.projectId) {
         <div class="expanded-view__chip" [class.expanded-view__chip--source]="project.isSource">
-          <span>{{ project.schoolName }} {{ project.className }}</span>
+          <span [matTooltip]="project.schoolName + ' ' + project.className">{{ shortenChip(project) }}</span>
           @if (!project.isSource) {
             <button class="expanded-view__chip-remove" (click)="removeProject(project.projectId)">
               <lucide-icon [name]="ICONS.X" [size]="14" />

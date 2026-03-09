@@ -83,6 +83,28 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   readonly hasSimilarityIssues = computed(() => this.similarityGroups().length > 0);
 
+  /** A forrás projekt (amelyikből megnyitották) */
+  readonly sourceProject = computed(() => this.projects().find(p => p.isSource) ?? null);
+
+  /** Fejléc szöveg: "Bővített nézet — Iskola Osztály" */
+  readonly headerTitle = computed(() => {
+    const src = this.sourceProject();
+    return src ? `Bővített nézet — ${src.schoolName} ${src.className}` : 'Bővített nézet';
+  });
+
+  /** Chip rövidítés: ha azonos az iskola, csak osztálynév; egyébként "Iskola...Osztály" */
+  shortenChip(project: ExpandedProjectInfo): string {
+    const src = this.sourceProject();
+    if (src && project.projectId !== src.projectId && project.schoolName === src.schoolName) {
+      return project.className;
+    }
+    const words = project.schoolName.split(' ');
+    if (words.length > 2) {
+      return `${words[0]}…${project.className}`;
+    }
+    return `${project.schoolName} ${project.className}`;
+  }
+
   ngOnInit(): void {
     this.dataService.loadData(this.projectId());
   }

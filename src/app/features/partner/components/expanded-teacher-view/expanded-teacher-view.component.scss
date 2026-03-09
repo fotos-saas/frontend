@@ -60,6 +60,71 @@
     min-width: 0;
   }
 
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    // gap workaround
+    margin: -3px;
+
+    & > * {
+      margin: 3px;
+    }
+  }
+
+  &__header-btn {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 6px;
+    background: white;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(55 65 81);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    lucide-icon {
+      margin-right: 4px;
+    }
+
+    &:hover:not(:disabled) {
+      background: rgb(249 250 251);
+      border-color: rgb(156 163 175);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--sync {
+      color: rgb(22 163 74);
+      border-color: rgb(187 247 208);
+
+      &:hover:not(:disabled) {
+        background: rgb(240 253 244);
+        border-color: rgb(134 239 172);
+      }
+    }
+
+    &--danger {
+      color: rgb(220 38 38);
+      border-color: rgb(254 202 202);
+
+      &:hover:not(:disabled) {
+        background: rgb(254 242 242);
+        border-color: rgb(252 165 165);
+      }
+    }
+  }
+
+  &__file-input {
+    display: none;
+  }
+
   &__close {
     background: none;
     border: none;

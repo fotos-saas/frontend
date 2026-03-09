@@ -16,46 +16,6 @@
       (dragleave)="onDragLeave($event)"
       (drop)="onDrop($event)"
     >
-      <div class="upload-panel__toolbar">
-        <button
-          class="upload-panel__action-btn"
-          (click)="onFileSelect()"
-          [disabled]="uploading()"
-          matTooltip="Fotók feltöltése"
-        >
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
-          @if (uploading()) {
-            <span>Feltöltés... {{ uploadProgress() }}%</span>
-          } @else {
-            <span>Fotó feltöltés</span>
-          }
-        </button>
-
-        <button
-          class="upload-panel__action-btn upload-panel__action-btn--sync"
-          (click)="onSync()"
-          [disabled]="syncing() || photos().length === 0"
-          matTooltip="Fotók szinkronizálása az osztályokba"
-        >
-          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
-          @if (syncing()) {
-            <span>Szinkronizálás...</span>
-          } @else {
-            <span>Szinkronizálás</span>
-          }
-        </button>
-
-        <button
-          class="upload-panel__action-btn upload-panel__action-btn--danger"
-          (click)="onDeleteAll()"
-          [disabled]="uploading() || syncing() || photos().length === 0"
-          matTooltip="Összes feltöltött fotó törlése"
-        >
-          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
-          <span>Mind törlése</span>
-        </button>
-      </div>
-
       @if (uploading()) {
         <div class="upload-panel__progress">
           <div class="upload-panel__progress-bar" [style.width.%]="uploadProgress()"></div>

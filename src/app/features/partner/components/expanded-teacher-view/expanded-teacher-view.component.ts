@@ -73,6 +73,13 @@ export class ExpandedTeacherViewComponent implements OnInit {
   // Tanár hozzáadás dialógus
   readonly addTeacherProjectId = signal<number | null>(null);
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('dropdownSearchInput');
+  private readonly headerFileInput = viewChild<ElementRef<HTMLInputElement>>('headerFileInput');
+
+  // Upload state a fejléc gombjaihoz
+  readonly uploading = computed(() => this.dataService.uploading());
+  readonly syncing = computed(() => this.dataService.syncing());
+  readonly uploadedPhotos = computed(() => this.dataService.uploadedPhotos());
+  readonly uploadProgress = computed(() => this.dataService.uploadProgress());
 
   // Projektek csoportosítása: same school előre
   readonly groupedAvailableProjects = computed(() => {
@@ -177,5 +184,17 @@ export class ExpandedTeacherViewComponent implements OnInit {
   onTeachersAdded(): void {
     this.addTeacherProjectId.set(null);
     this.dataService.reloadData();
+  }
+
+  onHeaderUpload(): void {
+    this.headerFileInput()?.nativeElement.click();
+  }
+
+  onHeaderFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.dataService.uploadPhotos(Array.from(input.files));
+      input.value = '';
+    }
   }
 }

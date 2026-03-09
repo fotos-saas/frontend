@@ -6,6 +6,47 @@
         <lucide-icon [name]="ICONS.MAXIMIZE_2" [size]="20" class="expanded-view__header-icon" />
         <h2 class="expanded-view__title">{{ headerTitle() }}</h2>
       </div>
+      <div class="expanded-view__header-actions">
+        <button
+          class="expanded-view__header-btn"
+          (click)="onHeaderUpload()"
+          [disabled]="uploading()"
+          matTooltip="Fotók feltöltése"
+        >
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
+          @if (uploading()) {
+            <span>{{ uploadProgress() }}%</span>
+          } @else {
+            <span>Feltöltés</span>
+          }
+        </button>
+        <button
+          class="expanded-view__header-btn expanded-view__header-btn--sync"
+          (click)="dataService.syncPhotos()"
+          [disabled]="syncing() || uploadedPhotos().length === 0"
+          matTooltip="Fotók szinkronizálása az osztályokba"
+        >
+          <lucide-icon [name]="ICONS.REFRESH" [size]="16" />
+          <span>Szinkronizálás</span>
+        </button>
+        <button
+          class="expanded-view__header-btn expanded-view__header-btn--danger"
+          (click)="dataService.deleteAllPhotos()"
+          [disabled]="uploading() || syncing() || uploadedPhotos().length === 0"
+          matTooltip="Összes feltöltött fotó törlése"
+        >
+          <lucide-icon [name]="ICONS.DELETE" [size]="16" />
+          <span>Törlés</span>
+        </button>
+        <input
+          #headerFileInput
+          type="file"
+          accept="image/jpeg,image/png"
+          multiple
+          class="expanded-view__file-input"
+          (change)="onHeaderFilesSelected($event)"
+        />
+      </div>
       <button class="expanded-view__close" (click)="close.emit()" matTooltip="Bezárás (Esc)">
         <lucide-icon [name]="ICONS.X" [size]="20" />
       </button>
@@ -78,7 +119,7 @@
     } @else {
       <!-- Feltöltési terület -->
       <div class="expanded-view__archive">
-        <app-expanded-upload-panel />
+        <app-expanded-upload-panel #uploadPanel />
       </div>
 
       <!-- Tanár kereső -->

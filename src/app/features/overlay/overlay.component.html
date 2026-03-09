@@ -303,49 +303,6 @@
       <span class="toolbar__btn-label">Gyors akciók</span>
     </button>
 
-    <!-- Lekerekítés gomb (csak kijelölt layerekre) -->
-    <div class="toolbar__btn-wrap">
-      <button
-        class="toolbar__btn toolbar__btn--amber"
-        [class.toolbar__btn--active]="openSubmenu() === 'border-radius'"
-        [class.toolbar__btn--busy]="qa.loading()"
-        [disabled]="qa.loading()"
-        (click)="onCommand('border-radius')"
-        matTooltip="Lekerekítés (kijelöltek)"
-      >
-        @if (qa.loading()) {
-          <span class="toolbar__spinner"></span>
-        } @else {
-          <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="16" />
-        }
-      </button>
-      <div
-        class="toolbar__inline-collapse"
-        [class.toolbar__inline-collapse--open]="openSubmenu() === 'border-radius'"
-      >
-        <div class="toolbar__inline-collapse-inner">
-          <input type="number" class="toolbar__input toolbar__input--narrow" min="1" max="500"
-            [value]="qa.borderRadius()"
-            (change)="qa.setBorderRadius(+$any($event.target).value || 30)"
-            (click)="$event.stopPropagation()" />
-          <span class="toolbar__input-label">px</span>
-          <button class="toolbar__btn toolbar__btn--sm toolbar__btn--amber" [disabled]="qa.loading()" (click)="applyBorderRadius(); $event.stopPropagation()">
-            <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Forgatás gomb -->
-    <button
-      class="toolbar__btn toolbar__btn--blue"
-      [class.toolbar__btn--active]="qa.rotatePanelOpen()"
-      (click)="toggleRotatePanel()"
-      matTooltip="Forgatás (kijelöltek)"
-    >
-      <lucide-icon [name]="ICONS.ROTATE_CCW" [size]="16" />
-    </button>
-
     <!-- Grid elosztás gomb -->
     <button
       class="toolbar__btn toolbar__btn--cyan"
@@ -1283,6 +1240,79 @@
       </div>
     </div>
 
+    <!-- Lekerekítés -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="11" />
+        Lekerekítés (kijelöltek)
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Sugár</span>
+        <div class="qa-section__buttons">
+          <input type="number" class="qa-input qa-input--narrow" min="1" max="500"
+            [value]="qa.borderRadius()"
+            (change)="qa.setBorderRadius(+$any($event.target).value || 30)" />
+          <span class="qa-unit">px</span>
+          <button class="qa-btn qa-btn--amber qa-btn--sm" [disabled]="qa.loading()" (click)="applyBorderRadius()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+            Alkalmaz
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forgatás -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.ROTATE_CCW" [size]="11" />
+        Forgatás (kijelöltek)
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Szög</span>
+        <div class="qa-section__buttons">
+          <input type="number" class="qa-input qa-input--narrow" min="0.1" max="180" step="0.1"
+            [value]="qa.rotateAngle()"
+            (change)="qa.setRotateAngle(+$any($event.target).value || 2)" />
+          <span class="qa-unit">°</span>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Mód</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--sm qa-align-toggle"
+            [class.qa-align-toggle--active]="qa.rotateRandom()"
+            (click)="qa.rotateRandom.set(true)">
+            Random (±)
+          </button>
+          <button class="qa-btn qa-btn--sm qa-align-toggle"
+            [class.qa-align-toggle--active]="!qa.rotateRandom()"
+            (click)="qa.rotateRandom.set(false)">
+            Egységes
+          </button>
+        </div>
+      </div>
+      <div class="rotate-panel__hint">
+        @if (qa.rotateRandom()) {
+          Minden képet véletlenszerűen forgat ±{{ qa.rotateAngle() }}° között
+        } @else {
+          Minden képet {{ qa.rotateAngle() }}°-kal forgat
+        }
+      </div>
+      <button class="qa-btn qa-btn--blue qa-btn--full" [disabled]="qa.loading()" (click)="applyRotate()">
+        @if (qa.loading()) {
+          <span class="qa-spinner"></span>
+          Forgatás...
+        } @else {
+          Forgatás indítása
+        }
+      </button>
+      @if (qa.result(); as r) {
+        <div class="grid-panel__status" [class.grid-panel__status--error]="!r.success">
+          <lucide-icon [name]="r.success ? ICONS.CHECK_CIRCLE : ICONS.ALERT_CIRCLE" [size]="13" />
+          <span>{{ r.message }}</span>
+        </div>
+      }
+    </div>
 
   </div>
 
@@ -1464,70 +1494,6 @@
 </div>
 }
 
-<!-- Forgatás panel -->
-@if (qa.rotatePanelOpen()) {
-<div class="rotate-panel">
-  <div class="grid-panel__header">
-    <lucide-icon [name]="ICONS.ROTATE_CCW" [size]="13" />
-    <span>Forgatás</span>
-    <button class="grid-panel__close" (click)="qa.closeRotatePanel()" type="button">
-      <lucide-icon [name]="ICONS.X" [size]="13" />
-    </button>
-  </div>
-  <div class="grid-panel__body">
-    <div class="qa-section__row">
-      <span class="qa-section__row-label">Szög</span>
-      <div class="qa-section__buttons">
-        <input type="number" class="qa-input qa-input--narrow" min="0.1" max="180" step="0.1"
-          [value]="qa.rotateAngle()"
-          (change)="qa.setRotateAngle(+$any($event.target).value || 2)" />
-        <span class="qa-unit">°</span>
-      </div>
-    </div>
-
-    <div class="qa-section__row">
-      <span class="qa-section__row-label">Mód</span>
-      <div class="qa-section__buttons">
-        <button class="qa-btn qa-btn--sm qa-align-toggle"
-          [class.qa-align-toggle--active]="qa.rotateRandom()"
-          (click)="qa.rotateRandom.set(true)">
-          Random (±)
-        </button>
-        <button class="qa-btn qa-btn--sm qa-align-toggle"
-          [class.qa-align-toggle--active]="!qa.rotateRandom()"
-          (click)="qa.rotateRandom.set(false)">
-          Egységes
-        </button>
-      </div>
-    </div>
-
-    <div class="rotate-panel__hint">
-      @if (qa.rotateRandom()) {
-        Minden képet véletlenszerűen forgat ±{{ qa.rotateAngle() }}° között
-      } @else {
-        Minden képet {{ qa.rotateAngle() }}°-kal forgat
-      }
-    </div>
-
-    <button class="qa-btn qa-btn--blue qa-btn--full" [disabled]="qa.loading()"
-      (click)="applyRotate()">
-      @if (qa.loading()) {
-        <span class="qa-spinner"></span>
-        Forgatás...
-      } @else {
-        Forgatás indítása
-      }
-    </button>
-  </div>
-
-  @if (qa.result(); as r) {
-    <div class="grid-panel__status" [class.grid-panel__status--error]="!r.success">
-      <lucide-icon [name]="r.success ? ICONS.CHECK_CIRCLE : ICONS.ALERT_CIRCLE" [size]="13" />
-      <span>{{ r.message }}</span>
-    </div>
-  }
-</div>
-}
 
 @if (showTeacherLinkDialog() && linkDialogTeacher()) {
   <app-teacher-link-dialog

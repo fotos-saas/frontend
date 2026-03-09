@@ -89,7 +89,7 @@
 
   &__portrait-badge {
     position: absolute;
-    bottom: -2px;
+    top: -2px;
     right: -2px;
     display: flex;
     align-items: center;
@@ -104,7 +104,7 @@
 
   &__crop-badge {
     position: absolute;
-    bottom: -2px;
+    top: -2px;
     left: -2px;
     display: flex;
     align-items: center;

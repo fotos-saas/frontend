@@ -57,6 +57,9 @@ export class OverlayQuickActionsService {
   readonly gridLayerCount = signal(0);
   readonly gridUnit = signal<'px' | 'cm'>('cm');
 
+  // === Spec panel ===
+  readonly specPanelOpen = signal(false);
+
   // === Forgatás ===
   readonly rotatePanelOpen = signal(false);
   readonly rotateAngle = signal(2);
@@ -108,13 +111,16 @@ export class OverlayQuickActionsService {
 
   // === Panel kezelés ===
 
-  togglePanel(): void { this.panelOpen.update(v => !v); this.gridPanelOpen.set(false); this.rotatePanelOpen.set(false); }
+  togglePanel(): void { this.panelOpen.update(v => !v); this.gridPanelOpen.set(false); this.rotatePanelOpen.set(false); this.specPanelOpen.set(false); }
   closePanel(): void { this.panelOpen.set(false); }
 
-  toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); this.rotatePanelOpen.set(false); }
+  toggleSpecPanel(): void { this.specPanelOpen.update(v => !v); this.panelOpen.set(false); this.gridPanelOpen.set(false); this.rotatePanelOpen.set(false); }
+  closeSpecPanel(): void { this.specPanelOpen.set(false); }
+
+  toggleGridPanel(): void { this.gridPanelOpen.update(v => !v); this.panelOpen.set(false); this.rotatePanelOpen.set(false); this.specPanelOpen.set(false); }
   closeGridPanel(): void { this.gridPanelOpen.set(false); }
 
-  toggleRotatePanel(): void { this.rotatePanelOpen.update(v => !v); this.panelOpen.set(false); this.gridPanelOpen.set(false); }
+  toggleRotatePanel(): void { this.rotatePanelOpen.update(v => !v); this.panelOpen.set(false); this.gridPanelOpen.set(false); this.specPanelOpen.set(false); }
   closeRotatePanel(): void { this.rotatePanelOpen.set(false); }
 
   toggleGridUnit(): void {

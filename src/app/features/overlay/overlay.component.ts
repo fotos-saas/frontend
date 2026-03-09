@@ -357,6 +357,8 @@ export class OverlayComponent implements OnInit {
   // ============ Quick actions (delegálva: OverlayQuickActionsService) ============
   toggleQuickActions(): void { this.qa.togglePanel(); }
   closeQuickActions(): void { this.qa.closePanel(); }
+  toggleSpecPanel(): void { this.qa.toggleSpecPanel(); }
+  closeSpecPanel(): void { this.qa.closeSpecPanel(); }
   toggleGridPanel(): void { this.qa.toggleGridPanel(); }
   toggleRotatePanel(): void { this.qa.toggleRotatePanel(); }
   applyBorderRadius(): void { this.qa.applyBorderRadiusSelected(); }

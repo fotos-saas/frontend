@@ -303,6 +303,17 @@
       <span class="toolbar__btn-label">Gyors akciók</span>
     </button>
 
+    <!-- Spec gomb -->
+    <button
+      class="toolbar__btn toolbar__btn--amber toolbar__btn--labeled"
+      [class.toolbar__btn--active]="qa.specPanelOpen()"
+      (click)="toggleSpecPanel()"
+      matTooltip="Spec"
+    >
+      <lucide-icon [name]="ICONS.WAND" [size]="14" />
+      <span class="toolbar__btn-label">Spec</span>
+    </button>
+
     <!-- Grid elosztás gomb -->
     <button
       class="toolbar__btn toolbar__btn--cyan"
@@ -1240,6 +1251,44 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Loading bar -->
+  @if (qa.loading()) {
+    <div class="quick-actions-panel__confirm quick-actions-panel__confirm--loading">
+      <span class="qa-spinner"></span>
+      <span class="quick-actions-panel__confirm-text">Feldolgozás...</span>
+    </div>
+  }
+
+  <!-- Confirm bar -->
+  @if (qa.confirm() && !qa.loading()) {
+    <div class="quick-actions-panel__confirm">
+      <span class="quick-actions-panel__confirm-text">Biztosan indítod?</span>
+      <button class="qa-btn qa-btn--green qa-btn--sm" (click)="qa.confirmAction()">
+        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+        Igen
+      </button>
+      <button class="qa-btn qa-btn--sm" (click)="qa.cancelAction()">
+        Mégse
+      </button>
+    </div>
+  }
+</div>
+}
+
+<!-- Spec panel -->
+@if (qa.specPanelOpen()) {
+<div class="quick-actions-panel spec-panel">
+  <div class="quick-actions-panel__header">
+    <lucide-icon [name]="ICONS.WAND" [size]="14" />
+    <span>Spec</span>
+    <button class="quick-actions-panel__close" (click)="closeSpecPanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="quick-actions-panel__body">
     <!-- Lekerekítés -->
     <div class="qa-section">
       <div class="qa-section__label">
@@ -1313,7 +1362,6 @@
         </div>
       }
     </div>
-
   </div>
 
   <!-- Loading bar -->
@@ -1321,20 +1369,6 @@
     <div class="quick-actions-panel__confirm quick-actions-panel__confirm--loading">
       <span class="qa-spinner"></span>
       <span class="quick-actions-panel__confirm-text">Feldolgozás...</span>
-    </div>
-  }
-
-  <!-- Confirm bar -->
-  @if (qa.confirm() && !qa.loading()) {
-    <div class="quick-actions-panel__confirm">
-      <span class="quick-actions-panel__confirm-text">Biztosan indítod?</span>
-      <button class="qa-btn qa-btn--green qa-btn--sm" (click)="qa.confirmAction()">
-        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
-        Igen
-      </button>
-      <button class="qa-btn qa-btn--sm" (click)="qa.cancelAction()">
-        Mégse
-      </button>
     </div>
   }
 </div>

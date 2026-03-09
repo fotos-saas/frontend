@@ -30,10 +30,22 @@ function getGitBranch() {
   }
 }
 
+function getGitCommitCount() {
+  try {
+    return execSync('git rev-list --count HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return '0';
+  }
+}
+
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+// major.minor a package.json-ból, patch = git commit count (automatikus)
+const [major, minor] = pkg.version.split('.');
+const commitCount = getGitCommitCount();
+const autoVersion = `${major}.${minor}.${commitCount}`;
 
 const version = {
-  version: pkg.version,
+  version: autoVersion,
   hash: getGitHash(),
   timestamp: new Date().toISOString(),
   buildTime: Date.now(),
@@ -65,4 +77,4 @@ if (!fs.existsSync(tsDir)) {
 fs.writeFileSync(tsPath, tsContent, 'utf8');
 
 // eslint-disable-next-line no-console
-console.log(`[Version] Generalva: ${version.hash} (${version.timestamp})`);
+console.log(`[Version] ${version.version} (${version.hash}) — ${version.timestamp}`);

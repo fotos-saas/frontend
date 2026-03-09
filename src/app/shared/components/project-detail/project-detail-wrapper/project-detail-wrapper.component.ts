@@ -313,9 +313,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   }
 
   openOrderWizardDialog(): void {
-    const container = this.orderWizardContainer();
-    if (!container) return;
-    this.dialogs.openOrderWizard(container);
+    if (this.facade.useWizardEdit()) {
+      this.openEditProjectModal();
+    } else {
+      const container = this.orderWizardContainer();
+      if (!container) return;
+      this.dialogs.openOrderWizard(container);
+    }
   }
 
   openSelectionDownloadDialog(): void {

@@ -49,7 +49,7 @@ export class ProjectDetailWrapperFacadeService<T> {
   private projectEditModalComponent: Type<unknown> | null = null;
   private wizardEditModalComponent: Type<unknown> | null = null;
   private orderDataDialogComponent: Type<unknown> | null = null;
-  private useWizardEdit = false;
+  readonly useWizardEdit = signal(false);
   private partnerService: PartnerService | null = null;
   private destroyRef!: DestroyRef;
   private router!: Router;
@@ -126,7 +126,7 @@ export class ProjectDetailWrapperFacadeService<T> {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res) => {
-            this.useWizardEdit = res.data.project_creation_mode === 'wizard';
+            this.useWizardEdit.set(res.data.project_creation_mode === 'wizard');
           },
         });
     }
@@ -236,7 +236,7 @@ export class ProjectDetailWrapperFacadeService<T> {
   // === PROJECT EDIT MODAL ===
 
   openEditProjectModal(container: ViewContainerRef): void {
-    const componentToUse = this.useWizardEdit && this.wizardEditModalComponent
+    const componentToUse = this.useWizardEdit() && this.wizardEditModalComponent
       ? this.wizardEditModalComponent
       : this.projectEditModalComponent;
     if (!componentToUse) return;

@@ -121,12 +121,11 @@ export class VersionCheckService {
   }
 
   private isElectron(): boolean {
-    return !!(window as Record<string, unknown>)['electronAPI'];
+    return !!(window as unknown as { electronAPI?: unknown }).electronAPI;
   }
 
   private isCapacitor(): boolean {
-    const cap = (window as Record<string, unknown>)['Capacitor'] as
-      { isNativePlatform?: () => boolean } | undefined;
-    return !!cap?.isNativePlatform?.();
+    const win = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
+    return !!win.Capacitor?.isNativePlatform?.();
   }
 }

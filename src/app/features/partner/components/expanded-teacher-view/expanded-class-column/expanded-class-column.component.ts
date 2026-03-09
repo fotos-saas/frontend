@@ -53,14 +53,15 @@ export class ExpandedClassColumnComponent {
 
       const card = listContainer.querySelector(`[data-person-id="${matchInThisColumn.personId}"]`) as HTMLElement;
       if (card) {
-        // Csak vertikálisan scrollozunk az oszlopon belül, nem a szülő konténert
-        const cardTop = card.offsetTop;
-        const containerScrollTop = listContainer.scrollTop;
-        const containerHeight = listContainer.clientHeight;
-        const cardHeight = card.offsetHeight;
+        // Horizontális scroll lock: a szülő classes konténer pozícióját megőrizzük
+        const classesContainer = listContainer.closest('.expanded-view__classes') as HTMLElement;
+        const savedScrollLeft = classesContainer?.scrollLeft ?? 0;
 
-        if (cardTop < containerScrollTop || cardTop + cardHeight > containerScrollTop + containerHeight) {
-          listContainer.scrollTo({ top: cardTop - containerHeight / 2 + cardHeight / 2, behavior: 'smooth' });
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Horizontális pozíció visszaállítása
+        if (classesContainer) {
+          classesContainer.scrollLeft = savedScrollLeft;
         }
       }
     });

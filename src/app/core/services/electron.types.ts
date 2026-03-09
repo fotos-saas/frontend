@@ -93,6 +93,7 @@ interface OverlayAPI {
   setContext: (ctx: OverlayContext) => Promise<{ success: boolean; error?: string }>;
   onContextChanged: (callback: (ctx: OverlayContext) => void) => CleanupFn;
   getProjectId: () => Promise<{ projectId: number | null }>;
+  requestAuthToken: () => Promise<{ token: string | null }>;
   hide: () => Promise<{ success: boolean }>;
   showMainWindow: () => Promise<{ success: boolean }>;
   setIgnoreMouseEvents: (ignore: boolean) => Promise<{ success: boolean }>;

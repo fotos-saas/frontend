@@ -276,6 +276,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay-command', handler);
       return () => ipcRenderer.removeListener('overlay-command', handler);
     },
+    requestAuthToken: () =>
+      ipcRenderer.invoke('overlay:request-auth-token') as Promise<{ token: string | null }>,
     getActiveDoc: () =>
       ipcRenderer.invoke('overlay:get-active-doc') as Promise<{ name: string | null; path: string | null; dir: string | null }>,
     setActiveDoc: (doc: { name: string | null; path: string | null; dir: string | null }) =>

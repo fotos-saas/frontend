@@ -17,7 +17,8 @@ function getGitHash() {
     if (process.env.GIT_HASH) {
       return process.env.GIT_HASH.substring(0, 8);
     }
-    return Math.random().toString(36).substring(2, 10);
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+    return `${pkg.version}-${Date.now().toString(36)}`;
   }
 }
 

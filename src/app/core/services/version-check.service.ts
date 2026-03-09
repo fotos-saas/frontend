@@ -31,6 +31,7 @@ export class VersionCheckService {
   readonly latestHash = signal<string | null>(null);
 
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private initialTimerId: ReturnType<typeof setTimeout> | null = null;
   private lastPollTime = 0;
   private started = false;
 
@@ -39,21 +40,20 @@ export class VersionCheckService {
     if (!isPlatformBrowser(this.platformId)) return;
 
     if (!environment.production) {
-      this.logger.info('[VersionCheck] Dev mod, polling kihagyva');
+      this.logger.info('[VersionCheck] Dev mód, polling kihagyva');
       return;
     }
 
     if (this.isElectron() || this.isCapacitor()) {
-      this.logger.info('[VersionCheck] Nativ platform, polling kihagyva');
+      this.logger.info('[VersionCheck] Natív platform, polling kihagyva');
       return;
     }
 
     this.started = true;
-    this.logger.info('[VersionCheck] Polling inditasa, aktualis hash:', BUILD_HASH);
-
-    setTimeout(() => this.checkForUpdate(), INITIAL_DELAY_MS);
+    this.logger.info('[VersionCheck] Polling indítása, aktuális hash:', BUILD_HASH);
 
     this.ngZone.runOutsideAngular(() => {
+      this.initialTimerId = setTimeout(() => this.checkForUpdate(), INITIAL_DELAY_MS);
       this.intervalId = setInterval(() => this.checkForUpdate(), POLL_INTERVAL_MS);
     });
 
@@ -62,6 +62,10 @@ export class VersionCheckService {
   }
 
   stopPolling(): void {
+    if (this.initialTimerId) {
+      clearTimeout(this.initialTimerId);
+      this.initialTimerId = null;
+    }
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -82,15 +86,18 @@ export class VersionCheckService {
 
     this.http.get<VersionInfo>(`/version.json${cacheBuster}`).subscribe({
       next: (serverVersion) => {
-        this.latestHash.set(serverVersion.hash);
-
         const current = this.currentHash();
         if (current && current !== serverVersion.hash) {
           this.logger.info(
-            '[VersionCheck] Uj verzio elerheto!',
-            `Aktualis: ${current}, Szerveren: ${serverVersion.hash}`
+            '[VersionCheck] Új verzió elérhető!',
+            `Aktuális: ${current}, Szerveren: ${serverVersion.hash}`
           );
-          this.ngZone.run(() => this.updateAvailable.set(true));
+          this.ngZone.run(() => {
+            this.latestHash.set(serverVersion.hash);
+            this.updateAvailable.set(true);
+          });
+        } else {
+          this.ngZone.run(() => this.latestHash.set(serverVersion.hash));
         }
       },
       error: () => {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { VersionCheckService } from '../../../core/services/version-check.service';
 import { ICONS } from '../../constants/icons.constants';
@@ -204,10 +204,20 @@ const DISMISS_RESHOW_MS = 5 * 60 * 1000;
 })
 export class UpdateBannerComponent {
   private readonly versionCheckService = inject(VersionCheckService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
   private dismissed = signal(false);
   private dismissTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.dismissTimer) {
+        clearTimeout(this.dismissTimer);
+        this.dismissTimer = null;
+      }
+    });
+  }
 
   readonly showBanner = computed(() =>
     this.versionCheckService.updateAvailable() && !this.dismissed()

@@ -222,6 +222,88 @@
 }
 
 // ============================================================================
+// FILE LIST (edit mode attachments)
+// ============================================================================
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid get-color('gray', 200);
+  border-radius: 8px;
+  background: white;
+  @include transition-fast;
+
+  &--deleting {
+    opacity: 0.5;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    color: get-color('gray', 400);
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: get-color('gray', 700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: get-color('gray', 400);
+    cursor: pointer;
+    @include transition-fast;
+
+    &:hover:not(:disabled) {
+      background: get-color('error', 50);
+      color: get-color('error', 500);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+
+.file-upload-area {
+  position: relative;
+
+  &__uploading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: get-color('gray', 500);
+    background: get-color('gray', 50);
+    border-radius: 8px;
+  }
+}
+
+// ============================================================================
 // FOOTER
 // ============================================================================
 

@@ -20,6 +20,7 @@ import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerService, PartnerProjectListItem, SchoolItem } from '../../services/partner.service';
+import { PartnerFinalizationApiService } from '../../services/partner-finalization-api.service';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
 import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 
@@ -28,6 +29,12 @@ interface WizardContact {
   email: string | null;
   phone: string | null;
   isPrimary: boolean;
+}
+
+interface ExistingFile {
+  path: string;
+  filename: string;
+  deleting?: boolean;
 }
 
 @Component({
@@ -50,6 +57,7 @@ interface WizardContact {
 })
 export class CreateProjectWizardDialogComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
+  private readonly finalizationApi = inject(PartnerFinalizationApiService);
   private readonly toast = inject(ToastService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
@@ -88,7 +96,8 @@ export class CreateProjectWizardDialogComponent implements OnInit {
   classYear = '';
 
   // --- Csatolmányok ---
-  attachmentFiles: File[] = [];
+  readonly existingFiles = signal<ExistingFile[]>([]);
+  readonly uploading = signal(false);
 
   // --- Megjegyzés ---
   description = '';
@@ -105,15 +114,18 @@ export class CreateProjectWizardDialogComponent implements OnInit {
       && this.classYear.trim().length > 0;
   });
 
+  readonly totalFileCount = computed(() => this.existingFiles().length);
+  readonly canAddMoreFiles = computed(() => this.totalFileCount() < 10);
+
   ngOnInit(): void {
     const proj = this.project();
     if (proj) {
       this.initFromProject(proj);
+      this.loadExistingFiles(proj.id);
     }
   }
 
   private initFromProject(proj: ProjectDetailData): void {
-    // Kapcsolattartók betöltése
     if (proj.contacts && proj.contacts.length > 0) {
       this.contacts.set(proj.contacts.map(c => ({
         name: c.name,
@@ -130,14 +142,29 @@ export class CreateProjectWizardDialogComponent implements OnInit {
       }]);
     }
 
-    // Iskola
     if (proj.school) {
       this.schoolName.set(proj.school.name);
     }
 
-    // Osztály adatok
     this.className = proj.className ?? '';
     this.classYear = proj.classYear ?? '';
+  }
+
+  private loadExistingFiles(projectId: number): void {
+    this.finalizationApi.getFinalizationData(projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.otherFiles) {
+            this.existingFiles.set(
+              response.data.otherFiles.map(f => ({
+                path: f.path,
+                filename: f.filename ?? f.path.split('/').pop() ?? 'ismeretlen',
+              }))
+            );
+          }
+        },
+      });
   }
 
   // --- Kapcsolattartó kezelés ---
@@ -218,6 +245,65 @@ export class CreateProjectWizardDialogComponent implements OnInit {
         error: () => {
           this.schoolSuggestions.set([]);
           this.schoolLoading.set(false);
+        },
+      });
+  }
+
+  // --- Csatolmány kezelés ---
+
+  onNewFilesSelected(files: File[] | null): void {
+    if (!files?.length) return;
+    const proj = this.project();
+    if (!proj) return;
+
+    for (const file of files) {
+      this.uploadFile(proj.id, file);
+    }
+  }
+
+  private uploadFile(projectId: number, file: File): void {
+    this.uploading.set(true);
+    this.finalizationApi.uploadFile(projectId, file, 'attachment')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.uploading.set(false);
+          if (response.success) {
+            this.existingFiles.update(list => [
+              ...list,
+              { path: response.fileId, filename: response.filename },
+            ]);
+          } else {
+            this.toast.error('Hiba', response.message || 'Fájl feltöltés sikertelen.');
+          }
+        },
+        error: (err) => {
+          this.uploading.set(false);
+          this.toast.error('Hiba', err.error?.message || 'Fájl feltöltés sikertelen.');
+        },
+      });
+  }
+
+  deleteExistingFile(index: number): void {
+    const proj = this.project();
+    const file = this.existingFiles()[index];
+    if (!proj || !file) return;
+
+    this.existingFiles.update(list =>
+      list.map((f, i) => i === index ? { ...f, deleting: true } : f)
+    );
+
+    this.finalizationApi.deleteFile(proj.id, file.path)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.existingFiles.update(list => list.filter((_, i) => i !== index));
+        },
+        error: () => {
+          this.existingFiles.update(list =>
+            list.map((f, i) => i === index ? { ...f, deleting: false } : f)
+          );
+          this.toast.error('Hiba', 'Nem sikerült törölni a fájlt.');
         },
       });
   }

@@ -51,9 +51,17 @@ export class ExpandedClassColumnComponent {
       const listContainer = this.listEl()?.nativeElement;
       if (!listContainer) return;
 
-      const card = listContainer.querySelector(`[data-person-id="${matchInThisColumn.personId}"]`);
+      const card = listContainer.querySelector(`[data-person-id="${matchInThisColumn.personId}"]`) as HTMLElement;
       if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Csak vertikálisan scrollozunk az oszlopon belül, nem a szülő konténert
+        const cardTop = card.offsetTop;
+        const containerScrollTop = listContainer.scrollTop;
+        const containerHeight = listContainer.clientHeight;
+        const cardHeight = card.offsetHeight;
+
+        if (cardTop < containerScrollTop || cardTop + cardHeight > containerScrollTop + containerHeight) {
+          listContainer.scrollTo({ top: cardTop - containerHeight / 2 + cardHeight / 2, behavior: 'smooth' });
+        }
       }
     });
   }

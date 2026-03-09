@@ -102,7 +102,7 @@
       <div class="expanded-view__classes">
         @for (cls of classes(); track cls.projectId) {
           @defer (on viewport) {
-            <app-expanded-class-column [classData]="cls" (addTeacherRequest)="openAddTeacherDialog($event)" />
+            <app-expanded-class-column [classData]="cls" [isSource]="cls.projectId === projectId()" (addTeacherRequest)="openAddTeacherDialog($event)" />
           } @placeholder {
             <div class="expanded-view__column-placeholder">
               <span>{{ cls.className }}</span>

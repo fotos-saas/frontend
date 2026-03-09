@@ -19,6 +19,7 @@ export class ExpandedClassColumnComponent {
   private dataService = inject(ExpandedTeacherViewDataService);
 
   readonly classData = input.required<ExpandedClassData>();
+  readonly isSource = input(false);
   readonly addTeacherRequest = output<number>();
   readonly listEl = viewChild<ElementRef<HTMLElement>>('listRef');
 

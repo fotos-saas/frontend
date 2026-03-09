@@ -53,7 +53,16 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   readonly loading = computed(() => this.dataService.loading());
   readonly projects = computed(() => this.dataService.projects());
-  readonly classes = computed(() => this.dataService.classes());
+  readonly classes = computed(() => {
+    const all = this.dataService.classes();
+    const srcId = this.projectId();
+    // Source projekt oszlopa mindig elöl
+    return [...all].sort((a, b) => {
+      if (a.projectId === srcId) return -1;
+      if (b.projectId === srcId) return 1;
+      return 0;
+    });
+  });
   readonly availableProjects = computed(() => this.dataService.availableProjects());
   readonly selectedPersonId = computed(() => this.dataService.selectedPersonId());
   readonly similarityGroups = computed(() => this.dataService.similarityGroups());

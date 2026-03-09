@@ -19,6 +19,7 @@ import { ExpandedTeacherViewDataService } from './expanded-teacher-view-data.ser
 import { ExpandedUploadPanelComponent } from './expanded-upload-panel/expanded-upload-panel.component';
 import { ExpandedClassColumnComponent } from './expanded-class-column/expanded-class-column.component';
 import { ExpandedTeacherPopupComponent } from './expanded-teacher-popup/expanded-teacher-popup.component';
+import { AddPersonsDialogComponent } from '../add-persons-dialog/add-persons-dialog.component';
 import { ExpandedProjectInfo } from './expanded-teacher-view.types';
 import { createBackdropHandler } from '@shared/utils/dialog.util';
 
@@ -32,6 +33,7 @@ import { createBackdropHandler } from '@shared/utils/dialog.util';
     ExpandedUploadPanelComponent,
     ExpandedClassColumnComponent,
     ExpandedTeacherPopupComponent,
+    AddPersonsDialogComponent,
   ],
   providers: [ExpandedTeacherViewDataService],
   templateUrl: './expanded-teacher-view.component.html',
@@ -58,6 +60,9 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   showDropdown = false;
   dropdownSearch = signal('');
+
+  // Tanár hozzáadás dialógus
+  readonly addTeacherProjectId = signal<number | null>(null);
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('dropdownSearchInput');
 
   // Projektek csoportosítása: same school előre
@@ -84,7 +89,9 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (this.dataService.pendingDrop()) {
+    if (this.addTeacherProjectId()) {
+      this.closeAddTeacherDialog();
+    } else if (this.dataService.pendingDrop()) {
       this.dataService.cancelDrop();
     } else if (this.showDropdown) {
       this.showDropdown = false;
@@ -126,5 +133,18 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   closePopup(): void {
     this.dataService.onTeacherSelect(null);
+  }
+
+  openAddTeacherDialog(projectId: number): void {
+    this.addTeacherProjectId.set(projectId);
+  }
+
+  closeAddTeacherDialog(): void {
+    this.addTeacherProjectId.set(null);
+  }
+
+  onTeachersAdded(): void {
+    this.addTeacherProjectId.set(null);
+    this.dataService.reloadData();
   }
 }

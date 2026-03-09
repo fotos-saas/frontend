@@ -102,7 +102,7 @@
       <div class="expanded-view__classes">
         @for (cls of classes(); track cls.projectId) {
           @defer (on viewport) {
-            <app-expanded-class-column [classData]="cls" />
+            <app-expanded-class-column [classData]="cls" (addTeacherRequest)="openAddTeacherDialog($event)" />
           } @placeholder {
             <div class="expanded-view__column-placeholder">
               <span>{{ cls.className }}</span>
@@ -170,4 +170,14 @@
 <!-- Popup -->
 @if (selectedPersonId(); as personId) {
   <app-expanded-teacher-popup [personId]="personId" (close)="closePopup()" />
+}
+
+<!-- Tanár hozzáadás dialógus -->
+@if (addTeacherProjectId(); as pid) {
+  <app-add-persons-dialog
+    [projectId]="pid"
+    type="teacher"
+    (close)="closeAddTeacherDialog()"
+    (personsAdded)="onTeachersAdded()"
+  />
 }

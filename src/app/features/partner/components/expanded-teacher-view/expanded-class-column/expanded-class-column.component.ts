@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, viewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,7 +9,7 @@ import { ExpandedTeacherViewDataService } from '../expanded-teacher-view-data.se
 @Component({
   selector: 'app-expanded-class-column',
   standalone: true,
-  imports: [LucideAngularModule, ExpandedTeacherCardComponent, FormsModule, MatTooltipModule],
+  imports: [LucideAngularModule, ExpandedTeacherCardComponent, MatTooltipModule],
   templateUrl: './expanded-class-column.component.html',
   styleUrl: './expanded-class-column.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,10 +18,8 @@ export class ExpandedClassColumnComponent {
   readonly ICONS = ICONS;
   private dataService = inject(ExpandedTeacherViewDataService);
 
-  readonly showAddForm = signal(false);
-  readonly newTeacherName = signal('');
-
   readonly classData = input.required<ExpandedClassData>();
+  readonly addTeacherRequest = output<number>();
   readonly listEl = viewChild<ElementRef<HTMLElement>>('listRef');
 
   readonly matchingIds = computed(() => this.dataService.matchingPersonIds());
@@ -103,29 +100,5 @@ export class ExpandedClassColumnComponent {
 
   onRemoveOverride(personId: number): void {
     this.dataService.removeOverride(personId);
-  }
-
-  toggleAddForm(): void {
-    this.showAddForm.update(v => !v);
-    if (!this.showAddForm()) {
-      this.newTeacherName.set('');
-    }
-  }
-
-  submitAddTeacher(): void {
-    const name = this.newTeacherName().trim();
-    if (!name) return;
-    this.dataService.addTeacher(this.classData().projectId, name);
-    this.newTeacherName.set('');
-    this.showAddForm.set(false);
-  }
-
-  onAddKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.submitAddTeacher();
-    } else if (event.key === 'Escape') {
-      this.showAddForm.set(false);
-      this.newTeacherName.set('');
-    }
   }
 }

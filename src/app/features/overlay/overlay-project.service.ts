@@ -73,7 +73,6 @@ export class OverlayProjectService {
   /**
    * Személylista betöltése API-ból.
    * A result-ot a persons() signal-be tölti.
-   * 401-re megpróbálja a mainWindow-ból resync-elni a tokent és újra próbálni.
    */
   async fetchPersons(projectId: number): Promise<PersonItem[]> {
     try {
@@ -82,45 +81,9 @@ export class OverlayProjectService {
       const list = res.data || [];
       this.ngZone.run(() => this.persons.set(list));
       return list;
-    } catch (e: any) {
-      if (e?.status === 401 && window.electronAPI) {
-        this.logger.warn('[PROJECT] 401 — token resync próba mainWindow-ból...');
-        const synced = await this.resyncAuthToken();
-        if (synced) {
-          try {
-            const url = `${environment.apiUrl}/partner/projects/${projectId}/persons`;
-            const res = await firstValueFrom(this.http.get<{ data: PersonItem[] }>(url));
-            const list = res.data || [];
-            this.ngZone.run(() => this.persons.set(list));
-            this.logger.info('[PROJECT] Token resync sikeres, persons betöltve');
-            return list;
-          } catch (retryErr) {
-            this.logger.error('[PROJECT] Retry after resync failed:', retryErr);
-          }
-        }
-      }
+    } catch (e) {
       this.logger.error('[PROJECT] fetch persons error:', e);
       return [];
-    }
-  }
-
-  /**
-   * Auth token újraszinkronizálás a mainWindow-ból IPC-n keresztül.
-   * Ha a mainWindow-ban van érvényes token, átveszi az overlay sessionStorage-ba.
-   */
-  private async resyncAuthToken(): Promise<boolean> {
-    try {
-      const result = await window.electronAPI!.overlay.requestAuthToken();
-      if (result.token) {
-        sessionStorage.setItem('marketer_token', result.token);
-        this.logger.info('[PROJECT] Auth token resync sikeres');
-        return true;
-      }
-      this.logger.warn('[PROJECT] mainWindow-ban sincs marketer_token');
-      return false;
-    } catch (err) {
-      this.logger.error('[PROJECT] Auth token resync hiba:', err);
-      return false;
     }
   }
 
@@ -141,25 +104,7 @@ export class OverlayProjectService {
           this.isLoggedOut.set(false);
         });
       },
-      error: async (err) => {
-        if ((err.status === 401 || err.status === 419) && window.electronAPI) {
-          const synced = await this.resyncAuthToken();
-          if (synced) {
-            this.logger.info('[PROJECT] loadPersons retry after resync...');
-            this.http.get<{ data: PersonItem[] }>(url).subscribe({
-              next: (res) => this.ngZone.run(() => {
-                this.persons.set(res.data || []);
-                this.loadingPersons.set(false);
-                this.isLoggedOut.set(false);
-              }),
-              error: () => this.ngZone.run(() => {
-                this.loadingPersons.set(false);
-                this.isLoggedOut.set(true);
-              }),
-            });
-            return;
-          }
-        }
+      error: (err) => {
         this.ngZone.run(() => {
           this.loadingPersons.set(false);
           if (err.status === 401 || err.status === 419) {

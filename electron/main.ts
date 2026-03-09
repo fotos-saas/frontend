@@ -420,33 +420,12 @@ async function syncAuthToOverlay(): Promise<void> {
       `sessionStorage.getItem('marketer_token')`,
     );
     if (token) {
-      await overlayWindow.webContents.executeJavaScript(
+      overlayWindow.webContents.executeJavaScript(
         `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
       );
-      log.info('[AUTH-SYNC] Token synced to overlay');
-    } else {
-      log.warn('[AUTH-SYNC] No marketer_token in mainWindow sessionStorage');
     }
-  } catch (err) {
-    log.error('[AUTH-SYNC] Failed:', err);
-  }
+  } catch { /* ignore — window may not be ready */ }
 }
-
-/**
- * Overlay-ből hívható IPC: mainWindow-ból kéri le a friss tokent.
- * 401-es hiba esetén az overlay ezzel tud resync-elni.
- */
-ipcMain.handle('overlay:request-auth-token', async () => {
-  if (!mainWindow || mainWindow.isDestroyed()) return { token: null };
-  try {
-    const token = await mainWindow.webContents.executeJavaScript(
-      `sessionStorage.getItem('marketer_token')`,
-    );
-    return { token: token || null };
-  } catch {
-    return { token: null };
-  }
-});
 
 
 function createWindow(): void {

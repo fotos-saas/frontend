@@ -194,7 +194,6 @@ export class OverlayComponent implements OnInit {
 
   ngOnInit(): void {
     document.body.classList.add('overlay-mode');
-    this.ensureAuthToken();
     this.loadContext();
     this.listenContextChanges();
     this.loadActiveDoc();
@@ -207,19 +206,6 @@ export class OverlayComponent implements OnInit {
     this.qa.setProjectIdResolver(() => this.context().projectId);
     this.dragOrder.setProjectIdResolver(() => this.pid);
     this.uploadPanel.setContextResolver(() => this.context());
-  }
-
-  /** Ha nincs marketer_token, kérjük el a mainWindow-ból (app restart után elveszhet) */
-  private async ensureAuthToken(): Promise<void> {
-    if (!window.electronAPI) return;
-    const existing = sessionStorage.getItem('marketer_token');
-    if (existing) return;
-    try {
-      const result = await window.electronAPI.overlay.requestAuthToken();
-      if (result.token) {
-        sessionStorage.setItem('marketer_token', result.token);
-      }
-    } catch { /* ignore */ }
   }
 
   // ============ Command router ============

@@ -59,6 +59,7 @@ export const TOOLBAR_GROUPS: ToolbarGroup[] = [
       { id: 'sort-menu', icon: ICONS.ARROW_DOWN_AZ, label: 'Rendezés', tooltip: 'ABC / fiú-lány / rácsba rendezés', accent: 'blue' },
       { id: 'link-layers', icon: ICONS.LINK, label: 'Összelinkelés', tooltip: 'Kijelölt layerek összelinkelése az azonos nevű társaikkal' },
       { id: 'unlink-layers', icon: ICONS.UNLINK, label: 'Szétlinkelés', tooltip: 'Kijelölt layerek linkelésének megszüntetése' },
+      { id: 'rename-layer-ids', icon: ICONS.REPLACE, label: 'Layer ID-k frissítése', tooltip: 'Régi person ID-k cseréje az aktuális projekt ID-jéire (név alapján)', accent: 'purple' },
     ],
   },
   {

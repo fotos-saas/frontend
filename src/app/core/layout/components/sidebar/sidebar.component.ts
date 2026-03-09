@@ -34,6 +34,13 @@ import { BUILD_HASH } from '../../../constants/build-version';
             [collapsed]="sidebarState.isTablet()"
           />
         }
+
+        <!-- Verzió hash a menü végén -->
+        @if (!sidebarState.isTablet()) {
+          <div class="px-4 pt-3 pb-1 text-[10px] text-slate-500 select-none">
+            v.{{ buildHash }}
+          </div>
+        }
       </nav>
 
       <!-- Bottom Items (sticky footer) -->
@@ -45,13 +52,6 @@ import { BUILD_HASH } from '../../../constants/build-version';
               [collapsed]="sidebarState.isTablet()"
             />
           }
-        </div>
-      }
-
-      <!-- Verzió -->
-      @if (!sidebarState.isTablet()) {
-        <div class="px-4 py-2 text-[10px] text-slate-500 select-none flex-shrink-0">
-          v.{{ buildHash }}
         </div>
       }
     </aside>

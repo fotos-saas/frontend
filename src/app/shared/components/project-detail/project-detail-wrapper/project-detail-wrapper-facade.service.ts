@@ -47,7 +47,9 @@ export class ProjectDetailWrapperFacadeService<T> {
   private backRoute!: string;
   private contactModalComponent!: Type<unknown>;
   private projectEditModalComponent: Type<unknown> | null = null;
+  private wizardEditModalComponent: Type<unknown> | null = null;
   private orderDataDialogComponent: Type<unknown> | null = null;
+  private useWizardEdit = false;
   private partnerService: PartnerService | null = null;
   private destroyRef!: DestroyRef;
   private router!: Router;
@@ -100,6 +102,7 @@ export class ProjectDetailWrapperFacadeService<T> {
     backRoute: string;
     contactModalComponent: Type<unknown>;
     projectEditModalComponent: Type<unknown> | null;
+    wizardEditModalComponent: Type<unknown> | null;
     orderDataDialogComponent: Type<unknown> | null;
     partnerService: PartnerService | null;
     destroyRef: DestroyRef;
@@ -110,11 +113,23 @@ export class ProjectDetailWrapperFacadeService<T> {
     this.backRoute = deps.backRoute;
     this.contactModalComponent = deps.contactModalComponent;
     this.projectEditModalComponent = deps.projectEditModalComponent;
+    this.wizardEditModalComponent = deps.wizardEditModalComponent;
     this.orderDataDialogComponent = deps.orderDataDialogComponent;
     this.partnerService = deps.partnerService;
     this.destroyRef = deps.destroyRef;
     this.router = deps.router;
     this.toast = deps.toast;
+
+    // Wizard mód betöltése beállításokból
+    if (this.partnerService && this.wizardEditModalComponent) {
+      this.partnerService.getGlobalSettings()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res) => {
+            this.useWizardEdit = res.data.project_creation_mode === 'wizard';
+          },
+        });
+    }
   }
 
   // === PROJECT LOADING ===
@@ -221,12 +236,15 @@ export class ProjectDetailWrapperFacadeService<T> {
   // === PROJECT EDIT MODAL ===
 
   openEditProjectModal(container: ViewContainerRef): void {
-    if (!this.projectEditModalComponent) return;
+    const componentToUse = this.useWizardEdit && this.wizardEditModalComponent
+      ? this.wizardEditModalComponent
+      : this.projectEditModalComponent;
+    if (!componentToUse) return;
     const projectData = this.projectData();
     if (!projectData) return;
 
     container.clear();
-    this.projectEditModalRef = container.createComponent(this.projectEditModalComponent);
+    this.projectEditModalRef = container.createComponent(componentToUse);
     this.projectEditModalRef.setInput('project', projectData);
     (this.projectEditModalRef.instance as ModalOutputs).close?.subscribe(() => this.closeEditProjectModal());
     (this.projectEditModalRef.instance as ModalOutputs).saved?.subscribe(() => {

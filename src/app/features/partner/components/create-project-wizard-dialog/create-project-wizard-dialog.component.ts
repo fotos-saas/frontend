@@ -2,10 +2,12 @@ import {
   Component,
   ChangeDetectionStrategy,
   output,
+  input,
   inject,
   signal,
   computed,
   DestroyRef,
+  OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +20,7 @@ import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerService, PartnerProjectListItem, SchoolItem } from '../../services/partner.service';
-import { ProjectContact } from '../../models/partner.models';
+import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
 import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 
 interface WizardContact {
@@ -46,16 +48,28 @@ interface WizardContact {
     AddSchoolModalComponent,
   ],
 })
-export class CreateProjectWizardDialogComponent {
+export class CreateProjectWizardDialogComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
   private readonly toast = inject(ToastService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Ha meg van adva, edit módban működik */
+  readonly project = input<ProjectDetailData | null>(null);
+
   readonly close = output<void>();
   readonly projectCreated = output<PartnerProjectListItem>();
+  readonly saved = output<void>();
 
   readonly ICONS = ICONS;
+
+  readonly isEditMode = computed(() => !!this.project());
+  readonly dialogTitle = computed(() => this.isEditMode() ? 'Projekt szerkesztése' : 'Új projekt létrehozása');
+  readonly dialogDescription = computed(() => this.isEditMode() ? 'Módosítsd a projekt adatait' : 'Projekt adatok kitöltése');
+  readonly dialogIcon = computed(() => this.isEditMode() ? ICONS.EDIT : ICONS.PLUS);
+  readonly submitLabel = computed(() => this.isEditMode() ? 'Mentés' : 'Projekt létrehozása');
+  readonly submittingLabel = computed(() => this.isEditMode() ? 'Mentés...' : 'Létrehozás...');
+  readonly dialogVariant = computed(() => this.isEditMode() ? 'edit' as const : 'create' as const);
 
   // --- Kapcsolattartók ---
   readonly contacts = signal<WizardContact[]>([
@@ -90,6 +104,41 @@ export class CreateProjectWizardDialogComponent {
       && this.className.trim().length > 0
       && this.classYear.trim().length > 0;
   });
+
+  ngOnInit(): void {
+    const proj = this.project();
+    if (proj) {
+      this.initFromProject(proj);
+    }
+  }
+
+  private initFromProject(proj: ProjectDetailData): void {
+    // Kapcsolattartók betöltése
+    if (proj.contacts && proj.contacts.length > 0) {
+      this.contacts.set(proj.contacts.map(c => ({
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        isPrimary: c.isPrimary ?? false,
+      })));
+    } else if (proj.contact) {
+      this.contacts.set([{
+        name: proj.contact.name,
+        email: proj.contact.email,
+        phone: proj.contact.phone,
+        isPrimary: true,
+      }]);
+    }
+
+    // Iskola
+    if (proj.school) {
+      this.schoolName.set(proj.school.name);
+    }
+
+    // Osztály adatok
+    this.className = proj.className ?? '';
+    this.classYear = proj.classYear ?? '';
+  }
 
   // --- Kapcsolattartó kezelés ---
 
@@ -178,6 +227,14 @@ export class CreateProjectWizardDialogComponent {
   submit(): void {
     if (!this.canSubmit() || this.submitting()) return;
 
+    if (this.isEditMode()) {
+      this.submitUpdate();
+    } else {
+      this.submitCreate();
+    }
+  }
+
+  private submitCreate(): void {
     this.submitting.set(true);
     const validContacts = this.contacts().filter(c => c.name.trim());
 
@@ -210,6 +267,46 @@ export class CreateProjectWizardDialogComponent {
           const msg = err.error?.message || 'Hiba történt a projekt létrehozása során.';
           this.toast.error('Hiba', msg);
           this.logger.error('Partner project creation failed', err);
+        },
+      });
+  }
+
+  private submitUpdate(): void {
+    const proj = this.project();
+    if (!proj) return;
+
+    this.submitting.set(true);
+    const validContacts = this.contacts().filter(c => c.name.trim());
+
+    this.partnerService.updateProjectWithWizard(proj.id, {
+      contacts: validContacts.map(c => ({
+        name: c.name.trim(),
+        email: c.email?.trim() || undefined,
+        phone: c.phone?.trim() || undefined,
+        is_primary: c.isPrimary,
+      })),
+      school_name: this.schoolName().trim(),
+      class_name: this.className.trim(),
+      class_year: this.classYear.trim(),
+      description: this.description.trim() || undefined,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toast.success('Siker', 'Projekt sikeresen módosítva!');
+            this.saved.emit();
+            this.close.emit();
+          } else {
+            this.submitting.set(false);
+            this.toast.error('Hiba', response.message || 'Hiba történt a projekt módosítása során.');
+          }
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          const msg = err.error?.message || 'Hiba történt a projekt módosítása során.';
+          this.toast.error('Hiba', msg);
+          this.logger.error('Partner project update failed', err);
         },
       });
   }

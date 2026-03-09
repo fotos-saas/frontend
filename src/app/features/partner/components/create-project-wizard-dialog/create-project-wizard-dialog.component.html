@@ -1,11 +1,11 @@
 <app-dialog-wrapper
   headerStyle="flat"
-  [icon]="ICONS.PLUS"
-  title="Új projekt létrehozása"
-  description="Projekt adatok kitöltése"
+  [icon]="dialogIcon()"
+  [title]="dialogTitle()"
+  [description]="dialogDescription()"
   theme="purple"
   size="lg"
-  variant="create"
+  [variant]="dialogVariant()"
   [isSubmitting]="submitting()"
   (closeEvent)="close.emit()"
   (submitEvent)="submit()"
@@ -129,24 +129,26 @@
       </div>
     </section>
 
-    <!-- 3. Csatolmányok -->
-    <section class="wizard-section">
-      <h3 class="wizard-section__title">Csatolmányok</h3>
-      <p class="wizard-section__desc">Csatolj képeket, referenciákat vagy bármit ami segíti a munkát.</p>
+    <!-- 3. Csatolmányok (csak létrehozásnál) -->
+    @if (!isEditMode()) {
+      <section class="wizard-section">
+        <h3 class="wizard-section__title">Csatolmányok</h3>
+        <p class="wizard-section__desc">Csatolj képeket, referenciákat vagy bármit ami segíti a munkát.</p>
 
-      <ps-file-upload
-        [(ngModel)]="attachmentFiles"
-        name="attachments"
-        [multiple]="true"
-        [maxFiles]="10"
-        [maxSizeMB]="20"
-        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx"
-        acceptLabel="JPG, PNG, WebP, PDF, DOC, DOCX, XLS, XLSX"
-        variant="compact"
-        dropzoneText="Húzd ide a fájlokat vagy kattints"
-        dropzoneHint="Max. 10 fájl, egyenként max. 20 MB"
-      />
-    </section>
+        <ps-file-upload
+          [(ngModel)]="attachmentFiles"
+          name="attachments"
+          [multiple]="true"
+          [maxFiles]="10"
+          [maxSizeMB]="20"
+          accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx"
+          acceptLabel="JPG, PNG, WebP, PDF, DOC, DOCX, XLS, XLSX"
+          variant="compact"
+          dropzoneText="Húzd ide a fájlokat vagy kattints"
+          dropzoneHint="Max. 10 fájl, egyenként max. 20 MB"
+        />
+      </section>
+    }
 
     <!-- 4. Megjegyzés -->
     <section class="wizard-section">
@@ -174,10 +176,10 @@
     >
       @if (submitting()) {
         <div class="spinner spinner--small spin"></div>
-        Létrehozás...
+        {{ submittingLabel() }}
       } @else {
         <lucide-icon [name]="ICONS.CHECK" [size]="16" />
-        Projekt létrehozása
+        {{ submitLabel() }}
       }
     </button>
   </div>

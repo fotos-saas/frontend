@@ -654,4 +654,28 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/wizard`, data);
   }
 
+  /**
+   * Projekt frissítése wizard módban
+   */
+  updateProjectWithWizard(projectId: number, data: {
+    contacts?: Array<{
+      name: string;
+      email?: string;
+      phone?: string;
+      is_primary?: boolean;
+    }>;
+    school_name: string;
+    class_name: string;
+    class_year: string;
+    description?: string;
+  }): Observable<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.http.put<{
+      success: boolean;
+      message: string;
+    }>(`${this.baseUrl}/projects/${projectId}/wizard`, data);
+  }
+
 }

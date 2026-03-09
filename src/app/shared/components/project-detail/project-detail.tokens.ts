@@ -58,6 +58,12 @@ export const PROJECT_CONTACT_MODAL_COMPONENT = new InjectionToken<Type<any>>('Pr
 export const PROJECT_EDIT_MODAL_COMPONENT = new InjectionToken<Type<any>>('ProjectEditModalComponent');
 
 /**
+ * InjectionToken a Wizard Edit Modal komponenshez.
+ * Opcionális - ha a partner wizard módot használ, ez lesz az edit modal.
+ */
+export const PROJECT_WIZARD_EDIT_MODAL_COMPONENT = new InjectionToken<Type<any>>('ProjectWizardEditModalComponent');
+
+/**
  * InjectionToken az Order Data Dialog komponenshez.
  * Opcionális - csak a partner felület adja meg.
  */

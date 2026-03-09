@@ -43,6 +43,7 @@ import {
   PROJECT_BACK_ROUTE,
   PROJECT_CONTACT_MODAL_COMPONENT,
   PROJECT_EDIT_MODAL_COMPONENT,
+  PROJECT_WIZARD_EDIT_MODAL_COMPONENT,
   PROJECT_ORDER_DATA_DIALOG_COMPONENT,
   ProjectDataMapper,
 } from '../project-detail.tokens';
@@ -105,6 +106,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly backRoute = inject(PROJECT_BACK_ROUTE);
   private readonly contactModalComponent = inject(PROJECT_CONTACT_MODAL_COMPONENT);
   private readonly projectEditModalComponent = inject(PROJECT_EDIT_MODAL_COMPONENT, { optional: true });
+  private readonly wizardEditModalComponent = inject(PROJECT_WIZARD_EDIT_MODAL_COMPONENT, { optional: true });
   private readonly orderDataDialogComponent = inject(PROJECT_ORDER_DATA_DIALOG_COMPONENT, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
@@ -168,6 +170,7 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       backRoute: this.backRoute,
       contactModalComponent: this.contactModalComponent,
       projectEditModalComponent: this.projectEditModalComponent,
+      wizardEditModalComponent: this.wizardEditModalComponent,
       orderDataDialogComponent: this.orderDataDialogComponent,
       partnerService: this.partnerService,
       destroyRef: this.destroyRef,

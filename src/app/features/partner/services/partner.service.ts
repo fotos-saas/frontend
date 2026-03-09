@@ -107,6 +107,10 @@ export class PartnerService {
     return this.projectService.createProjectWithWizard(data);
   }
 
+  updateProjectWithWizard(projectId: number, data: Parameters<PartnerProjectService['updateProjectWithWizard']>[1]): Observable<{ success: boolean; message: string }> {
+    return this.projectService.updateProjectWithWizard(projectId, data);
+  }
+
   updateProject(projectId: number, data: Partial<CreateProjectRequest> & { status?: string }): Observable<{
     success: boolean;
     message: string;

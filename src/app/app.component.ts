@@ -10,6 +10,8 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { TopLoadingBarComponent } from './shared/components/top-loading-bar/top-loading-bar.component';
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback-dialog/error-feedback-dialog.component';
+import { VersionCheckService } from './core/services/version-check.service';
+import { UpdateBannerComponent } from './shared/components/update-banner/update-banner.component';
 
 @Component({
     selector: 'app-root',
@@ -21,6 +23,7 @@ import { ErrorFeedbackDialogComponent } from './shared/components/error-feedback
         TopLoadingBarComponent,
         OfflineBannerComponent,
         ErrorFeedbackDialogComponent,
+        UpdateBannerComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -31,6 +34,7 @@ export class AppComponent implements OnInit {
     private sentryService = inject(SentryService);
     private destroyRef = inject(DestroyRef);
     private document = inject(DOCUMENT);
+    private versionCheckService = inject(VersionCheckService);
 
     ngOnInit(): void {
         // Setup deep link handling for mobile app
@@ -46,6 +50,9 @@ export class AppComponent implements OnInit {
 
         // Splash screen eltüntetése az első NavigationEnd-re
         this.hideSplashOnFirstNavigation();
+
+        // Web verzió-ellenőrzés indítása
+        this.versionCheckService.startPolling();
     }
 
     private setupDeepLinkHandler(): void {

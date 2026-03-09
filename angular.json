@@ -32,7 +32,12 @@
               "src/favicon.ico",
               "src/site.webmanifest",
               "src/robots.txt",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "version.json",
+                "input": "src/assets",
+                "output": "/"
+              }
             ],
             "styles": [
               "src/styles.scss",

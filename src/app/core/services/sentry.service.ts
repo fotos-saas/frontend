@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/angular';
 
 // Environment import
 import { environment } from '../../../environments/environment';
+import { BUILD_HASH } from '../constants/build-version';
 
 // Erzekeny adatok szurese
 const SENSITIVE_KEYS = [
@@ -201,14 +202,11 @@ export class SentryService {
    * Visszaadja az app verziot
    */
   private getAppVersion(): string {
-    // Electron app verzio
     const electronVersion = (window as { electronAPI?: { version?: string } }).electronAPI?.version;
     if (electronVersion) {
       return electronVersion;
     }
-
-    // Fallback: package.json verzio (build time-ban beallitva)
-    return (window as { APP_VERSION?: string }).APP_VERSION || '1.0.0';
+    return BUILD_HASH || '1.0.0';
   }
 
   /**

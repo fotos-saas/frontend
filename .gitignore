@@ -59,3 +59,7 @@ electron/dist/
 
 # Portrait Python venv
 electron/scripts/portrait/python/.venv/
+
+# Generalt verzio fajlok (build idoben jonnek letre)
+src/assets/version.json
+src/app/core/constants/build-version.ts

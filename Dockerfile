@@ -7,6 +7,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Git telepitese a verzio hash-hoz
+RUN apk add --no-cache git
+
 # Copy package files
 COPY package*.json ./
 
@@ -15,6 +18,10 @@ RUN npm install --ignore-scripts
 
 # Copy source code
 COPY . .
+
+# Git hash atadasa build arg-kent (Coolify: SOURCE_COMMIT)
+ARG GIT_HASH=""
+ENV GIT_HASH=${GIT_HASH}
 
 # Build for production (increase heap for large Angular builds)
 ENV NODE_OPTIONS="--max-old-space-size=4096"

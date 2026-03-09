@@ -31,10 +31,16 @@ if (!SENTRY_ORG || !SENTRY_PROJECT) {
   process.exit(1);
 }
 
-// Release verzio
-const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-const RELEASE = process.env.SENTRY_RELEASE || `photostack@${packageJson.version}`;
+// Release verzio - version.json hash-bol (build idoben generalt)
+const versionJsonPath = path.join(__dirname, '..', 'src', 'assets', 'version.json');
+let RELEASE;
+if (fs.existsSync(versionJsonPath)) {
+  const versionInfo = JSON.parse(fs.readFileSync(versionJsonPath, 'utf8'));
+  RELEASE = process.env.SENTRY_RELEASE || `photostack@${versionInfo.hash}`;
+} else {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  RELEASE = process.env.SENTRY_RELEASE || `photostack@${packageJson.version}`;
+}
 
 // Build konyvtarak
 const ANGULAR_DIST = path.join(__dirname, '..', 'dist', 'frontend-tablo', 'browser');

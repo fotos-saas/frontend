@@ -4,3 +4,4 @@
 export * from './auth.models';
 export * from './voting.models';
 export * from './poke.models';
+export * from './version.model';

@@ -5,6 +5,8 @@
   "author": "PhotoStack Team",
   "main": "electron/dist/main.js",
   "scripts": {
+    "prebuild": "node scripts/generate-version.js",
+    "prestart": "node scripts/generate-version.js",
     "ng": "ng",
     "start": "ng serve",
     "start:local": "ng serve --configuration=local",

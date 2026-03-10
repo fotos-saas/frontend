@@ -325,6 +325,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partner/pages/customization/email-templates/email-template-edit/email-template-edit.component').then(m => m.EmailTemplateEditComponent),
         title: 'Email sablon szerkesztése'
       },
+      // Értesítések teljes lista oldal
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/partner/pages/notification-list/notification-list.component').then(m => m.NotificationListComponent),
+        title: 'Értesítések'
+      },
       // Tevékenységnapló (csak partner)
       {
         path: 'activity-log',
@@ -642,6 +648,12 @@ export const routes: Routes = [
       {
         path: 'orders/albums/:id',
         loadComponent: () => import('./features/partner/pages/orders/album-detail/album-detail.component').then(m => m.PartnerAlbumDetailComponent)
+      },
+      // Értesítések (grafikusnak is elérhető)
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/partner/pages/notification-list/notification-list.component').then(m => m.NotificationListComponent),
+        title: 'Értesítések'
       },
       // Tevékenységnapló (grafikusnak is elérhető)
       {

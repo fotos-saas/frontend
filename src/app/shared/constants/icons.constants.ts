@@ -458,6 +458,7 @@ export const ICONS = {
   // Értesítések
   BELL: 'bell',
   BELL_OFF: 'bell-off',
+  CHECK_CHECK: 'check-check',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -256,6 +256,9 @@ import {
   // Feladat típusok
   MessageCircleQuestion,
   StickyNote,
+  // Értesítések oldal
+  CheckCheck,
+  Inbox,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -508,4 +511,7 @@ export const LUCIDE_ICONS_MAP = {
   // Feladat típusok
   MessageCircleQuestion,
   StickyNote,
+  // Értesítések oldal
+  CheckCheck,
+  Inbox,
 };

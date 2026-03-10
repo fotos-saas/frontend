@@ -1,0 +1,107 @@
+<div class="notification-list page-card">
+  <!-- Fejléc -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <lucide-icon [name]="ICONS.BELL" [size]="24" />
+        Értesítések
+      </h1>
+      <p class="subtitle">Összes bejövő értesítésed egy helyen</p>
+    </div>
+
+    @if (hasUnread) {
+      <button
+        type="button"
+        class="btn-mark-all"
+        (click)="markAllAsRead()"
+      >
+        <lucide-icon [name]="ICONS.CHECK_CHECK" [size]="16" />
+        Összes olvasottnak jelölése
+      </button>
+    }
+  </div>
+
+  <!-- Szűrő -->
+  <nav class="filter-tabs">
+    <button
+      type="button"
+      class="filter-tab"
+      [class.filter-tab--active]="filter() === 'all'"
+      (click)="setFilter('all')"
+    >
+      Összes
+    </button>
+    <button
+      type="button"
+      class="filter-tab"
+      [class.filter-tab--active]="filter() === 'unread'"
+      (click)="setFilter('unread')"
+    >
+      Olvasatlan
+      @if (unreadCount > 0) {
+        <span class="filter-badge">{{ unreadCount }}</span>
+      }
+    </button>
+  </nav>
+
+  <!-- Tartalom -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton-row skeleton-shimmer" [style.animation-delay]="i * 0.08 + 's'"></div>
+      }
+    </div>
+  } @else if (notifications().length === 0) {
+    <div class="empty-state">
+      <lucide-icon class="empty-icon" [name]="ICONS.INBOX" [size]="48" />
+      <h3>Nincs értesítés</h3>
+      @if (filter() === 'unread') {
+        <p>Nincs olvasatlan értesítésed. Szuper!</p>
+      } @else {
+        <p>Amikor valaki feladatot oszt ki neked vagy választ a kérdésedre, itt fogod látni.</p>
+      }
+    </div>
+  } @else {
+    <div class="notification-items">
+      @for (notification of notifications(); track notification.id; let i = $index) {
+        <div
+          class="notification-row"
+          [class.notification-row--unread]="!notification.is_read"
+          role="button"
+          tabindex="0"
+          (click)="onNotificationClick(notification)"
+          (keydown.enter)="onNotificationClick(notification)"
+          [style.animation-delay]="i * 0.03 + 's'"
+        >
+          <!-- Ikon -->
+          <div class="notification-row__icon">
+            <span class="notification-row__emoji">{{ notification.emoji }}</span>
+          </div>
+
+          <!-- Tartalom -->
+          <div class="notification-row__content">
+            <p class="notification-row__title">{{ notification.title }}</p>
+            @if (notification.message) {
+              <p class="notification-row__message">{{ notification.message }}</p>
+            }
+            <span class="notification-row__time">{{ formatTime(notification.created_at) }}</span>
+          </div>
+
+          <!-- Olvasatlan jelző -->
+          @if (!notification.is_read) {
+            <div class="notification-row__dot"></div>
+          }
+
+          <!-- Nyíl ha van action -->
+          @if (notification.action_url) {
+            <lucide-icon
+              class="notification-row__arrow"
+              [name]="ICONS.CHEVRON_RIGHT"
+              [size]="16"
+            />
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

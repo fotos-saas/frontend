@@ -33,7 +33,7 @@ export function buildPartnerMenu(params: {
       children: [
         { id: 'projects-list', route: `${base}/projects`, label: 'Projektek' },
         { id: 'finalizations', route: `${base}/projects/finalizations`, label: 'Véglegesítések', badge: inPrintCount || undefined },
-        { id: 'project-tasks', route: `${base}/projects/tasks`, label: 'Feladatok', badge: pendingTaskCount || undefined },
+        { id: 'project-tasks', route: `${base}/projects/tasks`, label: 'Tennivalók', badge: pendingTaskCount || undefined },
         { id: 'schools', route: `${base}/projects/schools`, label: 'Iskolák' },
         { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
         { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },

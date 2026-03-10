@@ -250,7 +250,7 @@ export const routes: Routes = [
       {
         path: 'projects/tasks',
         loadComponent: () => import('./features/partner/pages/tasks-overview/tasks-overview.component').then(m => m.TasksOverviewComponent),
-        title: 'Feladatok'
+        title: 'Tennivalók'
       },
       {
         path: 'projects/:id',
@@ -590,7 +590,7 @@ export const routes: Routes = [
       {
         path: 'projects/tasks',
         loadComponent: () => import('./features/partner/pages/tasks-overview/tasks-overview.component').then(m => m.TasksOverviewComponent),
-        title: 'Feladatok'
+        title: 'Tennivalók'
       },
       {
         path: 'projects/:id',

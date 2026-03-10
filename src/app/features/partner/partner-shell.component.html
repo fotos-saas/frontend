@@ -29,6 +29,9 @@
     [useExternalLogout]="true"
     (logoutEvent)="logout()"
   >
+    <!-- Partner értesítések -->
+    <app-partner-notification-bell />
+
     <!-- Subscription badge slot (csak tulajdonosnak) -->
     @if (subscriptionInfo() && isOwner() && featureToggleService.isEnabled('feature.subscription-badge')) {
       <a

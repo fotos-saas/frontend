@@ -66,7 +66,7 @@ export const CATEGORY_EMOJIS = {
   // UI elemek
   STATS: '📊',
   SEARCH: '🔍',
-  BELL: '🔔',
+  BELL_EMOJI: '🔔',
   INBOX_FULL: '📬',
   INBOX_EMPTY: '📭',
   PARTY: '🎉',
@@ -454,6 +454,10 @@ export const ICONS = {
   // Feladat típusok
   MESSAGE_CIRCLE_QUESTION: 'message-circle-question',
   STICKY_NOTE: 'sticky-note',
+
+  // Értesítések
+  BELL: 'bell',
+  BELL_OFF: 'bell-off',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

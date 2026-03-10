@@ -24,6 +24,7 @@ import { ChatbotPanelComponent } from '../help/components/chatbot-panel/chatbot-
 import { InviteBannerComponent } from '../../shared/components/invite-banner/invite-banner.component';
 import { PartnerSwitcherDropdownComponent } from '../../shared/components/partner-switcher-dropdown/partner-switcher-dropdown.component';
 import { BatchWorkspacePanelComponent } from './components/batch-workspace-panel/batch-workspace-panel.component';
+import { UploadQueueToastComponent } from '../../shared/components/upload-queue-toast/upload-queue-toast.component';
 import { FeatureToggleService } from '../../core/services/feature-toggle.service';
 import { ROLE_BADGES, buildPartnerMenu, buildTeamMemberMenu, filterMenuItems } from './partner-shell-menu.config';
 import { BUILD_VERSION } from '../../core/constants/build-version';
@@ -52,6 +53,7 @@ import { BUILD_VERSION } from '../../core/constants/build-version';
     InviteBannerComponent,
     PartnerSwitcherDropdownComponent,
     BatchWorkspacePanelComponent,
+    UploadQueueToastComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

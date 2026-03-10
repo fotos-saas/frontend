@@ -1,0 +1,77 @@
+@if (visible()) {
+  <!-- FAB gomb -->
+  <button
+    type="button"
+    class="upload-fab"
+    [class.upload-fab--uploading]="fabState() === 'uploading'"
+    [class.upload-fab--error]="fabState() === 'error'"
+    [class.upload-fab--done]="fabState() === 'done'"
+    (click)="toggle()"
+    [attr.aria-label]="'Feltöltési sor' + (badgeText() ? ': ' + badgeText() : '')"
+  >
+    <lucide-icon
+      [name]="fabState() === 'uploading' ? ICONS.LOADER : ICONS.UPLOAD"
+      [size]="22"
+      [class.spin]="fabState() === 'uploading'"
+    />
+    @if (badgeText()) {
+      <span class="upload-fab__badge" [class.upload-fab__badge--error]="fabState() === 'error'">
+        {{ badgeText() }}
+      </span>
+    }
+  </button>
+
+  <!-- Kinyitott panel -->
+  @if (expanded()) {
+    <div class="upload-panel" role="region" aria-label="Feltöltési sor">
+      <div class="upload-panel__header">
+        <h3>Feltöltések</h3>
+        <button type="button" class="upload-panel__close" (click)="toggle()">
+          <lucide-icon [name]="ICONS.X" [size]="18" />
+        </button>
+      </div>
+
+      <div class="upload-panel__body">
+        @for (item of queue.items(); track item.id) {
+          <div class="upload-item" [class.upload-item--error]="item.status === 'error'" [class.upload-item--done]="item.status === 'done'">
+            <div class="upload-item__icon">
+              <lucide-icon
+                [name]="getStatusIcon(item)"
+                [size]="16"
+                [class.spin]="item.status === 'uploading'"
+              />
+            </div>
+
+            <div class="upload-item__info">
+              <span class="upload-item__name" [title]="item.file.name">{{ item.file.name }}</span>
+              @if (item.status === 'uploading') {
+                <div class="upload-item__progress">
+                  <div class="upload-item__progress-bar" [style.width.%]="item.progress"></div>
+                </div>
+              }
+              @if (item.status === 'error') {
+                <span class="upload-item__error">{{ item.error || 'Sikertelen' }}</span>
+              }
+              @if (item.retries > 0 && item.status !== 'error' && item.status !== 'done') {
+                <span class="upload-item__retry-label">Újrapróbálás ({{ item.retries }}/3)...</span>
+              }
+            </div>
+
+            <div class="upload-item__actions">
+              @if (item.status === 'error') {
+                <button type="button" class="upload-item__btn" (click)="retryItem(item)" title="Újrapróbálás">
+                  <lucide-icon [name]="ICONS.REFRESH" [size]="14" />
+                </button>
+              }
+              @if (item.status !== 'uploading') {
+                <button type="button" class="upload-item__btn upload-item__btn--remove" (click)="removeItem(item)" title="Eltávolítás">
+                  <lucide-icon [name]="ICONS.X" [size]="14" />
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+}

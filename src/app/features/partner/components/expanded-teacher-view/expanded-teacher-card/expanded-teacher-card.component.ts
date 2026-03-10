@@ -35,6 +35,11 @@ export class ExpandedTeacherCardComponent {
 
   readonly isDragTarget = signal(false);
 
+  /** Fotó hozzárendelés folyamatban erre a kártyára */
+  readonly isAssigning = computed(() =>
+    this.dataService.assigningPersonIds().has(this.teacher().personId)
+  );
+
   readonly initials = computed(() => {
     const name = this.teacher().name;
     const parts = name.split(' ').filter(p => p.length > 0);

@@ -33,6 +33,7 @@ export class ExpandedTeacherViewDataService {
   // Drag & drop
   readonly draggedPhoto = signal<ExpandedUploadedPhoto | null>(null);
   readonly assigning = signal(false);
+  readonly assigningPersonIds = signal<Set<number>>(new Set());
   readonly pendingDrop = signal<PendingDrop | null>(null);
 
   // Hover/kijelölés
@@ -323,6 +324,7 @@ export class ExpandedTeacherViewDataService {
     if (!sid || this.assigning()) return;
 
     this.assigning.set(true);
+    this.assigningPersonIds.set(new Set(personIds));
     this.teacherService.assignPhotoToTeacher(sid, photoId, personIds).subscribe({
       next: (response) => {
         const results = response.data;
@@ -342,11 +344,13 @@ export class ExpandedTeacherViewDataService {
           });
         }
         this.assigning.set(false);
+        this.assigningPersonIds.set(new Set());
         this.draggedPhoto.set(null);
       },
       error: (err) => {
         this.logger.error('Fotó hozzárendelési hiba', err);
         this.assigning.set(false);
+        this.assigningPersonIds.set(new Set());
       },
     });
   }

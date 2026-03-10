@@ -21,6 +21,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { PartnerService, PartnerProjectListItem, SchoolItem } from '../../services/partner.service';
 import { PartnerFinalizationApiService } from '../../services/partner-finalization-api.service';
+import { UploadQueueService } from '../../../../shared/services/upload-queue.service';
 import { ProjectDetailData } from '@shared/components/project-detail/project-detail.types';
 import { AddSchoolModalComponent } from '../add-school-modal/add-school-modal.component';
 
@@ -61,6 +62,7 @@ export class CreateProjectWizardDialogComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly uploadQueue = inject(UploadQueueService);
 
   /** Ha meg van adva, edit módban működik */
   readonly project = input<ProjectDetailData | null>(null);
@@ -97,7 +99,14 @@ export class CreateProjectWizardDialogComponent implements OnInit {
 
   // --- Csatolmányok ---
   readonly existingFiles = signal<ExistingFile[]>([]);
-  readonly uploading = signal(false);
+  readonly uploading = computed(() => this.uploadQueue.hasActive());
+
+  /** Queue elemek ehhez a projekthez (feltöltés alatt / várakozó) */
+  readonly queueItems = computed(() => {
+    const proj = this.project();
+    if (!proj) return [];
+    return this.uploadQueue.items().filter(i => i.projectId === proj.id && i.status !== 'done');
+  });
 
   // --- Megjegyzés ---
   description = '';
@@ -262,26 +271,22 @@ export class CreateProjectWizardDialogComponent implements OnInit {
   }
 
   private uploadFile(projectId: number, file: File): void {
-    this.uploading.set(true);
-    this.finalizationApi.uploadFile(projectId, file, 'attachment')
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
-          if (response.success) {
-            this.existingFiles.update(list => [
-              ...list,
-              { path: response.fileId, filename: response.filename },
-            ]);
-          } else {
-            this.toast.error('Hiba', response.message || 'Fájl feltöltés sikertelen.');
-          }
-        },
-        error: (err) => {
-          this.uploading.set(false);
-          this.toast.error('Hiba', err.error?.message || 'Fájl feltöltés sikertelen.');
-        },
-      });
+    this.uploadQueue.enqueue({
+      file,
+      projectId,
+      type: 'attachment',
+      uploadFn: (f: File) => this.finalizationApi.uploadFile(projectId, f, 'attachment'),
+      onSuccess: (response) => {
+        if (response.success) {
+          this.existingFiles.update(list => [
+            ...list,
+            { path: response.fileId, filename: response.filename },
+          ]);
+        } else {
+          this.toast.error('Hiba', response.message || 'Fájl feltöltés sikertelen.');
+        }
+      },
+    });
   }
 
   deleteExistingFile(index: number): void {

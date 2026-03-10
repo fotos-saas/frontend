@@ -20,6 +20,7 @@ import { DesignData, FileUploadResponse } from '../../../models/order-finalizati
 import { OrderValidationService, ValidationError } from '../../../services/order-validation.service';
 import { FileUploadService } from '../../../services/file-upload.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { UploadQueueService } from '../../../../../shared/services/upload-queue.service';
 
 /**
  * Design Step Component (Step 3)
@@ -44,6 +45,7 @@ export class DesignStepComponent implements OnInit {
   private readonly fileUploadService = inject(FileUploadService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly uploadQueue = inject(UploadQueueService);
 
   readonly ICONS = ICONS;
   readonly MAX_ATTACHMENTS = 5;
@@ -70,6 +72,9 @@ export class DesignStepComponent implements OnInit {
   uploadBackgroundFn = input<((file: File) => Observable<FileUploadResponse>) | null>(null);
   uploadAttachmentFn = input<((file: File) => Observable<FileUploadResponse>) | null>(null);
   deleteFileFn = input<((fileId: string) => Observable<{ success: boolean }>) | null>(null);
+
+  /** Projekt ID a queue-hoz (ha van, queue-t használ) */
+  projectId = input<number | null>(null);
 
   /** Rich text editor */
   editor!: Editor;
@@ -143,34 +148,49 @@ export class DesignStepComponent implements OnInit {
   }
 
   /**
-   * Háttérkép feltöltése (ps-file-upload-ból)
+   * Háttérkép feltöltése — queue-ba kerül ha van projectId
    */
   onBackgroundFileChange(files: File[]): void {
     const file = files[0];
     if (!file) return;
 
-    const upload$ = this.uploadBackgroundFn()
-      ? this.uploadBackgroundFn()!(file)
-      : this.fileUploadService.uploadBackgroundImage(file);
+    const uploadFn = this.uploadBackgroundFn()
+      ? this.uploadBackgroundFn()!
+      : (f: File) => this.fileUploadService.uploadBackgroundImage(f);
 
-    upload$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
+    const pid = this.projectId();
+    if (pid) {
+      this.uploadQueue.enqueue({
+        file,
+        projectId: pid,
+        type: 'background',
+        uploadFn,
+        onSuccess: (response) => {
           if (response.success) {
-            this.dataChange.emit({
-              ...this.data(),
-              backgroundImageId: response.fileId
-            });
+            this.dataChange.emit({ ...this.data(), backgroundImageId: response.fileId });
             this.backgroundFileNameChange.emit(response.filename);
             this.toastService.success('Siker', 'Háttérkép sikeresen feltöltve!');
           }
-        }
+        },
       });
+    } else {
+      // Fallback: közvetlen feltöltés (nincs projectId)
+      uploadFn(file)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.dataChange.emit({ ...this.data(), backgroundImageId: response.fileId });
+              this.backgroundFileNameChange.emit(response.filename);
+              this.toastService.success('Siker', 'Háttérkép sikeresen feltöltve!');
+            }
+          }
+        });
+    }
   }
 
   /**
-   * Csatolmány feltöltése (ps-file-upload-ból)
+   * Csatolmány feltöltése — queue-ba kerül ha van projectId
    */
   onAttachmentFileChange(files: File[]): void {
     if (!files.length) return;
@@ -186,15 +206,20 @@ export class DesignStepComponent implements OnInit {
       this.toastService.warning('Figyelem', `Csak ${remaining} csatolmány fér még, ${files.length - filesToUpload.length} fájl kihagyva.`);
     }
 
-    for (const file of filesToUpload) {
-      const upload$ = this.uploadAttachmentFn()
-        ? this.uploadAttachmentFn()!(file)
-        : this.fileUploadService.uploadAttachment(file);
+    const uploadFn = this.uploadAttachmentFn()
+      ? this.uploadAttachmentFn()!
+      : (f: File) => this.fileUploadService.uploadAttachment(f);
 
-      upload$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (response) => {
+    const pid = this.projectId();
+
+    for (const file of filesToUpload) {
+      if (pid) {
+        this.uploadQueue.enqueue({
+          file,
+          projectId: pid,
+          type: 'attachment',
+          uploadFn,
+          onSuccess: (response) => {
             if (response.success) {
               this.dataChange.emit({
                 ...this.data(),
@@ -206,8 +231,27 @@ export class DesignStepComponent implements OnInit {
               ]);
               this.toastService.success('Siker', 'Csatolmány sikeresen feltöltve!');
             }
-          }
+          },
         });
+      } else {
+        uploadFn(file)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (response) => {
+              if (response.success) {
+                this.dataChange.emit({
+                  ...this.data(),
+                  attachmentIds: [...this.data().attachmentIds, response.fileId]
+                });
+                this.attachmentFileNamesChange.emit([
+                  ...this.attachmentFileNames(),
+                  response.filename
+                ]);
+                this.toastService.success('Siker', 'Csatolmány sikeresen feltöltve!');
+              }
+            }
+          });
+      }
     }
   }
 

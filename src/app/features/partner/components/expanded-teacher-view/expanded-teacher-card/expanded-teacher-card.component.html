@@ -13,7 +13,11 @@
   (drop)="onDropPhoto($event)"
 >
   <div class="teacher-card__photo">
-    @if (teacher().hasPhoto && teacher().photoThumbUrl) {
+    @if (isAssigning()) {
+      <div class="teacher-card__assigning">
+        <div class="teacher-card__spinner"></div>
+      </div>
+    } @else if (teacher().hasPhoto && teacher().photoThumbUrl) {
       <img
         [src]="teacher().photoThumbUrl"
         [alt]="teacher().name"

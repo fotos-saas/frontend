@@ -160,15 +160,34 @@
           </div>
         }
 
+        <!-- Queue elemek (feltöltés alatt / várakozó) -->
+        @if (queueItems().length > 0) {
+          <div class="file-list file-list--queue">
+            @for (item of queueItems(); track item.id) {
+              <div class="file-item file-item--queue" [class.file-item--uploading]="item.status === 'uploading'" [class.file-item--pending]="item.status === 'pending'">
+                @if (item.status === 'uploading') {
+                  <div class="spinner spinner--small spin file-item__icon"></div>
+                } @else {
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="14" class="file-item__icon file-item__icon--queue" />
+                }
+                <span class="file-item__name">{{ item.file.name }}</span>
+                <span class="file-item__status">
+                  @if (item.status === 'uploading') {
+                    Feltöltés...
+                  } @else if (item.retries > 0) {
+                    Várakozás ({{ item.retries }}. próba)...
+                  } @else {
+                    Sorban áll
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+
         <!-- Új fájl feltöltés -->
         @if (canAddMoreFiles()) {
           <div class="file-upload-area">
-            @if (uploading()) {
-              <div class="file-upload-area__uploading">
-                <div class="spinner spinner--small spin"></div>
-                <span>Feltöltés...</span>
-              </div>
-            }
             <ps-file-upload
               [ngModel]="null"
               (ngModelChange)="onNewFilesSelected($event)"

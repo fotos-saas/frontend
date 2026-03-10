@@ -108,10 +108,16 @@ export class ExpandedTeacherViewComponent implements OnInit {
     return src ? `Bővített nézet — ${src.schoolName} ${src.className}` : 'Bővített nézet';
   });
 
-  /** Chip rövidítés: ha azonos az iskola, csak osztálynév; egyébként "Iskola...Osztály" */
+  /** Csak osztálynév ha MINDEN projekt ugyanabból az iskolából van; egyébként "Iskola...Osztály" */
+  private readonly allSameSchool = computed(() => {
+    const projs = this.projects();
+    if (projs.length <= 1) return true;
+    const first = projs[0]?.schoolName;
+    return projs.every(p => p.schoolName === first);
+  });
+
   shortenChip(project: ExpandedProjectInfo): string {
-    const src = this.sourceProject();
-    if (src && project.projectId !== src.projectId && project.schoolName === src.schoolName) {
+    if (this.allSameSchool() && !project.isSource) {
       return project.className;
     }
     const words = project.schoolName.split(' ');
@@ -143,9 +149,11 @@ export class ExpandedTeacherViewComponent implements OnInit {
     }
   }
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    if (this.showDropdown) {
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Csak akkor zárjuk be, ha a dropdown-on KÍVÜLRE kattintottak
+    const target = event.target as HTMLElement;
+    if (this.showDropdown && !target.closest('.expanded-view__add-school')) {
       this.showDropdown = false;
       this.dropdownSearch.set('');
     }
@@ -161,6 +169,9 @@ export class ExpandedTeacherViewComponent implements OnInit {
 
   addProject(project: ExpandedProjectInfo): void {
     this.dataService.addProject(project.projectId);
+  }
+
+  closeDropdown(): void {
     this.showDropdown = false;
     this.dropdownSearch.set('');
   }

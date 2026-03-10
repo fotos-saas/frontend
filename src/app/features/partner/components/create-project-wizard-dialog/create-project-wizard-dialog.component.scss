@@ -230,6 +230,12 @@
   flex-direction: column;
   gap: 4px;
   margin-bottom: 12px;
+
+  &--queue {
+    margin-bottom: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed get-color('gray', 200);
+  }
 }
 
 .file-item {
@@ -246,9 +252,26 @@
     opacity: 0.5;
   }
 
+  // Queue elemek — vizuálisan elkülönítve
+  &--uploading {
+    border-color: get-color('primary', 300);
+    background: rgba(124, 58, 237, 0.04);
+    border-style: solid;
+  }
+
+  &--pending {
+    border-color: get-color('gray', 300);
+    background: get-color('gray', 50);
+    border-style: dashed;
+  }
+
   &__icon {
     flex-shrink: 0;
     color: get-color('gray', 400);
+
+    &--queue {
+      color: get-color('primary', 400);
+    }
   }
 
   &__name {
@@ -259,6 +282,28 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    .file-item--pending & {
+      color: get-color('gray', 500);
+    }
+  }
+
+  &__status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+
+    .file-item--uploading & {
+      color: get-color('primary', 700);
+      background: rgba(124, 58, 237, 0.1);
+    }
+
+    .file-item--pending & {
+      color: get-color('gray', 500);
+      background: get-color('gray', 100);
+    }
   }
 
   &__delete {

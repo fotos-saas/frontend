@@ -29,6 +29,7 @@ import { ToastService } from '../../../services/toast.service';
 import { AppShellService } from './app-shell.service';
 import { HelpFabComponent } from '../../../../features/help/components/help-fab/help-fab.component';
 import { ChatbotPanelComponent } from '../../../../features/help/components/chatbot-panel/chatbot-panel.component';
+import { UploadQueueToastComponent } from '../../../../shared/components/upload-queue-toast/upload-queue-toast.component';
 
 
 /**
@@ -54,6 +55,7 @@ import { ChatbotPanelComponent } from '../../../../features/help/components/chat
     PasswordSetDialogComponent,
     HelpFabComponent,
     ChatbotPanelComponent,
+    UploadQueueToastComponent,
   ],
   providers: [AppShellService],
   templateUrl: './app-shell.component.html',

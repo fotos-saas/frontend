@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, viewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LucideAngularModule } from 'lucide-angular';
@@ -110,50 +110,5 @@ export class ExpandedClassColumnComponent {
 
   onRemoveOverride(personId: number): void {
     this.dataService.removeOverride(personId);
-  }
-
-  /** Wheel görgetéssel léptetett tanár indexe ebben az oszlopban */
-  private wheelIndex = signal(-1);
-
-  onWheel(event: WheelEvent): void {
-    const teachers = this.filteredTeachers();
-    if (teachers.length === 0) return;
-
-    event.preventDefault();
-
-    // Ha a hover épp máshonnan jön, szinkronizáljuk a wheel index-et
-    const currentHovered = this.hoveredPersonId();
-    let idx = this.wheelIndex();
-    if (currentHovered && idx === -1) {
-      const hoveredIdx = teachers.findIndex(t => t.personId === currentHovered);
-      if (hoveredIdx !== -1) idx = hoveredIdx;
-    }
-
-    let nextIndex: number;
-    if (event.deltaY > 0) {
-      nextIndex = idx < teachers.length - 1 ? idx + 1 : 0;
-    } else {
-      nextIndex = idx > 0 ? idx - 1 : teachers.length - 1;
-    }
-
-    this.wheelIndex.set(nextIndex);
-    const nextTeacher = teachers[nextIndex];
-
-    // Hover kiemelés (zöld highlight az összes oszlopban), NEM popup
-    this.dataService.onTeacherHover(nextTeacher.normalizedName, nextTeacher.personId);
-
-    // Scroll into view
-    const listContainer = this.listEl()?.nativeElement;
-    if (listContainer) {
-      const card = listContainer.querySelector(`[data-person-id="${nextTeacher.personId}"]`) as HTMLElement;
-      if (card) {
-        const classesContainer = listContainer.closest('.expanded-view__classes') as HTMLElement;
-        const savedScrollLeft = classesContainer?.scrollLeft ?? 0;
-        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        if (classesContainer) {
-          classesContainer.scrollLeft = savedScrollLeft;
-        }
-      }
-    }
   }
 }

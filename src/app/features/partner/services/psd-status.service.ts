@@ -41,6 +41,8 @@ export class PsdStatusService {
   readonly statusMap = signal<Map<number, PsdStatus>>(new Map());
   /** Projekt ID → módosult személy ID-k halmaza */
   readonly changedPersonIdsMap = signal<Map<number, Set<number>>>(new Map());
+  /** Projekt ID → placed-photos.json tartalom (person→media mapping) */
+  private placedPhotosCache = new Map<number, Record<string, number>>();
   readonly loading = signal(false);
 
   getStatus(projectId: number): PsdStatus | null {
@@ -50,6 +52,43 @@ export class PsdStatusService {
   /** Módosult személy ID-k lekérése egy projekthez */
   getChangedPersonIds(projectId: number): Set<number> {
     return this.changedPersonIdsMap().get(projectId) ?? new Set();
+  }
+
+  /**
+   * Egyetlen projekt fotóváltozásainak ellenőrzése (on-demand).
+   * Ha már lefutott korábban és van eredmény, nem fut újra.
+   * Ha van placed-photos adat de még nem volt ellenőrizve, lefuttatja.
+   */
+  async ensurePhotoChangesChecked(projectId: number): Promise<void> {
+    // Már van eredmény — nem kell újra futtatni
+    if (this.changedPersonIdsMap().has(projectId)) return;
+
+    const placedPhotos = this.placedPhotosCache.get(projectId);
+    if (!placedPhotos || Object.keys(placedPhotos).length === 0) return;
+
+    try {
+      const result = await firstValueFrom(
+        this.projectService.checkPhotoChanges(projectId, placedPhotos),
+      );
+      const changedIds = [
+        ...result.changed.map(c => c.personId),
+        ...(result.newPhotos ?? []).map(c => c.personId),
+      ];
+      if (changedIds.length > 0) {
+        const personIdsMap = new Map(this.changedPersonIdsMap());
+        personIdsMap.set(projectId, new Set(changedIds));
+        this.changedPersonIdsMap.set(personIdsMap);
+
+        const statusMap = new Map(this.statusMap());
+        const status = statusMap.get(projectId);
+        if (status) {
+          statusMap.set(projectId, { ...status, updatedPhotosCount: changedIds.length });
+          this.statusMap.set(statusMap);
+        }
+      }
+    } catch (err) {
+      this.logger.error(`[PSD] On-demand fotó-változás hiba #${projectId}:`, err);
+    }
   }
 
   /** Badge nullázása egy projekt frissítése után */
@@ -110,6 +149,7 @@ export class PsdStatusService {
       }
 
       this.statusMap.set(newMap);
+      this.placedPhotosCache = placedMaps;
       this.loading.set(false);
 
       // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)

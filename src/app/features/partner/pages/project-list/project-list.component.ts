@@ -127,6 +127,17 @@ export class PartnerProjectListComponent implements OnInit {
   totalPages = signal(1);
   totalProjects = signal(0);
   projectLimits = signal<ProjectLimits | null>(null);
+  psdFilterActive = signal(false);
+
+  /** Projektek szűrve: ha PSD szűrő aktív, csak a módosított fotókkal rendelkezők */
+  readonly displayedProjects = computed(() => {
+    const all = this.projects();
+    if (!this.psdFilterActive()) return all;
+    return all.filter(p => {
+      const status = this.psdStatusService.getStatus(p.id);
+      return status != null && status.updatedPhotosCount > 0;
+    });
+  });
 
   // Státusz opciók
   readonly statusOptions = [
@@ -205,6 +216,10 @@ export class PartnerProjectListComponent implements OnInit {
 
   toggleActivitySort(): void {
     this.filterState.setSortBy(this.filterState.sortBy() === 'last_activity_at' ? 'created_at' : 'last_activity_at');
+  }
+
+  togglePsdFilter(): void {
+    this.psdFilterActive.update(v => !v);
   }
 
   ngOnInit(): void {

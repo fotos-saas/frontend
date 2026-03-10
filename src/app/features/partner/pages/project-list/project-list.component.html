@@ -88,6 +88,19 @@
       <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
       Módosítva
     </button>
+    @if (isElectron) {
+      <button
+        filterBarExtra
+        type="button"
+        class="sort-toggle-btn"
+        [class.sort-toggle-btn--active]="psdFilterActive()"
+        (click)="togglePsdFilter()"
+        matTooltip="Csak módosított fotókkal rendelkező projektek"
+      >
+        <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        Módosult PSD
+      </button>
+    }
   </app-smart-filter-bar>
 
   <!-- Lista -->
@@ -97,7 +110,7 @@
         <div class="skeleton-card skeleton-shimmer"></div>
       }
     </div>
-  } @else if (projects().length === 0) {
+  } @else if (displayedProjects().length === 0) {
     <div class="empty-state">
       <div class="empty-icon">
         <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="48" />
@@ -125,7 +138,7 @@
 
     <!-- Projekt sorok -->
     <div class="project-grid">
-      @for (project of projects(); track project.id; let i = $index) {
+      @for (project of displayedProjects(); track project.id; let i = $index) {
         <app-partner-project-card
           [project]="project"
           [selected]="actions.selectedProjectIds().has(project.id)"

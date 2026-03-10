@@ -44,6 +44,8 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
   title = '';
   description = '';
   assignedToUserId: string | number = '';
+  selectedType: 'task' | 'question' | 'note' = 'task';
+  answerText = '';
 
   // Csatolmányok
   newAttachments = signal<File[]>([]);
@@ -62,6 +64,7 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
       this.description = task.description ?? '';
       this.assignedToUserId = task.assigned_to?.id ?? '';
       this.existingAttachments.set(task.attachments ?? []);
+      this.selectedType = task.type ?? 'task';
     }
 
     this.loadAssignees();
@@ -156,10 +159,11 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
     if (!this.title.trim()) return;
 
     this.saving.set(true);
-    const data: { title: string; description: string | null; assigned_to_user_id: number | null } = {
+    const data: { title: string; description: string | null; assigned_to_user_id: number | null; type: string } = {
       title: this.title.trim(),
       description: this.description.trim() || null,
-      assigned_to_user_id: this.assignedToUserId ? Number(this.assignedToUserId) : null,
+      assigned_to_user_id: this.selectedType === 'note' ? null : (this.assignedToUserId ? Number(this.assignedToUserId) : null),
+      type: this.selectedType,
     };
     const editing = this.editTask();
     const files = this.newAttachments();
@@ -171,7 +175,8 @@ export class ProjectTaskDialogComponent implements OnInit, OnDestroy {
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.saving.set(false);
-        this.toast.success('Siker', editing ? 'Feladat frissítve.' : 'Feladat létrehozva.');
+        const typeLabel = this.selectedType === 'question' ? 'Kérdés' : this.selectedType === 'note' ? 'Jegyzet' : 'Feladat';
+        this.toast.success('Siker', editing ? `${typeLabel} frissítve.` : `${typeLabel} létrehozva.`);
         this.saved.emit(res.data);
       },
       error: () => {

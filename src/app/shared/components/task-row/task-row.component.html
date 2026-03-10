@@ -1,11 +1,19 @@
-<div class="task-row" [class.task-row--completed]="task().is_completed">
+<div
+  class="task-row"
+  [class.task-row--completed]="task().is_completed"
+  [class.task-row--question]="(task().type ?? 'task') === 'question'"
+  [class.task-row--note]="(task().type ?? 'task') === 'note'"
+>
+  <!-- Checkbox / Típus ikon -->
   <button
     class="task-row__checkbox"
     (click)="toggleComplete.emit()"
-    [attr.aria-label]="task().is_completed ? 'Visszavonás' : 'Kész jelölés'"
+    [attr.aria-label]="toggleLabel()"
   >
     @if (task().is_completed) {
       <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="18" class="task-row__check--done" />
+    } @else if (typeIcon()) {
+      <lucide-icon [name]="typeIcon()!" [size]="18" class="task-row__type-icon" />
     } @else {
       <lucide-icon [name]="ICONS.CIRCLE" [size]="18" class="task-row__check" />
     }
@@ -13,6 +21,13 @@
 
   <div class="task-row__content">
     <span class="task-row__title">{{ task().title }}</span>
+
+    <!-- Típus badge (kérdés/jegyzet) -->
+    @if ((task().type ?? 'task') === 'question') {
+      <span class="task-row__type-badge task-row__type-badge--question">Kérdés</span>
+    } @else if ((task().type ?? 'task') === 'note') {
+      <span class="task-row__type-badge task-row__type-badge--note">Jegyzet</span>
+    }
 
     <!-- Kiadta (rám bízott szekcióban) -->
     @if (section() === 'assigned_to_me' && task().created_by) {
@@ -40,6 +55,20 @@
       <span class="task-row__desc" [innerHTML]="task().description | safeHtml"></span>
     }
 
+    <!-- Válasz (kérdésnél) -->
+    @if ((task().type ?? 'task') === 'question' && task().answer) {
+      <div class="task-row__answer">
+        <div class="task-row__answer-header">
+          <lucide-icon [name]="ICONS.MESSAGE_CIRCLE_QUESTION" [size]="12" />
+          <span>Válasz</span>
+          @if (task().answered_by) {
+            <span class="task-row__answer-by">— {{ task().answered_by!.name }}</span>
+          }
+        </div>
+        <span class="task-row__answer-text" [innerHTML]="task().answer | safeHtml"></span>
+      </div>
+    }
+
     <!-- Csatolmányok -->
     @if (task().attachments && task().attachments.length > 0) {
       <div class="task-row__attachments">
@@ -60,8 +89,20 @@
     }
   </div>
 
-  <!-- Átnéztem gomb (feladat kiadója számára, kész feladatnál) -->
-  @if ((section() === 'i_gave_others' || section() === 'my_own') && task().is_completed && task().assigned_to) {
+  <!-- Válasz gomb (kérdésnél, ha nincs válasz) -->
+  @if ((task().type ?? 'task') === 'question' && !task().answer && !task().is_completed) {
+    <button
+      class="task-row__answer-btn"
+      (click)="answerClicked.emit()"
+      aria-label="Válaszolás"
+    >
+      <lucide-icon [name]="ICONS.MESSAGE_CIRCLE_QUESTION" [size]="14" />
+      <span>Válaszolás</span>
+    </button>
+  }
+
+  <!-- Átnéztem gomb (feladat kiadója számára, kész feladatnál) — csak task típusnál -->
+  @if ((task().type ?? 'task') === 'task' && (section() === 'i_gave_others' || section() === 'my_own') && task().is_completed && task().assigned_to) {
     <button
       class="task-row__review-btn"
       [class.task-row__review-btn--active]="task().is_reviewed"

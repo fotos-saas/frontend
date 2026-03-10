@@ -19,7 +19,7 @@ export class PartnerTaskService {
   /** Feladat létrehozása (FormData — fájlok miatt) */
   createTask(
     projectId: number,
-    data: { title: string; description?: string | null; assigned_to_user_id?: number | null },
+    data: { title: string; description?: string | null; assigned_to_user_id?: number | null; type?: string },
     attachments: File[] = []
   ): Observable<{ data: ProjectTask }> {
     const formData = this.buildFormData(data, attachments);
@@ -30,7 +30,7 @@ export class PartnerTaskService {
   updateTask(
     projectId: number,
     taskId: number,
-    data: { title: string; description?: string | null; assigned_to_user_id?: number | null },
+    data: { title: string; description?: string | null; assigned_to_user_id?: number | null; type?: string },
     attachments: File[] = [],
     removeAttachmentIds: number[] = []
   ): Observable<{ data: ProjectTask }> {
@@ -75,8 +75,16 @@ export class PartnerTaskService {
     return this.http.get<{ data: TaskAssignee[] }>(`${this.baseUrl}/task-assignees`);
   }
 
+  /** Kérdés megválaszolása */
+  answerQuestion(projectId: number, taskId: number, answer: string): Observable<{ data: ProjectTask }> {
+    return this.http.patch<{ data: ProjectTask }>(
+      `${this.baseUrl}/projects/${projectId}/tasks/${taskId}/answer`,
+      { answer }
+    );
+  }
+
   private buildFormData(
-    data: { title: string; description?: string | null; assigned_to_user_id?: number | null },
+    data: { title: string; description?: string | null; assigned_to_user_id?: number | null; type?: string },
     attachments: File[],
     removeAttachmentIds: number[] = []
   ): FormData {
@@ -87,6 +95,9 @@ export class PartnerTaskService {
     }
     if (data.assigned_to_user_id !== undefined && data.assigned_to_user_id !== null) {
       fd.append('assigned_to_user_id', String(data.assigned_to_user_id));
+    }
+    if (data.type) {
+      fd.append('type', data.type);
     }
     for (const file of attachments) {
       fd.append('attachments[]', file);

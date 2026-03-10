@@ -252,6 +252,9 @@ import {
   Workflow,
   // Crop kalibráció
   SlidersHorizontal,
+  // Feladat típusok
+  MessageCircleQuestion,
+  StickyNote,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -500,4 +503,7 @@ export const LUCIDE_ICONS_MAP = {
   Workflow,
   // Crop kalibráció
   SlidersHorizontal,
+  // Feladat típusok
+  MessageCircleQuestion,
+  StickyNote,
 };

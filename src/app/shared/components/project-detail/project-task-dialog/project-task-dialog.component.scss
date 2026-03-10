@@ -100,6 +100,63 @@
   }
 }
 
+.type-selector {
+  margin-bottom: 16px;
+
+  &__buttons {
+    display: flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+.type-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.15s ease;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+
+  &:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &--active {
+    font-weight: 600;
+  }
+
+  &--active.type-btn--task {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  &--active.type-btn--question {
+    background: #fff7ed;
+    color: #c2410c;
+  }
+
+  &--active.type-btn--note {
+    background: #faf5ff;
+    color: #7c3aed;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; }
 }

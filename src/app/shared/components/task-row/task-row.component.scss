@@ -53,6 +53,19 @@
     color: #22c55e;
   }
 
+  &__type-icon {
+    color: #cbd5e1;
+    transition: color 0.15s ease;
+  }
+
+  &--question &__type-icon {
+    color: #f59e0b;
+  }
+
+  &--note &__type-icon {
+    color: #8b5cf6;
+  }
+
   &__content {
     flex: 1;
     min-width: 0;
@@ -123,6 +136,100 @@
       em, i {
         font-style: italic;
       }
+    }
+  }
+
+  // Típus badge
+  &__type-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+
+    &--question {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    &--note {
+      background: #faf5ff;
+      color: #7c3aed;
+    }
+  }
+
+  // Válasz szekció (kérdésnél)
+  &__answer {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: #f0fdf4;
+    border-radius: 6px;
+    border-left: 3px solid #86efac;
+  }
+
+  &__answer-header {
+    display: flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #16a34a;
+    margin-bottom: 4px;
+
+    lucide-icon {
+      margin-right: 4px;
+    }
+  }
+
+  &__answer-by {
+    font-weight: 400;
+    color: #64748b;
+    margin-left: 4px;
+  }
+
+  &__answer-text {
+    display: block;
+    font-size: 0.75rem;
+    color: #475569;
+    word-break: break-word;
+    white-space: pre-line;
+
+    ::ng-deep {
+      p {
+        margin: 0 0 2px;
+        min-height: 1.4em;
+        &:last-child { margin-bottom: 0; }
+      }
+    }
+  }
+
+  // Válaszolás gomb
+  &__answer-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 4px 10px;
+    border: 1px solid #fcd34d;
+    background: #fffbeb;
+    color: #b45309;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+
+    lucide-icon {
+      margin-right: 4px;
+    }
+
+    &:hover {
+      background: #fef3c7;
+      border-color: #f59e0b;
     }
   }
 

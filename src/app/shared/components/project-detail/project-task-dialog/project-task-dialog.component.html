@@ -1,5 +1,5 @@
 <app-dialog-wrapper
-  [title]="editTask() ? 'Feladat szerkesztése' : 'Új feladat'"
+  [title]="editTask() ? (selectedType === 'task' ? 'Feladat szerkesztése' : selectedType === 'question' ? 'Kérdés szerkesztése' : 'Jegyzet szerkesztése') : (selectedType === 'task' ? 'Új feladat' : selectedType === 'question' ? 'Új kérdés' : 'Új jegyzet')"
   [icon]="ICONS.LIST_TODO"
   headerStyle="flat"
   theme="blue"
@@ -9,6 +9,43 @@
   (submitEvent)="save()"
   (backdropClickEvent)="close.emit()">
   <div dialogBody>
+    <!-- Típusválasztó -->
+    <div class="type-selector">
+      <label class="ps-field__label">Típus</label>
+      <div class="type-selector__buttons">
+        <button
+          type="button"
+          class="type-btn"
+          [class.type-btn--active]="selectedType === 'task'"
+          [class.type-btn--task]="selectedType === 'task'"
+          (click)="selectedType = 'task'"
+        >
+          <lucide-icon [name]="ICONS.LIST_TODO" [size]="16" />
+          Feladat
+        </button>
+        <button
+          type="button"
+          class="type-btn"
+          [class.type-btn--active]="selectedType === 'question'"
+          [class.type-btn--question]="selectedType === 'question'"
+          (click)="selectedType = 'question'"
+        >
+          <lucide-icon [name]="ICONS.MESSAGE_CIRCLE_QUESTION" [size]="16" />
+          Kérdés
+        </button>
+        <button
+          type="button"
+          class="type-btn"
+          [class.type-btn--active]="selectedType === 'note'"
+          [class.type-btn--note]="selectedType === 'note'"
+          (click)="selectedType = 'note'"
+        >
+          <lucide-icon [name]="ICONS.STICKY_NOTE" [size]="16" />
+          Jegyzet
+        </button>
+      </div>
+    </div>
+
     <ps-input
       label="Cím"
       placeholder="Feladat címe"
@@ -26,13 +63,15 @@
       [(ngModel)]="description"
     />
 
-    <ps-select
-      label="Kiosztás"
-      emptyLabel="Saját feladat"
-      size="full"
-      [options]="assigneeOptions()"
-      [(ngModel)]="assignedToUserId"
-    />
+    @if (selectedType !== 'note') {
+      <ps-select
+        label="Kiosztás"
+        emptyLabel="Saját feladat"
+        size="full"
+        [options]="assigneeOptions()"
+        [(ngModel)]="assignedToUserId"
+      />
+    }
 
     <!-- Meglévő csatolmányok (szerkesztésnél) -->
     @if (existingAttachments().length > 0) {

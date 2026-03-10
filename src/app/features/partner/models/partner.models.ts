@@ -785,6 +785,7 @@ export interface ProjectTask {
   project_id: number;
   title: string;
   description: string | null;
+  type: 'task' | 'question' | 'note';
   is_completed: boolean;
   completed_at: string | null;
   is_reviewed: boolean;
@@ -794,6 +795,9 @@ export interface ProjectTask {
   created_by: TaskUser | null;
   assigned_to: TaskUser | null;
   attachments: TaskAttachment[];
+  answer: string | null;
+  answered_at: string | null;
+  answered_by: TaskUser | null;
 }
 
 /**

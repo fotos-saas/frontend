@@ -18,6 +18,8 @@ import { PartnerTaskService } from '../../../../features/partner/services/partne
 import { ToastService } from '../../../../core/services/toast.service';
 import type { ProjectTask } from '../../../../features/partner/models/partner.models';
 
+type TaskTypeFilter = 'all' | 'task' | 'question' | 'note';
+
 @Component({
   selector: 'app-project-tasks-tab',
   standalone: true,
@@ -33,6 +35,8 @@ export class ProjectTasksTabComponent implements OnInit {
   dialogRequested = output<ProjectTask | null>();
   /** Törlés kérés */
   deleteRequested = output<ProjectTask>();
+  /** Válaszolás kérés (kérdésnél) */
+  answerRequested = output<ProjectTask>();
 
   private readonly taskService = inject(PartnerTaskService);
   private readonly toast = inject(ToastService);
@@ -43,12 +47,29 @@ export class ProjectTasksTabComponent implements OnInit {
   myTasks = signal<ProjectTask[]>([]);
   assignedToMe = signal<ProjectTask[]>([]);
   loading = signal(true);
+  activeFilter = signal<TaskTypeFilter>('all');
+
+  /** Szűrt saját feladatok */
+  filteredMyTasks = computed(() => this.filterByType(this.myTasks()));
+  /** Szűrt rám bízott feladatok */
+  filteredAssignedToMe = computed(() => this.filterByType(this.assignedToMe()));
 
   completedCount = computed(() => {
-    const all = [...this.myTasks(), ...this.assignedToMe()];
+    const all = [...this.filteredMyTasks(), ...this.filteredAssignedToMe()];
     return all.filter(t => t.is_completed).length;
   });
-  totalCount = computed(() => this.myTasks().length + this.assignedToMe().length);
+  totalCount = computed(() => this.filteredMyTasks().length + this.filteredAssignedToMe().length);
+
+  /** Típus szerinti darabszámok (badge-ekhez) */
+  typeCounts = computed(() => {
+    const all = [...this.myTasks(), ...this.assignedToMe()];
+    return {
+      all: all.length,
+      task: all.filter(t => (t.type ?? 'task') === 'task').length,
+      question: all.filter(t => (t.type ?? 'task') === 'question').length,
+      note: all.filter(t => (t.type ?? 'task') === 'note').length,
+    };
+  });
 
   ngOnInit(): void {
     this.loadTasks();
@@ -111,7 +132,6 @@ export class ProjectTasksTabComponent implements OnInit {
 
   /** Wrapper hívja a dialógus saved után */
   onTaskSaved(task: ProjectTask, wasEdit: boolean): void {
-    // Újratöltjük a szekciós listát, mert kiosztás változhatott
     this.loadTasks();
   }
 
@@ -127,5 +147,11 @@ export class ProjectTasksTabComponent implements OnInit {
         },
         error: () => this.toast.error('Hiba', 'Nem sikerült törölni a feladatot.'),
       });
+  }
+
+  private filterByType(tasks: ProjectTask[]): ProjectTask[] {
+    const filter = this.activeFilter();
+    if (filter === 'all') return tasks;
+    return tasks.filter(t => (t.type ?? 'task') === filter);
   }
 }

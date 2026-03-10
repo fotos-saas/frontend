@@ -450,6 +450,10 @@ export const ICONS = {
 
   // Workflow
   WORKFLOW: 'workflow',
+
+  // Feladat típusok
+  MESSAGE_CIRCLE_QUESTION: 'message-circle-question',
+  STICKY_NOTE: 'sticky-note',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

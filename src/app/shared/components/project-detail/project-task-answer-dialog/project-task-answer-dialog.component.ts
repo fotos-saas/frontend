@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICONS } from '../../../constants/icons.constants';
+import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
 import { DialogWrapperComponent } from '../../dialog-wrapper/dialog-wrapper.component';
 import { PsEditorComponent } from '../../form/ps-editor/ps-editor.component';
 import { PartnerTaskService } from '../../../../features/partner/services/partner-task.service';
@@ -12,7 +13,7 @@ import type { ProjectTask } from '../../../../features/partner/models/partner.mo
 @Component({
   selector: 'app-project-task-answer-dialog',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, DialogWrapperComponent, PsEditorComponent],
+  imports: [FormsModule, LucideAngularModule, SafeHtmlPipe, DialogWrapperComponent, PsEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-task-answer-dialog.component.html',
   styleUrls: ['./project-task-answer-dialog.component.scss'],

@@ -15,7 +15,7 @@
       <div class="original-question__content">
         <span class="original-question__title">{{ task().title }}</span>
         @if (task().description) {
-          <span class="original-question__desc">{{ task().description }}</span>
+          <span class="original-question__desc" [innerHTML]="task().description | safeHtml"></span>
         }
         @if (task().created_by) {
           <span class="original-question__author">Feltette: {{ task().created_by!.name }}</span>

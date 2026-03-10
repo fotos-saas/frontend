@@ -16,7 +16,7 @@
     </div>
   </div>
 
-  <div class="class-column__list" #listRef>
+  <div class="class-column__list" #listRef (wheel)="onWheel($event)">
     @for (teacher of filteredTeachers(); track teacher.personId) {
       <app-expanded-teacher-card
         [attr.data-person-id]="teacher.personId"

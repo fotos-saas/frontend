@@ -111,4 +111,42 @@ export class ExpandedClassColumnComponent {
   onRemoveOverride(personId: number): void {
     this.dataService.removeOverride(personId);
   }
+
+  onWheel(event: WheelEvent): void {
+    const teachers = this.filteredTeachers();
+    if (teachers.length === 0) return;
+
+    event.preventDefault();
+
+    const currentSelected = this.dataService.selectedPersonId();
+    const currentIndex = currentSelected
+      ? teachers.findIndex(t => t.personId === currentSelected)
+      : -1;
+
+    let nextIndex: number;
+    if (event.deltaY > 0) {
+      // Lefelé görgetés → következő
+      nextIndex = currentIndex < teachers.length - 1 ? currentIndex + 1 : 0;
+    } else {
+      // Felfelé görgetés → előző
+      nextIndex = currentIndex > 0 ? currentIndex - 1 : teachers.length - 1;
+    }
+
+    const nextTeacher = teachers[nextIndex];
+    this.dataService.onTeacherSelect(nextTeacher.personId);
+
+    // Scroll into view
+    const listContainer = this.listEl()?.nativeElement;
+    if (listContainer) {
+      const card = listContainer.querySelector(`[data-person-id="${nextTeacher.personId}"]`) as HTMLElement;
+      if (card) {
+        const classesContainer = listContainer.closest('.expanded-view__classes') as HTMLElement;
+        const savedScrollLeft = classesContainer?.scrollLeft ?? 0;
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (classesContainer) {
+          classesContainer.scrollLeft = savedScrollLeft;
+        }
+      }
+    }
+  }
 }

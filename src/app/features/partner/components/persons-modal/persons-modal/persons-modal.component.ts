@@ -174,8 +174,8 @@ export class PersonsModalComponent implements OnInit {
       this.partnerService.getCropSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (res) => { if (res.success) this.cropEnabled.set(res.data.enabled); },
       });
-      // PSD fotóváltozás ellenőrzése ha még nem történt meg
-      this.psdStatusService.ensurePhotoChangesChecked(this.projectId());
+      // PSD fotóváltozás friss lekérése
+      this.psdStatusService.refreshPhotoChanges(this.projectId());
     }
   }
 

@@ -43,8 +43,8 @@ export class PsdStatusService {
   readonly changedPersonIdsMap = signal<Map<number, Set<number>>>(new Map());
   /** Projekt ID → placed-photos.json tartalom (person→media mapping) */
   private placedPhotosCache = new Map<number, Record<string, number>>();
-  /** A háttérben futó fotóváltozás-ellenőrzés promise-ja */
-  private backgroundCheckPromise: Promise<void> | null = null;
+  /** A teljes checkProjects folyamat promise-ja (PSD keresés + háttér API check) */
+  private checkProjectsPromise: Promise<void> | null = null;
   readonly loading = signal(false);
 
   getStatus(projectId: number): PsdStatus | null {
@@ -57,20 +57,16 @@ export class PsdStatusService {
   }
 
   /**
-   * Egyetlen projekt fotóváltozásainak ellenőrzése (on-demand).
-   * Ha a háttérfolyamat még fut, megvárja azt.
-   * Ha nincs háttérfolyamat de van cached placed-photos, lefuttatja.
+   * Egy projekt fotóváltozásainak friss lekérése.
+   * Ha nincs placed-photos cache, megvárja a checkProjects-et.
+   * MINDIG frissen kéri le a backendet (nem cache-el).
    */
-  async ensurePhotoChangesChecked(projectId: number): Promise<void> {
-    // Ha háttérfolyamat fut, megvárjuk — utána a changedPersonIdsMap friss lesz
-    if (this.backgroundCheckPromise) {
-      await this.backgroundCheckPromise;
+  async refreshPhotoChanges(projectId: number): Promise<void> {
+    // Ha nincs cache, megvárjuk a checkProjects-et
+    if (!this.placedPhotosCache.has(projectId) && this.checkProjectsPromise) {
+      await this.checkProjectsPromise;
     }
 
-    // Már van eredmény — nem kell mást csinálni
-    if (this.changedPersonIdsMap().has(projectId)) return;
-
-    // Próbáljuk a cache-ből
     const placedPhotos = this.placedPhotosCache.get(projectId);
     if (!placedPhotos || Object.keys(placedPhotos).length === 0) return;
 
@@ -86,7 +82,7 @@ export class PsdStatusService {
       personIdsMap.set(projectId, new Set(changedIds));
       this.changedPersonIdsMap.set(personIdsMap);
     } catch (err) {
-      this.logger.error(`[PSD] On-demand fotó-változás hiba #${projectId}:`, err);
+      this.logger.error(`[PSD] Fotó-változás lekérés hiba #${projectId}:`, err);
     }
   }
 
@@ -114,7 +110,12 @@ export class PsdStatusService {
     }
   }
 
-  async checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
+  checkProjects(projects: PartnerProjectListItem[]): Promise<void> {
+    this.checkProjectsPromise = this.doCheckProjects(projects);
+    return this.checkProjectsPromise;
+  }
+
+  private async doCheckProjects(projects: PartnerProjectListItem[]): Promise<void> {
     if (!this.electron.isElectron || projects.length === 0) return;
 
     if (!this.ps.workDir()) {
@@ -152,9 +153,7 @@ export class PsdStatusService {
       this.loading.set(false);
 
       // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)
-      this.backgroundCheckPromise = this.checkPhotoChangesInBackground(newMap, placedMaps).catch(err =>
-        this.logger.error('[PSD] Fotó-változás háttér hiba:', err),
-      );
+      await this.checkPhotoChangesInBackground(newMap, placedMaps);
     } catch (err) {
       this.logger.error('PSD státusz ellenőrzés hiba', err);
       this.loading.set(false);
@@ -209,8 +208,10 @@ export class PsdStatusService {
     if (placedMaps.size === 0) return;
 
     const projectIds = [...placedMaps.keys()];
+    const batchResults = new Map<number, Set<number>>();
+    let hasStatusChanges = false;
 
-    // 3-asával párhuzamosan
+    // 3-asával párhuzamosan — eredményeket gyűjtjük
     for (let i = 0; i < projectIds.length; i += 3) {
       const batch = projectIds.slice(i, i + 3);
       const results = await Promise.allSettled(
@@ -219,7 +220,6 @@ export class PsdStatusService {
           const result = await firstValueFrom(
             this.projectService.checkPhotoChanges(projectId, placedPhotos),
           );
-          const newCount = result.newPhotos?.length ?? 0;
           const changedIds = [
             ...result.changed.map(c => c.personId),
             ...(result.newPhotos ?? []).map(c => c.personId),
@@ -228,29 +228,31 @@ export class PsdStatusService {
         }),
       );
 
-      let batchHasChanges = false;
-      const personIdsMap = this.changedPersonIdsMap();
       for (const r of results) {
         if (r.status === 'rejected') {
           this.logger.error('[PSD] Fotó-változás API hiba:', r.reason);
         } else {
-          // Mindig beírjuk az eredményt (0 changed is), hogy ne fusson újra feleslegesen
-          personIdsMap.set(r.value.projectId, new Set(r.value.changedIds));
+          batchResults.set(r.value.projectId, new Set(r.value.changedIds));
           if (r.value.changedCount > 0) {
             const status = statusMap.get(r.value.projectId);
             if (status) {
               statusMap.set(r.value.projectId, { ...status, updatedPhotosCount: r.value.changedCount });
-              batchHasChanges = true;
+              hasStatusChanges = true;
             }
           }
         }
       }
+    }
 
-      // Batch-enként frissítjük a signal-okat
-      this.changedPersonIdsMap.set(new Map(personIdsMap));
-      if (batchHasChanges) {
-        this.statusMap.set(new Map(statusMap));
-      }
+    // Egyszer a végén merge-öljük a meglévő adattal (nem felülírjuk!)
+    const merged = new Map(this.changedPersonIdsMap());
+    for (const [projectId, personIds] of batchResults) {
+      merged.set(projectId, personIds);
+    }
+    this.changedPersonIdsMap.set(merged);
+
+    if (hasStatusChanges) {
+      this.statusMap.set(new Map(statusMap));
     }
   }
 }

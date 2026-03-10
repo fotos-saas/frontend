@@ -16,11 +16,13 @@ import { useFilterState } from '@shared/utils/use-filter-state';
 import {
   PartnerActivityService,
   ProjectActivitySummary,
+  ProjectActivityItem,
   ActivitySummaryFilters,
   ActivitySummaryMeta,
 } from '../../../../services/partner-activity.service';
 import { TeamService } from '../../../../services/team.service';
 import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
+import { relativeTime, getEventLabel, getEventClass, formatChanges } from '../../utils/activity-format.util';
 
 interface TimeGroup {
   label: string;
@@ -51,7 +53,11 @@ export class ActivitySummaryTabComponent implements OnInit {
   lastPage = signal(1);
   selectedIds = signal<Set<number>>(new Set());
   summaryMeta = signal<ActivitySummaryMeta | null>(null);
+  expandedProjectId = signal<number | null>(null);
+  expandedActivities = signal<ProjectActivityItem[]>([]);
+  expandedLoading = signal(false);
   private loadSub?: Subscription;
+  private expandSub?: Subscription;
 
   allSelected = computed(() => {
     const ids = this.selectedIds();
@@ -260,20 +266,37 @@ export class ActivitySummaryTabComponent implements OnInit {
     this.markReviewed([...this.selectedIds()]);
   }
 
-  relativeTime(iso: string | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffH = Math.floor(diffMs / 3600000);
-    const diffD = Math.floor(diffMs / 86400000);
+  toggleExpand(projectId: number, event: MouseEvent): void {
+    // Ne nyisson expandot ha linkre vagy checkbox-ra kattintottak
+    const target = event.target as HTMLElement;
+    if (target.closest('button, input, a, .project-link, .action-btn')) return;
 
-    if (diffMin < 1) return 'épp most';
-    if (diffMin < 60) return `${diffMin} perce`;
-    if (diffH < 24) return `${diffH} órája`;
-    if (diffD === 1) return 'tegnap';
-    if (diffD < 7) return `${diffD} napja`;
-    return d.toLocaleDateString('hu-HU', { month: '2-digit', day: '2-digit' });
+    if (this.expandedProjectId() === projectId) {
+      this.expandedProjectId.set(null);
+      this.expandedActivities.set([]);
+      return;
+    }
+
+    this.expandedProjectId.set(projectId);
+    this.expandedActivities.set([]);
+    this.expandedLoading.set(true);
+    this.expandSub?.unsubscribe();
+
+    this.expandSub = this.activityService.getProjectActivity(projectId, 1, 10)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.expandedActivities.set(res.items);
+          this.expandedLoading.set(false);
+        },
+        error: () => {
+          this.expandedLoading.set(false);
+        },
+      });
   }
+
+  readonly relativeTime = relativeTime;
+  readonly getEventLabel = getEventLabel;
+  readonly getEventClass = getEventClass;
+  readonly formatChanges = formatChanges;
 }

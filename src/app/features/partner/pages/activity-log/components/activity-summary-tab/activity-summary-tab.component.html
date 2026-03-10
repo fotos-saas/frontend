@@ -59,6 +59,7 @@
       </div>
 
       <div class="table-header">
+        <span class="th th-expand"></span>
         <span class="th th-check">
           <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" />
         </span>
@@ -76,8 +77,17 @@
           <div
             class="list-row"
             [class.list-row--has-new]="item.new_activity_count > 0"
+            [class.list-row--expanded]="expandedProjectId() === item.project_id"
             [style.animation-delay]="i * 0.03 + 's'"
+            (click)="toggleExpand(item.project_id, $event)"
           >
+            <span class="cell cell-expand">
+              <lucide-icon
+                [name]="expandedProjectId() === item.project_id ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT"
+                [size]="14"
+                class="expand-icon"
+              />
+            </span>
             <span class="cell cell-check">
               <input
                 type="checkbox"
@@ -148,6 +158,56 @@
               }
             </span>
           </div>
+
+          <!-- Lenyitott részletek -->
+          @if (expandedProjectId() === item.project_id) {
+            <div class="expand-panel">
+              @if (expandedLoading()) {
+                <div class="expand-panel__loading">
+                  <div class="skeleton-row skeleton-row--sm"></div>
+                  <div class="skeleton-row skeleton-row--sm"></div>
+                  <div class="skeleton-row skeleton-row--sm"></div>
+                </div>
+              } @else if (expandedActivities().length === 0) {
+                <div class="expand-panel__empty">Nincs részletes aktivitás</div>
+              } @else {
+                <div class="expand-panel__header">
+                  <span class="expand-panel__th">Időpont</span>
+                  <span class="expand-panel__th">Esemény</span>
+                  <span class="expand-panel__th">Tárgy</span>
+                  <span class="expand-panel__th">Felhasználó</span>
+                  <span class="expand-panel__th">Változások</span>
+                </div>
+                @for (act of expandedActivities(); track act.id) {
+                  <div class="expand-panel__row">
+                    <span class="expand-panel__cell expand-panel__cell--date">
+                      {{ act.createdAt | date:'MM.dd HH:mm' }}
+                    </span>
+                    <span class="expand-panel__cell">
+                      <span class="event-badge" [class]="getEventClass(act.event)">{{ getEventLabel(act.event) }}</span>
+                    </span>
+                    <span class="expand-panel__cell expand-panel__cell--subject">
+                      {{ act.subjectName || '—' }}
+                    </span>
+                    <span class="expand-panel__cell">
+                      {{ act.causer?.name || 'Rendszer' }}
+                    </span>
+                    <span class="expand-panel__cell expand-panel__cell--changes">
+                      {{ formatChanges(act.changes) }}
+                    </span>
+                  </div>
+                }
+                @if (item.activity_count > 10) {
+                  <div class="expand-panel__more">
+                    <button type="button" class="expand-panel__more-btn" (click)="goToProject(item.project_id)">
+                      Összes aktivitás megtekintése ({{ item.activity_count }})
+                      <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="12" />
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          }
         }
       </div>
     </div>

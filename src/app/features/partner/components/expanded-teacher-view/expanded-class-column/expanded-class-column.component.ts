@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { LucideAngularModule } from 'lucide-angular';
@@ -112,28 +112,35 @@ export class ExpandedClassColumnComponent {
     this.dataService.removeOverride(personId);
   }
 
+  /** Wheel görgetéssel léptetett tanár indexe ebben az oszlopban */
+  private wheelIndex = signal(-1);
+
   onWheel(event: WheelEvent): void {
     const teachers = this.filteredTeachers();
     if (teachers.length === 0) return;
 
     event.preventDefault();
 
-    const currentSelected = this.dataService.selectedPersonId();
-    const currentIndex = currentSelected
-      ? teachers.findIndex(t => t.personId === currentSelected)
-      : -1;
+    // Ha a hover épp máshonnan jön, szinkronizáljuk a wheel index-et
+    const currentHovered = this.hoveredPersonId();
+    let idx = this.wheelIndex();
+    if (currentHovered && idx === -1) {
+      const hoveredIdx = teachers.findIndex(t => t.personId === currentHovered);
+      if (hoveredIdx !== -1) idx = hoveredIdx;
+    }
 
     let nextIndex: number;
     if (event.deltaY > 0) {
-      // Lefelé görgetés → következő
-      nextIndex = currentIndex < teachers.length - 1 ? currentIndex + 1 : 0;
+      nextIndex = idx < teachers.length - 1 ? idx + 1 : 0;
     } else {
-      // Felfelé görgetés → előző
-      nextIndex = currentIndex > 0 ? currentIndex - 1 : teachers.length - 1;
+      nextIndex = idx > 0 ? idx - 1 : teachers.length - 1;
     }
 
+    this.wheelIndex.set(nextIndex);
     const nextTeacher = teachers[nextIndex];
-    this.dataService.onTeacherSelect(nextTeacher.personId);
+
+    // Hover kiemelés (zöld highlight az összes oszlopban), NEM popup
+    this.dataService.onTeacherHover(nextTeacher.normalizedName, nextTeacher.personId);
 
     // Scroll into view
     const listContainer = this.listEl()?.nativeElement;

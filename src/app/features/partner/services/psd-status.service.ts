@@ -163,7 +163,6 @@ export class PsdStatusService {
     if (placedMaps.size === 0) return;
 
     const projectIds = [...placedMaps.keys()];
-    let hasUpdates = false;
 
     // 3-asával párhuzamosan
     for (let i = 0; i < projectIds.length; i += 3) {
@@ -179,21 +178,23 @@ export class PsdStatusService {
         }),
       );
 
+      let batchHasUpdates = false;
       for (const r of results) {
         if (r.status === 'rejected') {
           this.logger.error('[PSD] Fotó-változás API hiba:', r.reason);
         } else if (r.value.changedCount > 0) {
           const status = statusMap.get(r.value.projectId);
           if (status) {
-            status.updatedPhotosCount = r.value.changedCount;
-            hasUpdates = true;
+            statusMap.set(r.value.projectId, { ...status, updatedPhotosCount: r.value.changedCount });
+            batchHasUpdates = true;
           }
         }
       }
-    }
 
-    if (hasUpdates) {
-      this.statusMap.set(new Map(statusMap));
+      // Batch-enként frissítjük a signal-t, hogy a badge azonnal megjelenjen
+      if (batchHasUpdates) {
+        this.statusMap.set(new Map(statusMap));
+      }
     }
   }
 }

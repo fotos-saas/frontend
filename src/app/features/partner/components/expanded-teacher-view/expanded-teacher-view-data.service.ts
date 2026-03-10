@@ -326,26 +326,12 @@ export class ExpandedTeacherViewDataService {
     this.assigning.set(true);
     this.assigningPersonIds.set(new Set(personIds));
     this.teacherService.assignPhotoToTeacher(sid, photoId, personIds).subscribe({
-      next: (response) => {
-        const results = response.data;
-        const current = this.data();
-        if (current) {
-          this.data.set({
-            ...current,
-            classes: current.classes.map(cls => ({
-              ...cls,
-              teachers: cls.teachers.map(t => {
-                const match = results.find(r => r.personId === t.personId);
-                return match
-                  ? { ...t, hasPhoto: true, photoThumbUrl: match.photoThumbUrl, hasOverride: match.hasOverride }
-                  : t;
-              }),
-            })),
-          });
-        }
+      next: () => {
         this.assigning.set(false);
-        this.assigningPersonIds.set(new Set());
         this.draggedPhoto.set(null);
+        // Teljes újratöltés: linkedGroup badge-ek, fotók, minden frissül
+        // A spinner addig marad (assigningPersonIds), míg a reload be nem fejeződik
+        this.reloadDataKeepSpinner();
       },
       error: (err) => {
         this.logger.error('Fotó hozzárendelési hiba', err);
@@ -545,5 +531,23 @@ export class ExpandedTeacherViewDataService {
 
   onTeacherSelect(personId: number | null): void {
     this.selectedPersonId.set(personId === this.selectedPersonId() ? null : personId);
+  }
+
+  /** Újratölti az adatokat, de az assigningPersonIds spinner-t megtartja a betöltés végéig */
+  private reloadDataKeepSpinner(): void {
+    if (!this.sourceProjectId) {
+      this.assigningPersonIds.set(new Set());
+      return;
+    }
+    this.teacherService.getExpandedView(this.sourceProjectId).subscribe({
+      next: (response) => {
+        this.data.set(response);
+        this.assigningPersonIds.set(new Set());
+      },
+      error: (err) => {
+        this.logger.error('Újratöltési hiba assign után', err);
+        this.assigningPersonIds.set(new Set());
+      },
+    });
   }
 }

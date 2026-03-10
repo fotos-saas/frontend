@@ -159,7 +159,7 @@
             </span>
           </div>
 
-          <!-- Lenyitott részletek -->
+          <!-- Lenyitott részletek — tárgy szerint csoportosítva -->
           @if (expandedProjectId() === item.project_id) {
             <div class="expand-panel">
               @if (expandedLoading()) {
@@ -168,33 +168,23 @@
                   <div class="skeleton-row skeleton-row--sm"></div>
                   <div class="skeleton-row skeleton-row--sm"></div>
                 </div>
-              } @else if (expandedActivities().length === 0) {
+              } @else if (expandedGroups().length === 0) {
                 <div class="expand-panel__empty">Nincs részletes aktivitás</div>
               } @else {
-                <div class="expand-panel__header">
-                  <span class="expand-panel__th">Időpont</span>
-                  <span class="expand-panel__th">Esemény</span>
-                  <span class="expand-panel__th">Tárgy</span>
-                  <span class="expand-panel__th">Felhasználó</span>
-                  <span class="expand-panel__th">Változások</span>
-                </div>
-                @for (act of expandedActivities(); track act.id) {
-                  <div class="expand-panel__row">
-                    <span class="expand-panel__cell expand-panel__cell--date">
-                      {{ act.createdAt | date:'MM.dd HH:mm' }}
-                    </span>
-                    <span class="expand-panel__cell">
-                      <span class="event-badge" [class]="getEventClass(act.event)">{{ getEventLabel(act.event) }}</span>
-                    </span>
-                    <span class="expand-panel__cell expand-panel__cell--subject">
-                      {{ act.subjectName || '—' }}
-                    </span>
-                    <span class="expand-panel__cell">
-                      {{ act.causer?.name || 'Rendszer' }}
-                    </span>
-                    <span class="expand-panel__cell expand-panel__cell--changes">
-                      {{ formatChanges(act.changes) }}
-                    </span>
+                @for (group of expandedGroups(); track group.subjectName) {
+                  <div class="subject-group">
+                    <div class="subject-group__header">
+                      <span class="subject-group__name">{{ group.subjectName }}</span>
+                      <span class="subject-group__meta">
+                        {{ formatEventSummary(group.events) }}
+                      </span>
+                      <span class="subject-group__causer">
+                        {{ group.causers.join(', ') }}
+                      </span>
+                      <span class="subject-group__time">
+                        {{ group.lastAt | date:'MM.dd HH:mm' }}
+                      </span>
+                    </div>
                   </div>
                 }
                 @if (item.activity_count > 10) {

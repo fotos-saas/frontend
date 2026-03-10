@@ -22,7 +22,10 @@ import {
 } from '../../../../services/partner-activity.service';
 import { TeamService } from '../../../../services/team.service';
 import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
-import { relativeTime, getEventLabel, getEventClass, formatChanges } from '../../utils/activity-format.util';
+import {
+  relativeTime, getEventLabel, getEventClass, formatChanges,
+  groupBySubject, formatEventSummary, SubjectGroup,
+} from '../../utils/activity-format.util';
 
 interface TimeGroup {
   label: string;
@@ -55,6 +58,7 @@ export class ActivitySummaryTabComponent implements OnInit {
   summaryMeta = signal<ActivitySummaryMeta | null>(null);
   expandedProjectId = signal<number | null>(null);
   expandedActivities = signal<ProjectActivityItem[]>([]);
+  expandedGroups = computed(() => groupBySubject(this.expandedActivities()));
   expandedLoading = signal(false);
   private loadSub?: Subscription;
   private expandSub?: Subscription;
@@ -299,4 +303,5 @@ export class ActivitySummaryTabComponent implements OnInit {
   readonly getEventLabel = getEventLabel;
   readonly getEventClass = getEventClass;
   readonly formatChanges = formatChanges;
+  readonly formatEventSummary = formatEventSummary;
 }

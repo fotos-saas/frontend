@@ -46,6 +46,9 @@
                 <span class="photo-card__school">{{ photo.schoolName }}</span>
               }
               <span class="photo-card__meta">{{ photo.createdAt | date:'yyyy.MM.dd HH:mm' }} &middot; {{ formatFileSize(photo.fileSize) }}</span>
+              @if (photo.uploadedByName) {
+                <span class="photo-card__uploader">{{ photo.uploadedByName }}</span>
+              }
             </div>
           </div>
         }

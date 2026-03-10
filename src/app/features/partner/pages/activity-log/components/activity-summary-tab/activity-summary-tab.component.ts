@@ -17,9 +17,15 @@ import {
   PartnerActivityService,
   ProjectActivitySummary,
   ActivitySummaryFilters,
+  ActivitySummaryMeta,
 } from '../../../../services/partner-activity.service';
 import { TeamService } from '../../../../services/team.service';
 import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
+
+interface TimeGroup {
+  label: string;
+  items: ProjectActivitySummary[];
+}
 
 @Component({
   selector: 'app-activity-summary-tab',
@@ -44,6 +50,7 @@ export class ActivitySummaryTabComponent implements OnInit {
   total = signal(0);
   lastPage = signal(1);
   selectedIds = signal<Set<number>>(new Set());
+  summaryMeta = signal<ActivitySummaryMeta | null>(null);
   private loadSub?: Subscription;
 
   allSelected = computed(() => {
@@ -53,6 +60,44 @@ export class ActivitySummaryTabComponent implements OnInit {
   });
 
   hasSelection = computed(() => this.selectedIds().size > 0);
+
+  groupedItems = computed<TimeGroup[]>(() => {
+    const items = this.items();
+    if (items.length === 0) return [];
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 86400000);
+    const weekAgo = new Date(today.getTime() - 7 * 86400000);
+
+    const groups: Record<string, ProjectActivitySummary[]> = {
+      'Ma': [],
+      'Tegnap': [],
+      'Ezen a héten': [],
+      'Régebbi': [],
+    };
+
+    for (const item of items) {
+      if (!item.last_activity_at) {
+        groups['Régebbi'].push(item);
+        continue;
+      }
+      const d = new Date(item.last_activity_at);
+      if (d >= today) {
+        groups['Ma'].push(item);
+      } else if (d >= yesterday) {
+        groups['Tegnap'].push(item);
+      } else if (d >= weekAgo) {
+        groups['Ezen a héten'].push(item);
+      } else {
+        groups['Régebbi'].push(item);
+      }
+    }
+
+    return Object.entries(groups)
+      .filter(([, items]) => items.length > 0)
+      .map(([label, items]) => ({ label, items }));
+  });
 
   readonly searchConfig: SearchConfig = {
     placeholder: 'Projekt keresése...',
@@ -148,6 +193,7 @@ export class ActivitySummaryTabComponent implements OnInit {
           this.items.set(res.items);
           this.lastPage.set(res.pagination.last_page);
           this.total.set(res.pagination.total);
+          this.summaryMeta.set(res.summary);
           this.filterState.loading.set(false);
         },
         error: () => {
@@ -212,5 +258,22 @@ export class ActivitySummaryTabComponent implements OnInit {
 
   markSelectedReviewed(): void {
     this.markReviewed([...this.selectedIds()]);
+  }
+
+  relativeTime(iso: string | null): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffH = Math.floor(diffMs / 3600000);
+    const diffD = Math.floor(diffMs / 86400000);
+
+    if (diffMin < 1) return 'épp most';
+    if (diffMin < 60) return `${diffMin} perce`;
+    if (diffH < 24) return `${diffH} órája`;
+    if (diffD === 1) return 'tegnap';
+    if (diffD < 7) return `${diffD} napja`;
+    return d.toLocaleDateString('hu-HU', { month: '2-digit', day: '2-digit' });
   }
 }

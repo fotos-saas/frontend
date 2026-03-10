@@ -70,10 +70,19 @@ export interface ProjectActivitySummary {
   new_activity_count: number;
   last_activity_at: string | null;
   reviewed_at: string | null;
+  last_causer_name: string | null;
+}
+
+export interface ActivitySummaryMeta {
+  total_projects: number;
+  total_activities: number;
+  total_new_activities: number;
+  projects_with_new: number;
 }
 
 export interface ActivitySummaryResponse {
   items: ProjectActivitySummary[];
+  summary: ActivitySummaryMeta;
   pagination: {
     current_page: number;
     last_page: number;

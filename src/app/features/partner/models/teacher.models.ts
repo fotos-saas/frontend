@@ -101,6 +101,7 @@ export interface LinkedGroupPhoto {
   duplicateCount: number;
   isActive: boolean;
   isPortraitProcessed?: boolean;
+  uploadedByName: string | null;
 }
 
 /**

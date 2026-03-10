@@ -12,7 +12,7 @@
       type="button"
       class="tab-btn"
       [class.tab-btn--active]="activeTab() === 'detail'"
-      (click)="activeTab.set('detail')"
+      (click)="setTab('detail')"
     >
       <lucide-icon [name]="ICONS.LIST" [size]="16" />
       <span>Részletes</span>
@@ -21,7 +21,7 @@
       type="button"
       class="tab-btn"
       [class.tab-btn--active]="activeTab() === 'summary'"
-      (click)="activeTab.set('summary')"
+      (click)="setTab('summary')"
     >
       <lucide-icon [name]="ICONS.LAYERS" [size]="16" />
       <span>Projektek összesítve</span>

@@ -6,6 +6,28 @@
   [visibleFilterCount]="3"
 />
 
+<!-- Összesítő kártyák -->
+@if (summaryMeta(); as meta) {
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__value">{{ meta.total_projects }}</span>
+      <span class="summary-card__label">Projekt</span>
+    </div>
+    <div class="summary-card summary-card--highlight">
+      <span class="summary-card__value">{{ meta.total_new_activities }}</span>
+      <span class="summary-card__label">Új aktivitás</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__value">{{ meta.projects_with_new }}</span>
+      <span class="summary-card__label">Projekt új változással</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__value">{{ meta.total_activities }}</span>
+      <span class="summary-card__label">Összes aktivitás</span>
+    </div>
+  </div>
+}
+
 <!-- Batch műveletek -->
 @if (hasSelection()) {
   <div class="batch-bar">
@@ -29,87 +51,107 @@
     <p>Nincs aktivitással rendelkező projekt</p>
   </div>
 } @else {
-  <div class="table-header">
-    <span class="th th-check">
-      <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" />
-    </span>
-    <span class="th th-project">Projekt</span>
-    <span class="th th-new-count">Új aktivitások</span>
-    <span class="th th-total-count">Összes</span>
-    <span class="th th-date">Utolsó aktivitás</span>
-    <span class="th th-status">Állapot</span>
-    <span class="th th-actions">Művelet</span>
-  </div>
-
-  <div class="row-grid">
-    @for (item of items(); track item.project_id; let i = $index) {
-      <div
-        class="list-row"
-        [class.list-row--has-new]="item.new_activity_count > 0"
-        [style.animation-delay]="i * 0.03 + 's'"
-      >
-        <span class="cell cell-check">
-          <input
-            type="checkbox"
-            [checked]="selectedIds().has(item.project_id)"
-            (change)="toggleSelect(item.project_id)"
-          />
-        </span>
-        <span class="cell cell-project">
-          <button type="button" class="project-link" (click)="goToProject(item.project_id)">
-            {{ item.project_name }}
-          </button>
-        </span>
-        <span class="cell cell-new-count">
-          @if (item.new_activity_count > 0) {
-            <span class="count-badge count-badge--new">{{ item.new_activity_count }}</span>
-          } @else {
-            <span class="count-badge count-badge--zero">0</span>
-          }
-        </span>
-        <span class="cell cell-total-count">
-          <span class="count-badge count-badge--total">{{ item.activity_count }}</span>
-        </span>
-        <span class="cell cell-date">
-          {{ item.last_activity_at | date:'yyyy.MM.dd HH:mm' }}
-        </span>
-        <span class="cell cell-status">
-          @if (item.new_activity_count === 0 && item.reviewed_at) {
-            <span class="status-badge status-badge--reviewed">
-              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
-              Átnézve
-            </span>
-          } @else if (item.new_activity_count > 0) {
-            <span class="status-badge status-badge--new">
-              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
-              Új!
-            </span>
-          }
-        </span>
-        <span class="cell cell-actions">
-          @if (item.new_activity_count > 0 || !item.reviewed_at) {
-            <button
-              type="button"
-              class="action-btn action-btn--review"
-              matTooltip="Megjelölés átnézettként"
-              (click)="markReviewed([item.project_id])"
-            >
-              <lucide-icon [name]="ICONS.CHECK" [size]="14" />
-            </button>
-          } @else {
-            <button
-              type="button"
-              class="action-btn action-btn--undo"
-              matTooltip="Visszavonás"
-              (click)="unmarkReviewed([item.project_id])"
-            >
-              <lucide-icon [name]="ICONS.UNDO" [size]="14" />
-            </button>
-          }
-        </span>
+  @for (group of groupedItems(); track group.label) {
+    <div class="time-group">
+      <div class="time-group__header">
+        <span class="time-group__label">{{ group.label }}</span>
+        <span class="time-group__count">{{ group.items.length }} projekt</span>
       </div>
-    }
-  </div>
+
+      <div class="table-header">
+        <span class="th th-check">
+          <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" />
+        </span>
+        <span class="th th-project">Projekt</span>
+        <span class="th th-new-count">Új</span>
+        <span class="th th-total-count">Összes</span>
+        <span class="th th-date">Utolsó aktivitás</span>
+        <span class="th th-causer">Módosította</span>
+        <span class="th th-status">Állapot</span>
+        <span class="th th-actions">Művelet</span>
+      </div>
+
+      <div class="row-grid">
+        @for (item of group.items; track item.project_id; let i = $index) {
+          <div
+            class="list-row"
+            [class.list-row--has-new]="item.new_activity_count > 0"
+            [style.animation-delay]="i * 0.03 + 's'"
+          >
+            <span class="cell cell-check">
+              <input
+                type="checkbox"
+                [checked]="selectedIds().has(item.project_id)"
+                (change)="toggleSelect(item.project_id)"
+              />
+            </span>
+            <span class="cell cell-project">
+              <button type="button" class="project-link" (click)="goToProject(item.project_id)">
+                {{ item.project_name }}
+              </button>
+            </span>
+            <span class="cell cell-new-count">
+              @if (item.new_activity_count > 0) {
+                <span
+                  class="count-badge count-badge--new"
+                  [matTooltip]="item.new_activity_count + ' új az utolsó átnézés óta'"
+                >{{ item.new_activity_count }}</span>
+              } @else {
+                <span class="count-badge count-badge--zero">0</span>
+              }
+            </span>
+            <span class="cell cell-total-count">
+              <span class="count-badge count-badge--total">{{ item.activity_count }}</span>
+            </span>
+            <span class="cell cell-date" [matTooltip]="item.last_activity_at | date:'yyyy.MM.dd HH:mm'">
+              {{ relativeTime(item.last_activity_at) }}
+            </span>
+            <span class="cell cell-causer">
+              @if (item.last_causer_name) {
+                <span class="causer-name">{{ item.last_causer_name }}</span>
+              } @else {
+                <span class="causer-name causer-name--system">Rendszer</span>
+              }
+            </span>
+            <span class="cell cell-status">
+              @if (item.new_activity_count === 0 && item.reviewed_at) {
+                <span class="status-badge status-badge--reviewed">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                  Átnézve
+                </span>
+              } @else if (item.new_activity_count > 0) {
+                <span class="status-badge status-badge--new">
+                  <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+                  Új!
+                </span>
+              }
+            </span>
+            <span class="cell cell-actions">
+              @if (item.new_activity_count > 0 || !item.reviewed_at) {
+                <button
+                  type="button"
+                  class="action-btn action-btn--review"
+                  matTooltip="Megjelölés átnézettként"
+                  (click)="markReviewed([item.project_id])"
+                >
+                  <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="action-btn action-btn--undo"
+                  matTooltip="Visszavonás"
+                  (click)="unmarkReviewed([item.project_id])"
+                >
+                  <lucide-icon [name]="ICONS.UNDO" [size]="14" />
+                </button>
+              }
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
 }
 
 <app-list-pagination

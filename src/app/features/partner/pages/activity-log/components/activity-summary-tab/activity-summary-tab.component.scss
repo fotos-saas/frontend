@@ -4,6 +4,48 @@
   display: block;
 }
 
+// Összesítő kártyák
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 12px;
+  background: var(--surface-secondary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &--highlight {
+    background: #fef3c7;
+    border-color: #fcd34d;
+  }
+
+  &__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary, #1e293b);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+    margin-top: 4px;
+  }
+}
+
 // Batch művelet sáv
 .batch-bar {
   display: flex;
@@ -42,13 +84,38 @@
   }
 }
 
+// Idő csoport
+.time-group {
+  margin-bottom: 8px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 4px;
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &__count {
+    font-size: 0.7rem;
+    color: var(--text-tertiary, #94a3b8);
+  }
+}
+
 // Táblázat
 .table-header {
   display: grid;
-  grid-template-columns: 36px 1fr 110px 90px 160px 100px 70px;
+  grid-template-columns: 36px 1fr 70px 70px 120px 120px 90px 60px;
   gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-secondary, #64748b);
@@ -57,7 +124,7 @@
 
 .list-row {
   display: grid;
-  grid-template-columns: 36px 1fr 110px 90px 160px 100px 70px;
+  grid-template-columns: 36px 1fr 70px 70px 120px 120px 90px 60px;
   gap: 8px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-color, #f1f5f9);
@@ -139,6 +206,21 @@
   color: var(--text-secondary, #64748b);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+
+// Módosító
+.causer-name {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #475569);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--system {
+    color: var(--text-tertiary, #94a3b8);
+    font-style: italic;
+  }
 }
 
 // Státusz badge-ek
@@ -233,6 +315,10 @@
 }
 
 @media (max-width: 900px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .table-header { display: none; }
 
   .list-row {
@@ -244,4 +330,5 @@
 
   .cell-check { order: -1; }
   .cell-project { flex: 1 1 100%; }
+  .cell-causer { flex: 1 1 50%; }
 }

@@ -1,4 +1,5 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ActivityDetailTabComponent } from './components/activity-detail-tab/activity-detail-tab.component';
@@ -15,6 +16,21 @@ export type ActivityTab = 'detail' | 'summary';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivityLogComponent {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   readonly ICONS = ICONS;
-  activeTab = signal<ActivityTab>('detail');
+
+  activeTab = signal<ActivityTab>(
+    this.route.snapshot.queryParamMap.get('tab') === 'summary' ? 'summary' : 'detail',
+  );
+
+  setTab(tab: ActivityTab): void {
+    this.activeTab.set(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: tab === 'detail' ? {} : { tab },
+      queryParamsHandling: 'replace',
+      replaceUrl: false,
+    });
+  }
 }

@@ -114,6 +114,14 @@
     font-size: 0.6875rem;
     color: get-color('slate', 500);
   }
+
+  &__uploader {
+    font-size: 0.6875rem;
+    color: get-color('slate', 400);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .btn-secondary {

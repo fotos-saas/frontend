@@ -74,6 +74,11 @@
                   />
                 }
               </div>
+            } @else if (group.completed_count === group.total_count) {
+              <div class="group__summary">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" class="group__summary-icon" />
+                <span class="group__summary-text">{{ getCompletedSummary(group) }}</span>
+              </div>
             }
           </div>
         }

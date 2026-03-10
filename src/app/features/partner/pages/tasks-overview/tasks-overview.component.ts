@@ -136,12 +136,15 @@ export class TasksOverviewComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.rawGroups.set(res.data);
-          // Alapból minden csoport nyitva
+          // Csak a nem-kész csoportok nyitva, kész csoportok összecsukva
           const keys = new Set<string>();
-          for (const g of res.data) {
-            keys.add(`my_own_${g.project_id}`);
-            keys.add(`assigned_to_me_${g.project_id}`);
-            keys.add(`i_gave_others_${g.project_id}`);
+          const sections = this.sections();
+          for (const section of sections) {
+            for (const group of section.groups) {
+              if (group.completed_count < group.total_count) {
+                keys.add(`${section.key}_${group.project_id}`);
+              }
+            }
           }
           this.expandedGroups.set(keys);
           this.loading.set(false);
@@ -226,6 +229,14 @@ export class TasksOverviewComponent implements OnInit {
         this.toast.error('Hiba', errorMsg);
       },
     });
+  }
+
+  getCompletedSummary(group: ProjectTaskGroup): string {
+    const completed = group.tasks.filter(t => t.is_completed);
+    if (!completed.length) return '';
+    const names = completed.map(t => t.title);
+    if (names.length <= 3) return names.join(', ');
+    return names.slice(0, 3).join(', ') + ` (+${names.length - 3})`;
   }
 
   navigateToProject(projectId: number): void {

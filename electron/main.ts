@@ -420,11 +420,11 @@ async function syncAuthToOverlay(): Promise<void> {
       `sessionStorage.getItem('marketer_token')`,
     );
     if (token) {
-      overlayWindow.webContents.executeJavaScript(
+      await overlayWindow.webContents.executeJavaScript(
         `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
       );
     }
-  } catch { /* ignore — window may not be ready */ }
+  } catch { /* window may not be ready */ }
 }
 
 

@@ -184,4 +184,24 @@
   &__tasks {
     padding: 4px 14px 8px;
   }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    padding: 6px 14px 10px;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+  }
+
+  &__summary-icon {
+    color: #86efac;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  &__summary-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

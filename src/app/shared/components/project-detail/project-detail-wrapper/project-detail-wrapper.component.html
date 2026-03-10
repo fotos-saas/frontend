@@ -100,6 +100,7 @@
             [projectId]="facade.projectData()?.id ?? 0"
             (dialogRequested)="openTaskDialog($event)"
             (deleteRequested)="confirmDeleteTask($event)"
+            (answerRequested)="openAnswerDialog($event)"
           />
         }
       }
@@ -266,6 +267,16 @@
     [editTask]="printActions.editingTaskData()"
     (close)="closeTaskDialog()"
     (saved)="onTaskSaved($event)"
+  />
+}
+
+<!-- Answer Dialog - page-card-on KÍVÜL -->
+@if (printActions.showAnswerDialog() && printActions.answeringTask()) {
+  <app-project-task-answer-dialog
+    [projectId]="facade.projectData()?.id ?? 0"
+    [task]="printActions.answeringTask()!"
+    (close)="closeAnswerDialog()"
+    (saved)="onAnswerSaved($event)"
   />
 }
 

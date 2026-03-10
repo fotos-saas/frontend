@@ -34,6 +34,10 @@ export class ProjectDetailPrintActionsService {
   readonly showTaskDeleteConfirm = signal(false);
   readonly deletingTask = signal<ProjectTask | null>(null);
 
+  // Válasz dialógus állapotok
+  readonly showAnswerDialog = signal(false);
+  readonly answeringTask = signal<ProjectTask | null>(null);
+
   init(deps: {
     destroyRef: DestroyRef;
     toast: ToastService;
@@ -166,5 +170,22 @@ export class ProjectDetailPrintActionsService {
     }
     this.showTaskDeleteConfirm.set(false);
     this.deletingTask.set(null);
+  }
+
+  // === VÁLASZ DIALÓGUS ===
+
+  openAnswerDialog(task: ProjectTask): void {
+    this.answeringTask.set(task);
+    this.showAnswerDialog.set(true);
+  }
+
+  closeAnswerDialog(): void {
+    this.showAnswerDialog.set(false);
+    this.answeringTask.set(null);
+  }
+
+  onAnswerSaved(task: ProjectTask, onSaved: (task: ProjectTask, wasEdit: boolean) => void): void {
+    this.closeAnswerDialog();
+    onSaved(task, true);
   }
 }

@@ -1,0 +1,49 @@
+<app-dialog-wrapper
+  title="Válasz a kérdésre"
+  [icon]="ICONS.MESSAGE_CIRCLE_QUESTION"
+  headerStyle="flat"
+  theme="amber"
+  size="md"
+  [isSubmitting]="saving()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="save()"
+  (backdropClickEvent)="close.emit()">
+  <div dialogBody>
+    <!-- Eredeti kérdés -->
+    <div class="original-question">
+      <label class="ps-field__label">Kérdés</label>
+      <div class="original-question__content">
+        <span class="original-question__title">{{ task().title }}</span>
+        @if (task().description) {
+          <span class="original-question__desc">{{ task().description }}</span>
+        }
+        @if (task().created_by) {
+          <span class="original-question__author">Feltette: {{ task().created_by!.name }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Válasz -->
+    <ps-editor
+      label="Válasz"
+      placeholder="Írd ide a válaszod..."
+      mode="basic"
+      size="full"
+      [maxHeight]="300"
+      [(ngModel)]="answerText"
+    />
+  </div>
+
+  <div dialogFooter>
+    <button class="btn btn--outline" (click)="close.emit()">Mégse</button>
+    <button
+      class="btn btn--primary"
+      [disabled]="saving() || !answerText.trim()"
+      (click)="save()">
+      @if (saving()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+      }
+      Válasz küldése
+    </button>
+  </div>
+</app-dialog-wrapper>

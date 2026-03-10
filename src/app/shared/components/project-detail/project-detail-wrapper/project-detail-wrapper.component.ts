@@ -29,6 +29,7 @@ import { ProjectEmailsTabComponent } from '../project-emails-tab/project-emails-
 import { ProjectActivityTabComponent } from '../project-activity-tab/project-activity-tab.component';
 import { ProjectTasksTabComponent } from '../project-tasks-tab/project-tasks-tab.component';
 import { ProjectTaskDialogComponent } from '../project-task-dialog/project-task-dialog.component';
+import { ProjectTaskAnswerDialogComponent } from '../project-task-answer-dialog/project-task-answer-dialog.component';
 import {
   ProjectSamplesTabComponent,
   PackageDialogRequest,
@@ -82,6 +83,7 @@ import { ExpandedTeacherViewComponent } from '../../../../features/partner/compo
     ProjectActivityTabComponent,
     ProjectTasksTabComponent,
     ProjectTaskDialogComponent,
+    ProjectTaskAnswerDialogComponent,
     ConfirmDialogComponent,
     SamplePackageDialogComponent,
     SampleVersionDialogComponent,
@@ -354,5 +356,14 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   onTaskDeleteResult(result: ConfirmDialogResult): void {
     this.printActions.onTaskDeleteResult(result, (t) => this.tasksTab()?.executeDelete(t));
+  }
+
+  // === ANSWER DELEGATIONS ===
+
+  openAnswerDialog(task: ProjectTask): void { this.printActions.openAnswerDialog(task); }
+  closeAnswerDialog(): void { this.printActions.closeAnswerDialog(); }
+
+  onAnswerSaved(task: ProjectTask): void {
+    this.printActions.onAnswerSaved(task, (t, wasEdit) => this.tasksTab()?.onTaskSaved(t, wasEdit));
   }
 }

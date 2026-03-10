@@ -57,6 +57,64 @@
   }
 }
 
+// Típus szűrő
+.type-filters {
+  display: flex;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.type-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.15s ease;
+
+  lucide-icon {
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+
+  &:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &--active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+  }
+
+  &__count {
+    margin-left: 4px;
+    padding: 0 5px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 9999px;
+
+    .type-filter--active & {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+  }
+}
+
 .tabs {
   display: flex;
   border-bottom: 2px solid #e2e8f0;

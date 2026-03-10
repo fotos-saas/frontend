@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="page-header__left">
       <lucide-icon [name]="ICONS.LIST_TODO" [size]="24" class="page-header__icon" />
-      <h1 class="page-header__title">Összes feladat</h1>
+      <h1 class="page-header__title">Összes bejegyzés</h1>
       @if (totalTasks() > 0) {
         <span class="page-header__badge">{{ totalCompleted() }}/{{ totalTasks() }} kész</span>
       }
@@ -21,9 +21,54 @@
     <div class="empty-state">
       <lucide-icon [name]="ICONS.LIST_TODO" [size]="56" class="empty-state__icon" />
       <h3 class="empty-state__title">Nincsenek feladatok</h3>
-      <p class="empty-state__text">Adj hozzá feladatokat a projektek Feladatok fülén.</p>
+      <p class="empty-state__text">Adj hozzá bejegyzéseket a projektek Feladatok fülén.</p>
     </div>
   } @else {
+    <!-- Típus szűrő -->
+    <div class="type-filters">
+      <button
+        class="type-filter"
+        [class.type-filter--active]="activeTypeFilter() === 'all'"
+        (click)="activeTypeFilter.set('all')"
+      >
+        Mind
+        <span class="type-filter__count">{{ typeCounts().all }}</span>
+      </button>
+      @if (typeCounts().task > 0) {
+        <button
+          class="type-filter"
+          [class.type-filter--active]="activeTypeFilter() === 'task'"
+          (click)="activeTypeFilter.set('task')"
+        >
+          <lucide-icon [name]="ICONS.LIST_TODO" [size]="14" />
+          Feladatok
+          <span class="type-filter__count">{{ typeCounts().task }}</span>
+        </button>
+      }
+      @if (typeCounts().question > 0) {
+        <button
+          class="type-filter"
+          [class.type-filter--active]="activeTypeFilter() === 'question'"
+          (click)="activeTypeFilter.set('question')"
+        >
+          <lucide-icon [name]="ICONS.MESSAGE_CIRCLE_QUESTION" [size]="14" />
+          Kérdések
+          <span class="type-filter__count">{{ typeCounts().question }}</span>
+        </button>
+      }
+      @if (typeCounts().note > 0) {
+        <button
+          class="type-filter"
+          [class.type-filter--active]="activeTypeFilter() === 'note'"
+          (click)="activeTypeFilter.set('note')"
+        >
+          <lucide-icon [name]="ICONS.STICKY_NOTE" [size]="14" />
+          Jegyzetek
+          <span class="type-filter__count">{{ typeCounts().note }}</span>
+        </button>
+      }
+    </div>
+
     <!-- Tab-ok -->
     <div class="tabs">
       @for (section of sections(); track section.key) {

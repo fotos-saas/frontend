@@ -8,7 +8,7 @@
   </div>
   <button class="btn btn--primary btn--sm" (click)="dialogRequested.emit(null)">
     <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-    Új feladat
+    Új bejegyzés
   </button>
 </div>
 
@@ -18,28 +18,74 @@
     <span class="sr-only">Betöltés folyamatban...</span>
     <div class="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin"></div>
   </div>
-} @else if (totalCount() === 0) {
+} @else if (myTasks().length === 0 && assignedToMe().length === 0) {
   <!-- Üres állapot -->
   <div class="empty-state">
     <lucide-icon [name]="ICONS.LIST_TODO" [size]="48" class="empty-state__icon" />
-    <p class="empty-state__text">Még nincsenek feladatok ehhez a projekthez.</p>
+    <p class="empty-state__text">Még nincsenek bejegyzések ehhez a projekthez.</p>
     <button class="btn btn--primary btn--sm" (click)="dialogRequested.emit(null)">
       <lucide-icon [name]="ICONS.PLUS" [size]="16" />
-      Feladat hozzáadása
+      Bejegyzés hozzáadása
     </button>
   </div>
 } @else {
+  <!-- Típus szűrő tab-ok -->
+  <div class="type-filters">
+    <button
+      class="type-filter"
+      [class.type-filter--active]="activeFilter() === 'all'"
+      (click)="activeFilter.set('all')"
+    >
+      Mind
+      <span class="type-filter__count">{{ typeCounts().all }}</span>
+    </button>
+    @if (typeCounts().task > 0) {
+      <button
+        class="type-filter"
+        [class.type-filter--active]="activeFilter() === 'task'"
+        (click)="activeFilter.set('task')"
+      >
+        <lucide-icon [name]="ICONS.LIST_TODO" [size]="14" />
+        Feladatok
+        <span class="type-filter__count">{{ typeCounts().task }}</span>
+      </button>
+    }
+    @if (typeCounts().question > 0) {
+      <button
+        class="type-filter"
+        [class.type-filter--active]="activeFilter() === 'question'"
+        (click)="activeFilter.set('question')"
+      >
+        <lucide-icon [name]="ICONS.MESSAGE_CIRCLE_QUESTION" [size]="14" />
+        Kérdések
+        <span class="type-filter__count">{{ typeCounts().question }}</span>
+      </button>
+    }
+    @if (typeCounts().note > 0) {
+      <button
+        class="type-filter"
+        [class.type-filter--active]="activeFilter() === 'note'"
+        (click)="activeFilter.set('note')"
+      >
+        <lucide-icon [name]="ICONS.STICKY_NOTE" [size]="14" />
+        Jegyzetek
+        <span class="type-filter__count">{{ typeCounts().note }}</span>
+      </button>
+    }
+  </div>
+
   <!-- Saját feladatok szekció -->
-  @if (myTasks().length > 0) {
+  @if (filteredMyTasks().length > 0) {
     <div class="section">
-      <h4 class="section__title">Saját feladatok</h4>
+      <h4 class="section__title">Saját bejegyzések</h4>
       <div class="task-list">
-        @for (task of myTasks(); track task.id) {
+        @for (task of filteredMyTasks(); track task.id) {
           <app-task-row
             [task]="task"
             section="my_own"
             (toggleComplete)="toggleTask(task, 'my')"
             (toggleReview)="toggleReview(task, 'my')"
+            (answerClicked)="answerRequested.emit(task)"
             (edit)="dialogRequested.emit(task)"
             (delete)="deleteRequested.emit(task)"
           />
@@ -49,19 +95,27 @@
   }
 
   <!-- Rám bízott feladatok szekció -->
-  @if (assignedToMe().length > 0) {
+  @if (filteredAssignedToMe().length > 0) {
     <div class="section">
-      <h4 class="section__title">Rám bízott feladatok</h4>
+      <h4 class="section__title">Rám bízott bejegyzések</h4>
       <div class="task-list">
-        @for (task of assignedToMe(); track task.id) {
+        @for (task of filteredAssignedToMe(); track task.id) {
           <app-task-row
             [task]="task"
             section="assigned_to_me"
             (toggleComplete)="toggleTask(task, 'assigned')"
+            (answerClicked)="answerRequested.emit(task)"
             (edit)="dialogRequested.emit(task)"
           />
         }
       </div>
+    </div>
+  }
+
+  <!-- Szűrt üres állapot -->
+  @if (filteredMyTasks().length === 0 && filteredAssignedToMe().length === 0) {
+    <div class="empty-state empty-state--filtered">
+      <p class="empty-state__text">Nincs ilyen típusú bejegyzés.</p>
     </div>
   }
 }

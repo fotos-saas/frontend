@@ -1,0 +1,33 @@
+.original-question {
+  margin-bottom: 16px;
+
+  &__content {
+    padding: 12px 14px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+  }
+
+  &__title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    display: block;
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  &__author {
+    display: block;
+    font-size: 0.6875rem;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+}

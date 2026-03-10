@@ -18,6 +18,8 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import type { ProjectTaskGroup, ProjectTask } from '../../models/partner.models';
 
+type TaskTypeFilter = 'all' | 'task' | 'question' | 'note';
+
 interface TaskSection {
   key: TaskRowSection;
   title: string;
@@ -48,6 +50,7 @@ export class TasksOverviewComponent implements OnInit {
   loading = signal(true);
   expandedGroups = signal<Set<string>>(new Set());
   activeTab = signal<string>('');
+  activeTypeFilter = signal<TaskTypeFilter>('all');
 
   currentUserId = computed(() => this.authService.currentUserSignal()?.id ?? 0);
 
@@ -56,9 +59,26 @@ export class TasksOverviewComponent implements OnInit {
     return this.sections().find(s => s.key === tab) ?? null;
   });
 
+  /** Típus szerinti darabszámok (szűrő badge-ekhez) */
+  typeCounts = computed(() => {
+    const groups = this.rawGroups();
+    let all = 0, task = 0, question = 0, note = 0;
+    for (const group of groups) {
+      for (const t of group.tasks) {
+        all++;
+        const type = t.type ?? 'task';
+        if (type === 'task') task++;
+        else if (type === 'question') question++;
+        else if (type === 'note') note++;
+      }
+    }
+    return { all, task, question, note };
+  });
+
   sections = computed<TaskSection[]>(() => {
     const groups = this.rawGroups();
     const uid = this.currentUserId();
+    const typeFilter = this.activeTypeFilter();
     if (!groups.length) return [];
 
     const myOwn: Map<number, { group: ProjectTaskGroup; tasks: ProjectTask[] }> = new Map();
@@ -67,6 +87,9 @@ export class TasksOverviewComponent implements OnInit {
 
     for (const group of groups) {
       for (const task of group.tasks) {
+        // Típus szűrő
+        if (typeFilter !== 'all' && (task.type ?? 'task') !== typeFilter) continue;
+
         const createdByMe = task.created_by?.id === uid;
         const assignedToSelf = !task.assigned_to || task.assigned_to.id === uid;
         const assignedToOther = task.assigned_to && task.assigned_to.id !== uid;
@@ -87,7 +110,7 @@ export class TasksOverviewComponent implements OnInit {
     if (myOwnGroups.length) {
       result.push({
         key: 'my_own',
-        title: 'Saját feladataim',
+        title: 'Saját bejegyzéseim',
         icon: ICONS.LIST_TODO,
         groups: myOwnGroups,
         completedCount: myOwnGroups.reduce((s, g) => s + g.completed_count, 0),

@@ -6,13 +6,32 @@ interface ActivityItem {
   subjectName: string | null;
   event: string | null;
   causer: { name: string } | null;
+  changes: { old?: Record<string, unknown>; attributes?: Record<string, unknown>; source?: string } | null;
   createdAt: string;
 }
+
+/** Módosított mező → magyar label mapping */
+const FIELD_LABELS: Record<string, string> = {
+  name: 'név',
+  override_photo_id: 'fénykép',
+  active_photo_id: 'fénykép',
+  photo_type: 'fotó típusa',
+  position: 'pozíció',
+  type: 'típus',
+  archive_id: 'archív kapcsolat',
+  title: 'titulus',
+  email: 'e-mail',
+  note: 'megjegyzés',
+  local_id: 'helyi azonosító',
+  status: 'státusz',
+};
 
 export interface SubjectGroup {
   subjectName: string;
   count: number;
   events: Record<string, number>;
+  /** Módosított mezők összesítve (pl. { 'fénykép': 5, 'név': 2 }) */
+  fieldChanges: Record<string, number>;
   causers: string[];
   lastAt: string;
   firstAt: string;
@@ -20,7 +39,6 @@ export interface SubjectGroup {
 
 /**
  * Aktivitásokat tárgy (subjectName) szerint csoportosítja.
- * Eredmény: darabszám, eseménytípus eloszlás, érintett felhasználók, időszak.
  */
 export function groupBySubject(items: ActivityItem[]): SubjectGroup[] {
   const map = new Map<string, SubjectGroup>();
@@ -33,6 +51,7 @@ export function groupBySubject(items: ActivityItem[]): SubjectGroup[] {
         subjectName: key,
         count: 0,
         events: {},
+        fieldChanges: {},
         causers: [],
         lastAt: item.createdAt,
         firstAt: item.createdAt,
@@ -40,8 +59,18 @@ export function groupBySubject(items: ActivityItem[]): SubjectGroup[] {
       map.set(key, group);
     }
     group.count++;
+
     const ev = item.event || 'egyéb';
     group.events[ev] = (group.events[ev] || 0) + 1;
+
+    // Módosított mezők összegyűjtése
+    if (item.changes?.attributes) {
+      for (const field of Object.keys(item.changes.attributes)) {
+        const label = FIELD_LABELS[field] || field;
+        group.fieldChanges[label] = (group.fieldChanges[label] || 0) + 1;
+      }
+    }
+
     if (item.causer?.name && !group.causers.includes(item.causer.name)) {
       group.causers.push(item.causer.name);
     }
@@ -50,6 +79,32 @@ export function groupBySubject(items: ActivityItem[]): SubjectGroup[] {
   }
 
   return Array.from(map.values()).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+}
+
+/**
+ * Összefoglaló szöveg az eseményekről + módosított mezőkről.
+ * Pl.: "8× fénykép, 2× név" vagy "Létrehozva" / "Törölve"
+ */
+export function formatGroupSummary(group: SubjectGroup): string {
+  // Ha csak create vagy delete, egyszerűbb szöveg
+  if (group.events['created'] && Object.keys(group.events).length === 1) {
+    return group.count === 1 ? 'Létrehozva' : `${group.count}× létrehozva`;
+  }
+  if (group.events['deleted'] && Object.keys(group.events).length === 1) {
+    return group.count === 1 ? 'Törölve' : `${group.count}× törölve`;
+  }
+
+  // Módosított mezők eloszlása
+  const fields = Object.entries(group.fieldChanges);
+  if (fields.length > 0) {
+    return fields
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => count > 1 ? `${count}× ${label}` : label)
+      .join(', ');
+  }
+
+  // Fallback: eseménytípus szerint
+  return formatEventSummary(group.events);
 }
 
 export function formatEventSummary(events: Record<string, number>): string {

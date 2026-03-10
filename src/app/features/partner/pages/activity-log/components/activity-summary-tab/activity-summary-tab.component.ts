@@ -24,7 +24,7 @@ import { TeamService } from '../../../../services/team.service';
 import { generateYearOptions, getCurrentGraduationYear } from '@shared/utils/year-options.util';
 import {
   relativeTime, getEventLabel, getEventClass, formatChanges,
-  groupBySubject, formatEventSummary, SubjectGroup,
+  groupBySubject, formatGroupSummary,
 } from '../../utils/activity-format.util';
 
 interface TimeGroup {
@@ -303,5 +303,5 @@ export class ActivitySummaryTabComponent implements OnInit {
   readonly getEventLabel = getEventLabel;
   readonly getEventClass = getEventClass;
   readonly formatChanges = formatChanges;
-  readonly formatEventSummary = formatEventSummary;
+  readonly formatGroupSummary = formatGroupSummary;
 }

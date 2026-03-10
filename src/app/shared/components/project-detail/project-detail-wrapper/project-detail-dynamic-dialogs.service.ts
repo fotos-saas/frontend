@@ -61,6 +61,8 @@ export class ProjectDetailDynamicDialogsService<T> {
     const ref = container.createComponent(PersonsModalComponent);
     ref.setInput('projectId', projectData.id);
     ref.setInput('projectName', projectData.name);
+    ref.setInput('schoolName', projectData.school?.name ?? null);
+    ref.setInput('className', projectData.className ?? null);
     if (typeFilter) {
       ref.setInput('initialTypeFilter', typeFilter);
     }

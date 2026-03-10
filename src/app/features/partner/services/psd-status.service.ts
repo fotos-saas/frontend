@@ -58,13 +58,24 @@ export class PsdStatusService {
 
   /**
    * Egy projekt fotóváltozásainak friss lekérése.
-   * Ha nincs placed-photos cache, megvárja a checkProjects-et.
+   * Ha nincs placed-photos cache, megvárja a checkProjects-et,
+   * vagy ha az sem fut, saját maga tölti be a placed-photos.json-t IPC-n keresztül.
    * MINDIG frissen kéri le a backendet (nem cache-el).
    */
-  async refreshPhotoChanges(projectId: number): Promise<void> {
+  async refreshPhotoChanges(
+    projectId: number,
+    projectContext?: { name: string; schoolName?: string | null; className?: string | null },
+  ): Promise<void> {
+    if (!this.electron.isElectron) return;
+
     // Ha nincs cache, megvárjuk a checkProjects-et
     if (!this.placedPhotosCache.has(projectId) && this.checkProjectsPromise) {
       await this.checkProjectsPromise;
+    }
+
+    // Ha továbbra sincs cache, és van projekt context, saját magunk töltjük be
+    if (!this.placedPhotosCache.has(projectId) && projectContext) {
+      await this.loadPlacedPhotosForProject(projectId, projectContext);
     }
 
     const placedPhotos = this.placedPhotosCache.get(projectId);
@@ -107,6 +118,38 @@ export class PsdStatusService {
     const status = this.getStatus(projectId);
     if (status?.exists && status.psdPath) {
       this.ps.revealInFinder(status.psdPath);
+    }
+  }
+
+  /**
+   * Egyetlen projekt placed-photos.json betöltése IPC-n keresztül.
+   * Csak akkor hívódik ha nincs cache (pl. részletek oldalon F5 után).
+   */
+  private async loadPlacedPhotosForProject(
+    projectId: number,
+    context: { name: string; schoolName?: string | null; className?: string | null },
+  ): Promise<void> {
+    try {
+      if (!this.ps.workDir()) {
+        await this.ps.detectPhotoshop();
+      }
+      if (!this.ps.workDir()) return;
+
+      const brandName = this.branding.brandName();
+      const folderPath = this.ps.computeProjectFolderPath({
+        projectName: context.name,
+        schoolName: context.schoolName,
+        className: context.className,
+        brandName,
+      });
+      if (!folderPath) return;
+
+      const result = await this.ps.findProjectPsd(folderPath);
+      if (result.exists && result.placedPhotos && Object.keys(result.placedPhotos).length > 0) {
+        this.placedPhotosCache.set(projectId, result.placedPhotos);
+      }
+    } catch (err) {
+      this.logger.error(`[PSD] placed-photos betöltés hiba #${projectId}:`, err);
     }
   }
 

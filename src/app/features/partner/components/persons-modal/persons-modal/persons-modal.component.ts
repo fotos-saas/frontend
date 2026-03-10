@@ -46,6 +46,8 @@ export class PersonsModalComponent implements OnInit {
 
   readonly projectId = input.required<number>();
   readonly projectName = input<string>('');
+  readonly schoolName = input<string | null>(null);
+  readonly className = input<string | null>(null);
   readonly initialTypeFilter = input<TypeFilter | undefined>(undefined);
 
   readonly close = output<void>();
@@ -174,8 +176,12 @@ export class PersonsModalComponent implements OnInit {
       this.partnerService.getCropSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (res) => { if (res.success) this.cropEnabled.set(res.data.enabled); },
       });
-      // PSD fotóváltozás friss lekérése
-      this.psdStatusService.refreshPhotoChanges(this.projectId());
+      // PSD fotóváltozás friss lekérése (projektContext-tel, ha nincs cache)
+      this.psdStatusService.refreshPhotoChanges(this.projectId(), {
+        name: this.projectName(),
+        schoolName: this.schoolName(),
+        className: this.className(),
+      });
     }
   }
 

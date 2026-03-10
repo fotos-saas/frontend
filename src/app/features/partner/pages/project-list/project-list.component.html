@@ -217,6 +217,8 @@
   <app-persons-modal
     [projectId]="actions.selectedProject()!.id"
     [projectName]="actions.selectedProject()!.name"
+    [schoolName]="actions.selectedProject()!.schoolName"
+    [className]="actions.selectedProject()!.className"
     (close)="actions.closeMissingModal()"
     (openUploadWizard)="actions.openUploadWizardFromMissing($event)"
     (expandedViewRequested)="openExpandedTeacherView($event)"

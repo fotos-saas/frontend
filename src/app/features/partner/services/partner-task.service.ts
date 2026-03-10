@@ -83,6 +83,13 @@ export class PartnerTaskService {
     );
   }
 
+  /** Válasz törlése kérdésnél */
+  deleteAnswer(projectId: number, taskId: number): Observable<{ data: ProjectTask }> {
+    return this.http.delete<{ data: ProjectTask }>(
+      `${this.baseUrl}/projects/${projectId}/tasks/${taskId}/answer`
+    );
+  }
+
   private buildFormData(
     data: { title: string; description?: string | null; assigned_to_user_id?: number | null; type?: string },
     attachments: File[],

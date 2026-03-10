@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, input, output, signal, computed, inject, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -17,7 +17,7 @@ import type { ProjectTask } from '../../../../features/partner/models/partner.mo
   templateUrl: './project-task-answer-dialog.component.html',
   styleUrls: ['./project-task-answer-dialog.component.scss'],
 })
-export class ProjectTaskAnswerDialogComponent {
+export class ProjectTaskAnswerDialogComponent implements OnInit {
   projectId = input.required<number>();
   task = input.required<ProjectTask>();
   close = output<void>();
@@ -30,6 +30,15 @@ export class ProjectTaskAnswerDialogComponent {
   readonly ICONS = ICONS;
   saving = signal(false);
   answerText = '';
+  isEdit = false;
+
+  ngOnInit(): void {
+    const existing = this.task().answer;
+    if (existing) {
+      this.answerText = existing;
+      this.isEdit = true;
+    }
+  }
 
   readonly canSave = computed(() => !this.saving() && this.answerText.trim().length > 0);
 

@@ -64,6 +64,14 @@
           @if (task().answered_by) {
             <span class="task-row__answer-by">— {{ task().answered_by!.name }}</span>
           }
+          <div class="task-row__answer-actions">
+            <button class="task-row__answer-action" (click)="editAnswer.emit()" aria-label="Válasz szerkesztése">
+              <lucide-icon [name]="ICONS.EDIT" [size]="12" />
+            </button>
+            <button class="task-row__answer-action task-row__answer-action--danger" (click)="deleteAnswer.emit()" aria-label="Válasz törlése">
+              <lucide-icon [name]="ICONS.DELETE" [size]="12" />
+            </button>
+          </div>
         </div>
         <span class="task-row__answer-text" [innerHTML]="task().answer | safeHtml"></span>
       </div>

@@ -1,5 +1,5 @@
 <app-dialog-wrapper
-  title="Válasz a kérdésre"
+  [title]="isEdit ? 'Válasz szerkesztése' : 'Válasz a kérdésre'"
   [icon]="ICONS.MESSAGE_CIRCLE_QUESTION"
   headerStyle="flat"
   theme="amber"
@@ -43,7 +43,7 @@
       @if (saving()) {
         <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
       }
-      Válasz küldése
+      {{ isEdit ? 'Mentés' : 'Válasz küldése' }}
     </button>
   </div>
 </app-dialog-wrapper>

@@ -23,6 +23,8 @@ export class TaskRowComponent {
   toggleComplete = output<void>();
   toggleReview = output<void>();
   answerClicked = output<void>();
+  editAnswer = output<void>();
+  deleteAnswer = output<void>();
   edit = output<void>();
   delete = output<void>();
 

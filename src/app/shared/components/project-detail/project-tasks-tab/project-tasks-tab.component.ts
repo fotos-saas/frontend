@@ -149,6 +149,20 @@ export class ProjectTasksTabComponent implements OnInit {
       });
   }
 
+  /** Válasz törlése kérdésnél */
+  deleteAnswerForTask(task: ProjectTask): void {
+    this.taskService.deleteAnswer(this.projectId(), task.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.myTasks.update(tasks => tasks.map(t => t.id === task.id ? res.data : t));
+          this.assignedToMe.update(tasks => tasks.map(t => t.id === task.id ? res.data : t));
+          this.toast.success('Siker', 'Válasz törölve.');
+        },
+        error: () => this.toast.error('Hiba', 'Nem sikerült törölni a választ.'),
+      });
+  }
+
   private filterByType(tasks: ProjectTask[]): ProjectTask[] {
     const filter = this.activeFilter();
     if (filter === 'all') return tasks;

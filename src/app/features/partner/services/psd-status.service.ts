@@ -43,6 +43,8 @@ export class PsdStatusService {
   readonly changedPersonIdsMap = signal<Map<number, Set<number>>>(new Map());
   /** Projekt ID → placed-photos.json tartalom (person→media mapping) */
   private placedPhotosCache = new Map<number, Record<string, number>>();
+  /** A háttérben futó fotóváltozás-ellenőrzés promise-ja */
+  private backgroundCheckPromise: Promise<void> | null = null;
   readonly loading = signal(false);
 
   getStatus(projectId: number): PsdStatus | null {
@@ -56,13 +58,19 @@ export class PsdStatusService {
 
   /**
    * Egyetlen projekt fotóváltozásainak ellenőrzése (on-demand).
-   * Ha már lefutott korábban és van eredmény, nem fut újra.
-   * Ha van placed-photos adat de még nem volt ellenőrizve, lefuttatja.
+   * Ha a háttérfolyamat még fut, megvárja azt.
+   * Ha nincs háttérfolyamat de van cached placed-photos, lefuttatja.
    */
   async ensurePhotoChangesChecked(projectId: number): Promise<void> {
-    // Már van eredmény — nem kell újra futtatni
+    // Ha háttérfolyamat fut, megvárjuk — utána a changedPersonIdsMap friss lesz
+    if (this.backgroundCheckPromise) {
+      await this.backgroundCheckPromise;
+    }
+
+    // Már van eredmény — nem kell mást csinálni
     if (this.changedPersonIdsMap().has(projectId)) return;
 
+    // Próbáljuk a cache-ből
     const placedPhotos = this.placedPhotosCache.get(projectId);
     if (!placedPhotos || Object.keys(placedPhotos).length === 0) return;
 
@@ -74,18 +82,9 @@ export class PsdStatusService {
         ...result.changed.map(c => c.personId),
         ...(result.newPhotos ?? []).map(c => c.personId),
       ];
-      if (changedIds.length > 0) {
-        const personIdsMap = new Map(this.changedPersonIdsMap());
-        personIdsMap.set(projectId, new Set(changedIds));
-        this.changedPersonIdsMap.set(personIdsMap);
-
-        const statusMap = new Map(this.statusMap());
-        const status = statusMap.get(projectId);
-        if (status) {
-          statusMap.set(projectId, { ...status, updatedPhotosCount: changedIds.length });
-          this.statusMap.set(statusMap);
-        }
-      }
+      const personIdsMap = new Map(this.changedPersonIdsMap());
+      personIdsMap.set(projectId, new Set(changedIds));
+      this.changedPersonIdsMap.set(personIdsMap);
     } catch (err) {
       this.logger.error(`[PSD] On-demand fotó-változás hiba #${projectId}:`, err);
     }
@@ -153,7 +152,7 @@ export class PsdStatusService {
       this.loading.set(false);
 
       // Fotó-változások ellenőrzése háttérben (nem blokkolja a lista megjelenítést)
-      this.checkPhotoChangesInBackground(newMap, placedMaps).catch(err =>
+      this.backgroundCheckPromise = this.checkPhotoChangesInBackground(newMap, placedMaps).catch(err =>
         this.logger.error('[PSD] Fotó-változás háttér hiba:', err),
       );
     } catch (err) {
@@ -229,25 +228,28 @@ export class PsdStatusService {
         }),
       );
 
-      let batchHasUpdates = false;
+      let batchHasChanges = false;
       const personIdsMap = this.changedPersonIdsMap();
       for (const r of results) {
         if (r.status === 'rejected') {
           this.logger.error('[PSD] Fotó-változás API hiba:', r.reason);
-        } else if (r.value.changedCount > 0) {
-          const status = statusMap.get(r.value.projectId);
-          if (status) {
-            statusMap.set(r.value.projectId, { ...status, updatedPhotosCount: r.value.changedCount });
-            personIdsMap.set(r.value.projectId, new Set(r.value.changedIds));
-            batchHasUpdates = true;
+        } else {
+          // Mindig beírjuk az eredményt (0 changed is), hogy ne fusson újra feleslegesen
+          personIdsMap.set(r.value.projectId, new Set(r.value.changedIds));
+          if (r.value.changedCount > 0) {
+            const status = statusMap.get(r.value.projectId);
+            if (status) {
+              statusMap.set(r.value.projectId, { ...status, updatedPhotosCount: r.value.changedCount });
+              batchHasChanges = true;
+            }
           }
         }
       }
 
-      // Batch-enként frissítjük a signal-t, hogy a badge azonnal megjelenjen
-      if (batchHasUpdates) {
+      // Batch-enként frissítjük a signal-okat
+      this.changedPersonIdsMap.set(new Map(personIdsMap));
+      if (batchHasChanges) {
         this.statusMap.set(new Map(statusMap));
-        this.changedPersonIdsMap.set(new Map(personIdsMap));
       }
     }
   }

@@ -208,6 +208,7 @@ export class PersonsModalComponent implements OnInit {
   onPhotoUploaded(result: PhotoUploadResult): void {
     this.updatePersonInList(result.personId, { hasPhoto: true, photoThumbUrl: result.thumbUrl, photoUrl: result.photoUrl, hasOverride: result.isOverride });
     this.photoUploadPerson.set(null);
+    this.markPersonAsChanged(result.personId);
   }
 
   openLightbox(person: TabloPersonItem): void {
@@ -218,6 +219,7 @@ export class PersonsModalComponent implements OnInit {
 
   onPhotoChanged(event: { personId: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean }): void {
     this.updatePersonInList(event.personId, event);
+    this.markPersonAsChanged(event.personId);
     const current = this.lightboxPerson();
     if (current?.id === event.personId) {
       this.lightboxPerson.set(this.allPersons().find(p => p.id === event.personId) || null);
@@ -226,6 +228,18 @@ export class PersonsModalComponent implements OnInit {
 
   updatePersonInList(personId: number, patch: Partial<TabloPersonItem>): void {
     this.allPersons.set(this.allPersons().map(p => p.id === personId ? { ...p, ...patch } : p));
+  }
+
+  /** Személy megjelölése módosultként (PSD óta változott badge) */
+  private markPersonAsChanged(personId: number): void {
+    if (!this.isElectron) return;
+    const currentSet = this.psdStatusService.getChangedPersonIds(this.projectId());
+    if (currentSet.has(personId)) return;
+    const newSet = new Set(currentSet);
+    newSet.add(personId);
+    const map = new Map(this.psdStatusService.changedPersonIdsMap());
+    map.set(this.projectId(), newSet);
+    this.psdStatusService.changedPersonIdsMap.set(map);
   }
 
   // --- Extra nevek ---

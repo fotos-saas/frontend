@@ -116,6 +116,32 @@ export class PhotoLightboxComponent implements OnInit {
       });
   }
 
+  downloadPhoto(event: MouseEvent): void {
+    event.stopPropagation();
+    const p = this.person();
+    if (!p?.photoUrl) return;
+
+    const url = p.photoUrl;
+    const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+    const filename = `${p.name.replace(/\s+/g, '_')}.${ext}`;
+
+    // Electron: fetch + blob + saveAs (cross-origin nem engedi az <a download>-ot)
+    // Böngésző: ugyanez, mert a kép más domainről jön (API szerver)
+    fetch(url, { credentials: 'include' })
+      .then(res => res.blob())
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      })
+      .catch(() => {
+        // Fallback: megnyitás új ablakban
+        window.open(url, '_blank');
+      });
+  }
+
   onKeydown(event: KeyboardEvent): void {
     if (!this.person()) return;
 

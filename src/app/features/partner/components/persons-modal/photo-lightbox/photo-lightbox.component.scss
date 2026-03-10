@@ -55,10 +55,16 @@
   margin-top: 4px;
 }
 
-.lightbox-close {
+.lightbox-actions {
   position: absolute;
   top: 16px;
   right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lightbox-action {
   width: 44px;
   height: 44px;
   background: rgba(255, 255, 255, 0.1);
@@ -72,7 +78,7 @@
   transition: background 0.15s ease;
 }
 
-.lightbox-close:hover {
+.lightbox-action:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 

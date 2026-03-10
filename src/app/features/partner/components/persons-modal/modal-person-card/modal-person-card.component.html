@@ -26,6 +26,11 @@
         <lucide-icon [name]="ICONS.SETTINGS" [size]="12" />
       </button>
 
+      @if (photoChanged()) {
+        <div class="photo-changed-badge" matTooltip="Fotó változott a PSD óta">
+          <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+        </div>
+      }
       @if (person().isPortraitProcessed) {
         <div class="portrait-badge" matTooltip="Háttércserés fotó">
           <lucide-icon [name]="ICONS.SCAN_FACE" [size]="12" />

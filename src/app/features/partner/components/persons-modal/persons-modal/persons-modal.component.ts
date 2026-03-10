@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
 import { ElectronService } from '../../../../../core/services/electron.service';
+import { PsdStatusService } from '../../../services/psd-status.service';
 import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TIMEOUTS } from '../../../../../shared/constants/timeouts.constants';
@@ -55,6 +56,7 @@ export class PersonsModalComponent implements OnInit {
   private readonly partnerService = inject(PartnerService);
   private readonly projectService = inject(PartnerProjectService);
   private readonly electronService = inject(ElectronService);
+  private readonly psdStatusService = inject(PsdStatusService);
   private readonly destroyRef = inject(DestroyRef);
   readonly batchActions = inject(BatchPortraitActionsService);
   readonly actions = inject(PersonsModalActionsService);
@@ -145,6 +147,11 @@ export class PersonsModalComponent implements OnInit {
   });
 
   readonly personsWithPhotos = computed(() => this.filteredPersons().filter(p => p.photoUrl || p.photoThumbUrl));
+
+  /** PSD óta változott fotóval rendelkező személy ID-k */
+  readonly changedPersonIds = computed(() =>
+    this.psdStatusService.getChangedPersonIds(this.projectId())
+  );
 
   readonly emptyState = computed(() => {
     if (this.searchQuery()) return { title: 'Nincs találat', text: 'Próbálj más keresési kifejezéssel!' };

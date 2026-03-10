@@ -464,19 +464,21 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #ffffff;
-  font-size: 0.7rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  line-height: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid #ffffff;
   pointer-events: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 /* Col: Actions */

@@ -23,6 +23,8 @@ export class ModalPersonCardComponent {
 
   readonly person = input.required<TabloPersonItem>();
   readonly animationDelay = input<string>('0s');
+  /** Jelzi hogy a fotó változott a PSD-be helyezés óta */
+  readonly photoChanged = input(false);
 
   readonly cardClick = output<TabloPersonItem>();
   readonly editClick = output<TabloPersonItem>();

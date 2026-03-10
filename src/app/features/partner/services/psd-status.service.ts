@@ -39,10 +39,17 @@ export class PsdStatusService {
   private readonly projectService = inject(PartnerProjectService);
 
   readonly statusMap = signal<Map<number, PsdStatus>>(new Map());
+  /** Projekt ID → módosult személy ID-k halmaza */
+  readonly changedPersonIdsMap = signal<Map<number, Set<number>>>(new Map());
   readonly loading = signal(false);
 
   getStatus(projectId: number): PsdStatus | null {
     return this.statusMap().get(projectId) ?? null;
+  }
+
+  /** Módosult személy ID-k lekérése egy projekthez */
+  getChangedPersonIds(projectId: number): Set<number> {
+    return this.changedPersonIdsMap().get(projectId) ?? new Set();
   }
 
   /** Badge nullázása egy projekt frissítése után */
@@ -174,11 +181,16 @@ export class PsdStatusService {
             this.projectService.checkPhotoChanges(projectId, placedPhotos),
           );
           const newCount = result.newPhotos?.length ?? 0;
-          return { projectId, changedCount: result.changed.length + newCount };
+          const changedIds = [
+            ...result.changed.map(c => c.personId),
+            ...(result.newPhotos ?? []).map(c => c.personId),
+          ];
+          return { projectId, changedCount: changedIds.length, changedIds };
         }),
       );
 
       let batchHasUpdates = false;
+      const personIdsMap = this.changedPersonIdsMap();
       for (const r of results) {
         if (r.status === 'rejected') {
           this.logger.error('[PSD] Fotó-változás API hiba:', r.reason);
@@ -186,6 +198,7 @@ export class PsdStatusService {
           const status = statusMap.get(r.value.projectId);
           if (status) {
             statusMap.set(r.value.projectId, { ...status, updatedPhotosCount: r.value.changedCount });
+            personIdsMap.set(r.value.projectId, new Set(r.value.changedIds));
             batchHasUpdates = true;
           }
         }
@@ -194,6 +207,7 @@ export class PsdStatusService {
       // Batch-enként frissítjük a signal-t, hogy a badge azonnal megjelenjen
       if (batchHasUpdates) {
         this.statusMap.set(new Map(statusMap));
+        this.changedPersonIdsMap.set(new Map(personIdsMap));
       }
     }
   }

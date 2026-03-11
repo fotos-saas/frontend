@@ -1,57 +1,126 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { formatTimeAgo } from './time-formatter.util';
 
 describe('time-formatter.util', () => {
 
-  describe('formatTimeAgo', () => {
-    it('most (kevesebb mint 1 perc)', () => {
-      const now = new Date().toISOString();
-      expect(formatTimeAgo(now)).toBe('most');
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // ==========================================================================
+  // Null/undefined/invalid handling
+  // ==========================================================================
+  describe('null/undefined/invalid', () => {
+    it('null → üres string', () => {
+      expect(formatTimeAgo(null)).toBe('');
     });
 
+    it('undefined → üres string', () => {
+      expect(formatTimeAgo(undefined)).toBe('');
+    });
+
+    it('üres string → üres string', () => {
+      expect(formatTimeAgo('')).toBe('');
+    });
+
+    it('érvénytelen dátum string → üres string', () => {
+      expect(formatTimeAgo('not-a-date')).toBe('');
+    });
+
+    it('érvénytelen Date objektum → üres string', () => {
+      expect(formatTimeAgo(new Date('invalid'))).toBe('');
+    });
+  });
+
+  // ==========================================================================
+  // Múltbeli idő
+  // ==========================================================================
+  describe('múltbeli idő', () => {
+    it('most (kevesebb mint 60 mp)', () => {
+      expect(formatTimeAgo(new Date('2026-03-05T11:59:30Z'))).toBe('most');
+      expect(formatTimeAgo(new Date('2026-03-05T12:00:00Z'))).toBe('most');
+    });
+
+    it('percek (1-59)', () => {
+      expect(formatTimeAgo(new Date('2026-03-05T11:59:00Z'))).toBe('1 perce');
+      expect(formatTimeAgo(new Date('2026-03-05T11:30:00Z'))).toBe('30 perce');
+      expect(formatTimeAgo(new Date('2026-03-05T11:01:00Z'))).toBe('59 perce');
+    });
+
+    it('órák (1-23)', () => {
+      expect(formatTimeAgo(new Date('2026-03-05T11:00:00Z'))).toBe('1 órája');
+      expect(formatTimeAgo(new Date('2026-03-05T00:00:00Z'))).toBe('12 órája');
+    });
+
+    it('napok (1-6)', () => {
+      expect(formatTimeAgo(new Date('2026-03-04T12:00:00Z'))).toBe('1 napja');
+      expect(formatTimeAgo(new Date('2026-02-27T12:00:00Z'))).toBe('6 napja');
+    });
+
+    it('hetek (1-3)', () => {
+      expect(formatTimeAgo(new Date('2026-02-26T12:00:00Z'))).toBe('1 hete');
+      expect(formatTimeAgo(new Date('2026-02-12T12:00:00Z'))).toBe('3 hete');
+    });
+
+    it('hónapok (1-11)', () => {
+      expect(formatTimeAgo(new Date('2026-02-01T12:00:00Z'))).toBe('1 hónapja');
+      expect(formatTimeAgo(new Date('2025-09-01T12:00:00Z'))).toBe('6 hónapja');
+    });
+
+    it('évek (1+)', () => {
+      expect(formatTimeAgo(new Date('2025-01-01T12:00:00Z'))).toBe('1 éve');
+      expect(formatTimeAgo(new Date('2024-01-01T12:00:00Z'))).toBe('2 éve');
+    });
+
+    it('ISO string input', () => {
+      expect(formatTimeAgo('2026-03-05T11:59:00Z')).toBe('1 perce');
+      expect(formatTimeAgo('2026-03-05T11:30:00Z')).toBe('30 perce');
+    });
+  });
+
+  // ==========================================================================
+  // Jövőbeli idő
+  // ==========================================================================
+  describe('jövőbeli idő', () => {
     it('percek', () => {
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(fiveMinAgo)).toBe('5 perce');
-    });
-
-    it('1 perc', () => {
-      const oneMinAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(oneMinAgo)).toBe('1 perce');
+      expect(formatTimeAgo(new Date('2026-03-05T12:05:00Z'))).toBe('5 perc múlva');
     });
 
     it('órák', () => {
-      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(twoHoursAgo)).toBe('2 órája');
+      expect(formatTimeAgo(new Date('2026-03-05T15:00:00Z'))).toBe('3 óra múlva');
     });
 
     it('napok', () => {
-      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(threeDaysAgo)).toBe('3 napja');
+      expect(formatTimeAgo(new Date('2026-03-07T12:00:00Z'))).toBe('2 nap múlva');
     });
 
     it('hetek', () => {
-      const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(twoWeeksAgo)).toBe('2 hete');
+      expect(formatTimeAgo(new Date('2026-03-19T12:00:00Z'))).toBe('2 hét múlva');
+    });
+  });
+
+  // ==========================================================================
+  // fallbackToDate opció
+  // ==========================================================================
+  describe('fallbackToDate opció', () => {
+    it('7 napon belül: normál relatív szöveg', () => {
+      expect(formatTimeAgo(new Date('2026-03-04T12:00:00Z'), { fallbackToDate: true })).toBe('1 napja');
+      expect(formatTimeAgo(new Date('2026-03-05T11:00:00Z'), { fallbackToDate: true })).toBe('1 órája');
     });
 
-    it('hónapok', () => {
-      const twoMonthsAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(twoMonthsAgo)).toBe('2 hónapja');
+    it('7+ nap: formázott dátum', () => {
+      expect(formatTimeAgo(new Date('2026-01-15T12:00:00Z'), { fallbackToDate: true })).toBe('2026.01.15.');
+      expect(formatTimeAgo(new Date('2025-06-01T12:00:00Z'), { fallbackToDate: true })).toBe('2025.06.01.');
     });
 
-    it('59 perc még perce', () => {
-      const fiftyNineMin = new Date(Date.now() - 59 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(fiftyNineMin)).toBe('59 perce');
-    });
-
-    it('23 óra még órája', () => {
-      const twentyThreeHours = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(twentyThreeHours)).toBe('23 órája');
-    });
-
-    it('6 nap még napja', () => {
-      const sixDays = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString();
-      expect(formatTimeAgo(sixDays)).toBe('6 napja');
+    it('7+ nap fallbackToDate nélkül: hete/hónapja/éve', () => {
+      expect(formatTimeAgo(new Date('2026-02-26T12:00:00Z'))).toBe('1 hete');
+      expect(formatTimeAgo(new Date('2025-09-01T12:00:00Z'))).toBe('6 hónapja');
     });
   });
 });

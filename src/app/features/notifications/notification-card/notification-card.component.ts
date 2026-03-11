@@ -2,6 +2,7 @@ import { Component, input, output, inject, ChangeDetectionStrategy, computed } f
 import { Router } from '@angular/router';
 import { Notification, NotificationType } from '../../../core/services/notification.service';
 import { LoggerService } from '../../../core/services/logger.service';
+import { formatTimeAgo } from '../../../shared/utils/time-formatter.util';
 
 /**
  * Notification Card Component
@@ -82,26 +83,10 @@ export class NotificationCardComponent {
     return `icon-${type}`;
   });
 
-  /** Relatív időpont megjelenítése */
-  readonly relativeTime = computed(() => {
-    const createdAt = new Date(this.notification().created_at);
-    const now = new Date();
-    const diffMs = now.getTime() - createdAt.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Most';
-    if (diffMins < 60) return `${diffMins} perce`;
-    if (diffHours < 24) return `${diffHours} órája`;
-    if (diffDays < 7) return `${diffDays} napja`;
-
-    // 7 napnál régebbi - formázott dátum
-    const year = createdAt.getFullYear();
-    const month = String(createdAt.getMonth() + 1).padStart(2, '0');
-    const day = String(createdAt.getDate()).padStart(2, '0');
-    return `${year}.${month}.${day}.`;
-  });
+  /** Relatív időpont megjelenítése — közös formatTimeAgo() util */
+  readonly relativeTime = computed(() =>
+    formatTimeAgo(this.notification().created_at, { fallbackToDate: true })
+  );
 
   /** Formázott title - poke_reaction esetén 👉 ikon */
   readonly formattedTitle = computed(() => {

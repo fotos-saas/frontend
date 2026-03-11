@@ -1,6 +1,7 @@
 /**
  * Tevékenységnapló formázó segédfüggvények.
  */
+import { formatTimeAgo } from '../../../../../shared/utils/time-formatter.util';
 
 interface ActivityItem {
   subjectName: string | null;
@@ -118,21 +119,12 @@ export function formatEventSummary(events: Record<string, number>): string {
     .join(', ');
 }
 
+/**
+ * Relatív idő formázás — delegál a közös formatTimeAgo() util-ra.
+ * 7+ napos dátumnál formázott dátumot ad vissza (activity log specifikus).
+ */
 export function relativeTime(iso: string | null): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffH = Math.floor(diffMs / 3600000);
-  const diffD = Math.floor(diffMs / 86400000);
-
-  if (diffMin < 1) return 'épp most';
-  if (diffMin < 60) return `${diffMin} perce`;
-  if (diffH < 24) return `${diffH} órája`;
-  if (diffD === 1) return 'tegnap';
-  if (diffD < 7) return `${diffD} napja`;
-  return d.toLocaleDateString('hu-HU', { month: '2-digit', day: '2-digit' });
+  return formatTimeAgo(iso, { fallbackToDate: true });
 }
 
 export function getEventLabel(event: string | null): string {

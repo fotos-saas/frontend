@@ -28,6 +28,7 @@ export class PrintShopShellComponent {
   navItems: MenuItem[] = [
     { id: 'dashboard', route: '/print-shop/dashboard', label: 'Vezérlőpult', icon: 'home' },
     { id: 'projects', route: '/print-shop/projects', label: 'Projektek', icon: 'folder-open' },
+    { id: 'connections', route: '/print-shop/connections', label: 'Kapcsolatok', icon: 'link' },
   ];
 
   mobileMenuItems = computed<MenuItem[]>(() => [...this.navItems]);

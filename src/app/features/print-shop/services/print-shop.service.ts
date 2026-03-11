@@ -8,6 +8,7 @@ import {
   PrintShopProject,
   PrintShopProjectDetail,
   PrintShopProjectListParams,
+  PrintShopConnectionRequests,
   PaginatedResponse,
 } from '../models/print-shop.models';
 
@@ -51,6 +52,26 @@ export class PrintShopService {
     return this.http.post<{ data: { status: string } }>(`${this.baseUrl}/projects/${projectId}/revert-to-print`, {}).pipe(
       map(res => res.data)
     );
+  }
+
+  // === Connection endpoints ===
+
+  getConnectionRequests(): Observable<PrintShopConnectionRequests> {
+    return this.http.get<{ data: PrintShopConnectionRequests }>(`${this.baseUrl}/connection-requests`).pipe(
+      map(res => res.data)
+    );
+  }
+
+  approveConnection(id: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/connections/${id}/approve`, {});
+  }
+
+  rejectConnection(id: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/connections/${id}/reject`, {});
+  }
+
+  removeConnection(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.baseUrl}/connections/${id}`);
   }
 
   downloadFile(projectId: number, type: string = 'small_tablo'): Observable<{ blob: Blob; fileName: string }> {

@@ -1,0 +1,146 @@
+<div class="connections-page page-card">
+  <div class="page-header">
+    <div>
+      <h1>
+        <lucide-icon [name]="ICONS.LINK" [size]="24" />
+        Kapcsolatok
+      </h1>
+      <p class="page-subtitle">Fotós stúdiók kapcsolódási kérelmeinek kezelése</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state" role="status">
+      <span class="sr-only">Betöltés folyamatban...</span>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+  } @else {
+    <!-- Bejövő kérelmek -->
+    <section class="section">
+      <div class="section-header">
+        <h2>
+          <lucide-icon [name]="ICONS.INBOX" [size]="20" />
+          Bejövő kérelmek
+        </h2>
+        @if (incoming().length > 0) {
+          <span class="badge badge--pending">{{ incoming().length }}</span>
+        }
+      </div>
+
+      @if (incoming().length === 0) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.INBOX" [size]="40" class="empty-icon" />
+          <p>Nincs bejövő kapcsolódási kérelem</p>
+        </div>
+      } @else {
+        <div class="request-list">
+          @for (req of incoming(); track req.id) {
+            <div class="request-card">
+              <div class="request-info">
+                <div class="request-name">
+                  <lucide-icon [name]="ICONS.CAMERA" [size]="18" class="name-icon" />
+                  <span>{{ req.photoStudio.name }}</span>
+                </div>
+                @if (req.photoStudio.email) {
+                  <div class="request-detail">
+                    <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+                    {{ req.photoStudio.email }}
+                  </div>
+                }
+                <div class="request-detail request-detail--muted">
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                  {{ formatDate(req.createdAt) }}
+                </div>
+              </div>
+              <div class="request-actions">
+                <button
+                  class="btn btn--success btn--sm"
+                  matTooltip="Elfogadás"
+                  [disabled]="actionLoadingId() === req.id"
+                  (click)="approve(req)"
+                >
+                  @if (actionLoadingId() === req.id) {
+                    <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+                  }
+                  Elfogadás
+                </button>
+                <button
+                  class="btn btn--outline btn--sm btn--danger-outline"
+                  matTooltip="Elutasítás"
+                  [disabled]="actionLoadingId() === req.id"
+                  (click)="confirmReject(req)"
+                >
+                  <lucide-icon [name]="ICONS.X" [size]="16" />
+                  Elutasítás
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Kimenő kérelmek -->
+    @if (outgoing().length > 0) {
+      <section class="section">
+        <div class="section-header">
+          <h2>
+            <lucide-icon [name]="ICONS.SEND" [size]="20" />
+            Kimenő kérelmek
+          </h2>
+          <span class="badge badge--muted">{{ outgoing().length }}</span>
+        </div>
+
+        <div class="request-list">
+          @for (req of outgoing(); track req.id) {
+            <div class="request-card request-card--outgoing">
+              <div class="request-info">
+                <div class="request-name">
+                  <lucide-icon [name]="ICONS.CAMERA" [size]="18" class="name-icon" />
+                  <span>{{ req.photoStudio.name }}</span>
+                </div>
+                <div class="request-detail request-detail--muted">
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                  Meghívó küldve: {{ formatDate(req.createdAt) }}
+                </div>
+              </div>
+              <div class="request-actions">
+                <button
+                  class="btn btn--outline btn--sm"
+                  matTooltip="Visszavonás"
+                  [disabled]="actionLoadingId() === req.id"
+                  (click)="withdraw(req)"
+                >
+                  <lucide-icon [name]="ICONS.UNDO" [size]="16" />
+                  Visszavonás
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Ha mind üres -->
+    @if (incoming().length === 0 && outgoing().length === 0) {
+      <div class="all-empty">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="all-empty-icon" />
+        <p>Nincs függőben lévő kérelem</p>
+        <span class="all-empty-hint">A fotós stúdiók a rendszeren belül küldhetnek kapcsolódási kérelmet.</span>
+      </div>
+    }
+  }
+</div>
+
+<!-- Elutasítás megerősítés -->
+@if (showRejectConfirm()) {
+  <app-confirm-dialog
+    title="Kérelem elutasítása"
+    [message]="'Biztosan elutasítod ' + pendingRejectRequest()?.photoStudio?.name + ' kapcsolódási kérelmét?'"
+    confirmText="Elutasítás"
+    (resultEvent)="onRejectResult($event)"
+  />
+}

@@ -60,5 +60,36 @@ export interface PrintShopProjectListParams {
   class_year?: string;
 }
 
+// === Connection modellek ===
+
+export interface PrintShopConnectionStudio {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface PrintShopConnection {
+  id: number;
+  photoStudio: PrintShopConnectionStudio;
+  status: 'active' | 'pending' | 'inactive';
+  statusName: string;
+  initiatedBy: 'photo_studio' | 'print_shop';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PrintShopConnectionRequest {
+  id: number;
+  photoStudio: { id: number; name: string; email: string | null };
+  initiatedBy: 'photo_studio' | 'print_shop';
+  createdAt: string;
+}
+
+export interface PrintShopConnectionRequests {
+  incoming: PrintShopConnectionRequest[];
+  outgoing: PrintShopConnectionRequest[];
+}
+
 // Re-export from canonical source
 export type { PaginatedResponse } from '../../../core/models/api.models';

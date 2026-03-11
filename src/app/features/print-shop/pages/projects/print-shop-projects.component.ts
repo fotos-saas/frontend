@@ -220,13 +220,29 @@ export class PrintShopProjectsComponent {
 
   downloadFile(project: PrintShopProject): void {
     const type = project.printFileType === 'print_flat' ? 'flat' : 'small_tablo';
-    const url = this.service.getDownloadUrl(project.id, type);
-    window.open(url, '_blank');
+    this.triggerDownload(project.id, type);
   }
 
   downloadSample(project: PrintShopProject): void {
-    const url = this.service.getDownloadUrl(project.id, 'sample');
-    window.open(url, '_blank');
+    this.triggerDownload(project.id, 'sample');
+  }
+
+  private triggerDownload(projectId: number, type: string): void {
+    this.service.downloadFile(projectId, type)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ blob, fileName }) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => {
+          // Hiba esetén csendben marad
+        }
+      });
   }
 
   formatDate(isoDate: string | null): string {

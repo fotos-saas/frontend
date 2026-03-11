@@ -53,7 +53,17 @@ export class PrintShopService {
     );
   }
 
-  getDownloadUrl(projectId: number, type: string = 'small_tablo'): string {
-    return `${this.baseUrl}/projects/${projectId}/download?type=${type}`;
+  downloadFile(projectId: number, type: string = 'small_tablo'): Observable<{ blob: Blob; fileName: string }> {
+    return this.http.get(`${this.baseUrl}/projects/${projectId}/download`, {
+      params: { type },
+      responseType: 'blob',
+      observe: 'response',
+    }).pipe(
+      map(response => {
+        const disposition = response.headers.get('Content-Disposition');
+        const fileName = disposition?.match(/filename="?([^"]+)"?/)?.[1] ?? `download-${projectId}`;
+        return { blob: response.body!, fileName };
+      })
+    );
   }
 }

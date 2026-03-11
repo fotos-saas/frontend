@@ -1,0 +1,237 @@
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
+:host {
+  display: contents;
+}
+
+.compact-form {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+// ============================================================================
+// FORM SECTIONS
+// ============================================================================
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+
+  ps-input,
+  ps-autocomplete,
+  ps-textarea {
+    margin-bottom: 12px;
+  }
+}
+
+.school-row {
+  display: flex;
+  align-items: flex-end;
+
+  ps-autocomplete {
+    flex: 1;
+    margin-bottom: 12px;
+  }
+}
+
+.btn-add-school {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 8px;
+  margin-bottom: 12px;
+  border: 1px solid get-color('gray', 200);
+  border-radius: 8px;
+  background: #fff;
+  color: get-color('gray', 600);
+  cursor: pointer;
+  flex-shrink: 0;
+  @include transition-fast;
+
+  &:hover {
+    background: get-color('gray', 50);
+    color: var(--primary, #7c3aed);
+    border-color: var(--primary, #7c3aed);
+  }
+}
+
+.form-row {
+  display: flex;
+  margin: 0 -6px;
+
+  > ps-input,
+  > .color-field {
+    flex: 1;
+    margin: 0 6px 12px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    margin: 0;
+
+    > ps-input,
+    > .color-field {
+      margin: 0 0 12px;
+    }
+  }
+}
+
+// ============================================================================
+// COLLAPSIBLE SECTIONS
+// ============================================================================
+
+.collapsible-section {
+  border-top: 1px solid get-color('gray', 100);
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: get-color('gray', 600);
+  @include transition-fast;
+
+  lucide-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    color: var(--primary, #7c3aed);
+  }
+}
+
+.collapse-content {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+
+  ps-input,
+  ps-textarea {
+    margin-bottom: 12px;
+  }
+}
+
+// ============================================================================
+// COLOR FIELD
+// ============================================================================
+
+.color-field {
+  position: relative;
+}
+
+.color-swatch {
+  position: absolute;
+  right: 8px;
+  bottom: 16px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid get-color('gray', 200);
+  border-radius: 6px;
+  padding: 2px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+  }
+}
+
+// ============================================================================
+// EDITOR
+// ============================================================================
+
+.editor-field {
+  margin-bottom: 12px;
+}
+
+.editor-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: get-color('gray', 700);
+  margin-bottom: 6px;
+}
+
+.editor-container {
+  border: 1px solid get-color('gray', 200);
+  border-radius: 8px;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: var(--primary, #7c3aed);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+
+  ::ng-deep {
+    .NgxEditor__MenuBar {
+      border-bottom: 1px solid get-color('gray', 100);
+      padding: 4px;
+    }
+
+    .NgxEditor {
+      min-height: 100px;
+      padding: 8px 12px;
+
+      .NgxEditor__Content {
+        min-height: 80px;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// FOOTER
+// ============================================================================
+
+.compact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+// ============================================================================
+// SPINNER
+// ============================================================================
+
+.spinner--small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

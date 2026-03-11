@@ -64,6 +64,68 @@ function _getExistingLayerWidth(doc, groupPath) {
 }
 
 /**
+ * Meglevo SO belso meretenek kiolvasasa: megnyitjuk editContents-szel,
+ * kiolvassuk a width/height-et, majd bezarjuk mentes nelkul.
+ * Ha nincs meglevo SO, a doc DPI-bol szamolunk (9x13 cm arany).
+ */
+function _getExistingSoInternalSize(doc) {
+  // Fallback: doc DPI-bol szamolunk (9 cm szeles, 9/6.5 * 9 = ~13.3 cm magas arany: 1:1.481)
+  var fallbackW = Math.round((9 / 2.54) * doc.resolution);
+  var fallbackH = Math.round((13.3 / 2.54) * doc.resolution);
+  var fallback = { widthPx: fallbackW, heightPx: fallbackH };
+
+  // Keresunk egy meglevo SO-t az Images csoportban
+  var searchGroups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var sg = 0; sg < searchGroups.length; sg++) {
+    var grp = getGroupByPath(doc, searchGroups[sg]);
+    if (!grp) continue;
+    try {
+      for (var si = 0; si < grp.artLayers.length; si++) {
+        var soLayer = grp.artLayers[si];
+        // Csak SmartObject tipusu layerek
+        if (soLayer.kind !== LayerKind.SMARTOBJECT) continue;
+
+        try {
+          // SO megnyitasa szerkesztesre (editContents)
+          doc.activeLayer = soLayer;
+          var descEdit = new ActionDescriptor();
+          var refEdit = new ActionReference();
+          refEdit.putEnumerated(
+            stringIDToTypeID("smartObject"),
+            stringIDToTypeID("ordinal"),
+            stringIDToTypeID("targetEnum")
+          );
+          descEdit.putReference(charIDToTypeID("null"), refEdit);
+          executeAction(stringIDToTypeID("placedLayerEditContents"), descEdit, DialogModes.NO);
+
+          // Belso meret kiolvasasa
+          var soDoc = app.activeDocument;
+          var w = Math.round(soDoc.width.as("px"));
+          var h = Math.round(soDoc.height.as("px"));
+
+          // Bezaras mentes nelkul
+          soDoc.close(SaveOptions.DONOTSAVECHANGES);
+
+          if (w > 10 && h > 10) {
+            return { widthPx: w, heightPx: h };
+          }
+        } catch (editErr) {
+          // Ha nem sikerult megnyitni, probaljuk a kovetkezot
+          try {
+            if (app.documents.length > 1) {
+              app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+            }
+          } catch (ce) { /* ignore */ }
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  log("[JSX] WARN: nem talaltam meglevo SO-t, fallback: " + fallback.widthPx + "x" + fallback.heightPx);
+  return fallback;
+}
+
+/**
  * Elso text layer stilusanak kiolvasasa a megadott csoportbol.
  */
 function _getRefNameStyle(doc, groupPath) {
@@ -116,9 +178,11 @@ function _doRefreshRoster() {
   }
 
   // --- 2. Hozzaadas ---
-  // SO belso meret: UGYANAZ mint az eredeti generalaskor (9x13cm @ 339 DPI).
-  // A vegleges vizualis meretet a resize fazis allitja be (lasd lentebb).
-  var soCreationSize = { widthPx: 1228, heightPx: 1819 };
+  // SO belso meret: a meglevo SO-k belso meretevel AZONOS kell legyen.
+  // NEM hardcoded! A dokumentum DPI-jetol fugg (200 DPI → 819x1213, 300 DPI → 1228x1819).
+  // Kinyerjuk egy meglevo SO editContents-szel, vagy ha nincs, a doc DPI-bol szamolunk.
+  var soCreationSize = _getExistingSoInternalSize(_doc);
+  log("[JSX] SO belso meret: " + soCreationSize.widthPx + "x" + soCreationSize.heightPx + " px");
 
   // Meglevo layerek vizualis szelessege csoportonkent (resize celmerethez)
   var existingWidth = {};
@@ -143,11 +207,14 @@ function _doRefreshRoster() {
     try {
       var imagesGroup = getGroupByPath(_doc, ["Images", groupName]);
       if (imagesGroup) {
-        var newImgLayer = createSmartObjectPlaceholder(_doc, imagesGroup, {
+        createSmartObjectPlaceholder(_doc, imagesGroup, {
           name: item.layerName,
           widthPx: soCreationSize.widthPx,
           heightPx: soCreationSize.heightPx
         });
+        // FONTOS: createSmartObjectPlaceholder return erteke elavult referencia lehet
+        // a Convert to SO utan — a doc.activeLayer a megbizhato SO referencia
+        var newImgLayer = _doc.activeLayer;
         _addedImages++;
         try {
           _newImageLayerIds.push(newImgLayer.id);
@@ -204,10 +271,12 @@ function _doRefreshRoster() {
     var targetW = existingWidth[gn];
     if (targetW > 0 && newLayersByGroup[gn].length > 0) {
       for (var rl = 0; rl < newLayersByGroup[gn].length; rl++) {
-        var resizeLayer = newLayersByGroup[gn][rl];
+        var storedLayer = newLayersByGroup[gn][rl];
         try {
-          selectLayerById(resizeLayer.id);
-          _doc.activeLayer = resizeLayer;
+          selectLayerById(storedLayer.id);
+          // FONTOS: a createSmartObjectPlaceholder altal visszaadott layer referencia
+          // elavulhat a Convert to SO utan — mindig a doc.activeLayer-t hasznaljuk!
+          var resizeLayer = _doc.activeLayer;
           var rBounds = resizeLayer.bounds;
           var rCurrentW = rBounds[2].as("px") - rBounds[0].as("px");
           if (rCurrentW > 0 && Math.abs(rCurrentW - targetW) > 1) {
@@ -219,7 +288,7 @@ function _doRefreshRoster() {
             log("[JSX] Resize: " + resizeLayer.name + " " + Math.round(rCurrentW) + " → " + targetW + " px");
           }
         } catch (e) {
-          log("[JSX] FIGYELEM: resize sikertelen: " + resizeLayer.name + " - " + e.message);
+          log("[JSX] FIGYELEM: resize sikertelen: " + (storedLayer.name || "?") + " - " + e.message);
         }
       }
     }

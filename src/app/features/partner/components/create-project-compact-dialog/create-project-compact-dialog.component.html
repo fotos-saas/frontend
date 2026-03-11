@@ -1,0 +1,194 @@
+<app-dialog-wrapper
+  headerStyle="flat"
+  [icon]="ICONS.PLUS"
+  title="Új projekt létrehozása"
+  theme="purple"
+  size="md"
+  [isSubmitting]="submitting()"
+  (closeEvent)="close.emit()"
+  (submitEvent)="submit()"
+>
+  <div dialogBody class="compact-form">
+    <!-- Kötelező mezők -->
+    <section class="form-section">
+      <div class="school-row">
+        <ps-autocomplete
+          label="Iskola neve"
+          placeholder="Kezdj el gépelni..."
+          [ngModel]="schoolName()"
+          (ngModelChange)="schoolName.set($event)"
+          [suggestions]="schoolSuggestions()"
+          [loading]="schoolLoading()"
+          [required]="true"
+          (search)="onSchoolSearch($event)"
+          (selected)="onSchoolSelected($event)"
+        />
+        <button
+          type="button"
+          class="btn-icon btn-add-school"
+          (click)="openAddSchoolModal()"
+          matTooltip="Új iskola hozzáadása"
+          aria-label="Új iskola hozzáadása"
+        >
+          <lucide-icon [name]="ICONS.PLUS" [size]="18" />
+        </button>
+      </div>
+
+      <div class="form-row">
+        <ps-input
+          label="Osztály neve"
+          placeholder="pl. 12.A"
+          [ngModel]="className()"
+          (ngModelChange)="className.set($event)"
+          [required]="true"
+        />
+        <ps-input
+          label="Évfolyam"
+          placeholder="pl. 2026"
+          [ngModel]="classYear()"
+          (ngModelChange)="classYear.set($event)"
+          [required]="true"
+        />
+      </div>
+
+      <ps-input
+        label="Kapcsolattartó neve"
+        placeholder="Teljes név"
+        [ngModel]="contactName()"
+        (ngModelChange)="contactName.set($event)"
+        [required]="true"
+      />
+
+      <ps-input
+        label="Email cím"
+        placeholder="email@pelda.hu"
+        type="email"
+        [ngModel]="contactEmail()"
+        (ngModelChange)="contactEmail.set($event)"
+        [required]="true"
+      />
+    </section>
+
+    <!-- Collapse: További adatok -->
+    <section class="collapsible-section">
+      <button
+        type="button"
+        class="collapse-toggle"
+        (click)="showExtra.set(!showExtra())"
+        [attr.aria-expanded]="showExtra()"
+        aria-controls="extra-fields"
+      >
+        <lucide-icon [name]="showExtra() ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="16" />
+        További adatok
+      </button>
+      @if (showExtra()) {
+        <div id="extra-fields" class="collapse-content">
+          <ps-input
+            label="Város"
+            placeholder="pl. Budapest"
+            [ngModel]="city()"
+            (ngModelChange)="city.set($event)"
+          />
+          <ps-textarea
+            label="Idézet"
+            placeholder="Tablóra kerülő idézet (opcionális)"
+            [ngModel]="quote()"
+            (ngModelChange)="quote.set($event)"
+            [rows]="3"
+            [maxLength]="500"
+          />
+          <ps-input
+            label="Telefonszám"
+            placeholder="+36 30 123 4567"
+            type="tel"
+            [ngModel]="contactPhone()"
+            (ngModelChange)="contactPhone.set($event)"
+          />
+        </div>
+      }
+    </section>
+
+    <!-- Collapse: Design beállítások -->
+    <section class="collapsible-section">
+      <button
+        type="button"
+        class="collapse-toggle"
+        (click)="showDesign.set(!showDesign())"
+        [attr.aria-expanded]="showDesign()"
+        aria-controls="design-fields"
+      >
+        <lucide-icon [name]="showDesign() ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="16" />
+        Design beállítások
+      </button>
+      @if (showDesign()) {
+        <div id="design-fields" class="collapse-content">
+          <div class="form-row">
+            <ps-input
+              label="Betűtípus"
+              placeholder="Grafikusra bízom"
+              [ngModel]="fontFamily()"
+              (ngModelChange)="fontFamily.set($event)"
+            />
+            <div class="color-field">
+              <ps-input
+                label="Betűszín"
+                placeholder="#000000"
+                [ngModel]="fontColor()"
+                (ngModelChange)="fontColor.set($event)"
+              />
+              <input
+                type="color"
+                class="color-swatch"
+                [value]="fontColor()"
+                (input)="onColorInput($event)"
+                aria-label="Szín választó"
+              />
+            </div>
+          </div>
+
+          <div class="editor-field">
+            <label class="editor-label">Megjegyzés, elképzelés</label>
+            <div class="editor-container">
+              <ngx-editor-menu [editor]="editor" [toolbar]="editorToolbar" />
+              <ngx-editor
+                [editor]="editor"
+                [ngModel]="description()"
+                (ngModelChange)="updateDescription($event)"
+                [placeholder]="'Hogyan képzeled el a tablót? Milyen stílusú legyen?'"
+              />
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <div dialogFooter class="compact-footer">
+    <button type="button" class="btn btn--outline" (click)="close.emit()">
+      Mégse
+    </button>
+    <button
+      type="button"
+      class="btn btn--purple"
+      [disabled]="!isValid() || submitting()"
+      (click)="submit()"
+    >
+      @if (submitting()) {
+        <div class="spinner spinner--small spin"></div>
+        Létrehozás...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+        Projekt létrehozása
+      }
+    </button>
+  </div>
+</app-dialog-wrapper>
+
+<!-- Új iskola modal -->
+@if (showAddSchoolModal()) {
+  <app-add-school-modal
+    (close)="closeAddSchoolModal()"
+    (schoolCreated)="onSchoolCreated($event)"
+  />
+}

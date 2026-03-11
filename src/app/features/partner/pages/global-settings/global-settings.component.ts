@@ -9,25 +9,17 @@ import { PartnerService } from '../../services/partner.service';
 import { FeatureToggleService } from '../../../../core/services/feature-toggle.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { TabloSize } from '../../models/partner.models';
-import { PrintShopConnectionService, PrintShopConnection } from '../../services/print-shop-connection.service';
-import { PrintShopConnectionsCardComponent } from '../settings/components/print-shop-connections-card/print-shop-connections-card.component';
-import { PrintShopSearchDialogComponent } from '../settings/components/print-shop-search-dialog/print-shop-search-dialog.component';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-global-settings',
   standalone: true,
-  imports: [
-    FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsToggleComponent,
-    PrintShopConnectionsCardComponent, PrintShopSearchDialogComponent, ConfirmDialogComponent,
-  ],
+  imports: [FormsModule, LucideAngularModule, PsInputComponent, PsSelectComponent, PsToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-settings.component.html',
   styleUrl: './global-settings.component.scss',
 })
 export class GlobalSettingsComponent implements OnInit {
   private partnerService = inject(PartnerService);
-  private printShopService = inject(PrintShopConnectionService);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   protected readonly featureToggle = inject(FeatureToggleService);
@@ -65,18 +57,9 @@ export class GlobalSettingsComponent implements OnInit {
   newSizeLabel = signal('');
   newSizeValue = signal('');
 
-  // === Nyomda kapcsolat state ===
-  printShopConnections = signal<PrintShopConnection[]>([]);
-  isPrintShopLoading = signal(true);
-  printShopActionLoadingId = signal<number | null>(null);
-  showPrintShopSearch = signal(false);
-  showRemoveConfirm = signal(false);
-  pendingRemoveConnection = signal<PrintShopConnection | null>(null);
-
   ngOnInit(): void {
     this.loadSettings();
     this.loadTabloSizes();
-    this.loadPrintShopConnections();
   }
 
   private loadSettings(): void {
@@ -203,56 +186,5 @@ export class GlobalSettingsComponent implements OnInit {
         this.toast.error('Hiba', 'Nem sikerült menteni a beállításokat');
       },
     });
-  }
-
-  // === Nyomda kapcsolat metódusok ===
-
-  private loadPrintShopConnections(): void {
-    this.isPrintShopLoading.set(true);
-    this.printShopService.getConnections()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.printShopConnections.set(res.data);
-          this.isPrintShopLoading.set(false);
-        },
-        error: () => {
-          this.isPrintShopLoading.set(false);
-        },
-      });
-  }
-
-  onPrintShopConnectionSent(): void {
-    this.showPrintShopSearch.set(false);
-    this.loadPrintShopConnections();
-  }
-
-  requestRemoveConnection(conn: PrintShopConnection): void {
-    this.pendingRemoveConnection.set(conn);
-    this.showRemoveConfirm.set(true);
-  }
-
-  onRemoveConfirmResult(result: { action: 'confirm' | 'cancel' }): void {
-    if (result.action === 'confirm') {
-      const conn = this.pendingRemoveConnection();
-      if (conn) {
-        this.printShopActionLoadingId.set(conn.id);
-        this.printShopService.removeConnection(conn.id)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (res) => {
-              this.toast.success('Siker', res.message);
-              this.printShopActionLoadingId.set(null);
-              this.loadPrintShopConnections();
-            },
-            error: () => {
-              this.toast.error('Hiba', 'Nem sikerült törölni a kapcsolatot.');
-              this.printShopActionLoadingId.set(null);
-            },
-          });
-      }
-    }
-    this.showRemoveConfirm.set(false);
-    this.pendingRemoveConnection.set(null);
   }
 }

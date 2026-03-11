@@ -3,8 +3,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TeamService, TeamMember, PendingInvitation, TeamRole } from '../../../services/team.service';
+import { PrintShopConnectionService, PrintShopConnection } from '../../../services/print-shop-connection.service';
 import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PrintShopConnectionsCardComponent } from '../../settings/components/print-shop-connections-card/print-shop-connections-card.component';
+import { PrintShopSearchDialogComponent } from '../../settings/components/print-shop-search-dialog/print-shop-search-dialog.component';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { DevLoginService } from '../../../../../core/services/dev-login.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -12,7 +15,7 @@ import { ClipboardService } from '../../../../../core/services/clipboard.service
 
 /**
  * Partner Team List - Csapatom oldal
- * Csapattagok és meghívók kezelése.
+ * Csapattagok, meghívók és nyomda partnerek kezelése.
  */
 @Component({
   selector: 'app-partner-team-list',
@@ -22,6 +25,8 @@ import { ClipboardService } from '../../../../../core/services/clipboard.service
     MatTooltipModule,
     InviteDialogComponent,
     ConfirmDialogComponent,
+    PrintShopConnectionsCardComponent,
+    PrintShopSearchDialogComponent,
   ],
   templateUrl: './team-list.component.html',
   styleUrl: './team-list.component.scss',
@@ -29,6 +34,7 @@ import { ClipboardService } from '../../../../../core/services/clipboard.service
 })
 export class PartnerTeamListComponent implements OnInit {
   private readonly teamService = inject(TeamService);
+  private readonly printShopService = inject(PrintShopConnectionService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly devLoginService = inject(DevLoginService);
   private readonly toast = inject(ToastService);
@@ -52,8 +58,17 @@ export class PartnerTeamListComponent implements OnInit {
   // Lenyitott meghívó id-k
   expandedInvitations = signal<Set<number>>(new Set());
 
+  // Nyomda kapcsolatok
+  printShopConnections = signal<PrintShopConnection[]>([]);
+  isPrintShopLoading = signal(true);
+  printShopActionLoadingId = signal<number | null>(null);
+  showPrintShopSearch = signal(false);
+  showPrintShopRemoveConfirm = signal(false);
+  pendingRemoveConnection = signal<PrintShopConnection | null>(null);
+
   ngOnInit(): void {
     this.loadTeam();
+    this.loadPrintShopConnections();
   }
 
   loadTeam(): void {
@@ -205,5 +220,56 @@ export class PartnerTeamListComponent implements OnInit {
           this.toast.error('Hiba', 'Nem sikerült a dev login URL generálása');
         }
       });
+  }
+
+  // === Nyomda kapcsolat metódusok ===
+
+  private loadPrintShopConnections(): void {
+    this.isPrintShopLoading.set(true);
+    this.printShopService.getConnections()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.printShopConnections.set(res.data);
+          this.isPrintShopLoading.set(false);
+        },
+        error: () => {
+          this.isPrintShopLoading.set(false);
+        },
+      });
+  }
+
+  onPrintShopConnectionSent(): void {
+    this.showPrintShopSearch.set(false);
+    this.loadPrintShopConnections();
+  }
+
+  requestRemovePrintShop(conn: PrintShopConnection): void {
+    this.pendingRemoveConnection.set(conn);
+    this.showPrintShopRemoveConfirm.set(true);
+  }
+
+  onPrintShopRemoveResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'confirm') {
+      const conn = this.pendingRemoveConnection();
+      if (conn) {
+        this.printShopActionLoadingId.set(conn.id);
+        this.printShopService.removeConnection(conn.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (res) => {
+              this.toast.success('Siker', res.message);
+              this.printShopActionLoadingId.set(null);
+              this.loadPrintShopConnections();
+            },
+            error: () => {
+              this.toast.error('Hiba', 'Nem sikerült törölni a kapcsolatot.');
+              this.printShopActionLoadingId.set(null);
+            },
+          });
+      }
+    }
+    this.showPrintShopRemoveConfirm.set(false);
+    this.pendingRemoveConnection.set(null);
   }
 }

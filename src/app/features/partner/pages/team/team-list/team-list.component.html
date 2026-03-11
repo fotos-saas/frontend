@@ -166,6 +166,24 @@
         </div>
       </section>
     }
+
+    <!-- Nyomda partner szekció -->
+    <section class="section">
+      <div class="section-header">
+        <h2>
+          <lucide-icon [name]="ICONS.PRINTER" [size]="20" />
+          Nyomda partner
+        </h2>
+      </div>
+
+      <app-print-shop-connections-card
+        [connections]="printShopConnections()"
+        [isLoading]="isPrintShopLoading()"
+        [actionLoadingId]="printShopActionLoadingId()"
+        (openSearch)="showPrintShopSearch.set(true)"
+        (removeConnection)="requestRemovePrintShop($event)"
+      />
+    </section>
   }
 </div>
 
@@ -198,6 +216,26 @@
     cancelText="Mégse"
     confirmType="warning"
     (resultEvent)="$event.action === 'confirm' ? revokeInvitation() : closeRevokeConfirm()"
+  />
+}
+
+<!-- Print Shop Search Dialog -->
+@if (showPrintShopSearch()) {
+  <app-print-shop-search-dialog
+    (close)="showPrintShopSearch.set(false)"
+    (connectionSent)="onPrintShopConnectionSent()"
+  />
+}
+
+<!-- Print Shop Remove Confirm -->
+@if (showPrintShopRemoveConfirm()) {
+  <app-confirm-dialog
+    title="Nyomda kapcsolat törlése"
+    [message]="pendingRemoveConnection()?.status === 'pending'
+      ? 'Biztosan visszavonod a kapcsolódási kérelmet?'
+      : 'Biztosan megszünteted a kapcsolatot ezzel a nyomdával?'"
+    confirmText="Igen, törlés"
+    (resultEvent)="onPrintShopRemoveResult($event)"
   />
 }
 

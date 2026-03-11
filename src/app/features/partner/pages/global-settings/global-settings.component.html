@@ -285,6 +285,22 @@
       </div>
     </div>
 
+    <!-- Nyomda partner szekció -->
+    <div class="settings-section">
+      <div class="section-title">
+        <lucide-icon [name]="ICONS.PRINTER" [size]="18" />
+        <h2>Nyomda partner</h2>
+      </div>
+
+      <app-print-shop-connections-card
+        [connections]="printShopConnections()"
+        [isLoading]="isPrintShopLoading()"
+        [actionLoadingId]="printShopActionLoadingId()"
+        (openSearch)="showPrintShopSearch.set(true)"
+        (removeConnection)="requestRemoveConnection($event)"
+      />
+    </div>
+
     <div class="action-row">
       <button
         class="save-btn"
@@ -299,3 +315,23 @@
     </div>
   }
 </div>
+
+<!-- Nyomda keresés dialógus -->
+@if (showPrintShopSearch()) {
+  <app-print-shop-search-dialog
+    (close)="showPrintShopSearch.set(false)"
+    (connectionSent)="onPrintShopConnectionSent()"
+  />
+}
+
+<!-- Kapcsolat törlés megerősítés -->
+@if (showRemoveConfirm()) {
+  <app-confirm-dialog
+    title="Nyomda kapcsolat törlése"
+    [message]="pendingRemoveConnection()?.status === 'pending'
+      ? 'Biztosan visszavonod a kapcsolódási kérelmet?'
+      : 'Biztosan megszünteted a kapcsolatot ezzel a nyomdával?'"
+    confirmText="Igen, törlés"
+    (resultEvent)="onRemoveConfirmResult($event)"
+  />
+}

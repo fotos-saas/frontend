@@ -158,6 +158,11 @@ export class PsdCacheService {
   }
 
   private registerIpcHandlers(): void {
+    // Duplikáció védelem — ha már regisztrálva van, eltávolítjuk
+    ipcMain.removeHandler('psd-cache:get-all');
+    ipcMain.removeHandler('psd-cache:rescan');
+    ipcMain.removeHandler('psd-cache:get-status');
+
     ipcMain.handle('psd-cache:get-all', () => {
       return this.getCache();
     });

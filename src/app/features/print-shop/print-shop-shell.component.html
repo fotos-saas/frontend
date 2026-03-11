@@ -14,7 +14,10 @@
     homeRoute="/print-shop/dashboard"
     [useExternalLogout]="true"
     (logoutEvent)="logout()"
-  />
+  >
+    <!-- Értesítések -->
+    <app-partner-notification-bell />
+  </app-top-bar>
 
   <!-- Content with Sidebar -->
   <div class="main-container">

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 import { LoggerService } from './logger.service';
 
 export interface PartnerNotification {
@@ -38,10 +39,14 @@ interface UnreadCountResponse {
 })
 export class PartnerNotificationService {
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly baseUrl = `${environment.apiUrl}/partner/notifications`;
+  private get baseUrl(): string {
+    const prefix = this.authService.isPrintShop() ? 'print-shop' : 'partner';
+    return `${environment.apiUrl}/${prefix}/notifications`;
+  }
   private pollingTimer: ReturnType<typeof setInterval> | null = null;
 
   /** Dropdown értesítések */

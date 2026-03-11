@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SidebarStateService } from '../../core/layout/services/sidebar-state.service';
 import { MobileNavOverlayComponent } from '../../core/layout/components/mobile-nav-overlay/mobile-nav-overlay.component';
 import { TopBarComponent } from '../../core/layout/components/top-bar/top-bar.component';
+import { PartnerNotificationBellComponent } from '../partner/components/partner-notification-bell/partner-notification-bell.component';
 import { MenuItem } from '../../core/layout/models/menu-item.model';
 
 /**
@@ -15,7 +16,7 @@ import { MenuItem } from '../../core/layout/models/menu-item.model';
 @Component({
   selector: 'app-print-shop-shell',
   standalone: true,
-  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent],
+  imports: [RouterModule, RouterLink, RouterLinkActive, NgClass, LucideAngularModule, MobileNavOverlayComponent, TopBarComponent, PartnerNotificationBellComponent],
   templateUrl: './print-shop-shell.component.html',
   styleUrls: ['./print-shop-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

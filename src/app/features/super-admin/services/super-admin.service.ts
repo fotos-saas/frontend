@@ -5,6 +5,12 @@ import { environment } from '../../../../environments/environment';
 import { buildHttpParams } from '@shared/utils/http-params.util';
 import { DashboardStats, DashboardProjectItem } from '../../../shared/components/dashboard';
 import type { PaginatedResponse } from '../../../core/models/api.models';
+import {
+  GlobalEmailTemplateListItem,
+  GlobalEmailTemplateDetail,
+  EmailVariableGroup,
+  EmailTemplatePreview,
+} from '../models/email-template.model';
 
 /**
  * Kedvezmény adatok
@@ -278,5 +284,44 @@ export class SuperAdminService {
       `${this.baseUrl}/email/send-test`,
       data
     );
+  }
+
+  // =============================================
+  // Email sablon kezelés
+  // =============================================
+
+  /**
+   * Globális email sablonok listázása
+   */
+  getEmailTemplates(): Observable<{ data: GlobalEmailTemplateListItem[] }> {
+    return this.http.get<{ data: GlobalEmailTemplateListItem[] }>(`${this.baseUrl}/email-templates`);
+  }
+
+  /**
+   * Egy globális email sablon lekérése
+   */
+  getEmailTemplate(name: string): Observable<{ data: GlobalEmailTemplateDetail }> {
+    return this.http.get<{ data: GlobalEmailTemplateDetail }>(`${this.baseUrl}/email-templates/${name}`);
+  }
+
+  /**
+   * Elérhető email változók lekérése
+   */
+  getEmailVariables(): Observable<{ data: EmailVariableGroup[] }> {
+    return this.http.get<{ data: EmailVariableGroup[] }>(`${this.baseUrl}/email-templates/variables`);
+  }
+
+  /**
+   * Globális email sablon frissítése
+   */
+  updateEmailTemplate(name: string, data: { subject: string; body: string }): Observable<{ data: GlobalEmailTemplateDetail; message: string }> {
+    return this.http.put<{ data: GlobalEmailTemplateDetail; message: string }>(`${this.baseUrl}/email-templates/${name}`, data);
+  }
+
+  /**
+   * Email sablon előnézete
+   */
+  previewEmailTemplate(name: string, data: { subject: string; body: string }): Observable<{ data: EmailTemplatePreview }> {
+    return this.http.post<{ data: EmailTemplatePreview }>(`${this.baseUrl}/email-templates/${name}/preview`, data);
   }
 }

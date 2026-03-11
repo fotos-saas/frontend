@@ -1,0 +1,121 @@
+@use '../../../../../shared/styles/list-page' as list;
+@use 'styles/colors' as *;
+
+:host {
+  display: block;
+}
+
+.email-template-manager {
+  --table-cols: 1fr 1.5fr 120px 80px;
+  background: #ffffff;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+  margin: 0 0 4px 0;
+
+  lucide-icon {
+    margin-right: 8px;
+  }
+}
+
+.section-subtitle {
+  color: get-color('slate', 500);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+// Kategória select
+.category-select {
+  flex-shrink: 0;
+  width: 180px;
+}
+
+// Keresés: ps-input komponens
+.search-input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: inherit;
+  box-shadow: none;
+}
+
+.template-display-name {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.template-slug {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  font-family: monospace;
+  margin-top: 2px;
+}
+
+.cell-subject {
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &--red {
+    background: get-color('error', 100);
+    color: get-color('error', 700);
+  }
+
+  &--gray {
+    background: get-color('slate', 100);
+    color: get-color('slate', 500);
+  }
+}
+
+@media (max-width: 640px) {
+  .email-template-manager {
+    --table-cols: 1fr;
+    padding: 16px;
+  }
+
+  .cell-subject,
+  .cell-type {
+    display: none;
+  }
+
+  .cell-actions {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .list-row {
+    position: relative;
+  }
+}

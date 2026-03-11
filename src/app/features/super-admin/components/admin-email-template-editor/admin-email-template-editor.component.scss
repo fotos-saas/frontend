@@ -1,0 +1,339 @@
+@use '../../../../../styles/buttons' as *;
+@use 'styles/mixins' as *;
+@use 'styles/colors' as *;
+
+// Overlay
+.editor-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: var(--bg-surface, #fff);
+  overflow-y: auto;
+  animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+// Header
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+  background: var(--bg-surface, #fff);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-left { display: flex; align-items: center; min-width: 0; }
+.header-info { min-width: 0; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light, #e2e8f0);
+  background: var(--bg-surface, #fff);
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  @include transition-fast;
+  margin-right: 12px;
+  flex-shrink: 0;
+
+  &:hover { border-color: var(--primary, #1e7b34); color: var(--primary, #1e7b34); }
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-slug { font-size: 12px; color: var(--text-tertiary, #94a3b8); font-family: monospace; margin: 2px 0 0; }
+.header-buttons { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+.btn-primary { @include btn-primary($radius: 10px); &:disabled { opacity: 0.7; } }
+.btn-secondary { @include btn-secondary($color: var(--color-primary, #1e3a5f), $radius: 10px, $font-weight: 600, $hover-border: var(--color-primary, #1e3a5f)); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+
+  &--red { background: get-color('error', 100); color: get-color('error', 700); }
+}
+
+// Editor layout
+.editor-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.editor-column { min-width: 0; }
+.field-group { margin-bottom: 16px; }
+
+.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary, #1f2937); margin-bottom: 6px; }
+
+.field-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary, #1f2937);
+  background: var(--bg-surface, #fff);
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+
+  &:focus { outline: none; border-color: var(--primary, #1e7b34); box-shadow: 0 0 0 3px rgba(30, 123, 52, 0.1); }
+}
+
+// Tabs
+.editor-tabs { display: flex; border-bottom: 1px solid var(--border-light, #e2e8f0); }
+
+.editor-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  lucide-icon { margin-right: 6px; }
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  @include transition-fast;
+  margin-bottom: -1px;
+
+  &:hover { color: var(--primary, #1e7b34); }
+  &--active { color: var(--primary, #1e7b34); border-bottom-color: var(--primary, #1e7b34); }
+}
+
+// Quill
+.quill-wrapper {
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+
+  ::ng-deep .ql-toolbar { border: none; border-bottom: 1px solid var(--border-light, #e2e8f0); }
+  ::ng-deep .ql-container { border: none; min-height: 350px; font-size: 14px; }
+  ::ng-deep .ql-editor { min-height: 350px; }
+}
+
+// HTML editor
+.html-editor-wrapper { border: 1px solid var(--border-light, #e2e8f0); border-top: none; border-radius: 0 0 8px 8px; }
+
+.html-notice {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  lucide-icon { margin-right: 6px; }
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  background: var(--bg-muted, #f8fafc);
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
+  margin: 0;
+}
+
+.html-textarea {
+  width: 100%;
+  min-height: 380px;
+  padding: 14px;
+  border: none;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary, #1f2937);
+  background: var(--bg-surface, #fff);
+  resize: vertical;
+  box-sizing: border-box;
+  border-radius: 0 0 8px 8px;
+
+  &:focus { outline: none; }
+}
+
+// Változók panel (desktop)
+.variables-column--desktop {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--bg-muted, #f8fafc);
+  border-radius: 12px;
+  border: 1px solid var(--border-light, #e2e8f0);
+}
+
+.variables-title--in-sidebar { display: flex; }
+.variables-fab { display: none; }
+.variables-sheet-backdrop, .variables-sheet { display: none; }
+
+.variables-title {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  lucide-icon { margin-right: 8px; }
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 4px;
+}
+
+.variables-hint { font-size: 12px; color: var(--text-tertiary, #94a3b8); margin: 0 0 16px; }
+.variable-group { margin-bottom: 4px; }
+
+.variable-group-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  > lucide-icon { margin-right: 6px; }
+  padding: 8px 6px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+
+  &:hover { background: var(--bg-surface, #fff); }
+}
+
+.variable-count { margin-left: auto; font-size: 11px; font-weight: 400; color: var(--text-tertiary, #94a3b8); background: var(--bg-surface, #fff); padding: 1px 6px; border-radius: 8px; }
+.variable-list { padding: 0 0 8px; }
+
+.variable-item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+
+  &:hover { background: var(--bg-surface, #fff); }
+}
+
+.variable-key { font-size: 12px; color: var(--primary, #1e7b34); font-family: 'SF Mono', Monaco, monospace; font-weight: 500; }
+.variable-desc { font-size: 11px; color: var(--text-tertiary, #94a3b8); margin-top: 1px; }
+
+// Előnézet
+.preview-subject { padding: 12px 16px; background: var(--bg-muted, #f8fafc); border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+.preview-frame { border: 1px solid var(--border-light, #e2e8f0); border-radius: 8px; overflow: hidden; }
+.preview-iframe { width: 100%; min-height: 500px; border: none; background: #f7f7f7; }
+
+// Loading
+.loading-state { display: flex; flex-direction: column; gap: 8px; padding: 24px; }
+.skeleton-row { height: 56px; background: get-color('slate', 200); border-radius: 10px; }
+.skeleton-shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+
+// Responsive
+@media (max-width: 900px) {
+  .editor-layout { grid-template-columns: 1fr; }
+  .variables-column--desktop { display: none; }
+  .variables-title--in-sidebar { display: none; }
+
+  .variables-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    background: var(--primary, #1e7b34);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(30, 123, 52, 0.35);
+    cursor: pointer;
+    z-index: 1010;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    &:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(30, 123, 52, 0.45); }
+    &:active { transform: scale(0.97); }
+  }
+
+  .variables-sheet-backdrop { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 1100; animation: fadeIn 0.2s ease; }
+
+  .variables-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    background: var(--bg-surface, #fff);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1101;
+    animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .variables-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border-light, #e2e8f0);
+    flex-shrink: 0;
+    position: relative;
+    &::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 36px; height: 4px; border-radius: 2px; background: var(--border-light, #d1d5db); }
+  }
+
+  .variables-sheet-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg-muted, #f1f5f9);
+    color: var(--text-secondary, #64748b);
+    cursor: pointer;
+    &:hover { background: var(--border-light, #e2e8f0); }
+  }
+
+  .variables-sheet-body { overflow-y: auto; padding: 12px 20px 24px; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 640px) {
+  .editor-header { padding: 12px 16px; flex-direction: column; align-items: stretch; }
+  .header-buttons { width: 100%; display: flex; margin: -4px; button { margin: 4px; flex: 1; } }
+  .editor-layout { padding: 16px; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-overlay-backdrop, .editor-overlay, .variables-sheet-backdrop, .variables-sheet, .variables-fab {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

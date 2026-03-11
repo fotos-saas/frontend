@@ -10,6 +10,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { PsToggleComponent, PsInputComponent, PsSelectComponent, PsTagInputComponent } from '@shared/components/form';
 import { PsTextareaComponent } from '@shared/components/form/ps-textarea/ps-textarea.component';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { AdminEmailTemplateManagerComponent } from '../../components/admin-email-template-manager/admin-email-template-manager.component';
 
 type TabId = 'system' | 'email' | 'stripe' | 'info';
 
@@ -29,6 +30,7 @@ type TabId = 'system' | 'email' | 'stripe' | 'info';
     PsSelectComponent,
     PsTagInputComponent,
     PsTextareaComponent,
+    AdminEmailTemplateManagerComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

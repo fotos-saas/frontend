@@ -1,0 +1,108 @@
+<div class="email-template-manager">
+  <header class="section-header">
+    <div class="header-content">
+      <h2 class="section-title">
+        <lucide-icon [name]="ICONS.MAIL" [size]="20" />
+        Email sablonok
+      </h2>
+      <p class="section-subtitle">{{ templates().length }} sablon, {{ systemCount() }} rendszer szintű</p>
+    </div>
+  </header>
+
+  <!-- Keresés + Kategória szűrő -->
+  <div class="filters">
+    <ps-input
+      class="search-input"
+      prefix="search"
+      placeholder="Keresés..."
+      [ngModel]="search()"
+      (ngModelChange)="setSearch($event)"
+    />
+
+    <ps-select
+      class="category-select"
+      size="sm"
+      [options]="categoryOptions"
+      [ngModel]="activeCategory()"
+      (ngModelChange)="setCategory($event)"
+    />
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (filteredTemplates().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.MAIL" [size]="48" />
+      </div>
+      <h3>Nincs találat</h3>
+      <p>Próbálj más keresési feltételekkel vagy kategóriával!</p>
+    </div>
+  } @else {
+    <!-- Table header -->
+    <div class="table-header">
+      <span class="th th-name">Sablon neve</span>
+      <span class="th th-subject">Tárgy</span>
+      <span class="th th-type">Típus</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Lista sorok -->
+    <div class="row-grid">
+      @for (template of paginatedTemplates(); track template.name; let i = $index) {
+        <div
+          class="list-row"
+          [style.animation-delay]="i * 0.03 + 's'"
+          (click)="openTemplate(template)"
+        >
+          <div class="cell cell-name">
+            <span class="template-display-name">{{ template.display_name }}</span>
+            <span class="template-slug">{{ template.name }}</span>
+          </div>
+          <div class="cell cell-subject">
+            {{ template.subject }}
+          </div>
+          <div class="cell cell-type">
+            @if (template.is_system) {
+              <span class="badge badge--red">Rendszer</span>
+            } @else {
+              <span class="badge badge--gray">Egyéni</span>
+            }
+          </div>
+          <div class="cell cell-actions">
+            <button
+              type="button"
+              class="action-btn"
+              matTooltip="Szerkesztés"
+              (click)="openTemplate(template); $event.stopPropagation()"
+            >
+              <lucide-icon [name]="ICONS.EDIT" [size]="16" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <app-list-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [totalItems]="filteredTemplates().length"
+      itemLabel="sablon"
+      (pageChange)="currentPage.set($event)"
+    />
+  }
+</div>
+
+<!-- Editor overlay -->
+@if (selectedTemplateName(); as name) {
+  <app-admin-email-template-editor
+    [templateName]="name"
+    (closed)="onEditorClosed()"
+    (saved)="onEditorSaved()"
+  />
+}

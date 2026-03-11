@@ -45,32 +45,31 @@ else
     echo -e "${RED}  ✗ Backend: .git nem található${NC}"
 fi
 
-# 2. Root .claude/ symlink-ek
+# 2. Root .claude/ másolás (symlink nem működik Claude Code-ban)
 echo ""
 echo -e "${CYAN}2/4 Root .claude/ beállítás...${NC}"
 
 mkdir -p "$ROOT_DIR/.claude/scripts"
 mkdir -p "$ROOT_DIR/.claude/skills"
 
-# Scripts symlink
+# Scripts másolás
 for script in auto-review.sh pre-commit-check.sh; do
     SRC="$SHARED_DIR/scripts/$script"
     DST="$ROOT_DIR/.claude/scripts/$script"
     if [ -f "$SRC" ]; then
-        rm -f "$DST"
-        ln -s "$SRC" "$DST"
-        echo -e "${GREEN}  ✓ .claude/scripts/$script → symlink${NC}"
+        cp "$SRC" "$DST"
+        chmod +x "$DST"
+        echo -e "${GREEN}  ✓ .claude/scripts/$script → másolva${NC}"
     fi
 done
 
-# Skills symlink
-for skill in maintenance.md; do
+# Skills másolás
+for skill in maintenance.md ci-fix.md; do
     SRC="$SHARED_DIR/skills/$skill"
     DST="$ROOT_DIR/.claude/skills/$skill"
     if [ -f "$SRC" ]; then
-        rm -f "$DST"
-        ln -s "$SRC" "$DST"
-        echo -e "${GREEN}  ✓ .claude/skills/$skill → symlink${NC}"
+        cp "$SRC" "$DST"
+        echo -e "${GREEN}  ✓ .claude/skills/$skill → másolva${NC}"
     fi
 done
 

@@ -50,7 +50,7 @@ echo ""
 echo -e "${CYAN}2/4 Root .claude/ beállítás...${NC}"
 
 mkdir -p "$ROOT_DIR/.claude/scripts"
-mkdir -p "$ROOT_DIR/.claude/skills"
+mkdir -p "$ROOT_DIR/.claude/commands"
 
 # Scripts másolás
 for script in auto-review.sh pre-commit-check.sh; do
@@ -63,13 +63,13 @@ for script in auto-review.sh pre-commit-check.sh; do
     fi
 done
 
-# Skills másolás
-for skill in maintenance.md ci-fix.md; do
-    SRC="$SHARED_DIR/skills/$skill"
-    DST="$ROOT_DIR/.claude/skills/$skill"
+# Commands másolás (Claude Code /parancsok)
+for cmd in maintenance.md ci-fix.md; do
+    SRC="$SHARED_DIR/commands/$cmd"
+    DST="$ROOT_DIR/.claude/commands/$cmd"
     if [ -f "$SRC" ]; then
         cp "$SRC" "$DST"
-        echo -e "${GREEN}  ✓ .claude/skills/$skill → másolva${NC}"
+        echo -e "${GREEN}  ✓ .claude/commands/$cmd → másolva${NC}"
     fi
 done
 

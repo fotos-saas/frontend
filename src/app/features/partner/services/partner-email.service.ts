@@ -9,12 +9,7 @@ import {
   EmailStats,
   ReplyData,
 } from '../models/project-email.models';
-
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
+import type { ApiResponse } from '../../../core/models/api.models';
 
 interface PaginatedData<T> {
   items: T[];

@@ -8,14 +8,10 @@ import {
   PrepaymentStats,
   PrepaymentSummary,
 } from '../models/prepayment.models';
+import type { ApiResponse } from '../../../core/models/api.models';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
-
-interface PaginatedResponse<T> {
+/** Prepayment-specifikus paginált válasz (meta + summary struktúra) */
+interface PrepaymentPaginatedResponse<T> {
   success: boolean;
   data: T[];
   message: string;
@@ -58,14 +54,14 @@ export class PartnerPrepaymentService {
 
   // --- Prepayments ---
 
-  getPrepayments(params?: Record<string, string>): Observable<PaginatedResponse<Prepayment>> {
+  getPrepayments(params?: Record<string, string>): Observable<PrepaymentPaginatedResponse<Prepayment>> {
     let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value) httpParams = httpParams.set(key, value);
       });
     }
-    return this.http.get<PaginatedResponse<Prepayment>>(this.baseUrl, { params: httpParams });
+    return this.http.get<PrepaymentPaginatedResponse<Prepayment>>(this.baseUrl, { params: httpParams });
   }
 
   getPrepayment(id: number): Observable<ApiResponse<Prepayment>> {

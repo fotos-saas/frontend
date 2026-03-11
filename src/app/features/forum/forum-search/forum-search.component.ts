@@ -9,23 +9,16 @@ import {
 import { FormsModule } from '@angular/forms';
 import { PsInputComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { DiscussionFilters } from '../../../core/services/forum.service';
+import { TemplateOption } from '../models/forum.types';
 
 /**
- * Szűrési opciók
+ * @deprecated Use DiscussionFilters from forum.service
  */
-export interface ForumFilters {
-  search?: string;
-  templateId?: number;
-  sortBy?: 'latest' | 'oldest' | 'most_posts' | 'most_views';
-}
+export type ForumFilters = DiscussionFilters;
 
-/**
- * Sablon opció (dropdown-hoz)
- */
-export interface TemplateOption {
-  id: number;
-  name: string;
-}
+// Re-export for backward compatibility
+export { DiscussionFilters, TemplateOption };
 
 /**
  * Forum Search Component

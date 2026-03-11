@@ -2,6 +2,11 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NewsfeedPostService } from './newsfeed-post.service';
 import { NewsfeedCommentService } from './newsfeed-comment.service';
+import type { ReactionsSummary } from '../../shared/types/reactions.types';
+import type { PostMedia } from '../../shared/types/post-media.types';
+
+// Re-export for backward compatibility
+export type { ReactionsSummary } from '../../shared/types/reactions.types';
 
 /**
  * Newsfeed Post típus
@@ -10,14 +15,9 @@ export type PostType = 'announcement' | 'event';
 export type AuthorType = 'contact' | 'guest';
 
 /**
- * Newsfeed Media interfész
+ * @deprecated Use PostMedia from shared/types/post-media.types instead
  */
-export interface NewsfeedMedia {
-  id: number;
-  url: string;
-  fileName: string;
-  isImage: boolean;
-}
+export type NewsfeedMedia = PostMedia;
 
 /**
  * Newsfeed Comment interfész
@@ -39,13 +39,6 @@ export interface NewsfeedComment {
   replies?: NewsfeedComment[];
   /** Új komment jelzés (animációhoz) */
   isNew?: boolean;
-}
-
-/**
- * Reakciók összesítés
- */
-export interface ReactionsSummary {
-  [emoji: string]: number;
 }
 
 /**

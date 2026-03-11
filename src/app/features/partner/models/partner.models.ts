@@ -5,6 +5,10 @@
 
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 import type { ExtendedPaginatedResponse } from '../../../core/models/api.models';
+import type { TabloStatus } from '../../../shared/types/tablo.types';
+
+// Re-export for backward compatibility
+export type { TabloStatus } from '../../../shared/types/tablo.types';
 
 /**
  * Dashboard statisztikák
@@ -26,17 +30,6 @@ export interface ProjectContact {
   email: string | null;
   phone: string | null;
   isPrimary?: boolean;
-}
-
-/**
- * Tablo Status interface
- */
-export interface TabloStatus {
-  id: number;
-  name: string;
-  slug: string;
-  color: string;
-  icon: string | null;
 }
 
 /**

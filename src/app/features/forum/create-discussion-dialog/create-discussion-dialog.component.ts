@@ -22,14 +22,10 @@ import { DiscussionFormValidatorService, DiscussionFormErrors } from './discussi
 import { ICONS } from '@shared/constants/icons.constants';
 import { PsInputComponent, PsTextareaComponent, PsSelectComponent } from '@shared/components/form';
 import { PsSelectOption } from '@shared/components/form/form.types';
+import { TemplateOption } from '../models/forum.types';
 
-/**
- * Sablon interface (minimalis)
- */
-export interface TemplateOption {
-  id: number;
-  name: string;
-}
+// Re-export for backward compatibility
+export { TemplateOption };
 
 /**
  * Dialog eredmeny tipus

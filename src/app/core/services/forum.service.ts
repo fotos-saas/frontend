@@ -2,6 +2,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ForumDiscussionService } from './forum-discussion.service';
 import { ForumPostService } from './forum-post.service';
+import type { ReactionsSummary } from '../../shared/types/reactions.types';
+import type { PostMedia } from '../../shared/types/post-media.types';
+
+// Re-export for backward compatibility
+export type { ReactionsSummary } from '../../shared/types/reactions.types';
+export type { PostMedia } from '../../shared/types/post-media.types';
 
 /**
  * Discussion (Beszélgetés) interfész
@@ -21,13 +27,6 @@ export interface Discussion {
   createdAt: string;
   lastPostAt?: string;
   lastPostBy?: string;
-}
-
-/**
- * Reakciók összesítés
- */
-export interface ReactionsSummary {
-  [emoji: string]: number;
 }
 
 /**
@@ -52,16 +51,6 @@ export interface DiscussionPost {
   createdAt: string;
   replies?: DiscussionPost[];
   media?: PostMedia[];
-}
-
-/**
- * Post Media (Csatolmány) interfész
- */
-export interface PostMedia {
-  id: number;
-  url: string;
-  fileName: string;
-  isImage: boolean;
 }
 
 /**

@@ -21,17 +21,10 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
 
 // Navbar state service
 import { NavbarStateService } from './navbar-state.service';
+import type { TabloStatus } from '../../../shared/types/tablo.types';
 
-/**
- * Tablo Status interface
- */
-export interface TabloStatus {
-  id: number;
-  name: string;
-  slug: string;
-  color: string;
-  icon: string | null;
-}
+// Re-export for backward compatibility
+export type { TabloStatus } from '../../../shared/types/tablo.types';
 
 /**
  * Projekt info interface (shared)

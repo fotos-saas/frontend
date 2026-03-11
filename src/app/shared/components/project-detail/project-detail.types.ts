@@ -3,6 +3,11 @@
  * Marketer és Partner komponensek által is használható.
  */
 
+import type { TabloStatus } from '../../../shared/types/tablo.types';
+
+// Re-export for backward compatibility
+export type { TabloStatus } from '../../../shared/types/tablo.types';
+
 /**
  * Kapcsolattartó interface
  */
@@ -12,17 +17,6 @@ export interface ProjectContact {
   email: string | null;
   phone: string | null;
   isPrimary?: boolean;
-}
-
-/**
- * Tablo Status interface
- */
-export interface TabloStatus {
-  id: number;
-  name: string;
-  slug: string;
-  color: string;
-  icon: string | null;
 }
 
 /**

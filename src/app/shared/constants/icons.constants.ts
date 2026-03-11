@@ -141,15 +141,10 @@ export const TOAST_EMOJIS: Record<ToastType, string> = {
 } as const;
 
 // ============================================
-// REAKCIÓK ÖSSZESÍTÉS (interface)
+// REAKCIÓK ÖSSZESÍTÉS (re-export)
 // ============================================
 
-/**
- * Reakciók összesítés interface
- */
-export interface ReactionsSummary {
-  [emoji: string]: number;
-}
+export type { ReactionsSummary } from '../types/reactions.types';
 
 // ============================================
 // LUCIDE ICON NEVEK (type-safe)

@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import type { TabloStatus } from '../../../shared/types/tablo.types';
+
+// Re-export for backward compatibility
+export type { TabloStatus } from '../../../shared/types/tablo.types';
 
 /**
  * Minta kép interface
@@ -22,17 +26,6 @@ export interface SamplesResponse {
   success: boolean;
   data: Sample[];
   totalCount: number;
-}
-
-/**
- * Tablo Status interface
- */
-export interface TabloStatus {
-  id: number;
-  name: string;
-  slug: string;
-  color: string;
-  icon: string | null;
 }
 
 /**

@@ -1,4 +1,8 @@
 import { TokenType } from '../services/token.service';
+import type { TabloStatus } from '../../shared/types/tablo.types';
+
+// Re-export for backward compatibility
+export type { TabloStatus } from '../../shared/types/tablo.types';
 
 /**
  * Kapcsolattartó interface (ügyintéző vagy iskolai kapcsolattartó)
@@ -40,17 +44,6 @@ export interface PersonStats {
  * @deprecated Use PersonStats instead
  */
 export type MissingStats = PersonStats;
-
-/**
- * Tablo Status interface
- */
-export interface TabloStatus {
-  id: number;
-  name: string;
-  slug: string;
-  color: string;
-  icon: string | null;
-}
 
 /**
  * Photo selection progress interface

@@ -60,10 +60,5 @@ export interface PrintShopProjectListParams {
   class_year?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
+// Re-export from canonical source
+export type { PaginatedResponse } from '../../../core/models/api.models';

@@ -3,8 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Quote, QuoteEmail, QuoteTemplate, EmailSnippet } from '../models/quote.models';
+import type { ApiResponse } from '../../../core/models/api.models';
 
-interface PaginatedResponse<T> {
+/** Quote-specifikus paginált válasz (eltérő struktúra a Laravel-től) */
+interface QuotePaginatedResponse<T> {
   data: {
     items: T[];
     pagination: {
@@ -17,24 +19,19 @@ interface PaginatedResponse<T> {
   message: string;
 }
 
-interface ApiResponse<T> {
-  data: T;
-  message: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class PartnerQuoteService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/partner/quotes`;
 
   /** Árajánlatok listázása */
-  getQuotes(params?: { search?: string; status?: string; page?: number }): Observable<PaginatedResponse<Quote>> {
+  getQuotes(params?: { search?: string; status?: string; page?: number }): Observable<QuotePaginatedResponse<Quote>> {
     let httpParams = new HttpParams();
     if (params?.search) httpParams = httpParams.set('search', params.search);
     if (params?.status) httpParams = httpParams.set('status', params.status);
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
 
-    return this.http.get<PaginatedResponse<Quote>>(this.baseUrl, { params: httpParams });
+    return this.http.get<QuotePaginatedResponse<Quote>>(this.baseUrl, { params: httpParams });
   }
 
   /** Árajánlat részletei */

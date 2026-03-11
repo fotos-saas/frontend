@@ -162,13 +162,28 @@
               <button
                 class="action-btn action-btn--success"
                 [disabled]="markingDone() === project.id"
-                (click)="markDone(project)"
+                (click)="requestMarkDone(project)"
                 matTooltip="Készre állítás"
               >
                 @if (markingDone() === project.id) {
                   <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
                 } @else {
                   <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16"></lucide-icon>
+                }
+              </button>
+            }
+
+            @if (project.status === 'done') {
+              <button
+                class="action-btn action-btn--warning"
+                [disabled]="reverting() === project.id"
+                (click)="requestRevert(project)"
+                matTooltip="Visszaállítás nyomdába"
+              >
+                @if (reverting() === project.id) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
+                } @else {
+                  <lucide-icon [name]="ICONS.UNDO" [size]="16"></lucide-icon>
                 }
               </button>
             }
@@ -194,3 +209,17 @@
     }
   }
 </div>
+
+<!-- Confirm dialog — page-card-on kívül! -->
+@if (showConfirmDialog()) {
+  <app-confirm-dialog
+    [title]="confirmAction() === 'mark_done' ? 'Készre állítás' : 'Visszaállítás nyomdába'"
+    [message]="confirmAction() === 'mark_done'
+      ? 'Biztosan készre állítod a projektet: ' + (confirmProject()?.name ?? '') + '?'
+      : 'Biztosan visszaállítod nyomdába a projektet: ' + (confirmProject()?.name ?? '') + '?'"
+    [confirmText]="confirmAction() === 'mark_done' ? 'Készre állítás' : 'Visszaállítás'"
+    [confirmType]="confirmAction() === 'mark_done' ? 'primary' : 'warning'"
+    [isSubmitting]="(markingDone() ?? reverting()) !== null"
+    (resultEvent)="onConfirmResult($event)"
+  />
+}

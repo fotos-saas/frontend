@@ -47,6 +47,12 @@ export class PrintShopService {
     );
   }
 
+  revertToPrint(projectId: number): Observable<{ status: string }> {
+    return this.http.post<{ data: { status: string } }>(`${this.baseUrl}/projects/${projectId}/revert-to-print`, {}).pipe(
+      map(res => res.data)
+    );
+  }
+
   getDownloadUrl(projectId: number, type: string = 'small_tablo'): string {
     return `${this.baseUrl}/projects/${projectId}/download?type=${type}`;
   }

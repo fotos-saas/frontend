@@ -6,13 +6,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PrintShopService } from '../../services/print-shop.service';
 import { PrintShopProject, PrintShopStudio, PaginatedResponse } from '../../models/print-shop.models';
+import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { ICONS } from '@shared/constants/icons.constants';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-print-shop-projects',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, MatTooltipModule],
+  imports: [LucideAngularModule, FormsModule, MatTooltipModule, ConfirmDialogComponent],
   templateUrl: './print-shop-projects.component.html',
   styleUrls: ['./print-shop-projects.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,8 +42,14 @@ export class PrintShopProjectsComponent {
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
 
-  // Mark-done state
+  // Mark-done / revert state
   markingDone = signal<number | null>(null);
+  reverting = signal<number | null>(null);
+
+  // Confirm dialog
+  showConfirmDialog = signal(false);
+  confirmProject = signal<PrintShopProject | null>(null);
+  confirmAction = signal<'mark_done' | 'revert'>('mark_done');
 
   // Search debounce
   private searchSubject = new Subject<string>();
@@ -121,15 +128,39 @@ export class PrintShopProjectsComponent {
     this.loadProjects();
   }
 
-  markDone(project: PrintShopProject): void {
-    if (this.markingDone() !== null) return;
+  requestMarkDone(project: PrintShopProject): void {
+    this.confirmProject.set(project);
+    this.confirmAction.set('mark_done');
+    this.showConfirmDialog.set(true);
+  }
+
+  requestRevert(project: PrintShopProject): void {
+    this.confirmProject.set(project);
+    this.confirmAction.set('revert');
+    this.showConfirmDialog.set(true);
+  }
+
+  onConfirmResult(result: ConfirmDialogResult): void {
+    this.showConfirmDialog.set(false);
+    if (result.action !== 'confirm') return;
+
+    const project = this.confirmProject();
+    if (!project) return;
+
+    if (this.confirmAction() === 'mark_done') {
+      this.executeMarkDone(project);
+    } else {
+      this.executeRevert(project);
+    }
+  }
+
+  private executeMarkDone(project: PrintShopProject): void {
     this.markingDone.set(project.id);
 
     this.service.markAsDone(project.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          // Frissítjük lokálisan a listában
           this.projects.update(list =>
             list.map(p => p.id === project.id
               ? { ...p, status: 'done' as const, doneAt: new Date().toISOString() }
@@ -140,6 +171,27 @@ export class PrintShopProjectsComponent {
         },
         error: () => {
           this.markingDone.set(null);
+        }
+      });
+  }
+
+  private executeRevert(project: PrintShopProject): void {
+    this.reverting.set(project.id);
+
+    this.service.revertToPrint(project.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.projects.update(list =>
+            list.map(p => p.id === project.id
+              ? { ...p, status: 'in_print' as const, doneAt: null }
+              : p
+            )
+          );
+          this.reverting.set(null);
+        },
+        error: () => {
+          this.reverting.set(null);
         }
       });
   }

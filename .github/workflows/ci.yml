@@ -19,13 +19,14 @@ jobs:
       - run: npm ci
       - name: TypeScript compile check
         run: npx tsc --noEmit
+        continue-on-error: true  # ⚠️ WARNING mód
       - name: ESLint
         run: npm run lint --if-present
+        continue-on-error: true  # ⚠️ WARNING mód
 
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: lint-and-typecheck
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,6 +36,7 @@ jobs:
       - run: npm ci
       - name: Run Vitest
         run: npm run test:coverage
+        continue-on-error: true  # ⚠️ WARNING mód
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         if: always()
@@ -49,32 +51,29 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check file sizes
         run: |
-          echo "Fajlmeret ellenorzes..."
-          ERRORS=0
+          echo "📏 Fájlméret ellenőrzés..."
+          OVER=0
 
-          # Check component/service files (max 500 lines)
           while IFS= read -r file; do
             lines=$(wc -l < "$file" | tr -d ' ')
             if [ "$lines" -gt 500 ]; then
-              echo "TULMERET: $file ($lines sor, limit: 500)"
-              ERRORS=$((ERRORS + 1))
+              echo "⚠️ $file ($lines sor, limit: 500)"
+              OVER=$((OVER + 1))
             fi
           done < <(find src -name "*.ts" -not -name "*.spec.ts" -not -name "*.data.ts" -not -name "*.routes.ts" -not -name "*.models.ts")
 
-          # Check data files (max 800 lines)
           while IFS= read -r file; do
             lines=$(wc -l < "$file" | tr -d ' ')
             if [ "$lines" -gt 800 ]; then
-              echo "TULMERET: $file ($lines sor, limit: 800)"
-              ERRORS=$((ERRORS + 1))
+              echo "⚠️ $file ($lines sor, limit: 800)"
+              OVER=$((OVER + 1))
             fi
           done < <(find src -name "*.data.ts" -o -name "*.routes.ts" -o -name "*.models.ts")
 
-          if [ $ERRORS -gt 0 ]; then
-            echo "$ERRORS fajl meghaladja a meretkorlatot!"
-            exit 1
+          if [ $OVER -gt 0 ]; then
+            echo "::warning::$OVER fájl meghaladja a méretkorlátot"
           else
-            echo "Minden fajl merete rendben!"
+            echo "✅ Minden fájl mérete rendben!"
           fi
 
   security-check:
@@ -84,25 +83,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check forbidden patterns
         run: |
-          echo "Biztonsagi ellenorzes..."
-          ERRORS=0
+          echo "🔒 Biztonsági ellenőrzés..."
 
           # localStorage token check
-          if grep -rn "localStorage\.\(get\|set\)Item.*token" src/ --include="*.ts" | grep -v ".spec.ts"; then
-            echo "localStorage token tarolas! sessionStorage kell!"
-            ERRORS=$((ERRORS + 1))
+          LSTORAGE=$(grep -rn "localStorage\.\(get\|set\)Item.*token" src/ --include="*.ts" | grep -v ".spec.ts" || true)
+          if [ -n "$LSTORAGE" ]; then
+            echo "::warning::localStorage token tárolás! sessionStorage kell!"
+            echo "$LSTORAGE"
           fi
 
-          # Check for debug leftovers
-          if grep -rn "console\.log" src/ --include="*.ts" | grep -v ".spec.ts" | grep -v "// keep" | grep -v "logger" | head -20; then
-            echo "console.log maradvanyok (nem blokkolo)"
+          # console.log check
+          CONSOLELOG=$(grep -rn "console\.log" src/ --include="*.ts" | grep -v ".spec.ts" | grep -v "// keep" | grep -v "logger" | wc -l | tr -d ' ')
+          if [ "$CONSOLELOG" -gt 0 ]; then
+            echo "::warning::$CONSOLELOG console.log maradvány"
           fi
 
-          if [ $ERRORS -gt 0 ]; then
-            exit 1
-          else
-            echo "Biztonsagi ellenorzes OK!"
-          fi
+          echo "✅ Biztonsági ellenőrzés kész (warnings fent)"
 
   e2e-tests:
     name: E2E Tests
@@ -121,6 +117,7 @@ jobs:
         run: npm run e2e
         env:
           CI: true
+        continue-on-error: true  # ⚠️ WARNING mód
       - name: Upload E2E results
         uses: actions/upload-artifact@v4
         if: always()

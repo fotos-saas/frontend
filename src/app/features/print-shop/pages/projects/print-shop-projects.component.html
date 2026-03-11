@@ -35,6 +35,13 @@
       <option value="done">Kész</option>
     </select>
 
+    <select class="filter-select" [ngModel]="classYearFilter()" (ngModelChange)="onClassYearChange($event)">
+      <option value="">Minden évfolyam</option>
+      @for (year of availableYears(); track year) {
+        <option [value]="year">{{ year }}</option>
+      }
+    </select>
+
     @if (studios().length > 1) {
       <select class="filter-select" [ngModel]="studioFilter() ?? ''" (ngModelChange)="onStudioChange($event)">
         <option value="">Minden stúdió</option>

@@ -34,10 +34,12 @@ export class PrintShopProjectsComponent {
   perPage = signal(20);
 
   // Filters
-  statusFilter = signal<'in_print' | 'done' | ''>('');
+  statusFilter = signal<'in_print' | 'done' | ''>('in_print');
+  classYearFilter = signal<string>(new Date().getFullYear().toString());
   studioFilter = signal<number | null>(null);
   searchQuery = signal('');
   studios = signal<PrintShopStudio[]>([]);
+  availableYears = signal<string[]>(this.getRecentYears());
 
   // Mark-done state
   markingDone = signal<number | null>(null);
@@ -47,14 +49,20 @@ export class PrintShopProjectsComponent {
 
   // Computed
   hasFilters = computed(() =>
-    this.statusFilter() !== '' || this.studioFilter() !== null || this.searchQuery() !== ''
+    this.statusFilter() !== 'in_print' ||
+    this.classYearFilter() !== new Date().getFullYear().toString() ||
+    this.studioFilter() !== null ||
+    this.searchQuery() !== ''
   );
 
   constructor() {
     // URL query params → initial filter state
     const params = this.route.snapshot.queryParams;
-    if (params['status'] === 'in_print' || params['status'] === 'done') {
-      this.statusFilter.set(params['status']);
+    if (params['status'] === 'in_print' || params['status'] === 'done' || params['status'] === '') {
+      this.statusFilter.set(params['status'] || '');
+    }
+    if (params['class_year']) {
+      this.classYearFilter.set(params['class_year']);
     }
 
     // Search debounce
@@ -90,8 +98,16 @@ export class PrintShopProjectsComponent {
     this.loadProjects();
   }
 
+  onClassYearChange(year: string): void {
+    this.classYearFilter.set(year);
+    this.currentPage.set(1);
+    this.updateUrl();
+    this.loadProjects();
+  }
+
   clearFilters(): void {
-    this.statusFilter.set('');
+    this.statusFilter.set('in_print');
+    this.classYearFilter.set(new Date().getFullYear().toString());
     this.studioFilter.set(null);
     this.searchQuery.set('');
     this.currentPage.set(1);
@@ -162,6 +178,7 @@ export class PrintShopProjectsComponent {
       status: this.statusFilter() || null,
       search: this.searchQuery() || undefined,
       studio_id: this.studioFilter(),
+      class_year: this.classYearFilter() || undefined,
     }).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: PaginatedResponse<PrintShopProject>) => {
@@ -180,6 +197,16 @@ export class PrintShopProjectsComponent {
   private updateUrl(): void {
     const queryParams: Record<string, string | null> = {};
     queryParams['status'] = this.statusFilter() || null;
+    queryParams['class_year'] = this.classYearFilter() || null;
     this.router.navigate([], { queryParams, queryParamsHandling: 'merge' });
+  }
+
+  private getRecentYears(): string[] {
+    const currentYear = new Date().getFullYear();
+    return [
+      currentYear.toString(),
+      (currentYear - 1).toString(),
+      (currentYear - 2).toString(),
+    ];
   }
 }

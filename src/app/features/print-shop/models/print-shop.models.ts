@@ -55,6 +55,7 @@ export interface PrintShopProjectListParams {
   status?: 'in_print' | 'done' | null;
   search?: string;
   studio_id?: number | null;
+  class_year?: string;
 }
 
 export interface PaginatedResponse<T> {

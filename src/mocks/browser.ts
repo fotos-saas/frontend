@@ -25,6 +25,6 @@ export async function startMockServiceWorker(): Promise<void> {
         url: '/mockServiceWorker.js'
       }
     });
-    console.log('[MSW] Mock Service Worker started');
+    console.log('[MSW] Mock Service Worker started'); // keep
   }
 }

@@ -451,7 +451,7 @@ export const RunPerformanceTest: Story = {
       return;
     }
 
-    console.log('\n🔬 Starting Performance Test...\n');
+    console.log('\n🔬 Starting Performance Test...\n'); // keep
 
     const frameMonitor = new FrameTimeMonitor();
     const memoryStart = getMemoryMetrics();
@@ -499,7 +499,7 @@ export const RunPerformanceTest: Story = {
       report.issues.push(`${frameMetrics.longFrames} long frames detected`);
     }
 
-    console.log(formatPerformanceReport(report));
+    console.log(formatPerformanceReport(report)); // keep
   },
   parameters: {
     docs: {

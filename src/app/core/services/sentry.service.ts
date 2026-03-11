@@ -108,7 +108,7 @@ export class SentryService {
 
     if (!this.dsn) {
       if (!environment.production) {
-        console.log('[Sentry] No DSN configured, skipping initialization');
+        console.log('[Sentry] No DSN configured, skipping initialization'); // keep
       }
       return;
     }
@@ -194,7 +194,7 @@ export class SentryService {
 
     this.initialized = true;
     if (!isProduction) {
-      console.log(`[Sentry] Initialized for development environment`);
+      console.log(`[Sentry] Initialized for development environment`); // keep
     }
   }
 
@@ -273,7 +273,7 @@ export class SentryService {
   ): string | undefined {
     if (!this.initialized) {
       if (!environment.production) {
-        console.log(`[Sentry] Message (not sent - not initialized): [${level}] ${message}`);
+        console.log(`[Sentry] Message (not sent - not initialized): [${level}] ${message}`); // keep
       }
       return undefined;
     }

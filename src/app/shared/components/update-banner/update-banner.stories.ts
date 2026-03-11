@@ -11,7 +11,7 @@ const mockVersionCheckService = {
   latestHash: signal('def67890'),
   reloadPage: () => {
     // eslint-disable-next-line no-console
-    console.log('[Story] reloadPage() meghívva');
+    console.log('[Story] reloadPage() meghívva'); // keep
   },
   startPolling: () => {},
   stopPolling: () => {},

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { ScheduleCardComponent } from './schedule-card.component';
 
-const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
+const action = (name: string) => (...args: unknown[]) => console.log(name, ...args); // keep
 
 /**
  * Schedule Card Stories

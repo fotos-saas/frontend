@@ -338,10 +338,7 @@ export class TabloStorageSessionService {
     const project = safeJsonParse<TabloProject | null>(legacyProject, null);
     if (!project) {
       // Hibás JSON formátum - törlés és kilépés
-      localStorage.removeItem('tablo_auth_token');
-      localStorage.removeItem('tablo_project');
-      localStorage.removeItem('tablo_token_type');
-      localStorage.removeItem('tablo_can_finalize');
+      this.removeLegacyKeys();
       return null;
     }
 
@@ -349,6 +346,7 @@ export class TabloStorageSessionService {
       const projectId = project.id;
 
       if (!projectId) {
+        this.removeLegacyKeys();
         return null;
       }
 
@@ -365,14 +363,22 @@ export class TabloStorageSessionService {
       }
 
       // Régi kulcsok törlése
-      localStorage.removeItem('tablo_auth_token');
-      localStorage.removeItem('tablo_project');
-      localStorage.removeItem('tablo_token_type');
-      localStorage.removeItem('tablo_can_finalize');
+      this.removeLegacyKeys();
 
       return { projectId, sessionType: tokenType };
     } catch (e) {
+      this.removeLegacyKeys();
       return null;
     }
+  }
+
+  /**
+   * Legacy localStorage kulcsok törlése (migráció után vagy hiba esetén)
+   */
+  private removeLegacyKeys(): void {
+    localStorage.removeItem('tablo_auth_token');
+    localStorage.removeItem('tablo_project');
+    localStorage.removeItem('tablo_token_type');
+    localStorage.removeItem('tablo_can_finalize');
   }
 }

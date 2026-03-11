@@ -21,11 +21,11 @@ class MockTabloStorageService {
   }
 
   setActiveSession(projectId: number, sessionType: string): void {
-    console.log('setActiveSession called:', projectId, sessionType);
+    console.log('setActiveSession called:', projectId, sessionType); // keep
   }
 
   updateSessionLastUsed(projectId: number, sessionType: string): void {
-    console.log('updateSessionLastUsed called:', projectId, sessionType);
+    console.log('updateSessionLastUsed called:', projectId, sessionType); // keep
   }
 
   removeSession(projectId: number, sessionType: string): void {
@@ -35,7 +35,7 @@ class MockTabloStorageService {
   }
 
   clearSessionAuth(projectId: number, sessionType: string): void {
-    console.log('clearSessionAuth called:', projectId, sessionType);
+    console.log('clearSessionAuth called:', projectId, sessionType); // keep
   }
 }
 

@@ -59,6 +59,7 @@ export class PartnerProjectService {
     is_preliminary?: string;
     photos_uploaded?: string;
     tag_ids?: string;
+    project_ids?: string;
   }): Observable<ProjectListResponse> {
     const httpParams = buildHttpParams({
       page: params?.page,
@@ -74,6 +75,7 @@ export class PartnerProjectService {
       is_preliminary: params?.is_preliminary,
       photos_uploaded: params?.photos_uploaded,
       tag_ids: params?.tag_ids,
+      project_ids: params?.project_ids,
     });
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
@@ -102,6 +104,18 @@ export class PartnerProjectService {
       notFound: number;
       newPhotos: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
     }>(`${this.baseUrl}/projects/${projectId}/check-photo-changes`, { placedPhotos });
+  }
+
+  /**
+   * Batch fotóváltozás ellenőrzés — több projekt egyszerre.
+   * Visszaadja a módosult projekt ID-kat.
+   */
+  batchCheckPhotoChanges(items: Array<{ projectId: number; placedPhotos: Record<string, number> }>): Observable<{
+    data: { modifiedProjectIds: number[]; checkedCount: number };
+  }> {
+    return this.http.post<{
+      data: { modifiedProjectIds: number[]; checkedCount: number };
+    }>(`${this.baseUrl}/projects/batch-check-photo-changes`, { items });
   }
 
   /**

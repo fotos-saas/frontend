@@ -144,34 +144,52 @@
   @if (isElectron) {
     <div class="col col-psd">
       @if (psdStatus()?.exists) {
-        <div class="psd-btn-wrap">
+        <div class="psd-info-col">
+          <div class="psd-btn-wrap">
+            <button
+              type="button"
+              class="action-btn action-btn--ps"
+              (click)="onOpenPsClick($event)"
+              matTooltip="Megnyitás Photoshopban"
+              aria-label="Megnyitás Photoshopban"
+            >
+              <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+            </button>
+            @if (psdStatus()?.updatedPhotosCount) {
+              <span
+                class="photo-update-badge"
+                [matTooltip]="psdStatus()!.updatedPhotosCount + ' személy fotója változott vagy új'"
+              >{{ psdStatus()!.updatedPhotosCount }}</span>
+            } @else if (psdStatus()?.hasPlacedPhotos) {
+              <span class="placed-dot" matTooltip="Képek elhelyezve"></span>
+            }
+          </div>
           <button
             type="button"
-            class="action-btn action-btn--ps"
-            (click)="onOpenPsClick($event)"
-            matTooltip="Megnyitás Photoshopban"
-            aria-label="Megnyitás Photoshopban"
+            class="action-btn action-btn--folder"
+            (click)="onOpenFolderClick($event)"
+            matTooltip="Mappa megnyitása"
+            aria-label="Mappa megnyitása"
           >
-            <lucide-icon [name]="ICONS.MONITOR" [size]="14" />
+            <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
           </button>
-          @if (psdStatus()?.updatedPhotosCount) {
-            <span
-              class="photo-update-badge"
-              [matTooltip]="psdStatus()!.updatedPhotosCount + ' személy fotója változott vagy új'"
-            >{{ psdStatus()!.updatedPhotosCount }}</span>
-          } @else if (psdStatus()?.hasPlacedPhotos) {
-            <span class="placed-dot" matTooltip="Képek elhelyezve"></span>
-          }
         </div>
-        <button
-          type="button"
-          class="action-btn action-btn--folder"
-          (click)="onOpenFolderClick($event)"
-          matTooltip="Mappa megnyitása"
-          aria-label="Mappa megnyitása"
-        >
-          <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="14" />
-        </button>
+        @if (psdStatus()?.psdLastModified || psdStatus()?.placedPhotosLastModified) {
+          <div class="psd-dates">
+            @if (psdStatus()?.psdLastModified) {
+              <span class="psd-date" [matTooltip]="'PSD mentve: ' + (psdStatus()!.psdLastModified! | date:'yyyy. MMM d. HH:mm':'':'hu-HU')">
+                <lucide-icon [name]="ICONS.SAVE" [size]="10" />
+                {{ psdStatus()!.psdLastModified! | date:'MM.dd HH:mm':'':'hu-HU' }}
+              </span>
+            }
+            @if (psdStatus()?.placedPhotosLastModified) {
+              <span class="psd-date psd-date--photos" [matTooltip]="'Képcsere: ' + (psdStatus()!.placedPhotosLastModified! | date:'yyyy. MMM d. HH:mm':'':'hu-HU')">
+                <lucide-icon [name]="ICONS.IMAGE" [size]="10" />
+                {{ psdStatus()!.placedPhotosLastModified! | date:'MM.dd HH:mm':'':'hu-HU' }}
+              </span>
+            }
+          </div>
+        }
       } @else {
         <span class="psd-missing" matTooltip="Nincs PSD generálva">
           <lucide-icon [name]="ICONS.MONITOR" [size]="14" />

@@ -90,7 +90,7 @@ export class PartnerProjectListComponent implements OnInit {
     { key: 'tablo_status', label: 'Státusz', width: '110px', align: 'center', sortable: true },
     { key: 'missing_count', label: 'Hiányzó', width: '75px', align: 'center', sortable: true },
     ...(this.electronService.isElectron ? [
-      { key: 'psd', label: 'PSD', width: '64px', align: 'center' as const },
+      { key: 'psd', label: 'PSD', width: '110px', align: 'center' as const },
     ] : []),
     { key: 'actions', label: '', width: '56px' },
   ];
@@ -128,16 +128,11 @@ export class PartnerProjectListComponent implements OnInit {
   totalProjects = signal(0);
   projectLimits = signal<ProjectLimits | null>(null);
   psdFilterActive = signal(false);
+  /** Módosult PSD batch check betöltés jelző */
+  readonly psdBatchLoading = this.psdStatusService.batchCheckLoading;
 
-  /** Projektek szűrve: ha PSD szűrő aktív, csak a módosított fotókkal rendelkezők */
-  readonly displayedProjects = computed(() => {
-    const all = this.projects();
-    if (!this.psdFilterActive()) return all;
-    return all.filter(p => {
-      const status = this.psdStatusService.getStatus(p.id);
-      return status != null && status.updatedPhotosCount > 0;
-    });
-  });
+  /** Projektek — ha PSD szűrő aktív, a backend már szűrve adja (server-side) */
+  readonly displayedProjects = computed(() => this.projects());
 
   // Státusz opciók
   readonly statusOptions = [
@@ -218,8 +213,23 @@ export class PartnerProjectListComponent implements OnInit {
     this.filterState.setSortBy(this.filterState.sortBy() === 'last_activity_at' ? 'created_at' : 'last_activity_at');
   }
 
-  togglePsdFilter(): void {
-    this.psdFilterActive.update(v => !v);
+  async togglePsdFilter(): Promise<void> {
+    const newActive = !this.psdFilterActive();
+    this.psdFilterActive.set(newActive);
+
+    if (newActive) {
+      // Batch check: az összes cache-elt placed-photos ellenőrzése a backenddel
+      const ids = await this.psdStatusService.runBatchCheck();
+      if (ids.length === 0) {
+        // Ha nincs módosult, visszaállítjuk a szűrőt
+        this.psdFilterActive.set(false);
+        return;
+      }
+    }
+
+    // Újratöltjük a projekt listát (a loadProjects kezeli a project_ids szűrőt)
+    this.filterState.setPage(1);
+    this.loadProjects();
   }
 
   ngOnInit(): void {
@@ -262,6 +272,10 @@ export class PartnerProjectListComponent implements OnInit {
     this.filterState.loading.set(true);
 
     const filters = this.filterState.filters();
+
+    // Ha PSD szűrő aktív, a módosult projekt ID-kat server-side filterként küldjük
+    const psdProjectIds = this.psdFilterActive() ? this.psdStatusService.modifiedProjectIds() : [];
+
     this.partnerService.getProjects({
       page: this.filterState.page(),
       per_page: this.perPage(),
@@ -276,6 +290,7 @@ export class PartnerProjectListComponent implements OnInit {
       is_preliminary: filters['is_preliminary'] || undefined,
       photos_uploaded: filters['photos_uploaded'] || undefined,
       tag_ids: filters['tag_ids'] || undefined,
+      project_ids: psdProjectIds.length > 0 ? psdProjectIds.join(',') : undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

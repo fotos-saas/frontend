@@ -431,8 +431,37 @@
 
 /* Col: PSD */
 .col-psd {
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.psd-info-col {
+  display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+.psd-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: center;
+}
+
+.psd-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.5625rem;
+  color: get-color('slate', 400);
+  white-space: nowrap;
+  line-height: 1.2;
+  cursor: default;
+}
+
+.psd-date--photos {
+  color: get-color('primary', 400);
 }
 
 .psd-missing {

@@ -22,7 +22,7 @@ describe('PsdStatusService', () => {
     findProjectPsd: vi.fn(),
   };
   const mockBranding = { brandName: vi.fn(() => null) };
-  const mockProjectService = { checkPhotoChanges: vi.fn() };
+  const mockProjectService = { checkPhotoChanges: vi.fn(), batchCheckPhotoChanges: vi.fn() };
   const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {

@@ -668,6 +668,41 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener('touch-bar-action', handler);
     },
   },
+
+  // PSD cache — workDir figyelés chokidarral
+  psdCache: {
+    getAll: () =>
+      ipcRenderer.invoke('psd-cache:get-all') as Promise<Array<{
+        folderPath: string;
+        psdPath: string;
+        psdLastModified: string;
+        placedPhotos: Record<string, number> | null;
+        placedPhotosLastModified: string | null;
+      }>>,
+    rescan: () =>
+      ipcRenderer.invoke('psd-cache:rescan') as Promise<Array<{
+        folderPath: string;
+        psdPath: string;
+        psdLastModified: string;
+        placedPhotos: Record<string, number> | null;
+        placedPhotosLastModified: string | null;
+      }>>,
+    getStatus: () =>
+      ipcRenderer.invoke('psd-cache:get-status') as Promise<{ watching: boolean; entryCount: number; workDir: string | null }>,
+    onUpdated: (callback: (data: { folderPath: string; entry: {
+      folderPath: string; psdPath: string; psdLastModified: string;
+      placedPhotos: Record<string, number> | null; placedPhotosLastModified: string | null;
+    } }) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, data: any) => callback(data);
+      ipcRenderer.on('psd-cache:updated', handler);
+      return () => ipcRenderer.removeListener('psd-cache:updated', handler);
+    },
+    onRemoved: (callback: (data: { folderPath: string }) => void): CleanupFn => {
+      const handler = (_event: IpcRendererEvent, data: { folderPath: string }) => callback(data);
+      ipcRenderer.on('psd-cache:removed', handler);
+      return () => ipcRenderer.removeListener('psd-cache:removed', handler);
+    },
+  },
 });
 
 // TypeScript type declaration is in electron.service.ts to avoid duplication

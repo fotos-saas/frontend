@@ -89,7 +89,7 @@ function updatePlacedPhotosJson(
   }
 }
 
-const psStore = new Store<PhotoshopSchema>({
+export const psStore = new Store<PhotoshopSchema>({
   name: 'photostack-photoshop',
   defaults: {
     photoshopPath: null,

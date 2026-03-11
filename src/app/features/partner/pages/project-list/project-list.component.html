@@ -94,10 +94,15 @@
         type="button"
         class="sort-toggle-btn"
         [class.sort-toggle-btn--active]="psdFilterActive()"
+        [disabled]="psdBatchLoading()"
         (click)="togglePsdFilter()"
-        matTooltip="Csak módosított fotókkal rendelkező projektek"
+        matTooltip="Csak módosított fotókkal rendelkező projektek (teljes lista)"
       >
-        <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        @if (psdBatchLoading()) {
+          <span class="sort-toggle-btn__spinner"></span>
+        } @else {
+          <lucide-icon [name]="ICONS.IMAGE" [size]="16" />
+        }
         Módosult PSD
       </button>
     }

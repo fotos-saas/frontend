@@ -13,7 +13,8 @@ import { initSentryMain, setSentryUser, captureMainException, addMainBreadcrumb 
 initSentryMain();
 
 // Modularis IPC handlerek
-import { registerPhotoshopHandlers, jsxRunner } from './handlers/photoshop.handler';
+import { registerPhotoshopHandlers, jsxRunner, psStore } from './handlers/photoshop.handler';
+import { PsdCacheService } from './services/psd-cache.service';
 import { registerSampleGeneratorHandlers } from './handlers/sample-generator.handler';
 import { registerFinalizerHandlers } from './handlers/finalizer.handler';
 import { registerOverlayHandlers } from './handlers/overlay.handler';
@@ -764,6 +765,10 @@ app.whenReady().then(async () => {
   if (mainWindow) {
     registerPhotoshopHandlers(mainWindow);
   }
+
+  // PSD cache watcher indítása (háttérben figyeli a workDir-t)
+  const psdCache = new PsdCacheService(psStore, mainWindow);
+  psdCache.start();
 
   // Minta generalas IPC handlerek regisztralasa
   registerSampleGeneratorHandlers();

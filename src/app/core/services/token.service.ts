@@ -45,7 +45,7 @@ export class TokenService {
   }
 
   /**
-   * Inicializálás localStorage-ból
+   * Inicializálás sessionStorage-ból
    */
   private initializeFromStorage(): {
     canFinalize: boolean;
@@ -151,7 +151,7 @@ export class TokenService {
   }
 
   /**
-   * Újrainicializálás localStorage-ból (session váltáshoz)
+   * Újrainicializálás sessionStorage-ból (session váltáshoz)
    */
   reinitialize(): void {
     const state = this.initializeFromStorage();

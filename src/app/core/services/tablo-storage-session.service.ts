@@ -49,13 +49,12 @@ export class TabloStorageSessionService {
   /**
    * Aktív session lekérése (projectId + sessionType)
    *
-   * Prioritás:
-   * 1. sessionStorage - tab-specifikus (ha van érvényes auth/guest token hozzá)
-   * 2. localStorage - fallback (F5 után, vagy ha sessionStorage session-höz nincs token)
+   * SECURITY: Kizárólag sessionStorage-ból olvas (XSS védelem).
+   * Legacy localStorage fallback: egyszeri migráció majd törlés.
    */
   getActiveSession(): { projectId: number; sessionType: TokenType } | null {
     try {
-      // Először sessionStorage-ból próbáljuk (tab-specifikus)
+      // sessionStorage-ból próbáljuk (tab-specifikus, XSS-biztos)
       const sessionStored = sessionStorage.getItem(this.ACTIVE_SESSION_KEY);
 
       if (sessionStored) {
@@ -70,16 +69,23 @@ export class TabloStorageSessionService {
         }
       }
 
-      // Fallback: localStorage (F5 után, vagy ha sessionStorage session invalid)
+      // Legacy cleanup: ha localStorage-ban még van régi adat, migráljuk és töröljük
       const localStored = localStorage.getItem(this.ACTIVE_SESSION_KEY);
-      if (!localStored) return null;
+      if (localStored) {
+        // Áthelyezzük sessionStorage-ba
+        sessionStorage.setItem(this.ACTIVE_SESSION_KEY, localStored);
+        // Töröljük a régi localStorage kulcsot
+        localStorage.removeItem(this.ACTIVE_SESSION_KEY);
 
-      const [projectIdStr, sessionType] = localStored.split(':');
-      const projectId = parseInt(projectIdStr, 10);
+        const [projectIdStr, sessionType] = localStored.split(':');
+        const projectId = parseInt(projectIdStr, 10);
 
-      if (isNaN(projectId) || !sessionType) return null;
+        if (isNaN(projectId) || !sessionType) return null;
 
-      return { projectId, sessionType: sessionType as TokenType };
+        return { projectId, sessionType: sessionType as TokenType };
+      }
+
+      return null;
     } catch {
       // Safari Private mode fallback
       return null;
@@ -111,15 +117,14 @@ export class TabloStorageSessionService {
 
   /**
    * Aktív session beállítása
-   * FONTOS: Mindkét helyre mentjük!
-   * - sessionStorage: tab-specifikus működéshez
-   * - localStorage: oldal frissítés utáni visszatöltéshez (guest session)
+   * SECURITY: Csak sessionStorage-ba mentjük (XSS védelem).
    */
   setActiveSession(projectId: number, sessionType: TokenType): void {
     const value = `${projectId}:${sessionType}`;
     try {
       sessionStorage.setItem(this.ACTIVE_SESSION_KEY, value);
-      localStorage.setItem(this.ACTIVE_SESSION_KEY, value);
+      // Legacy cleanup: ha localStorage-ban még van régi kulcs, töröljük
+      localStorage.removeItem(this.ACTIVE_SESSION_KEY);
     } catch {
       // Safari Private mode - silent fail, getActiveSession visszaad null-t
     }
@@ -326,12 +331,20 @@ export class TabloStorageSessionService {
 
   // === MIGRATION ===
 
+  /**
+   * Régi localStorage kulcsok migrálása sessionStorage-ba.
+   * A legacy kulcsokat (tablo_auth_token, tablo_project, stb.) localStorage-ból
+   * olvassuk ki és a CRUD service-en keresztül sessionStorage-ba mentjük,
+   * majd törüljük a régi localStorage kulcsokat.
+   */
   migrateFromLegacy(): { projectId: number; sessionType: TokenType } | null {
-    // Régi kulcsok
+    // Régi kulcsok (localStorage-ból, mert ott voltak korábban)
     const legacyToken = localStorage.getItem('tablo_auth_token');
     const legacyProject = localStorage.getItem('tablo_project');
 
     if (!legacyToken || !legacyProject) {
+      // Akkor is takarítsuk ki a maradék legacy kulcsokat ha részlegesen vannak
+      this.removeLegacyKeys();
       return null;
     }
 
@@ -353,7 +366,7 @@ export class TabloStorageSessionService {
       // Token típus meghatározása (default: code)
       const tokenType = (localStorage.getItem('tablo_token_type') as TokenType) ?? 'code';
 
-      // Migrálás új session-izolt kulcsokba
+      // Migrálás új session-izolt kulcsokba (sessionStorage-ba a CRUD service-en keresztül)
       this.setAuthToken(projectId, tokenType, legacyToken);
       this.setProject(projectId, tokenType, project);
 
@@ -362,7 +375,7 @@ export class TabloStorageSessionService {
         this.setCanFinalize(projectId, tokenType, canFinalize === 'true');
       }
 
-      // Régi kulcsok törlése
+      // Régi localStorage kulcsok törlése (SECURITY: ne maradjanak localStorage-ban)
       this.removeLegacyKeys();
 
       return { projectId, sessionType: tokenType };
@@ -373,12 +386,17 @@ export class TabloStorageSessionService {
   }
 
   /**
-   * Legacy localStorage kulcsok törlése (migráció után vagy hiba esetén)
+   * Legacy localStorage kulcsok törlése (migráció után vagy hiba esetén).
+   * SECURITY: Biztosítja, hogy régi tokenek ne maradjanak localStorage-ban.
    */
   private removeLegacyKeys(): void {
-    localStorage.removeItem('tablo_auth_token');
-    localStorage.removeItem('tablo_project');
-    localStorage.removeItem('tablo_token_type');
-    localStorage.removeItem('tablo_can_finalize');
+    try {
+      localStorage.removeItem('tablo_auth_token');
+      localStorage.removeItem('tablo_project');
+      localStorage.removeItem('tablo_token_type');
+      localStorage.removeItem('tablo_can_finalize');
+    } catch {
+      // Silent fail — ha localStorage nem elérhető, nincs mit törölni
+    }
   }
 }

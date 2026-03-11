@@ -10,7 +10,7 @@ export type { StoredSession };
 /**
  * Tablo Storage Service (Facade)
  *
- * Projekt ÉS session-típus izolált localStorage abstrakció.
+ * Projekt ÉS session-típus izolált sessionStorage abstrakció.
  * Kulcs struktúra: `tablo:{projectId}:{sessionType}:*`
  *
  * Ez lehetővé teszi, hogy ugyanazon projekt vendég (share) és

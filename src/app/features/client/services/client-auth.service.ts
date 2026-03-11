@@ -211,7 +211,7 @@ export class ClientAuthService {
           isRegistered: response.user.isRegistered,
           wantsNotifications: response.client.wantsNotifications,
         });
-        // Store albums in localStorage for quick access
+        // Store albums in sessionStorage for quick access
         sessionStorage.setItem('client_albums', JSON.stringify(response.albums));
         // Store branding
         if (response.branding) {

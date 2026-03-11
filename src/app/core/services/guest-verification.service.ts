@@ -111,7 +111,7 @@ export class GuestVerificationService {
           missingPersonName: response.data.missing_person_name
         };
 
-        // Mentés localStorage-ba
+        // Mentés sessionStorage-ba
         const activeSession = this.storage.getActiveSession();
         if (activeSession) {
           this.sessionService.storeSessionToken(activeSession.projectId, activeSession.sessionType, response.data.session_token);

@@ -72,7 +72,7 @@ export class SessionService {
   }
 
   /**
-   * Inicializálás localStorage-ból (migration + aktív session betöltése)
+   * Inicializálás sessionStorage-ból (migration + aktív session betöltése)
    */
   initializeFromStorage(): SessionInitResult {
     // Először próbáljunk migrálni régi kulcsokról
@@ -121,7 +121,7 @@ export class SessionService {
 
   /**
    * Tárolt session visszaállítása (session chooser-ből)
-   * Újra inicializálja az auth állapotot a localStorage-ból.
+   * Újra inicializálja az auth állapotot a sessionStorage-ból.
    * @returns true ha sikerült, false ha nincs érvényes session
    */
   restoreSession(projectId: number, sessionType: TokenType): boolean {
@@ -278,7 +278,7 @@ export class SessionService {
   }
 
   /**
-   * Marketer felhasználó lekérése localStorage-ból
+   * Marketer felhasználó lekérése sessionStorage-ból
    */
   getStoredMarketerUser(): AuthUser | null {
     const stored = sessionStorage.getItem('marketer_user');

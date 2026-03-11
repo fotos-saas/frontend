@@ -14,7 +14,7 @@ export interface ClientBranding {
 }
 
 /**
- * Client info stored in localStorage
+ * Client info stored in sessionStorage
  */
 export interface ClientInfo {
   id: number;

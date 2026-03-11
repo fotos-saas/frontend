@@ -163,6 +163,14 @@
               >
                 <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
               </button>
+            } @else if (project.hasSample) {
+              <button
+                class="action-btn"
+                (click)="downloadSample(project)"
+                matTooltip="Mintakép letöltése"
+              >
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
+              </button>
             }
 
             @if (project.status === 'in_print') {

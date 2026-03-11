@@ -224,6 +224,11 @@ export class PrintShopProjectsComponent {
     window.open(url, '_blank');
   }
 
+  downloadSample(project: PrintShopProject): void {
+    const url = this.service.getDownloadUrl(project.id, 'sample');
+    window.open(url, '_blank');
+  }
+
   formatDate(isoDate: string | null): string {
     if (!isoDate) return '-';
     return new Date(isoDate).toLocaleDateString('hu-HU', {

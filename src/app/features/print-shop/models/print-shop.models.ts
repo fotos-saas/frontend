@@ -28,6 +28,7 @@ export interface PrintShopProject {
   doneAt: string | null;
   hasPrintFile: boolean;
   printFileType: string | null;
+  hasSample: boolean;
   thumbnailUrl: string | null;
   previewUrl: string | null;
 }

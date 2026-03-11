@@ -8,6 +8,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { provideSentry, SentryService } from './core/services/sentry.service';
+import { AuthService } from './core/services/auth.service';
 import { LUCIDE_ICONS_MAP } from './shared/constants/lucide-icons';
 import { RoleBasedPreloadingStrategy } from './core/strategies/role-based-preloading.strategy';
 
@@ -21,6 +22,12 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: (sentryService: SentryService) => () => sentryService.init(),
       deps: [SentryService],
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (authService: AuthService) => () => authService.tabSyncReady,
+      deps: [AuthService],
       multi: true
     },
     ...provideSentry(),

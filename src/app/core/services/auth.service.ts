@@ -194,6 +194,12 @@ export class AuthService {
   // CONSTRUCTOR
   // ==========================================
 
+  /**
+   * Tab sync inicializálás promise — APP_INITIALIZER megvárja mielőtt routing elindul.
+   * Ha van aktív session (saját tab), azonnal resolved.
+   */
+  readonly tabSyncReady: Promise<void>;
+
   constructor() {
     // Callback-ok regisztrálása a child service-ekhez
     this.registerChildCallbacks();
@@ -206,7 +212,9 @@ export class AuthService {
 
     // Ha nincs aktív session, próbálunk másik tab-tól kérni
     if (!initialState.isAuthenticated) {
-      this.tryRestoreFromOtherTab();
+      this.tabSyncReady = this.tryRestoreFromOtherTab();
+    } else {
+      this.tabSyncReady = Promise.resolve();
     }
   }
 
@@ -279,8 +287,8 @@ export class AuthService {
   }
 
   /** Session visszaállítás másik tab-tól (új tab nyitáskor) */
-  private tryRestoreFromOtherTab(): void {
-    this.tabSync.requestSession().then(received => {
+  private tryRestoreFromOtherTab(): Promise<void> {
+    return this.tabSync.requestSession().then(received => {
       if (received) this.reinitializeFromStorage();
     });
   }

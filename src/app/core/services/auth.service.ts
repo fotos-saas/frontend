@@ -194,27 +194,25 @@ export class AuthService {
   // CONSTRUCTOR
   // ==========================================
 
-  /**
-   * Tab sync inicializálás promise — APP_INITIALIZER megvárja mielőtt routing elindul.
-   * Ha van aktív session (saját tab), azonnal resolved.
-   */
-  readonly tabSyncReady: Promise<void>;
-
   constructor() {
     // Callback-ok regisztrálása a child service-ekhez
     this.registerChildCallbacks();
     this.registerTabSyncCallbacks();
 
-    // Inicializálás storage-ból
+    // Ha nincs saját session, próbáljuk visszaállítani a localStorage mirror-ból (szinkron)
+    const hasOwnSession = this.hasAnySessionInStorage();
+    if (!hasOwnSession) {
+      this.tabSync.restoreFromMirror();
+    }
+
+    // Inicializálás storage-ból (a mirror restore után már ott vannak az adatok)
     const initialState = this.sessionService.initializeFromStorage();
     this._project.set(initialState.project);
     this._isAuthenticated.set(initialState.isAuthenticated);
 
-    // Ha nincs aktív session, próbálunk másik tab-tól kérni
+    // Marketer session inicializálás ha tablo session nincs
     if (!initialState.isAuthenticated) {
-      this.tabSyncReady = this.tryRestoreFromOtherTab();
-    } else {
-      this.tabSyncReady = Promise.resolve();
+      this.initializeMarketerSession();
     }
   }
 
@@ -230,8 +228,8 @@ export class AuthService {
         if (passwordSet !== undefined) {
           this.passwordSet.set(passwordSet);
         }
-        // Tab szinkronizáció: többi tab is kapja az új session-t
-        this.tabSync.broadcastSessionUpdate();
+        // Tab szinkronizáció: localStorage mirror mentés
+        this.tabSync.saveToMirror();
       },
       onPasswordSetChange: (value: boolean) => {
         this.passwordSet.set(value);
@@ -243,8 +241,8 @@ export class AuthService {
       onMarketerAuthSuccess: (user: AuthUser) => {
         this._currentUser.set(user);
         this._isAuthenticated.set(true);
-        // Tab szinkronizáció: többi tab is kapja az új session-t
-        this.tabSync.broadcastSessionUpdate();
+        // Tab szinkronizáció: localStorage mirror mentés
+        this.tabSync.saveToMirror();
       },
       onPasswordSetChange: (value: boolean) => {
         this.passwordSet.set(value);
@@ -278,28 +276,23 @@ export class AuthService {
     });
   }
 
-  /** Tab szinkronizáció callback-ek */
+  /** Tab szinkronizáció callback-ek (logout broadcast) */
   private registerTabSyncCallbacks(): void {
     this.tabSync.registerCallbacks({
-      onSessionReceived: () => this.reinitializeFromStorage(),
       onSessionCleared: () => this.clearLocalState()
     });
   }
 
-  /** Session visszaállítás másik tab-tól (új tab nyitáskor) */
-  private tryRestoreFromOtherTab(): Promise<void> {
-    return this.tabSync.requestSession().then(received => {
-      if (received) this.reinitializeFromStorage();
-    });
-  }
-
-  /** Session újra inicializálása storage-ból (tab sync után) */
-  private reinitializeFromStorage(): void {
-    this.tokenService.reinitialize();
-    const state = this.sessionService.initializeFromStorage();
-    this._project.set(state.project);
-    this._isAuthenticated.set(state.isAuthenticated);
-    if (!state.isAuthenticated) this.initializeMarketerSession();
+  /** Van-e bármi session adat a saját sessionStorage-ban? */
+  private hasAnySessionInStorage(): boolean {
+    try {
+      if (sessionStorage.getItem('marketer_token')) return true;
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith('tablo:')) return true;
+      }
+    } catch { /* silent */ }
+    return false;
   }
 
   /** Lokális auth state törlése (tab sync logout, NEM broadcast-ol vissza) */

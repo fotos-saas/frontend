@@ -2,26 +2,10 @@ import { Injectable, inject, NgZone, OnDestroy } from '@angular/core';
 import { LoggerService } from './logger.service';
 
 /**
- * Protokoll verzió — ha változik az üzenetformátum, növeld!
- * Régi verziójú üzeneteket a service figyelmen kívül hagyja.
+ * localStorage kulcs a session mirror-hoz.
+ * JSON tartalom: TabSyncPayload | null
  */
-const CHANNEL_VERSION = 1;
-
-/** Mennyi ideig várunk válaszra másik tab-tól (ms) */
-const SESSION_REQUEST_TIMEOUT_MS = 300;
-
-/**
- * Tab szinkronizáció üzenet típusok
- */
-interface TabSyncMessage {
-  type: 'SESSION_REQUEST' | 'SESSION_RESPONSE' | 'SESSION_UPDATED' | 'SESSION_CLEARED';
-  /** Az üzenetet küldő tab egyedi azonosítója */
-  senderId: string;
-  /** Protokoll verzió */
-  version: number;
-  /** Session adatok (ha van) */
-  payload?: TabSyncPayload;
-}
+const SESSION_MIRROR_KEY = 'photostack_session_mirror';
 
 /**
  * Szinkronizálandó session adatok
@@ -37,22 +21,22 @@ interface TabSyncPayload {
 /**
  * Tab Sync Service
  *
- * BroadcastChannel API-val szinkronizálja a session adatokat a tabok között.
- * A tokenek sessionStorage-ban maradnak (XSS védelem), de új tab nyitásnál
- * a meglévő tabok átadják a session adatokat.
+ * Két mechanizmussal szinkronizálja a session adatokat a tabok között:
  *
- * Működés:
- * 1. Új tab nyitáskor: SESSION_REQUEST üzenetet küld
- * 2. Meglévő tabok: SESSION_RESPONSE-szal válaszolnak (session adatokkal)
- * 3. Bejelentkezéskor: SESSION_UPDATED → minden tab megkapja az új session-t
- * 4. Kijelentkezéskor: SESSION_CLEARED → minden tab kijelentkezik
+ * 1. **localStorage mirror** (session megosztás):
+ *    Login-kor a session adatokat localStorage-ba is mentjük (mirror).
+ *    Új tab nyitáskor SZINKRONBAN olvashatja és sessionStorage-ba másolja.
+ *    Ez 0ms-es, megbízható, és nem függ a BroadcastChannel-től.
  *
- * SECURITY: A BroadcastChannel same-origin policy-val védett.
- * A tokenek átadása a tabok között tudatos döntés — ugyanaz a fenyegetési modell,
- * mint a sessionStorage közvetlen olvasása. Verzió ellenőrzéssel szűrjük az idegen üzeneteket.
+ * 2. **BroadcastChannel** (logout szinkronizáció):
+ *    Kijelentkezéskor az összes tab értesül és szinkronban kijelentkezik.
+ *
+ * SECURITY: A localStorage mirror ugyanaz a fenyegetési modell mint a sessionStorage
+ * (XSS támadás mindkettőt olvasni tudja). A tokenek védelme a CSP headerek és
+ * az input sanitizálás feladata — nem a storage típusé.
  *
  * Safari kompatibilitás: BroadcastChannel Safari 15.4+ óta támogatott.
- * Ha nem elérhető, a service nem csinál semmit (graceful degradation).
+ * Ha nem elérhető, a logout szinkronizáció nem működik, de a session megosztás igen.
  */
 @Injectable({
   providedIn: 'root'
@@ -64,15 +48,10 @@ export class TabSyncService implements OnDestroy {
   private channel: BroadcastChannel | null = null;
   private readonly tabId = this.generateTabId();
 
-  /** Callback-ek a session események kezelésére */
-  private onSessionReceived?: (payload: TabSyncPayload) => void;
+  /** Callback kijelentkezés szinkronizáláshoz */
   private onSessionCleared?: () => void;
 
-  /** Jelzi, hogy a session request-re érkezett-e válasz */
-  private sessionRequestResolved = false;
-  private sessionRequestResolver?: (received: boolean) => void;
-
-  /** Guard a végtelen ciklus ellen (sync → logout → broadcast → sync → ...) */
+  /** Guard a végtelen ciklus ellen */
   private isProcessingSync = false;
 
   constructor() {
@@ -84,212 +63,132 @@ export class TabSyncService implements OnDestroy {
     this.channel = null;
   }
 
-  /**
-   * Egyedi tab azonosító generálása
-   */
   private generateTabId(): string {
     return `tab_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   }
 
   /**
-   * BroadcastChannel inicializálása
+   * BroadcastChannel inicializálása (logout szinkronizáláshoz)
    */
   private initChannel(): void {
     try {
-      if (typeof BroadcastChannel === 'undefined') {
-        this.logger.warn('[TabSync] BroadcastChannel nem elérhető');
-        return;
-      }
+      if (typeof BroadcastChannel === 'undefined') return;
 
       this.channel = new BroadcastChannel('photostack_tab_sync');
-
-      this.channel.onmessage = (event: MessageEvent<TabSyncMessage>) => {
-        // Angular zone-ban futtatjuk a callback-eket
-        this.ngZone.run(() => {
-          this.handleMessage(event.data);
-        });
+      this.channel.onmessage = (event: MessageEvent) => {
+        this.ngZone.run(() => this.handleChannelMessage(event.data));
       };
-
-      this.logger.info(`[TabSync] Inicializálva (tabId: ${this.tabId})`);
     } catch {
-      this.logger.warn('[TabSync] BroadcastChannel inicializálás sikertelen');
+      // BroadcastChannel nem elérhető — graceful degradation
     }
   }
 
-  /**
-   * Callback-ek regisztrálása
-   */
-  registerCallbacks(callbacks: {
-    onSessionReceived: (payload: TabSyncPayload) => void;
-    onSessionCleared: () => void;
-  }): void {
-    this.onSessionReceived = callbacks.onSessionReceived;
+  /** Callback regisztrálás */
+  registerCallbacks(callbacks: { onSessionCleared: () => void }): void {
     this.onSessionCleared = callbacks.onSessionCleared;
   }
 
+  // ==========================================
+  // SESSION MIRROR (localStorage → szinkron)
+  // ==========================================
+
   /**
-   * Session kérése a meglévő taboktól
-   *
-   * Új tab nyitásakor hívódik. Küld egy SESSION_REQUEST-et,
-   * majd vár max SESSION_REQUEST_TIMEOUT_MS-t válaszra.
-   *
-   * @returns Promise<boolean> - true ha kapott session adatokat
+   * Session adatok mentése localStorage mirror-ba (login után).
+   * Új tab nyitásakor a restoreFromMirror() szinkronban visszaolvassa.
    */
-  requestSession(): Promise<boolean> {
-    if (!this.channel) {
-      return Promise.resolve(false);
+  saveToMirror(): void {
+    try {
+      const payload = this.collectSessionData();
+      if (!payload) return;
+
+      const hasSession = Object.keys(payload.tabloEntries).length > 0 || payload.marketerToken;
+      if (!hasSession) return;
+
+      localStorage.setItem(SESSION_MIRROR_KEY, JSON.stringify(payload));
+      this.logger.info('[TabSync] Session mirror mentve localStorage-ba');
+    } catch {
+      // localStorage nem elérhető — silent fail
     }
-
-    this.sessionRequestResolved = false;
-
-    return new Promise<boolean>((resolve) => {
-      this.sessionRequestResolver = resolve;
-
-      // Timeout: ha nem jön válasz, nincs másik aktív tab
-      setTimeout(() => {
-        if (!this.sessionRequestResolved) {
-          this.sessionRequestResolved = true;
-          this.sessionRequestResolver = undefined;
-          resolve(false);
-        }
-      }, SESSION_REQUEST_TIMEOUT_MS);
-
-      this.send({
-        type: 'SESSION_REQUEST',
-        senderId: this.tabId,
-        version: CHANNEL_VERSION
-      });
-    });
   }
 
   /**
-   * Session frissítés broadcast (login után)
+   * Session visszaállítása localStorage mirror-ból (szinkron, 0ms).
+   * Új tab nyitásakor hívódik — a session adatokat sessionStorage-ba másolja.
+   *
+   * @returns true ha sikerült session-t visszaállítani
    */
-  broadcastSessionUpdate(): void {
-    if (this.isProcessingSync) return;
+  restoreFromMirror(): boolean {
+    try {
+      const stored = localStorage.getItem(SESSION_MIRROR_KEY);
+      if (!stored) return false;
 
-    const payload = this.collectSessionData();
-    if (!payload) return;
+      const payload: TabSyncPayload = JSON.parse(stored);
+      if (!payload) return false;
 
-    this.send({
-      type: 'SESSION_UPDATED',
-      senderId: this.tabId,
-      version: CHANNEL_VERSION,
-      payload
-    });
+      const hasSession = Object.keys(payload.tabloEntries).length > 0 || payload.marketerToken;
+      if (!hasSession) return false;
+
+      this.applySessionData(payload);
+      this.logger.info('[TabSync] Session visszaállítva localStorage mirror-ból');
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
-   * Kijelentkezés broadcast (logout után)
+   * Mirror törlése (logout után)
+   */
+  clearMirror(): void {
+    try {
+      localStorage.removeItem(SESSION_MIRROR_KEY);
+    } catch {
+      // Silent fail
+    }
+  }
+
+  // ==========================================
+  // BROADCAST CHANNEL (logout szinkronizáció)
+  // ==========================================
+
+  /**
+   * Kijelentkezés broadcast — minden tab kijelentkezik
    */
   broadcastSessionClear(): void {
     if (this.isProcessingSync) return;
 
-    this.send({
-      type: 'SESSION_CLEARED',
-      senderId: this.tabId,
-      version: CHANNEL_VERSION
-    });
-  }
+    this.clearMirror();
 
-  /**
-   * Bejövő üzenetek kezelése
-   */
-  private handleMessage(message: TabSyncMessage): void {
-    // Saját üzeneteket kihagyjuk
-    if (message.senderId === this.tabId) return;
-
-    // Verzió ellenőrzés — idegen/régi verziójú üzeneteket eldobjuk
-    if (message.version !== CHANNEL_VERSION) return;
-
-    switch (message.type) {
-      case 'SESSION_REQUEST':
-        this.handleSessionRequest(message.senderId);
-        break;
-
-      case 'SESSION_RESPONSE':
-        this.handleSessionResponse(message.payload);
-        break;
-
-      case 'SESSION_UPDATED':
-        this.handleSessionUpdated(message.payload);
-        break;
-
-      case 'SESSION_CLEARED':
-        this.handleSessionCleared();
-        break;
-    }
-  }
-
-  /**
-   * Másik tab kéri a session adatokat → elküldjük
-   */
-  private handleSessionRequest(requesterId: string): void {
-    const payload = this.collectSessionData();
-    if (!payload) return;
-
-    // Csak ha van aktív session, válaszolunk
-    const hasSession = Object.keys(payload.tabloEntries).length > 0 || payload.marketerToken;
-    if (!hasSession) return;
-
-    this.send({
-      type: 'SESSION_RESPONSE',
-      senderId: this.tabId,
-      version: CHANNEL_VERSION,
-      payload
-    });
-
-    this.logger.info(`[TabSync] Session elküldve tab-nak: ${requesterId}`);
-  }
-
-  /**
-   * Válasz érkezett a session kérésre → betöltjük
-   */
-  private handleSessionResponse(payload?: TabSyncPayload): void {
-    if (!payload || this.sessionRequestResolved) return;
-
-    this.sessionRequestResolved = true;
-    this.applySessionData(payload);
-    this.sessionRequestResolver?.(true);
-    this.sessionRequestResolver = undefined;
-
-    this.logger.info('[TabSync] Session átvéve másik tab-tól');
-  }
-
-  /**
-   * Másik tab bejelentkezett → frissítjük a mi session-ünket is
-   */
-  private handleSessionUpdated(payload?: TabSyncPayload): void {
-    if (!payload) return;
-
-    this.isProcessingSync = true;
     try {
-      this.applySessionData(payload);
-      this.onSessionReceived?.(payload);
-    } finally {
-      this.isProcessingSync = false;
+      this.channel?.postMessage({
+        type: 'SESSION_CLEARED',
+        senderId: this.tabId
+      });
+    } catch {
+      // Channel closed — silent fail
     }
-
-    this.logger.info('[TabSync] Session szinkronizálva (másik tab bejelentkezett)');
   }
 
   /**
-   * Másik tab kijelentkezett → mi is kijelentkezünk
-   *
-   * FONTOS: isProcessingSync guard védi a végtelen ciklust:
-   * Tab A logout → broadcast → Tab B clearLocalState → NEM broadcast-ol vissza
+   * Bejövő BroadcastChannel üzenet kezelése
    */
-  private handleSessionCleared(): void {
-    if (this.isProcessingSync) return;
+  private handleChannelMessage(message: { type: string; senderId: string }): void {
+    if (!message || message.senderId === this.tabId) return;
 
-    this.isProcessingSync = true;
-    try {
-      this.logger.info('[TabSync] Kijelentkezés szinkronizálva (másik tab kijelentkezett)');
-      this.onSessionCleared?.();
-    } finally {
-      this.isProcessingSync = false;
+    if (message.type === 'SESSION_CLEARED' && !this.isProcessingSync) {
+      this.isProcessingSync = true;
+      try {
+        this.logger.info('[TabSync] Kijelentkezés szinkronizálva (másik tab kijelentkezett)');
+        this.onSessionCleared?.();
+      } finally {
+        this.isProcessingSync = false;
+      }
     }
   }
+
+  // ==========================================
+  // SESSION DATA HELPERS
+  // ==========================================
 
   /**
    * Aktuális session adatok összegyűjtése sessionStorage-ból
@@ -323,14 +222,12 @@ export class TabSyncService implements OnDestroy {
    */
   private applySessionData(payload: TabSyncPayload): void {
     try {
-      // Tablo session adatok — csak tablo: prefixű kulcsokat fogadunk el
       for (const [key, value] of Object.entries(payload.tabloEntries)) {
         if (key.startsWith('tablo:') && typeof value === 'string') {
           sessionStorage.setItem(key, value);
         }
       }
 
-      // Marketer session adatok
       if (payload.marketerToken && typeof payload.marketerToken === 'string') {
         sessionStorage.setItem('marketer_token', payload.marketerToken);
       }
@@ -339,17 +236,6 @@ export class TabSyncService implements OnDestroy {
       }
     } catch {
       this.logger.warn('[TabSync] Session adatok alkalmazása sikertelen');
-    }
-  }
-
-  /**
-   * Üzenet küldése a channel-en
-   */
-  private send(message: TabSyncMessage): void {
-    try {
-      this.channel?.postMessage(message);
-    } catch {
-      // Channel closed vagy nem elérhető — silent fail
     }
   }
 }

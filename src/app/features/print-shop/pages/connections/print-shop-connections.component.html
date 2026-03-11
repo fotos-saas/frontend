@@ -16,24 +16,17 @@
       <div class="skeleton-card"></div>
     </div>
   } @else {
-    <!-- Bejövő kérelmek -->
-    <section class="section">
-      <div class="section-header">
-        <h2>
-          <lucide-icon [name]="ICONS.INBOX" [size]="20" />
-          Bejövő kérelmek
-        </h2>
-        @if (incoming().length > 0) {
+    <!-- Bejövő kérelmek (csak ha van) -->
+    @if (incoming().length > 0) {
+      <section class="section">
+        <div class="section-header">
+          <h2>
+            <lucide-icon [name]="ICONS.INBOX" [size]="20" />
+            Bejövő kérelmek
+          </h2>
           <span class="badge badge--pending">{{ incoming().length }}</span>
-        }
-      </div>
-
-      @if (incoming().length === 0) {
-        <div class="empty-state">
-          <lucide-icon [name]="ICONS.INBOX" [size]="40" class="empty-icon" />
-          <p>Nincs bejövő kapcsolódási kérelem</p>
         </div>
-      } @else {
+
         <div class="request-list">
           @for (req of incoming(); track req.id) {
             <div class="request-card">
@@ -80,10 +73,10 @@
             </div>
           }
         </div>
-      }
-    </section>
+      </section>
+    }
 
-    <!-- Kimenő kérelmek -->
+    <!-- Kimenő kérelmek (csak ha van) -->
     @if (outgoing().length > 0) {
       <section class="section">
         <div class="section-header">
@@ -124,7 +117,7 @@
       </section>
     }
 
-    <!-- Ha mind üres -->
+    <!-- Ha nincs egy kérelem se -->
     @if (incoming().length === 0 && outgoing().length === 0) {
       <div class="all-empty">
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="all-empty-icon" />

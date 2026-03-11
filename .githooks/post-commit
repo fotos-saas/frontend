@@ -1,0 +1,40 @@
+#!/bin/bash
+# PhotoStack Frontend Post-commit Hook — Refaktor agent trigger
+
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+REFACTOR_FILE=".git/NEEDS_REFACTOR"
+
+if [ -f "$REFACTOR_FILE" ]; then
+    FILES=$(cat "$REFACTOR_FILE")
+    rm -f "$REFACTOR_FILE"
+
+    echo ""
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║  📦 REFAKTORÁLÁS SZÜKSÉGES — Túlméretes fájlok:    ║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    for ENTRY in $FILES; do
+        FILE=$(echo "$ENTRY" | cut -d: -f1)
+        LINES=$(echo "$ENTRY" | cut -d: -f2)
+        echo -e "${YELLOW}  → $FILE ($LINES sor)${NC}"
+    done
+
+    echo ""
+    echo -e "${CYAN}Indítsd el a refaktor agent-et a következő Claude Code sessionben:${NC}"
+    echo ""
+    echo "  Prompt: \"Bontsd szét a következő túlméretes fájlokat:\""
+
+    for ENTRY in $FILES; do
+        FILE=$(echo "$ENTRY" | cut -d: -f1)
+        LINES=$(echo "$ENTRY" | cut -d: -f2)
+        echo "    - $FILE ($LINES sor)"
+    done
+
+    echo ""
+    echo -e "${CYAN}Vagy futtasd: /maintenance${NC}"
+    echo ""
+fi

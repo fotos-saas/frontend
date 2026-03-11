@@ -203,7 +203,7 @@ export class BookingCalendarComponent {
   }
 
   onBookingClick(bookingId: number): void {
-    // TODO: foglalás részletek megnyitása (Sprint 5)
+    // NOTE: Foglalás részletek megnyitása — placeholder, dialog komponens még nem készült el
     this.logger.debug('Foglalás kiválasztva:', bookingId);
   }
 

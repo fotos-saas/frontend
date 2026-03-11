@@ -216,7 +216,7 @@ export class CapacitorService {
       PushNotifications.addListener('registration', (token: Token) => {
         this.pushToken.set(token.value);
         this.logger.info('Push token', token.value);
-        // TODO: Send to backend
+        // TODO: Push tokent el kell küldeni a backend-nek (POST /api/devices) hogy push notification működjön
       });
 
       // Handle registration error

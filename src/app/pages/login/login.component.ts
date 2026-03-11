@@ -305,8 +305,7 @@ export class LoginComponent implements OnInit {
    * Regisztráció státusz ellenőrzése
    */
   private checkRegistrationEnabled(): void {
-    // TODO: Lehetne backend endpoint ami visszaadja a beállításokat
-    // Egyelőre engedélyezzük a linket, backend úgyis ellenőrzi
+    // NOTE: Backend endpoint kellene a regisztrációs beállításokhoz — jelenleg mindig engedélyezett, backend úgyis validál
     this.registrationEnabled.set(true);
   }
 }

@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, last, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { buildHttpParams } from '@shared/utils/http-params.util';
 import { FinalizationListItem, PaginatedResponse, PrintReadyFile } from '../models/partner.models';
+import { ChunkedUploadService, ChunkedUploadProgress } from '@shared/services/chunked-upload.service';
 
 export type PrintFileType = 'small_tablo' | 'flat';
 
@@ -12,6 +14,7 @@ export type PrintFileType = 'small_tablo' | 'flat';
 })
 export class PartnerFinalizationService {
   private http = inject(HttpClient);
+  private chunkedUpload = inject(ChunkedUploadService);
   private baseUrl = `${environment.apiUrl}/partner/finalizations`;
 
   getFinalizations(params?: {
@@ -41,6 +44,12 @@ export class PartnerFinalizationService {
     message: string;
     data: PrintReadyFile;
   }> {
+    // Nagy fájlok (>8MB) chunked módban mennek
+    if (this.chunkedUpload.needsChunkedUpload(file)) {
+      return this.uploadPrintReadyChunked(projectId, file, type, tabloSize);
+    }
+
+    // Kis fájlok a hagyományos egyetlen POST-tal
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
@@ -52,6 +61,41 @@ export class PartnerFinalizationService {
       message: string;
       data: PrintReadyFile;
     }>(`${this.baseUrl}/${projectId}/upload`, formData);
+  }
+
+  /**
+   * Chunked upload progress Observable — UI progress bar-hoz.
+   */
+  uploadPrintReadyChunked$(projectId: number, file: File, type: PrintFileType, tabloSize?: string): Observable<ChunkedUploadProgress> {
+    const collection = type === 'small_tablo' ? 'print_small_tablo' : 'print_flat';
+
+    return this.chunkedUpload.uploadFile(file, {
+      context: 'finalization',
+      project_id: projectId,
+      collection,
+      type,
+      tablo_size: tabloSize || null,
+    });
+  }
+
+  private uploadPrintReadyChunked(projectId: number, file: File, type: PrintFileType, tabloSize?: string): Observable<{
+    success: boolean;
+    message: string;
+    data: PrintReadyFile;
+  }> {
+    return this.uploadPrintReadyChunked$(projectId, file, type, tabloSize).pipe(
+      last(),
+      map(progress => {
+        if (progress.phase === 'error') {
+          throw new Error(progress.errorMessage || 'Feltöltési hiba');
+        }
+        return {
+          success: true,
+          message: 'Fájl sikeresen feltöltve (darabolva)',
+          data: {} as PrintReadyFile,
+        };
+      }),
+    );
   }
 
   downloadPrintReady(projectId: number, type: PrintFileType): Observable<Blob> {

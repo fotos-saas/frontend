@@ -1,14 +1,189 @@
 <div class="print-shop-projects page-card">
-  <h1 class="page-title">Projektek</h1>
-
-  <!-- Üres állapot -->
-  <div class="empty-state">
-    <div class="empty-icon">
-      <lucide-icon name="inbox" [size]="48"></lucide-icon>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Projektek</h1>
+      <p class="subtitle">Kapcsolt stúdiók nyomtatási projektjei</p>
     </div>
-    <h2 class="empty-title">Még nincs beérkező projekt</h2>
-    <p class="empty-description">
-      A partner fotósok által küldött nyomtatási projektek itt fognak megjelenni.
-    </p>
+    <div class="total-badge">
+      <lucide-icon [name]="ICONS.FOLDER_OPEN" [size]="16"></lucide-icon>
+      {{ totalCount() }} projekt
+    </div>
   </div>
+
+  <!-- Szűrők -->
+  <div class="filters">
+    <div class="search-box">
+      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="18"></lucide-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Keresés név, osztály, iskola..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchInput($event)"
+      />
+      @if (searchQuery()) {
+        <button class="clear-btn" (click)="onSearchInput('')" matTooltip="Keresés törlése">
+          <lucide-icon [name]="ICONS.X" [size]="16"></lucide-icon>
+        </button>
+      }
+    </div>
+
+    <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)">
+      <option value="">Minden státusz</option>
+      <option value="in_print">Nyomdában</option>
+      <option value="done">Kész</option>
+    </select>
+
+    @if (studios().length > 1) {
+      <select class="filter-select" [ngModel]="studioFilter() ?? ''" (ngModelChange)="onStudioChange($event)">
+        <option value="">Minden stúdió</option>
+        @for (studio of studios(); track studio.id) {
+          <option [value]="studio.id">{{ studio.name }}</option>
+        }
+      </select>
+    }
+
+    @if (hasFilters()) {
+      <button class="clear-filters-btn" (click)="clearFilters()" matTooltip="Szűrők törlése">
+        <lucide-icon [name]="ICONS.X" [size]="14"></lucide-icon>
+        Törlés
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton-row skeleton-shimmer"></div>
+      }
+    </div>
+  } @else if (projects().length === 0) {
+    <!-- Üres állapot -->
+    <div class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon [name]="ICONS.INBOX" [size]="48"></lucide-icon>
+      </div>
+      @if (hasFilters()) {
+        <h3>Nincs találat</h3>
+        <p>A megadott szűrőkkel nem található projekt.</p>
+        <button class="clear-filters-btn mt-4" (click)="clearFilters()">Szűrők törlése</button>
+      } @else {
+        <h3>Még nincs beérkező projekt</h3>
+        <p>A partner fotósok által küldött nyomtatási projektek itt fognak megjelenni.</p>
+      }
+    </div>
+  } @else {
+    <!-- Táblázat fejléc -->
+    <div class="table-header">
+      <span class="th th-thumb"></span>
+      <span class="th th-name">Projekt</span>
+      <span class="th th-studio">Stúdió</span>
+      <span class="th th-size">Méret</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-date">Dátum</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <!-- Lista -->
+    <div class="row-grid">
+      @for (project of projects(); track project.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <!-- Thumbnail -->
+          <div class="cell-thumb">
+            @if (project.thumbnailUrl) {
+              <img [src]="project.thumbnailUrl" alt="" class="thumb-img" loading="lazy" />
+            } @else {
+              <div class="thumb-placeholder">
+                <lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon>
+              </div>
+            }
+          </div>
+
+          <!-- Projekt info -->
+          <div class="cell-name">
+            <span class="project-name">{{ project.name }}</span>
+            <span class="project-meta">
+              @if (project.schoolName) {
+                {{ project.schoolName }}
+              }
+              @if (project.className) {
+                &middot; {{ project.className }}
+              }
+              @if (project.classYear) {
+                &middot; {{ project.classYear }}
+              }
+            </span>
+          </div>
+
+          <!-- Stúdió -->
+          <div class="cell-studio">
+            <span class="studio-name">{{ project.studioName ?? '-' }}</span>
+          </div>
+
+          <!-- Méret -->
+          <div class="cell-size">
+            <span class="size-badge">{{ project.tabloSize ?? '-' }}</span>
+          </div>
+
+          <!-- Státusz -->
+          <div class="cell-status">
+            <span class="status-badge" [class.status-badge--done]="project.status === 'done'">
+              {{ getStatusLabel(project.status) }}
+            </span>
+          </div>
+
+          <!-- Dátum -->
+          <div class="cell-date">
+            <span class="date-text">{{ formatDate(project.status === 'done' ? project.doneAt : project.inPrintAt) }}</span>
+          </div>
+
+          <!-- Műveletek -->
+          <div class="cell-actions">
+            @if (project.hasPrintFile) {
+              <button
+                class="action-btn"
+                (click)="downloadFile(project)"
+                matTooltip="Nyomdakész fájl letöltése"
+              >
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
+              </button>
+            }
+
+            @if (project.status === 'in_print') {
+              <button
+                class="action-btn action-btn--success"
+                [disabled]="markingDone() === project.id"
+                (click)="markDone(project)"
+                matTooltip="Készre állítás"
+              >
+                @if (markingDone() === project.id) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
+                } @else {
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16"></lucide-icon>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (lastPage() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16"></lucide-icon>
+          Előző
+        </button>
+        <span class="page-info">{{ currentPage() }} / {{ lastPage() }} oldal</span>
+        <span class="total-count">({{ totalCount() }} projekt)</span>
+        <button class="page-btn" [disabled]="currentPage() >= lastPage()" (click)="goToPage(currentPage() + 1)">
+          Következő
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    }
+  }
 </div>

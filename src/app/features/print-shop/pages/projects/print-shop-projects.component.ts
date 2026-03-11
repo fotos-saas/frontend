@@ -7,13 +7,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PrintShopService } from '../../services/print-shop.service';
 import { PrintShopProject, PrintShopStudio, PaginatedResponse } from '../../models/print-shop.models';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { SamplesLightboxComponent, SampleLightboxItem } from '@shared/components/samples-lightbox';
 import { ICONS } from '@shared/constants/icons.constants';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-print-shop-projects',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, MatTooltipModule, ConfirmDialogComponent],
+  imports: [LucideAngularModule, FormsModule, MatTooltipModule, ConfirmDialogComponent, SamplesLightboxComponent],
   templateUrl: './print-shop-projects.component.html',
   styleUrls: ['./print-shop-projects.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -50,6 +51,10 @@ export class PrintShopProjectsComponent {
   showConfirmDialog = signal(false);
   confirmProject = signal<PrintShopProject | null>(null);
   confirmAction = signal<'mark_done' | 'revert'>('mark_done');
+
+  // Lightbox
+  lightboxSamples = signal<SampleLightboxItem[]>([]);
+  lightboxIndex = signal<number | null>(null);
 
   // Search debounce
   private searchSubject = new Subject<string>();
@@ -194,6 +199,22 @@ export class PrintShopProjectsComponent {
           this.reverting.set(null);
         }
       });
+  }
+
+  openLightbox(project: PrintShopProject): void {
+    if (!project.thumbnailUrl) return;
+    this.lightboxSamples.set([{
+      id: project.id,
+      url: project.thumbnailUrl,
+      thumbUrl: project.thumbnailUrl,
+      fileName: project.name,
+      createdAt: project.inPrintAt ?? new Date().toISOString(),
+    }]);
+    this.lightboxIndex.set(0);
+  }
+
+  closeLightbox(): void {
+    this.lightboxIndex.set(null);
   }
 
   downloadFile(project: PrintShopProject): void {

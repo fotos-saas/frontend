@@ -83,6 +83,16 @@
   border-radius: 6px;
   object-fit: cover;
   border: 1px solid get-color('slate', 200);
+
+  &--clickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
 }
 
 .thumb-placeholder {

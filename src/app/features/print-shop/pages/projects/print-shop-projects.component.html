@@ -100,7 +100,14 @@
           <!-- Thumbnail -->
           <div class="cell-thumb">
             @if (project.thumbnailUrl) {
-              <img [src]="project.thumbnailUrl" alt="" class="thumb-img" loading="lazy" />
+              <img
+                [src]="project.thumbnailUrl"
+                alt=""
+                class="thumb-img thumb-img--clickable"
+                loading="lazy"
+                (click)="openLightbox(project)"
+                matTooltip="Kép megtekintése"
+              />
             } @else {
               <div class="thumb-placeholder">
                 <lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon>
@@ -209,6 +216,16 @@
     }
   }
 </div>
+
+<!-- Lightbox — page-card-on kívül! -->
+@if (lightboxIndex() !== null) {
+  <app-samples-lightbox
+    [samples]="lightboxSamples()"
+    [currentIndex]="lightboxIndex()!"
+    (close)="closeLightbox()"
+    (navigate)="lightboxIndex.set($event)"
+  />
+}
 
 <!-- Confirm dialog — page-card-on kívül! -->
 @if (showConfirmDialog()) {

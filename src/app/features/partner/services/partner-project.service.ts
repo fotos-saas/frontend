@@ -60,6 +60,7 @@ export class PartnerProjectService {
     photos_uploaded?: string;
     tag_ids?: string;
     project_ids?: string;
+    exclude_statuses?: string;
   }): Observable<ProjectListResponse> {
     const httpParams = buildHttpParams({
       page: params?.page,
@@ -76,6 +77,7 @@ export class PartnerProjectService {
       photos_uploaded: params?.photos_uploaded,
       tag_ids: params?.tag_ids,
       project_ids: params?.project_ids,
+      exclude_statuses: params?.exclude_statuses,
     });
 
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });

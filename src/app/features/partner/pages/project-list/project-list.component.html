@@ -88,6 +88,17 @@
       <lucide-icon [name]="ICONS.ARROW_UP_DOWN" [size]="16" />
       Módosítva
     </button>
+    <button
+      filterBarExtra
+      type="button"
+      class="sort-toggle-btn"
+      [class.sort-toggle-btn--active]="activeOnly()"
+      (click)="toggleActiveFilter()"
+      matTooltip="Kész és Nyomdában státuszú projektek elrejtése"
+    >
+      <lucide-icon [name]="ICONS.FILTER" [size]="16" />
+      Aktív
+    </button>
     @if (isElectron) {
       <button
         filterBarExtra

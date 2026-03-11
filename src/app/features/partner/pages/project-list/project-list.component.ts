@@ -130,6 +130,8 @@ export class PartnerProjectListComponent implements OnInit {
   psdFilterActive = signal(false);
   /** Módosult PSD batch check betöltés jelző */
   readonly psdBatchLoading = this.psdStatusService.batchCheckLoading;
+  /** Aktív projektek szűrő — kizárja a "Kész" és "Nyomdában" státuszokat */
+  activeOnly = signal(localStorage.getItem('ps_active_filter') === 'true');
 
   /** Projektek — ha PSD szűrő aktív, a backend már szűrve adja (server-side) */
   readonly displayedProjects = computed(() => this.projects());
@@ -232,6 +234,14 @@ export class PartnerProjectListComponent implements OnInit {
     this.loadProjects();
   }
 
+  toggleActiveFilter(): void {
+    const newVal = !this.activeOnly();
+    this.activeOnly.set(newVal);
+    localStorage.setItem('ps_active_filter', String(newVal));
+    this.filterState.setPage(1);
+    this.loadProjects();
+  }
+
   ngOnInit(): void {
     this.actions.init(this.projects, this.totalProjects, () => this.loadProjects());
     this.loadProjects();
@@ -291,6 +301,7 @@ export class PartnerProjectListComponent implements OnInit {
       photos_uploaded: filters['photos_uploaded'] || undefined,
       tag_ids: filters['tag_ids'] || undefined,
       project_ids: psdProjectIds.length > 0 ? psdProjectIds.join(',') : undefined,
+      exclude_statuses: this.activeOnly() ? 'done,in_print' : undefined,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

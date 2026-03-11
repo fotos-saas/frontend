@@ -102,7 +102,7 @@ done
 # 5. TypeScript compile check — csak warning, nem blokkol (régi hibák lehetnek)
 if command -v npx &> /dev/null; then
     echo "TypeScript ellenőrzés..."
-    TS_OUTPUT=$(npx tsc --noEmit --pretty 2>&1 | head -20)
+    TS_OUTPUT=$(npx tsc --noEmit --pretty -p tsconfig.app.json 2>&1 | head -20)
     if [ ${PIPESTATUS[0]} -ne 0 ]; then
         echo -e "${YELLOW}⚠ TypeScript compile warning:${NC}"
         echo "$TS_OUTPUT" | head -10

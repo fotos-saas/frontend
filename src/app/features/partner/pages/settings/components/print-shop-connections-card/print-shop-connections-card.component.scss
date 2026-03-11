@@ -1,0 +1,231 @@
+.connections-card {
+  margin-top: 8px;
+}
+
+/* ============ Connections List ============ */
+.connections-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.connection-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.connection-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.connection-name {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: var(--text-primary, #1e293b);
+  font-size: 0.9375rem;
+
+  .name-icon {
+    margin-right: 8px;
+    color: var(--text-secondary, #64748b);
+    flex-shrink: 0;
+  }
+
+  span:first-of-type {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.connection-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding-left: 24px;
+}
+
+.detail {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #64748b);
+  margin-right: 16px;
+
+  lucide-icon {
+    margin-right: 4px;
+  }
+
+  &--muted {
+    color: var(--text-tertiary, #94a3b8);
+    font-style: italic;
+  }
+}
+
+.connection-actions {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* ============ Status Badge ============ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+}
+
+.status--active {
+  background: var(--color-success-light, #dcfce7);
+  color: var(--color-success-dark, #166534);
+}
+
+.status--pending {
+  background: var(--color-warning-light, #fef3c7);
+  color: var(--color-warning-dark, #92400e);
+}
+
+.status--inactive {
+  background: var(--bg-secondary, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+}
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+}
+
+.btn--primary {
+  background: var(--color-primary, #7c3aed);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-dark, #6d28d9);
+  }
+}
+
+.btn--outline {
+  background: transparent;
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-primary, #1e293b);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-secondary, #f8fafc);
+    border-color: var(--border-color-dark, #cbd5e1);
+  }
+}
+
+.btn--danger-outline {
+  border-color: var(--color-danger-light, #fecaca);
+  color: var(--color-danger, #dc2626);
+
+  &:hover:not(:disabled) {
+    background: #fef2f2;
+    border-color: var(--color-danger, #dc2626);
+  }
+}
+
+/* ============ Add Section ============ */
+.add-section {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light, #f1f5f9);
+  margin-top: 8px;
+}
+
+/* ============ Empty State ============ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+
+  .empty-icon {
+    color: var(--text-tertiary, #94a3b8);
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: var(--text-secondary, #64748b);
+    font-size: 0.875rem;
+    margin: 0 0 16px 0;
+  }
+}
+
+/* ============ Loading ============ */
+.loading-skeleton {
+  padding: 8px 0;
+}
+
+.skeleton-row {
+  height: 48px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============ Spinner ============ */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============ Reduced Motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .skeleton-row {
+    transition: none;
+    animation: none;
+  }
+
+  .spin {
+    animation: none;
+  }
+}

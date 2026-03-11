@@ -1,0 +1,221 @@
+/* ============ Search Input ============ */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 40px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  color: var(--text-primary, #1e293b);
+  background: white;
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  &::placeholder {
+    color: var(--text-tertiary, #94a3b8);
+  }
+
+  &:focus {
+    border-color: var(--color-primary, #7c3aed);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+}
+
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--text-tertiary, #94a3b8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--bg-secondary, #f1f5f9);
+    color: var(--text-secondary, #64748b);
+  }
+}
+
+/* ============ Results Container ============ */
+.results-container {
+  min-height: 200px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+/* ============ Results List ============ */
+.results-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--bg-secondary, #f8fafc);
+  }
+}
+
+.result-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.result-icon {
+  color: var(--text-tertiary, #94a3b8);
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.result-name {
+  font-weight: 500;
+  color: var(--text-primary, #1e293b);
+  font-size: 0.9375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+}
+
+.btn--primary {
+  background: var(--color-primary, #7c3aed);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-dark, #6d28d9);
+  }
+}
+
+/* ============ Loading State ============ */
+.results-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.875rem;
+
+  lucide-icon {
+    margin-right: 8px;
+  }
+}
+
+/* ============ No Results ============ */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.no-results-icon {
+  color: var(--text-tertiary, #94a3b8);
+  margin-bottom: 8px;
+}
+
+.no-results p {
+  color: var(--text-secondary, #64748b);
+  font-size: 0.875rem;
+  margin: 0 0 4px 0;
+}
+
+.no-results-hint {
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 0.8125rem;
+}
+
+/* ============ Search Hint ============ */
+.search-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.hint-icon {
+  color: var(--text-tertiary, #94a3b8);
+  margin-bottom: 8px;
+}
+
+.search-hint p {
+  color: var(--text-secondary, #64748b);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ============ Spinner ============ */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============ Reduced Motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .search-input,
+  .clear-btn,
+  .result-row {
+    transition: none;
+  }
+
+  .spin {
+    animation: none;
+  }
+}

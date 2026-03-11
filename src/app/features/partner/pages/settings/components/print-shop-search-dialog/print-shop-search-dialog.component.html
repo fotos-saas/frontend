@@ -1,0 +1,76 @@
+<app-dialog-wrapper
+  variant="create"
+  headerStyle="flat"
+  theme="purple"
+  [icon]="ICONS.SEARCH"
+  title="Nyomda keresése"
+  size="md"
+  [closable]="true"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody>
+    <!-- Keresőmező -->
+    <div class="search-input-wrapper">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="18" class="search-icon" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Nyomda neve..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchInput($event)"
+        autofocus
+      />
+      @if (searchTerm().length > 0) {
+        <button class="clear-btn" (click)="onSearchInput('')" matTooltip="Törlés">
+          <lucide-icon [name]="ICONS.X" [size]="16" />
+        </button>
+      }
+    </div>
+
+    <!-- Találati lista -->
+    <div class="results-container">
+      @if (isSearching()) {
+        <div class="results-loading">
+          <lucide-icon [name]="ICONS.LOADER" [size]="20" class="spin" />
+          <span>Keresés...</span>
+        </div>
+      } @else if (results().length > 0) {
+        <div class="results-list">
+          @for (ps of results(); track ps.id) {
+            <div class="result-row">
+              <div class="result-info">
+                <lucide-icon [name]="ICONS.PRINTER" [size]="16" class="result-icon" />
+                <span class="result-name">{{ ps.name }}</span>
+              </div>
+              <button
+                class="btn btn--primary btn--sm"
+                [disabled]="sendingId() !== null"
+                (click)="sendRequest(ps)"
+                matTooltip="Kapcsolódási kérelem küldése"
+              >
+                @if (sendingId() === ps.id) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                  Küldés...
+                } @else {
+                  <lucide-icon [name]="ICONS.SEND" [size]="14" />
+                  Meghívás
+                }
+              </button>
+            </div>
+          }
+        </div>
+      } @else if (hasSearched() && searchTerm().length >= 2) {
+        <div class="no-results">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="24" class="no-results-icon" />
+          <p>Nincs találat a keresésre.</p>
+          <span class="no-results-hint">Próbálj más kulcsszót, vagy ellenőrizd a nyomda nevét.</span>
+        </div>
+      } @else {
+        <div class="search-hint">
+          <lucide-icon [name]="ICONS.INFO" [size]="20" class="hint-icon" />
+          <p>Írd be a nyomda nevét a kereséshez (legalább 2 karakter).</p>
+        </div>
+      }
+    </div>
+  </div>
+</app-dialog-wrapper>

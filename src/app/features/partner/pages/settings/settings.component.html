@@ -65,6 +65,25 @@
     </section>
   }
 
+  <!-- Nyomda partner szekció -->
+  <section class="settings-section">
+    <h2>
+      <lucide-icon [name]="ICONS.PRINTER" [size]="20" />
+      Nyomda partner
+    </h2>
+    <p class="section-description">
+      Kapcsolódj nyomda partnerekhez a nyomtatási megrendelések egyszerűbb kezeléséért.
+    </p>
+
+    <app-print-shop-connections-card
+      [connections]="printShopConnections()"
+      [isLoading]="isPrintShopLoading()"
+      [actionLoadingId]="printShopActionLoadingId()"
+      (openSearch)="openPrintShopSearchDialog()"
+      (removeConnection)="requestRemovePrintShopConnection($event)"
+    />
+  </section>
+
   <!-- Kiegészítők szekció -->
   <section class="settings-section">
     <h2>
@@ -113,5 +132,22 @@
     [isSubmitting]="isStorageSubmitting()"
     (close)="closeStoragePurchaseDialog()"
     (confirm)="handleStoragePurchase($event)"
+  />
+}
+
+@if (showPrintShopSearchDialog()) {
+  <app-print-shop-search-dialog
+    (close)="closePrintShopSearchDialog()"
+    (connectionSent)="onPrintShopConnectionSent()"
+  />
+}
+
+@if (showRemoveConfirmDialog()) {
+  <app-confirm-dialog
+    title="Nyomda kapcsolat megszüntetése"
+    [message]="'Biztosan megszünteted a kapcsolatot a \'' + (pendingRemoveConnection()?.printShop?.name ?? '') + '\' nyomdával? ' + (pendingRemoveConnection()?.status === 'pending' ? 'A kérelem visszavonásra kerül.' : 'Az aktív kapcsolat deaktiválódik.')"
+    confirmText="Megszüntetés"
+    confirmType="danger"
+    (resultEvent)="onRemoveConfirmResult($event)"
   />
 }

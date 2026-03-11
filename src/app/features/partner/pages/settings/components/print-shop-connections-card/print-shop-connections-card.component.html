@@ -1,0 +1,80 @@
+<div class="connections-card">
+  @if (isLoading()) {
+    <div class="loading-skeleton">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  } @else {
+    @if (connections().length === 0) {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.PRINTER" [size]="32" class="empty-icon" />
+        <p>Még nincs összekapcsolt nyomda partner.</p>
+        <button class="btn btn--primary btn--sm" (click)="openSearch.emit()">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+          Nyomda keresése
+        </button>
+      </div>
+    } @else {
+      <div class="connections-list">
+        @for (conn of connections(); track conn.id) {
+          <div class="connection-row">
+            <div class="connection-info">
+              <div class="connection-name">
+                <lucide-icon [name]="ICONS.PRINTER" [size]="16" class="name-icon" />
+                <span>{{ conn.printShop.name }}</span>
+                <span class="status-badge" [class]="getStatusClass(conn.status)">
+                  {{ conn.statusName }}
+                </span>
+              </div>
+              @if (conn.status === 'active' && conn.printShop.email) {
+                <div class="connection-details">
+                  <span class="detail">
+                    <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+                    {{ conn.printShop.email }}
+                  </span>
+                  @if (conn.printShop.phone) {
+                    <span class="detail">
+                      <lucide-icon [name]="ICONS.PHONE" [size]="14" />
+                      {{ conn.printShop.phone }}
+                    </span>
+                  }
+                </div>
+              }
+              @if (conn.status === 'pending') {
+                <div class="connection-details">
+                  <span class="detail detail--muted">
+                    <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                    {{ conn.initiatedBy === 'photo_studio' ? 'Általad kezdeményezve' : 'Nyomda által kezdeményezve' }}
+                  </span>
+                </div>
+              }
+            </div>
+            <div class="connection-actions">
+              <button
+                class="btn btn--outline btn--sm btn--danger-outline"
+                [matTooltip]="getRemoveTooltip(conn)"
+                [disabled]="actionLoadingId() === conn.id"
+                (click)="removeConnection.emit(conn)"
+              >
+                @if (actionLoadingId() === conn.id) {
+                  <lucide-icon [name]="ICONS.LOADER" [size]="14" class="spin" />
+                } @else {
+                  <lucide-icon [name]="ICONS.UNLINK" [size]="14" />
+                }
+                {{ getRemoveLabel(conn) }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Új nyomda hozzáadása gomb -->
+      <div class="add-section">
+        <button class="btn btn--outline btn--sm" (click)="openSearch.emit()">
+          <lucide-icon [name]="ICONS.PLUS" [size]="16" />
+          Nyomda hozzáadása
+        </button>
+      </div>
+    }
+  }
+</div>

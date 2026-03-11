@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { SubscriptionService, SubscriptionInfo } from '../../services/subscription.service';
 import { StorageService, StorageUsage } from '../../services/storage.service';
+import { PrintShopConnectionService, PrintShopConnection } from '../../services/print-shop-connection.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
 import { openSecureUrl } from '@core/utils/url-validator.util';
@@ -22,6 +23,7 @@ export class SettingsStateService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly storageService = inject(StorageService);
+  private readonly printShopConnectionService = inject(PrintShopConnectionService);
   private readonly toastService = inject(ToastService);
   private readonly logger = inject(LoggerService);
 
@@ -38,6 +40,14 @@ export class SettingsStateService {
   readonly showStoragePurchaseDialog = signal(false);
   readonly isStorageSubmitting = signal(false);
 
+  // === Print shop connections state ===
+  readonly printShopConnections = signal<PrintShopConnection[]>([]);
+  readonly isPrintShopLoading = signal(true);
+  readonly printShopActionLoadingId = signal<number | null>(null);
+  readonly showPrintShopSearchDialog = signal(false);
+  readonly showRemoveConfirmDialog = signal(false);
+  readonly pendingRemoveConnection = signal<PrintShopConnection | null>(null);
+
   // ============================================
   // INICIALIZÁLÁS
   // ============================================
@@ -45,6 +55,7 @@ export class SettingsStateService {
   init(): void {
     this.loadSubscriptionInfo();
     this.loadStorageUsage();
+    this.loadPrintShopConnections();
   }
 
   // ============================================
@@ -202,6 +213,74 @@ export class SettingsStateService {
 
   onAddonChanged(): void {
     this.loadSubscriptionInfo();
+  }
+
+  // ============================================
+  // NYOMDA KAPCSOLATOK
+  // ============================================
+
+  loadPrintShopConnections(): void {
+    this.isPrintShopLoading.set(true);
+    this.printShopConnectionService.getConnections()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.printShopConnections.set(response.data);
+          this.isPrintShopLoading.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Nyomda kapcsolatok betöltése sikertelen:', err);
+          this.isPrintShopLoading.set(false);
+          this.toastService.error('Hiba', 'Nem sikerült betölteni a nyomda kapcsolatokat.');
+        }
+      });
+  }
+
+  openPrintShopSearchDialog(): void {
+    this.showPrintShopSearchDialog.set(true);
+  }
+
+  closePrintShopSearchDialog(): void {
+    this.showPrintShopSearchDialog.set(false);
+  }
+
+  onPrintShopConnectionSent(): void {
+    this.closePrintShopSearchDialog();
+    this.loadPrintShopConnections();
+  }
+
+  requestRemovePrintShopConnection(connection: PrintShopConnection): void {
+    this.pendingRemoveConnection.set(connection);
+    this.showRemoveConfirmDialog.set(true);
+  }
+
+  onRemoveConfirmResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'confirm') {
+      const connection = this.pendingRemoveConnection();
+      if (connection) {
+        this.confirmRemovePrintShopConnection(connection);
+      }
+    }
+    this.showRemoveConfirmDialog.set(false);
+    this.pendingRemoveConnection.set(null);
+  }
+
+  private confirmRemovePrintShopConnection(connection: PrintShopConnection): void {
+    this.printShopActionLoadingId.set(connection.id);
+    this.printShopConnectionService.removeConnection(connection.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Siker', response.message);
+          this.printShopActionLoadingId.set(null);
+          this.loadPrintShopConnections();
+        },
+        error: (err) => {
+          this.logger.error('Nyomda kapcsolat törlése sikertelen:', err);
+          this.toastService.error('Hiba', 'Nem sikerült törölni a kapcsolatot.');
+          this.printShopActionLoadingId.set(null);
+        }
+      });
   }
 
   // ============================================

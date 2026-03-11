@@ -9,8 +9,12 @@ import { StorageUsageCardComponent } from './components/storage-usage-card/stora
 import { StoragePurchaseDialogComponent } from './components/storage-purchase-dialog/storage-purchase-dialog.component';
 import { AddonsCardComponent } from './components/addons-card/addons-card.component';
 import { SyncSettingsCardComponent } from './components/sync-settings-card/sync-settings-card.component';
+import { PrintShopConnectionsCardComponent } from './components/print-shop-connections-card/print-shop-connections-card.component';
+import { PrintShopSearchDialogComponent } from './components/print-shop-search-dialog/print-shop-search-dialog.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ElectronService } from '../../../../core/services/electron.service';
 import { SettingsStateService } from './settings-state.service';
+import { PrintShopConnection } from '../../services/print-shop-connection.service';
 
 /**
  * Partner Settings Page
@@ -33,6 +37,9 @@ import { SettingsStateService } from './settings-state.service';
     StoragePurchaseDialogComponent,
     AddonsCardComponent,
     SyncSettingsCardComponent,
+    PrintShopConnectionsCardComponent,
+    PrintShopSearchDialogComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -56,6 +63,14 @@ export class PartnerSettingsComponent implements OnInit {
   readonly showStoragePurchaseDialog = this.state.showStoragePurchaseDialog;
   readonly isStorageSubmitting = this.state.isStorageSubmitting;
 
+  // Print shop connection signals
+  readonly printShopConnections = this.state.printShopConnections;
+  readonly isPrintShopLoading = this.state.isPrintShopLoading;
+  readonly printShopActionLoadingId = this.state.printShopActionLoadingId;
+  readonly showPrintShopSearchDialog = this.state.showPrintShopSearchDialog;
+  readonly showRemoveConfirmDialog = this.state.showRemoveConfirmDialog;
+  readonly pendingRemoveConnection = this.state.pendingRemoveConnection;
+
   ngOnInit(): void {
     this.state.init();
   }
@@ -73,4 +88,11 @@ export class PartnerSettingsComponent implements OnInit {
   closeStoragePurchaseDialog(): void { this.state.closeStoragePurchaseDialog(); }
   handleStoragePurchase(gb: number): void { this.state.purchaseStorage(gb); }
   onAddonChanged(): void { this.state.onAddonChanged(); }
+
+  // Print shop connection metódusok
+  openPrintShopSearchDialog(): void { this.state.openPrintShopSearchDialog(); }
+  closePrintShopSearchDialog(): void { this.state.closePrintShopSearchDialog(); }
+  onPrintShopConnectionSent(): void { this.state.onPrintShopConnectionSent(); }
+  requestRemovePrintShopConnection(conn: PrintShopConnection): void { this.state.requestRemovePrintShopConnection(conn); }
+  onRemoveConfirmResult(result: { action: 'confirm' | 'cancel' }): void { this.state.onRemoveConfirmResult(result); }
 }

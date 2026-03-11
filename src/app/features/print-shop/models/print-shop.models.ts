@@ -29,6 +29,7 @@ export interface PrintShopProject {
   hasPrintFile: boolean;
   printFileType: string | null;
   thumbnailUrl: string | null;
+  previewUrl: string | null;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

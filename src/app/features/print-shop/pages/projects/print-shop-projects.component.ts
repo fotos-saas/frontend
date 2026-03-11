@@ -202,11 +202,12 @@ export class PrintShopProjectsComponent {
   }
 
   openLightbox(project: PrintShopProject): void {
-    if (!project.thumbnailUrl) return;
+    const url = project.previewUrl || project.thumbnailUrl;
+    if (!url) return;
     this.lightboxSamples.set([{
       id: project.id,
-      url: project.thumbnailUrl,
-      thumbUrl: project.thumbnailUrl,
+      url,
+      thumbUrl: project.thumbnailUrl ?? undefined,
       fileName: project.name,
       createdAt: project.inPrintAt ?? new Date().toISOString(),
     }]);

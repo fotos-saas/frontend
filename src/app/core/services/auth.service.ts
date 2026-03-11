@@ -9,6 +9,7 @@ import { TokenService, type TokenType } from './token.service';
 import { TabloAuthService } from './auth/tablo-auth.service';
 import { PasswordAuthService, type MarketerLoginResponse } from './auth/password-auth.service';
 import { SessionService } from './auth/session.service';
+import { TabSyncService } from './tab-sync.service';
 import type {
   ContactPerson,
   TabloProject,
@@ -82,6 +83,7 @@ export class AuthService {
   private tabloAuth = inject(TabloAuthService);
   private passwordAuth = inject(PasswordAuthService);
   private sessionService = inject(SessionService);
+  private tabSync = inject(TabSyncService);
 
   // ==========================================
   // STATE (Signals)
@@ -195,11 +197,17 @@ export class AuthService {
   constructor() {
     // Callback-ok regisztrálása a child service-ekhez
     this.registerChildCallbacks();
+    this.registerTabSyncCallbacks();
 
     // Inicializálás storage-ból
     const initialState = this.sessionService.initializeFromStorage();
     this._project.set(initialState.project);
     this._isAuthenticated.set(initialState.isAuthenticated);
+
+    // Ha nincs aktív session, próbálunk másik tab-tól kérni
+    if (!initialState.isAuthenticated) {
+      this.tryRestoreFromOtherTab();
+    }
   }
 
   /**
@@ -214,6 +222,8 @@ export class AuthService {
         if (passwordSet !== undefined) {
           this.passwordSet.set(passwordSet);
         }
+        // Tab szinkronizáció: többi tab is kapja az új session-t
+        this.tabSync.broadcastSessionUpdate();
       },
       onPasswordSetChange: (value: boolean) => {
         this.passwordSet.set(value);
@@ -225,6 +235,8 @@ export class AuthService {
       onMarketerAuthSuccess: (user: AuthUser) => {
         this._currentUser.set(user);
         this._isAuthenticated.set(true);
+        // Tab szinkronizáció: többi tab is kapja az új session-t
+        this.tabSync.broadcastSessionUpdate();
       },
       onPasswordSetChange: (value: boolean) => {
         this.passwordSet.set(value);
@@ -246,17 +258,49 @@ export class AuthService {
       onAuthCleared: () => {
         this._project.set(null);
         this._isAuthenticated.set(false);
+        // Tab szinkronizáció: többi tab is kijelentkezik
+        this.tabSync.broadcastSessionClear();
       },
       onMarketerLogout: () => {
         this._currentUser.set(null);
         this._isAuthenticated.set(false);
+        // Tab szinkronizáció: többi tab is kijelentkezik
+        this.tabSync.broadcastSessionClear();
       }
     });
   }
 
-  // ==========================================
-  // TABLO AUTH METHODS (delegálva TabloAuthService-nek)
-  // ==========================================
+  /** Tab szinkronizáció callback-ek */
+  private registerTabSyncCallbacks(): void {
+    this.tabSync.registerCallbacks({
+      onSessionReceived: () => this.reinitializeFromStorage(),
+      onSessionCleared: () => this.clearLocalState()
+    });
+  }
+
+  /** Session visszaállítás másik tab-tól (új tab nyitáskor) */
+  private tryRestoreFromOtherTab(): void {
+    this.tabSync.requestSession().then(received => {
+      if (received) this.reinitializeFromStorage();
+    });
+  }
+
+  /** Session újra inicializálása storage-ból (tab sync után) */
+  private reinitializeFromStorage(): void {
+    this.tokenService.reinitialize();
+    const state = this.sessionService.initializeFromStorage();
+    this._project.set(state.project);
+    this._isAuthenticated.set(state.isAuthenticated);
+    if (!state.isAuthenticated) this.initializeMarketerSession();
+  }
+
+  /** Lokális auth state törlése (tab sync logout, NEM broadcast-ol vissza) */
+  private clearLocalState(): void {
+    this.sessionService.clearLocalOnly();
+    this._project.set(null);
+    this._isAuthenticated.set(false);
+    this._currentUser.set(null);
+  }
 
   // ==========================================
   // TABLO AUTH (delegálva TabloAuthService-nek)

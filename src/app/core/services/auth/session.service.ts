@@ -332,4 +332,37 @@ export class SessionService {
       );
   }
 
+  /**
+   * Lokális auth state törlése callback-ek nélkül (tab sync logout-hoz).
+   * NEM triggereli az onAuthCleared/onMarketerLogout callback-eket,
+   * így a broadcast végtelen ciklus elkerülhető.
+   */
+  clearLocalOnly(): void {
+    // SessionStorage tablo/marketer kulcsok törlése
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith('tablo:') || key === 'marketer_token' || key === 'marketer_user') {
+          keysToRemove.push(key);
+        }
+      }
+      for (const key of keysToRemove) {
+        sessionStorage.removeItem(key);
+      }
+    } catch {
+      // Silent fail
+    }
+
+    // Token state reset
+    this.tokenService.clearToken();
+
+    // Szűrők törlése
+    this.filterPersistence.clearAllFilters();
+    this.sentryService.setUser(null);
+
+    // Navigálás login oldalra
+    this.router.navigate(['/login']);
+  }
+
 }

@@ -31,7 +31,22 @@ export class NoAuthGuard implements CanActivate {
       return true;
     }
 
-    // Normál működés: ha van token, átirányítás home-ra
+    // Partner/marketer/admin session — átirányítás a megfelelő dashboard-ra
+    if (this.authService.getMarketerToken()) {
+      const user = this.authService.getCurrentUser();
+      if (user?.roles?.includes('super_admin')) {
+        this.router.navigate(['/super-admin/dashboard']);
+      } else if (user?.roles?.includes('print_shop')) {
+        this.router.navigate(['/print-shop/dashboard']);
+      } else if (user?.roles?.includes('designer')) {
+        this.router.navigate(['/designer/dashboard']);
+      } else {
+        this.router.navigate(['/partner/dashboard']);
+      }
+      return false;
+    }
+
+    // Tablo session: ha van token, átirányítás home-ra
     if (this.authService.hasToken()) {
       this.router.navigate(['/home']);
       return false;

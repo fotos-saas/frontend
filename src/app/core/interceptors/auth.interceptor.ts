@@ -86,25 +86,18 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           const isOverlay = router.url.startsWith('/overlay');
           if (isOverlay) {
             logger.info('[AuthInterceptor] 401 ignorálva (overlay mód)');
+          } else if (marketerToken) {
+            // Partner/marketer/admin session — marketer token törlés + login redirect
+            logger.warn('[AuthInterceptor] Partner/admin logout 401 miatt', { url: req.url });
+            authService.logoutMarketer();
+          } else if (activeSession?.sessionType === 'share' ||
+                     req.url.includes('/newsfeed') ||
+                     req.url.includes('/gamification')) {
+            logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
           } else {
-            // NE logout-oljon ha:
-            // - share session (guest session-nel autentikál)
-            // - newsfeed API hívás (guest session hiánya okozhatja)
-            // - gamification API hívás (opcionális, service catchError-rel kezeli)
-            // - marketer session (külön kezeljük)
-            const isMarketerRequest = req.url.includes('/marketer');
-            if (activeSession?.sessionType !== 'share' &&
-                !req.url.includes('/newsfeed') &&
-                !req.url.includes('/gamification') &&
-                !isMarketerRequest) {
-              logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
-              authService.clearAuth();
-            } else if (isMarketerRequest) {
-              logger.warn('[AuthInterceptor] Marketer logout 401 miatt');
-              authService.logoutMarketer();
-            } else {
-              logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
-            }
+            // Tablo session logout
+            logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
+            authService.clearAuth();
           }
         }
       }

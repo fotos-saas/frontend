@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { DialogWrapperComponent } from '@shared/components/dialog-wrapper/dialog-wrapper.component';
 import { ICONS } from '@shared/constants/icons.constants';
-import { PartnerProjectService } from '../../services/partner-project.service';
+import { PartnerPersonService } from '../../services/partner-person.service';
 
 interface CreatedPerson {
   id: number;
@@ -31,7 +31,7 @@ export class AddPersonsDialogComponent {
   readonly close = output<void>();
   readonly personsAdded = output<void>();
 
-  private readonly projectService = inject(PartnerProjectService);
+  private readonly personService = inject(PartnerPersonService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly namesText = signal('');
@@ -75,7 +75,7 @@ export class AddPersonsDialogComponent {
     if (!this.canSubmit()) return;
 
     this.submitting.set(true);
-    this.projectService.addPersons(this.projectId(), this.namesText(), this.type())
+    this.personService.addPersons(this.projectId(), this.namesText(), this.type())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

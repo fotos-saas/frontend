@@ -9,7 +9,7 @@ import { DialogWrapperComponent } from '@shared/components/dialog-wrapper';
 import { DropZoneComponent } from '@shared/components/drop-zone/drop-zone.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { PartnerAlbumService } from '../../../../../services/partner-album.service';
-import { PartnerProjectService } from '../../../../../services/partner-project.service';
+import { PartnerPersonService } from '../../../../../services/partner-person.service';
 import { PersonPhoto } from '../../../../../models/partner.models';
 import { firstValueFrom } from 'rxjs';
 
@@ -42,7 +42,7 @@ export interface PhotoUploadResult {
 })
 export class LayoutPhotoUploadDialogComponent implements OnInit {
   private readonly albumService = inject(PartnerAlbumService);
-  private readonly projectService = inject(PartnerProjectService);
+  private readonly personService = inject(PartnerPersonService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ICONS = ICONS;
 
@@ -120,7 +120,7 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
 
     try {
       const result = await firstValueFrom(
-        this.projectService.overridePersonPhoto(this.projectId(), this.person().id, photo.mediaId),
+        this.personService.overridePersonPhoto(this.projectId(), this.person().id, photo.mediaId),
       );
 
       if (result.success && result.data) {
@@ -227,7 +227,7 @@ export class LayoutPhotoUploadDialogComponent implements OnInit {
 
       if (this.uploadMode() === 'override') {
         const overrideResult = await firstValueFrom(
-          this.projectService.overridePersonPhoto(this.projectId(), this.person().id, mediaId),
+          this.personService.overridePersonPhoto(this.projectId(), this.person().id, mediaId),
         );
 
         if (overrideResult.success && overrideResult.data) {

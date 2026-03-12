@@ -1,18 +1,9 @@
-/**
- * Partner modul közös interface-ek és típusok.
- * Single source of truth - MINDEN partner service innen importál.
- */
-
 import type { QrCode } from '../../../shared/interfaces/qr-code.interface';
 import type { ExtendedPaginatedResponse } from '../../../core/models/api.models';
 import type { TabloStatus } from '../../../shared/types/tablo.types';
 
-// Re-export for backward compatibility
 export type { TabloStatus } from '../../../shared/types/tablo.types';
 
-/**
- * Dashboard statisztikák
- */
 export interface PartnerDashboardStats {
   totalProjects: number;
   activeQrCodes: number;
@@ -21,9 +12,6 @@ export interface PartnerDashboardStats {
   projectsByStatus: Record<string, number>;
 }
 
-/**
- * Kapcsolattartó interface
- */
 export interface ProjectContact {
   id?: number;
   name: string;
@@ -32,18 +20,12 @@ export interface ProjectContact {
   isPrimary?: boolean;
 }
 
-/**
- * Projekt címke
- */
 export interface ProjectTag {
   id: number;
   name: string;
   color: string;
 }
 
-/**
- * Projekt email metrikák (lista badge-hez)
- */
 export interface ProjectEmailMetrics {
   unansweredCount: number;
   lastEmailAt: string | null;
@@ -51,9 +33,6 @@ export interface ProjectEmailMetrics {
   responseStatus: 'good' | 'warning' | 'critical' | null;
 }
 
-/**
- * Projekt lista elem
- */
 export interface PartnerProjectListItem {
   id: number;
   name: string;
@@ -94,9 +73,6 @@ export interface PartnerProjectListItem {
   tabloSize: string | null;
 }
 
-/**
- * QR kód előzmény (rövid)
- */
 export interface QrCodeHistory {
   id: number;
   code: string;
@@ -105,9 +81,6 @@ export interface QrCodeHistory {
   createdAt: string;
 }
 
-/**
- * Projekt részletek
- */
 export interface PartnerProjectDetails extends PartnerProjectListItem {
   school: {
     id: number;
@@ -154,9 +127,6 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   updatedAt: string;
 }
 
-/**
- * Minta kép interface
- */
 export interface SampleItem {
   id: number;
   url: string;
@@ -166,9 +136,6 @@ export interface SampleItem {
   description?: string;
 }
 
-/**
- * Tablo személy interface (partner view)
- */
 export interface TabloPersonItem {
   id: number;
   name: string;
@@ -195,9 +162,6 @@ export interface TabloPersonItem {
  */
 export type MissingPersonItem = TabloPersonItem;
 
-/**
- * Feltöltött kép interface
- */
 export interface UploadedPhoto {
   mediaId: number;
   filename: string;
@@ -222,9 +186,6 @@ export interface DraftInfo {
   assignmentCount?: number;
 }
 
-/**
- * AI párosítási eredmény
- */
 export interface MatchResult {
   matches: Array<{
     name: string;
@@ -252,14 +213,8 @@ export interface DraftDetails extends DraftInfo {
   assignments?: PhotoAssignment[];
 }
 
-/**
- * Album típus
- */
 export type AlbumType = 'students' | 'teachers';
 
-/**
- * Album összefoglaló interface (egy album)
- */
 export interface AlbumSummaryItem {
   photoCount: number;
   missingCount: number;
@@ -267,17 +222,11 @@ export interface AlbumSummaryItem {
   previewThumbs: string[];
 }
 
-/**
- * Mindkét album összefoglalója
- */
 export interface AlbumsSummary {
   students: AlbumSummaryItem;
   teachers: AlbumSummaryItem;
 }
 
-/**
- * Hiányzó személy album nélküli (csak lényeges adatok)
- */
 export interface AlbumMissingPerson {
   id: number;
   name: string;
@@ -285,9 +234,6 @@ export interface AlbumMissingPerson {
   email: string | null;
 }
 
-/**
- * Album részletek interface
- */
 export interface AlbumDetails {
   album: AlbumType;
   photoCount: number;
@@ -296,26 +242,17 @@ export interface AlbumDetails {
   missingPersons: AlbumMissingPerson[];
 }
 
-/**
- * Kép hozzárendelés request
- */
 export interface PhotoAssignment {
   personId: number;
   mediaId: number;
 }
 
-/**
- * Iskola interface (autocomplete-hez)
- */
 export interface SchoolItem {
   id: number;
   name: string;
   city: string | null;
 }
 
-/**
- * Iskola lista elem (partner iskolái)
- */
 export interface SchoolListItem {
   id: number;
   name: string;
@@ -328,18 +265,12 @@ export interface SchoolListItem {
   groupSize: number;
 }
 
-/**
- * Iskola csoportosított sor (linked_group alapján)
- */
 export interface SchoolGroupRow {
   primary: SchoolListItem;
   members: SchoolListItem[];
   linkedGroup: string | null;
 }
 
-/**
- * Iskola limitek
- */
 export interface SchoolLimits {
   current: number;
   max: number | null;
@@ -347,9 +278,6 @@ export interface SchoolLimits {
   plan_id: string;
 }
 
-/**
- * Kapcsolattartó lista elem (partner kapcsolattartói)
- */
 export interface ContactListItem {
   id: number;
   name: string;
@@ -367,9 +295,6 @@ export interface ContactListItem {
   smsCount: number;
 }
 
-/**
- * Kapcsolattartó limitek
- */
 export interface ContactLimits {
   current: number;
   max: number | null;
@@ -377,9 +302,6 @@ export interface ContactLimits {
   plan_id: string;
 }
 
-/**
- * Guest session interface (projekt felhasználók)
- */
 export interface GuestSession {
   id: number;
   guestName: string;
@@ -398,9 +320,6 @@ export interface GuestSession {
   createdAt: string;
 }
 
-/**
- * Minta csomag interface
- */
 export interface SamplePackage {
   id: number;
   title: string;
@@ -411,18 +330,12 @@ export interface SamplePackage {
   createdAt: string;
 }
 
-/**
- * Minta verzió kép
- */
 export interface SampleVersionImage {
   id: number;
   url: string;
   thumbUrl: string;
 }
 
-/**
- * Minta verzió interface
- */
 export interface SampleVersion {
   id: number;
   versionNumber: number;
@@ -431,18 +344,12 @@ export interface SampleVersion {
   createdAt: string;
 }
 
-/**
- * Projekt autocomplete elem (kapcsolattartó modalhoz)
- */
 export interface ProjectAutocompleteItem {
   id: number;
   name: string;
   schoolName: string | null;
 }
 
-/**
- * Projekt létrehozás request
- */
 export interface CreateProjectRequest {
   school_id?: number | null;
   class_name?: string | null;
@@ -455,17 +362,11 @@ export interface CreateProjectRequest {
   contact_phone?: string | null;
 }
 
-/**
- * Iskola létrehozás request
- */
 export interface CreateSchoolRequest {
   name: string;
   city?: string | null;
 }
 
-/**
- * Projekt limitek interface
- */
 export interface ProjectLimits {
   current: number;
   max: number | null;
@@ -474,45 +375,24 @@ export interface ProjectLimits {
   preliminary_count: number;
 }
 
-/**
- * Pagináció response interface (alias a központi ExtendedPaginatedResponse-ra)
- */
 export type PaginatedResponse<T> = ExtendedPaginatedResponse<T>;
 
-/**
- * Projekt lista válasz interface (limitekkel)
- */
 export interface ProjectListResponse extends PaginatedResponse<PartnerProjectListItem> {
   limits?: ProjectLimits;
 }
 
-/**
- * Upload progress interface (chunk upload-hoz)
- */
 export interface UploadProgress {
-  /** Feltöltött képek száma */
   uploadedCount: number;
-  /** Összes kép száma */
   totalCount: number;
-  /** Feltöltött képek */
   photos: UploadedPhoto[];
-  /** Album típus */
   album: AlbumType;
-  /** Aktuális chunk index */
   currentChunk: number;
-  /** Összes chunk száma */
   totalChunks: number;
-  /** Százalékos progress (0-100) */
   progress: number;
-  /** Kész-e a feltöltés */
   completed: boolean;
-  /** Hibás fájlok száma */
   errorCount: number;
 }
 
-/**
- * Iskola részletek (detail nézet)
- */
 export interface SchoolDetail {
   id: number;
   name: string;
@@ -539,9 +419,6 @@ export interface SchoolRecentTeacher {
   position: string | null;
 }
 
-/**
- * Iskola changelog bejegyzés
- */
 export interface SchoolChangeLogEntry {
   id: number;
   changeType: string;
@@ -552,29 +429,17 @@ export interface SchoolChangeLogEntry {
   createdAt: string;
 }
 
-/**
- * Tablóméret (elérhető méretek a partner beállításokban)
- */
 export interface TabloSize {
   label: string;
   value: string;
 }
 
-/**
- * Tablóméret küszöbérték beállítás
- * threshold: diáklétszám határ
- * below: méret ha kevesebb diák van
- * above: méret ha több vagy egyenlő diák van
- */
 export interface TabloSizeThreshold {
   threshold: number;
   below: string;
   above: string;
 }
 
-/**
- * Véglegesítés lista elem
- */
 export interface FinalizationListItem {
   id: number;
   name: string;
@@ -594,9 +459,6 @@ export interface FinalizationListItem {
   createdAt: string;
 }
 
-/**
- * Nyomdakész fájl adatok
- */
 export interface PrintReadyFile {
   id: number;
   fileName: string;
@@ -605,9 +467,6 @@ export interface PrintReadyFile {
   uploadedAt: string;
 }
 
-/**
- * Előzetes projekt létrehozás request
- */
 export interface CreatePreliminaryRequest {
   school_name: string;
   school_id?: number | null;
@@ -616,9 +475,6 @@ export interface CreatePreliminaryRequest {
   note?: string | null;
 }
 
-/**
- * Link jelölt projekt (valós projektek lista)
- */
 export interface LinkCandidate {
   id: number;
   name: string;
@@ -627,18 +483,12 @@ export interface LinkCandidate {
   classYear: string | null;
 }
 
-/**
- * Link előnézet válasz
- */
 export interface LinkPreview {
   conflicts: LinkConflict[];
   transferable: TransferablePerson[];
   photosCount: number;
 }
 
-/**
- * Link ütközés
- */
 export interface LinkConflict {
   sourcePersonId: number;
   sourcePersonName: string;
@@ -649,9 +499,6 @@ export interface LinkConflict {
   targetHasPhoto: boolean;
 }
 
-/**
- * Átvihető személy
- */
 export interface TransferablePerson {
   personId: number;
   name: string;
@@ -659,17 +506,11 @@ export interface TransferablePerson {
   hasPhoto: boolean;
 }
 
-/**
- * Link request
- */
 export interface LinkPreliminaryRequest {
   target_project_id: number;
   conflict_resolution: Array<{ person_id: number; action: 'skip' | 'transfer_photo' }>;
 }
 
-/**
- * Link eredmény
- */
 export interface LinkPreliminaryResult {
   stats: {
     students_transferred: number;
@@ -679,9 +520,6 @@ export interface LinkPreliminaryResult {
   };
 }
 
-/**
- * Személy archív fotó
- */
 export interface PersonPhoto {
   id: number;
   mediaId: number;
@@ -694,9 +532,6 @@ export interface PersonPhoto {
   isPortraitProcessed?: boolean;
 }
 
-/**
- * Személy archív fotók válasz
- */
 export interface PersonPhotosResponse {
   photos: PersonPhoto[];
   overridePhoto: PersonPhoto | null;
@@ -704,9 +539,6 @@ export interface PersonPhotosResponse {
   hasOverride: boolean;
 }
 
-/**
- * Partner e-mail fiók (IMAP/SMTP) beállítások
- */
 export interface PartnerEmailAccount {
   id: number;
   tablo_partner_id: number;
@@ -732,34 +564,22 @@ export interface PartnerEmailAccount {
   updated_at: string;
 }
 
-/**
- * E-mail fiók teszt eredmény
- */
 export interface EmailAccountTestResult {
   smtp: { ok: boolean; error: string | null; info?: string | null };
   imap?: { ok: boolean; error: string | null };
 }
 
-/**
- * Feladat felhasználó (created_by, assigned_to)
- */
 export interface TaskUser {
   id: number;
   name: string;
 }
 
-/**
- * Feladat kiosztás dropdown elem
- */
 export interface TaskAssignee {
   id: number;
   name: string;
   role: string;
 }
 
-/**
- * Feladat csatolmány
- */
 export interface TaskAttachment {
   id: number;
   original_filename: string;
@@ -770,9 +590,6 @@ export interface TaskAttachment {
   height: number | null;
 }
 
-/**
- * Projekt feladat
- */
 export interface ProjectTask {
   id: number;
   project_id: number;
@@ -793,17 +610,11 @@ export interface ProjectTask {
   answered_by: TaskUser | null;
 }
 
-/**
- * Projekt feladatok szekciókra bontva
- */
 export interface ProjectTaskSections {
   my_tasks: ProjectTask[];
   assigned_to_me: ProjectTask[];
 }
 
-/**
- * Projekt feladat csoport (összesítő nézethez)
- */
 export interface ProjectTaskGroup {
   project_id: number;
   project_name: string;

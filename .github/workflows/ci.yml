@@ -60,7 +60,7 @@ jobs:
               echo "⚠️ $file ($lines sor, limit: 500)"
               OVER=$((OVER + 1))
             fi
-          done < <(find src -name "*.ts" -not -name "*.spec.ts" -not -name "*.data.ts" -not -name "*.routes.ts" -not -name "*.models.ts")
+          done < <(find src -name "*.ts" -not -name "*.spec.ts" -not -name "*.data.ts" -not -name "*.routes.ts" -not -name "*.models.ts" -not -name "*.types.ts" -not -name "*.stories.ts" -not -path "*/constants/lucide-icons.ts")
 
           while IFS= read -r file; do
             lines=$(wc -l < "$file" | tr -d ' ')

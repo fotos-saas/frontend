@@ -85,6 +85,39 @@ export class PhotoshopPsdService {
     }
   }
 
+  /** Projekt mappa útvonal kiszámítása (PSD fájlnév nélkül) */
+  computeProjectFolderPath(
+    context: { projectName: string; schoolName?: string | null; className?: string | null; brandName?: string | null },
+  ): string | null {
+    if (!this.pathService.workDir()) return null;
+    const partnerDir = context.brandName ? this.sanitizePathName(context.brandName) : 'photostack';
+    const folderName = this.buildProjectFolderName(context);
+    const year = new Date().getFullYear().toString();
+    return `${this.pathService.workDir()}/${partnerDir}/${year}/${folderName}`;
+  }
+
+  /** Projekt PSD keresése mappa alapján */
+  async findProjectPsd(folderPath: string): Promise<{
+    exists: boolean; psdPath: string | null; hasLayouts: boolean;
+    hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null;
+  }> {
+    const empty = { exists: false, psdPath: null, hasLayouts: false, hasPlacedPhotos: false, placedPhotos: null };
+    if (!this.api) return empty;
+    try {
+      const result = await this.api.findProjectPsd({ folderPath });
+      if (result.success && result.exists) {
+        return {
+          exists: true, psdPath: result.psdPath ?? null, hasLayouts: result.hasLayouts ?? false,
+          hasPlacedPhotos: result.hasPlacedPhotos ?? false, placedPhotos: result.placedPhotos ?? null,
+        };
+      }
+      return empty;
+    } catch (err) {
+      this.logger.error('Projekt PSD keresés hiba', err);
+      return empty;
+    }
+  }
+
   /** PSD generálás és megnyitás Photoshopban */
   async generateAndOpenPsd(
     size: TabloSize,

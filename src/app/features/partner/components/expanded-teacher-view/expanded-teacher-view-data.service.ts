@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import { PartnerProjectService } from '../../services/partner-project.service';
+import { PartnerPersonService } from '../../services/partner-person.service';
 import {
   ExpandedViewResponse,
   ExpandedUploadedPhoto,
@@ -24,34 +24,23 @@ export class ExpandedTeacherViewDataService {
   private teacherService = inject(PartnerTeacherService);
   private logger = inject(LoggerService);
 
-  // Core state
   readonly loading = signal(false);
   readonly uploading = signal(false);
   readonly syncing = signal(false);
   readonly data = signal<ExpandedViewResponse | null>(null);
-
-  // Drag & drop
   readonly draggedPhoto = signal<ExpandedUploadedPhoto | null>(null);
   readonly assigning = signal(false);
   readonly assigningPersonIds = signal<Set<number>>(new Set());
   readonly pendingDrop = signal<PendingDrop | null>(null);
-
-  // Hover/kijelölés
   readonly hoveredPersonId = signal<number | null>(null);
   readonly hoveredNormalizedName = signal<string | null>(null);
   readonly selectedPersonId = signal<number | null>(null);
-
-  // Tanár keresés
   readonly teacherSearch = signal('');
-
-  // Feltöltési terület
   readonly uploadPanelCollapsed = signal(false);
   readonly uploadProgress = signal<number>(0);
 
-  // Computed: session ID
   readonly sessionId = computed<number | null>(() => this.data()?.sessionId ?? null);
 
-  // Computed: hover alapján kiemelt person ID-k
   readonly matchingPersonIds = computed<Set<number>>(() => {
     const normalizedName = this.hoveredNormalizedName();
     const viewData = this.data();
@@ -68,7 +57,6 @@ export class ExpandedTeacherViewDataService {
     return ids;
   });
 
-  // Computed: hover név hasonlóság csoport
   readonly highlightedSimilarityGroup = computed<SimilarityGroup | null>(() => {
     const normalizedName = this.hoveredNormalizedName();
     const viewData = this.data();
@@ -83,21 +71,15 @@ export class ExpandedTeacherViewDataService {
     ) ?? null;
   });
 
-  // Computed: feltöltött fotók
   readonly uploadedPhotos = computed<ExpandedUploadedPhoto[]>(() => this.data()?.uploadedPhotos ?? []);
-
-  // Computed: projektek és osztályok
   readonly projects = computed<ExpandedProjectInfo[]>(() => this.data()?.projects ?? []);
   readonly availableProjects = computed<ExpandedProjectInfo[]>(() => this.data()?.availableProjects ?? []);
   readonly classes = computed<ExpandedClassData[]>(() => this.data()?.classes ?? []);
   readonly similarityGroups = computed<SimilarityGroup[]>(() => this.data()?.similarityGroups ?? []);
 
-  /** linkedGroup UUID → sorszám (1, 2, 3...) mapping — csak ha a nézetben legalább 2 tanár tartozik hozzá */
   readonly linkedGroupNumbers = computed<Map<string, number>>(() => {
     const viewData = this.data();
     if (!viewData) return new Map();
-
-    // Számolja hány tanár tartozik az egyes linkedGroup-okhoz a nézetben
     const groupCounts = new Map<string, number>();
     for (const cls of viewData.classes) {
       for (const teacher of cls.teachers) {
@@ -107,7 +89,6 @@ export class ExpandedTeacherViewDataService {
       }
     }
 
-    // Csak azokat számozza, amelyekhez legalább 2 tanár tartozik
     const groupMap = new Map<string, number>();
     let counter = 1;
     for (const [group, count] of groupCounts) {
@@ -118,7 +99,7 @@ export class ExpandedTeacherViewDataService {
     return groupMap;
   });
 
-  private projectService = inject(PartnerProjectService);
+  private personService = inject(PartnerPersonService);
   private sourceProjectId: number | null = null;
 
   loadData(projectId: number): void {
@@ -247,7 +228,6 @@ export class ExpandedTeacherViewDataService {
     this.syncing.set(true);
     this.teacherService.syncSessionPhotos(sid).subscribe({
       next: () => {
-        // Teljes újratöltés a sync után, hogy a tanár kártyákon megjelenjen a frissített fotó
         if (this.sourceProjectId) {
           this.loadData(this.sourceProjectId);
         }
@@ -260,42 +240,28 @@ export class ExpandedTeacherViewDataService {
     });
   }
 
-  /**
-   * Fotó ráhúzás kezelése: ha a tanár több osztályban is szerepel, kérdez.
-   */
   handlePhotoDrop(photoId: number, targetPersonId: number): void {
     const viewData = this.data();
     if (!viewData) return;
 
-    // Keressük meg a target tanár normalizedName-jét
     let targetName = '';
     let targetNormalized = '';
     for (const cls of viewData.classes) {
       const teacher = cls.teachers.find(t => t.personId === targetPersonId);
-      if (teacher) {
-        targetName = teacher.name;
-        targetNormalized = teacher.normalizedName;
-        break;
-      }
+      if (teacher) { targetName = teacher.name; targetNormalized = teacher.normalizedName; break; }
     }
-
     if (!targetNormalized) return;
 
-    // Keressük az összes azonos normalizedName-ű person-t
     const allPersonIds: number[] = [];
     for (const cls of viewData.classes) {
       for (const teacher of cls.teachers) {
-        if (teacher.normalizedName === targetNormalized) {
-          allPersonIds.push(teacher.personId);
-        }
+        if (teacher.normalizedName === targetNormalized) allPersonIds.push(teacher.personId);
       }
     }
 
     if (allPersonIds.length <= 1) {
-      // Csak 1 osztályban van → azonnal assign
       this.assignPhotoToTeacher(photoId, [targetPersonId]);
     } else {
-      // Több osztályban is van → popup
       this.pendingDrop.set({
         photoId,
         targetPersonId,
@@ -329,8 +295,6 @@ export class ExpandedTeacherViewDataService {
       next: () => {
         this.assigning.set(false);
         this.draggedPhoto.set(null);
-        // Teljes újratöltés: linkedGroup badge-ek, fotók, minden frissül
-        // A spinner addig marad (assigningPersonIds), míg a reload be nem fejeződik
         this.reloadDataKeepSpinner();
       },
       error: (err) => {
@@ -342,78 +306,22 @@ export class ExpandedTeacherViewDataService {
   }
 
   removeOverride(personId: number): void {
-    const viewData = this.data();
-    if (!viewData) return;
-
-    // Keressük meg a person projectId-jét
-    let projectId: number | null = null;
-    for (const cls of viewData.classes) {
-      if (cls.teachers.some(t => t.personId === personId)) {
-        projectId = cls.projectId;
-        break;
-      }
-    }
-
+    const projectId = this.findProjectIdForPerson(personId);
     if (!projectId) return;
 
     this.teacherService.removeOverridePhoto(projectId, personId).subscribe({
-      next: (response) => {
-        const result = response.data;
-        const current = this.data();
-        if (current) {
-          this.data.set({
-            ...current,
-            classes: current.classes.map(cls => ({
-              ...cls,
-              teachers: cls.teachers.map(t =>
-                t.personId === personId
-                  ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
-                  : t
-              ),
-            })),
-          });
-        }
-      },
-      error: (err) => {
-        this.logger.error('Override eltávolítási hiba', err);
-      },
+      next: (response) => this.updateTeacherPhoto(personId, response.data),
+      error: (err) => this.logger.error('Override eltávolítási hiba', err),
     });
   }
 
   setOverrideFromArchive(personId: number, mediaId: number): void {
-    const viewData = this.data();
-    if (!viewData) return;
-
-    let projectId: number | null = null;
-    for (const cls of viewData.classes) {
-      if (cls.teachers.some(t => t.personId === personId)) {
-        projectId = cls.projectId;
-        break;
-      }
-    }
+    const projectId = this.findProjectIdForPerson(personId);
     if (!projectId) return;
 
     this.teacherService.setOverridePhoto(projectId, personId, mediaId).subscribe({
-      next: (response) => {
-        const result = response.data;
-        const current = this.data();
-        if (current) {
-          this.data.set({
-            ...current,
-            classes: current.classes.map(cls => ({
-              ...cls,
-              teachers: cls.teachers.map(t =>
-                t.personId === personId
-                  ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
-                  : t
-              ),
-            })),
-          });
-        }
-      },
-      error: (err) => {
-        this.logger.error('Override beállítási hiba', err);
-      },
+      next: (response) => this.updateTeacherPhoto(personId, response.data),
+      error: (err) => this.logger.error('Override beállítási hiba', err),
     });
   }
 
@@ -421,59 +329,34 @@ export class ExpandedTeacherViewDataService {
     const viewData = this.data();
     if (!viewData || personIds.length === 0) return;
 
-    const requests = personIds.map(pid => {
-      let projectId: number | null = null;
-      for (const cls of viewData.classes) {
-        if (cls.teachers.some(t => t.personId === pid)) {
-          projectId = cls.projectId;
-          break;
-        }
-      }
-      return projectId ? this.teacherService.setOverridePhoto(projectId, pid, mediaId) : null;
-    }).filter((r): r is NonNullable<typeof r> => r !== null);
+    const requests = personIds
+      .map(pid => {
+        const projectId = this.findProjectIdForPerson(pid);
+        return projectId ? this.teacherService.setOverridePhoto(projectId, pid, mediaId) : null;
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
 
     if (requests.length === 0) return;
 
     forkJoin(requests).subscribe({
       next: (responses) => {
-        const current = this.data();
-        if (!current) return;
-
         const resultMap = new Map<number, { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null }>();
-        responses.forEach((resp, i) => {
-          resultMap.set(personIds[i], resp.data);
-        });
-
-        this.data.set({
-          ...current,
-          classes: current.classes.map(cls => ({
-            ...cls,
-            teachers: cls.teachers.map(t => {
-              const result = resultMap.get(t.personId);
-              return result
-                ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
-                : t;
-            }),
-          })),
-        });
+        responses.forEach((resp, i) => resultMap.set(personIds[i], resp.data));
+        this.updateTeacherPhotos(resultMap);
       },
-      error: (err) => {
-        this.logger.error('Tömeges override beállítási hiba', err);
-      },
+      error: (err) => this.logger.error('Tömeges override beállítási hiba', err),
     });
   }
 
-  /** Tanár hozzáadása egy projekthez (osztályhoz) */
   addTeacher(projectId: number, name: string): void {
-    this.projectService.addPersons(projectId, name, 'teacher').subscribe({
+    this.personService.addPersons(projectId, name, 'teacher').subscribe({
       next: () => this.reloadData(),
       error: (err) => this.logger.error('Tanár hozzáadási hiba', err),
     });
   }
 
-  /** Tanár nevének/pozíciójának módosítása */
   updateTeacher(projectId: number, personId: number, data: { name?: string; title?: string | null }): void {
-    this.projectService.updatePerson(projectId, personId, data).subscribe({
+    this.personService.updatePerson(projectId, personId, data).subscribe({
       next: (response) => {
         const result = response.data;
         const current = this.data();
@@ -495,9 +378,8 @@ export class ExpandedTeacherViewDataService {
     });
   }
 
-  /** Tanár törlése egy projektből */
   deleteTeacher(projectId: number, personId: number): void {
-    this.projectService.deletePerson(projectId, personId).subscribe({
+    this.personService.deletePerson(projectId, personId).subscribe({
       next: () => {
         const current = this.data();
         if (current) {
@@ -509,7 +391,6 @@ export class ExpandedTeacherViewDataService {
             })),
           });
         }
-        // Ha a törölt tanár volt kiválasztva, zárd be a popup-ot
         if (this.selectedPersonId() === personId) {
           this.selectedPersonId.set(null);
         }
@@ -533,7 +414,48 @@ export class ExpandedTeacherViewDataService {
     this.selectedPersonId.set(personId === this.selectedPersonId() ? null : personId);
   }
 
-  /** Újratölti az adatokat, de az assigningPersonIds spinner-t megtartja a betöltés végéig */
+  private findProjectIdForPerson(personId: number): number | null {
+    const viewData = this.data();
+    if (!viewData) return null;
+    for (const cls of viewData.classes) {
+      if (cls.teachers.some(t => t.personId === personId)) return cls.projectId;
+    }
+    return null;
+  }
+
+  private updateTeacherPhoto(personId: number, result: { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null }): void {
+    const current = this.data();
+    if (!current) return;
+    this.data.set({
+      ...current,
+      classes: current.classes.map(cls => ({
+        ...cls,
+        teachers: cls.teachers.map(t =>
+          t.personId === personId
+            ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
+            : t
+        ),
+      })),
+    });
+  }
+
+  private updateTeacherPhotos(resultMap: Map<number, { hasPhoto: boolean; hasOverride: boolean; photoThumbUrl: string | null }>): void {
+    const current = this.data();
+    if (!current) return;
+    this.data.set({
+      ...current,
+      classes: current.classes.map(cls => ({
+        ...cls,
+        teachers: cls.teachers.map(t => {
+          const result = resultMap.get(t.personId);
+          return result
+            ? { ...t, hasPhoto: result.hasPhoto, hasOverride: result.hasOverride, photoThumbUrl: result.photoThumbUrl ?? '' }
+            : t;
+        }),
+      })),
+    });
+  }
+
   private reloadDataKeepSpinner(): void {
     if (!this.sourceProjectId) {
       this.assigningPersonIds.set(new Set());

@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerService } from '../../../services/partner.service';
-import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PartnerPersonService } from '../../../services/partner-person.service';
 import { ElectronService } from '../../../../../core/services/electron.service';
 import { PsdStatusService } from '../../../services/psd-status.service';
 import { PsInputComponent, PsToggleComponent } from '@shared/components/form';
@@ -56,7 +56,7 @@ export class PersonsModalComponent implements OnInit {
   readonly expandedViewRequested = output<{ projectId: number }>();
 
   private readonly partnerService = inject(PartnerService);
-  private readonly projectService = inject(PartnerProjectService);
+  private readonly personService = inject(PartnerPersonService);
   private readonly electronService = inject(ElectronService);
   private readonly psdStatusService = inject(PsdStatusService);
   private readonly destroyRef = inject(DestroyRef);
@@ -252,7 +252,7 @@ export class PersonsModalComponent implements OnInit {
   saveExtraNames(): void {
     if (!this.extraNamesDirty() || this.extraNamesSaving()) return;
     this.extraNamesSaving.set(true);
-    this.projectService.updateExtraNames(this.projectId(), this.extraNames())
+    this.personService.updateExtraNames(this.projectId(), this.extraNames())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => { this.extraNames.set(res.data.extraNames); this.extraNamesDirty.set(false); this.extraNamesSaving.set(false); },

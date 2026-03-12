@@ -33,6 +33,14 @@ fi
 # 2. OKOS fájlméret check — különbséget tesz "már nagy volt" és "mi tettük naggyá"
 for FILE in $STAGED_FILES; do
     if [ -f "$FILE" ]; then
+        # Skip: pure type definíciók, Storybook stories, ikon registry
+        if echo "$FILE" | grep -qE '\.(types|stories)\.ts$'; then
+            continue
+        fi
+        if echo "$FILE" | grep -qE 'constants/lucide-icons\.ts$'; then
+            continue
+        fi
+
         LINES=$(wc -l < "$FILE" | tr -d ' ')
         if echo "$FILE" | grep -qE '\.(data|routes|models)\.ts$'; then
             LIMIT=800

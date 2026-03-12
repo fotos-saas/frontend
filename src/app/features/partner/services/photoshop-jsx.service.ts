@@ -6,9 +6,6 @@ import { PhotoshopSettingsService } from './photoshop-settings.service';
 import { PhotoshopPsdService } from './photoshop-psd.service';
 import { TabloLayoutConfig } from '../pages/project-tablo-editor/layout-designer/layout-designer.types';
 
-/**
- * PhotoshopJsxService — JSX layer műveletek (guides, subtitles, names, images, grid, arrange, link/unlink, resize).
- */
 @Injectable({ providedIn: 'root' })
 export class PhotoshopJsxService {
   private readonly logger = inject(LoggerService);
@@ -19,7 +16,6 @@ export class PhotoshopJsxService {
   private get api() { return this.pathService.api; }
   private runJsx(params: Parameters<PhotoshopPathService['runJsx']>[0]) { return this.pathService.runJsx(params); }
 
-  /** Guide-ok hozzáadása (margó cm alapján) */
   async addGuides(targetDocName?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     const marginCm = this.settings.marginCm();
@@ -33,7 +29,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Subtitle felirat tömb összeállítása projekt adatokból */
   buildSubtitles(context: {
     schoolName?: string | null;
     className?: string | null;
@@ -49,7 +44,6 @@ export class PhotoshopJsxService {
     return subtitles;
   }
 
-  /** Felirat text layerek hozzáadása */
   async addSubtitleLayers(
     subtitles: Array<{ name: string; text: string; fontSize?: number }>,
     targetDocName?: string,
@@ -69,7 +63,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Személynevek text layerként hozzáadása */
   async addNameLayers(persons: Array<{ id: number; name: string; type: string }>, targetDocName?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     if (!persons || persons.length === 0) return { success: true };
@@ -82,7 +75,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Smart Object placeholder layerek hozzáadása */
   async addImageLayers(
     persons: Array<{ id: number; name: string; type: string; photoUrl?: string | null }>,
     imageSizeCm = { widthCm: 10.4, heightCm: 15.4, dpi: 300 },
@@ -103,7 +95,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Extra nevek beillesztése/frissítése */
   async addExtraNames(
     extraNames: { students: string; teachers: string },
     options: { includeStudents: boolean; includeTeachers: boolean },
@@ -134,7 +125,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Grid elrendezés */
   async arrangeGrid(
     boardSize: { widthCm: number; heightCm: number },
     targetDocName?: string,
@@ -163,7 +153,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Nevek rendezése */
   async arrangeNames(targetDocName?: string, linkedLayerNames?: string[]): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     try {
@@ -183,7 +172,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Feliratok pozícionálása */
   async arrangeSubtitles(
     freeZone: { topPx: number; bottomPx: number },
     subtitleGapPx = 30,
@@ -203,7 +191,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Teljes tablóelrendezés: tanárok fent, feliratok középen, diákok lent */
   async arrangeTabloLayout(
     boardSize: { widthCm: number; heightCm: number },
     targetDocName?: string,
@@ -257,7 +244,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Pozíció layerek frissítése/létrehozása */
   async updatePositions(
     persons: Array<{ id: number; name: string; type: string; title: string | null }>,
     targetDocName?: string,
@@ -291,7 +277,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Fotók behelyezése Smart Object layerekbe */
   async placePhotos(layers: Array<{ layerName: string; photoUrl: string }>, targetDocName?: string, syncBorder?: boolean): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     if (!layers || layers.length === 0) return { success: true };
@@ -304,7 +289,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Layerek összelinkelése */
   async linkLayers(layerNames: string[], targetDocName?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     if (!layerNames || layerNames.length === 0) return { success: true };
@@ -317,7 +301,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Layerek linkelésének megszüntetése */
   async unlinkLayers(layerNames: string[], targetDocName?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.api) return { success: false, error: 'Nem Electron környezet' };
     if (!layerNames || layerNames.length === 0) return { success: true };
@@ -330,7 +313,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Layerek átméretezése */
   async resizeLayers(params: {
     layerNames: string[]; width: number | null; height: number | null; unit: 'cm' | 'px';
   }): Promise<{ success: boolean; error?: string }> {
@@ -345,7 +327,6 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Csoport + SO layerek hozzáadása */
   async addGroupLayers(params: {
     groupName: string;
     sourceFiles: Array<{ filePath: string }>;
@@ -361,7 +342,108 @@ export class PhotoshopJsxService {
     }
   }
 
-  /** Teljes layout kiolvasás v3 formátumban */
+  async relocateLayers(
+    layers: Array<{ layerId: number; layerName: string; groupPath: string[]; x: number; y: number; width: number; height: number; kind: string }>,
+    targetDocName?: string,
+    linkedLayerNames?: string[],
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      this.logger.info('Elrendezés szinkronizálás indul:', { layerCount: layers.length });
+      const result = await this.runJsx({
+        scriptName: 'actions/restore-layout.jsx',
+        jsonData: {
+          layers, restoreGroups: [['Images'], ['Names']], historyName: 'Sorrend frissítés', moveAllSiblings: true,
+          ...(linkedLayerNames?.length ? { linkedLayerNames } : {}),
+        },
+        targetDocName,
+      });
+      if (!result.success) this.logger.error('Elrendezés szinkronizálás JSX hiba:', result.error);
+      return { success: result.success, error: result.error };
+    } catch (err) {
+      this.logger.error('Elrendezés szinkronizálás hiba', err);
+      return { success: false, error: 'Váratlan hiba az elrendezés szinkronizálásnál' };
+    }
+  }
+
+  async closeDocumentWithoutSaving(targetDocName?: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    try {
+      const result = await this.runJsx({ scriptName: 'actions/close-without-saving.jsx', targetDocName });
+      if (!result.success) return { success: false, error: result.error || 'Bezárás sikertelen' };
+      const output = result.output ?? '';
+      if (output.indexOf('__CLOSE_NOSAVE__OK') === -1) {
+        const errorMatch = output.match(/\[JSX\] HIBA: (.+)/);
+        return { success: false, error: errorMatch?.[1] || 'Ismeretlen hiba a bezárásnál' };
+      }
+      return { success: true };
+    } catch (err) {
+      this.logger.warn('Dokumentum bezárás sikertelen (valószínűleg nincs nyitva)', err);
+      return { success: true };
+    }
+  }
+
+  async applyCircleMask(params: {
+    layerNames?: string[]; useSelectedLayers?: boolean;
+  }): Promise<{ success: boolean; masked?: number; skipped?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    if (!params.useSelectedLayers && (!params.layerNames || params.layerNames.length === 0)) return { success: true, masked: 0 };
+    try {
+      const result = await this.runJsx({ scriptName: 'actions/apply-circle-mask.jsx', jsonData: params });
+      if (!result.success) return { success: false, error: result.error };
+      return this.parseJsxStats(result.output, 'masked');
+    } catch (err) {
+      this.logger.error('JSX applyCircleMask hiba', err);
+      return { success: false, error: 'Váratlan hiba a maszkolás során' };
+    }
+  }
+
+  async removeMasks(params: {
+    layerNames?: string[]; useSelectedLayers?: boolean;
+  }): Promise<{ success: boolean; removed?: number; skipped?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    if (!params.useSelectedLayers && (!params.layerNames || params.layerNames.length === 0)) return { success: true, removed: 0 };
+    try {
+      const result = await this.runJsx({ scriptName: 'actions/remove-masks.jsx', jsonData: params });
+      if (!result.success) return { success: false, error: result.error };
+      return this.parseJsxStats(result.output, 'removed');
+    } catch (err) {
+      this.logger.error('JSX removeMasks hiba', err);
+      return { success: false, error: 'Váratlan hiba a maszk eltávolítás során' };
+    }
+  }
+
+  async addPlaceholderTexts(params: {
+    layers: Array<{ layerName: string; displayText: string; group: 'Students' | 'Teachers'; x: number; y: number }>;
+    groupName?: string; textAlign?: string;
+  }): Promise<{ success: boolean; created?: number; errors?: number; error?: string }> {
+    if (!this.api) return { success: false, error: 'Nem Electron környezet' };
+    if (!params.layers || params.layers.length === 0) return { success: true, created: 0 };
+    try {
+      const result = await this.runJsx({ scriptName: 'actions/add-placeholder-texts.jsx', jsonData: params });
+      if (!result.success) return { success: false, error: result.error };
+      return this.parseJsxStats(result.output, 'created');
+    } catch (err) {
+      this.logger.error('JSX addPlaceholderTexts hiba', err);
+      return { success: false, error: 'Váratlan hiba a placeholder szöveg hozzáadásakor' };
+    }
+  }
+
+  private parseJsxStats(output: string | undefined, mainKey: string): { success: boolean; error?: string; [key: string]: unknown } {
+    try {
+      if (output) {
+        const lines = output.trim().split('\n');
+        const lastLine = lines[lines.length - 1];
+        if (lastLine.charAt(0) === '{') {
+          const data = JSON.parse(lastLine);
+          if (data.error) return { success: false, error: data.error };
+          return { success: true, [mainKey]: data[mainKey], skipped: data.skipped, errors: data.errors };
+        }
+      }
+    } catch { /* parse hiba */ }
+    return { success: true };
+  }
+
   async readFullLayout(
     boardConfig: { widthCm: number; heightCm: number },
     targetDocName?: string,

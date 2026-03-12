@@ -3,6 +3,7 @@ import { SnapshotLayer } from '@core/services/electron.types';
 import { TabloPersonItem } from '../../../models/partner.models';
 import { PhotoshopService } from '../../../services/photoshop.service';
 import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PartnerPersonService } from '../../../services/partner-person.service';
 import { LayoutDesignerStateService } from './layout-designer-state.service';
 import { PhotoUploadPerson, PhotoUploadResult } from './components/layout-photo-upload-dialog/layout-photo-upload-dialog.component';
 import { firstValueFrom } from 'rxjs';
@@ -16,6 +17,7 @@ export class LayoutDesignerPsBridgeService {
   private readonly state = inject(LayoutDesignerStateService);
   private readonly ps = inject(PhotoshopService);
   private readonly projectService = inject(PartnerProjectService);
+  private readonly personService = inject(PartnerPersonService);
 
   readonly linking = signal(false);
   readonly placingPhotos = signal(false);
@@ -139,7 +141,7 @@ export class LayoutDesignerPsBridgeService {
     this.extraNamesSuccess.set(null);
     this.extraNamesError.set(null);
     try {
-      const saveResult = await firstValueFrom(this.projectService.updateExtraNames(this._projectId, event.extraNames));
+      const saveResult = await firstValueFrom(this.personService.updateExtraNames(this._projectId, event.extraNames));
       this._extraNamesUpdatedEmitter?.(saveResult.data.extraNames);
       const result = await this.ps.addExtraNames(
         saveResult.data.extraNames,

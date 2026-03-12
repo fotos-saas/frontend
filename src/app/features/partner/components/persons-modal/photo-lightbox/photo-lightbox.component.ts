@@ -4,7 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '../../../../../shared/constants/icons.constants';
 import { TabloPersonItem } from '../persons-modal.types';
 import { PartnerAlbumService } from '../../../services/partner-album.service';
-import { PartnerProjectService } from '../../../services/partner-project.service';
+import { PartnerPersonService } from '../../../services/partner-person.service';
 import { PersonPhoto } from '../../../models/partner.models';
 
 /**
@@ -22,7 +22,7 @@ export class PhotoLightboxComponent implements OnInit {
   readonly ICONS = ICONS;
   private destroyRef = inject(DestroyRef);
   private albumService = inject(PartnerAlbumService);
-  private projectService = inject(PartnerProjectService);
+  private personService = inject(PartnerPersonService);
 
   readonly person = input<TabloPersonItem | null>(null);
   readonly personsWithPhotos = input<TabloPersonItem[]>([]);
@@ -101,7 +101,7 @@ export class PhotoLightboxComponent implements OnInit {
     const p = this.person();
     if (!p) return;
 
-    this.projectService.overridePersonPhoto(this.projectId(), p.id, photo.mediaId)
+    this.personService.overridePersonPhoto(this.projectId(), p.id, photo.mediaId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

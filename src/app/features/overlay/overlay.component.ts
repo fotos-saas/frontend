@@ -27,6 +27,8 @@ import { TeacherPhotoChooserDialogComponent } from '../partner/components/teache
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../partner/models/teacher.models';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { OverlayDragOrderService } from './overlay-drag-order.service';
+import { OverlayDragGroupsService } from './overlay-drag-groups.service';
+import { OverlayEffectsService } from './overlay-effects.service';
 import { OverlayEmailService } from './overlay-email.service';
 import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
 
@@ -38,17 +40,13 @@ import { DragOrderColorPipe } from '@shared/pipes/drag-order-color.pipe';
     OverlayUploadService, OverlayProjectService, OverlayPhotoshopService,
     OverlayPollingService, OverlaySettingsService, OverlaySortService,
     OverlaySyncService, OverlayLayerManagementService, OverlayGenerateService,
-    OverlayQuickActionsService,
-    OverlayDragOrderService,
-    OverlayUploadPanelService,
-    OverlayEmailService,
+    OverlayQuickActionsService, OverlayDragOrderService, OverlayDragGroupsService,
+    OverlayEffectsService, OverlayUploadPanelService, OverlayEmailService,
   ],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:click)': 'onDocumentClick($event)',
-  },
+  host: { '(document:click)': 'onDocumentClick($event)' },
 })
 export class OverlayComponent implements OnInit {
   protected readonly ICONS = ICONS;
@@ -56,7 +54,6 @@ export class OverlayComponent implements OnInit {
   private readonly ngZone = inject(NgZone);
   private readonly teacherService = inject(PartnerTeacherService);
 
-  // Kiemelt service-ek
   readonly projectService = inject(OverlayProjectService);
   readonly ps = inject(OverlayPhotoshopService);
   readonly polling = inject(OverlayPollingService);
@@ -71,14 +68,12 @@ export class OverlayComponent implements OnInit {
   readonly emailService = inject(OverlayEmailService);
   private readonly sanitizer = inject(DomSanitizer);
 
-  // ============ Service signal alias-ok (template backward compat) ============
   readonly context = signal<OverlayContext>({ mode: 'normal' });
   readonly isDesignerMode = computed(() => this.context().mode === 'designer');
   readonly openSubmenu = signal<string | null>(null);
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
   private collapseHover = false;
 
-  // Alias-ok a service signal-ekre (template compatibility)
   readonly activeDoc = this.polling.activeDoc;
   readonly isTurbo = this.polling.isTurbo;
   readonly isPollingEnabled = this.polling.isEnabled;
@@ -102,14 +97,12 @@ export class OverlayComponent implements OnInit {
   readonly refreshRosterToRemove = this.layerMgmt.refreshRosterToRemove;
   readonly refreshRosterToAdd = this.layerMgmt.refreshRosterToAdd;
   readonly refreshRosterApplying = this.layerMgmt.refreshRosterApplying;
-
   readonly renameCanApply = computed(() => {
     if (this.renameApplying()) return false;
     if (this.renameMatched().length > 0) return true;
     return this.renameUnmatched().some(u => u.newId.trim().length > 0);
   });
 
-  // Drag order panel — alias-ok a service signal-ekre
   readonly dragOrderPanelOpen = this.dragOrder.panelOpen;
   readonly dragOrderSaving = this.dragOrder.saving;
   readonly dragOrderRefreshing = this.dragOrder.refreshing;
@@ -127,11 +120,8 @@ export class OverlayComponent implements OnInit {
   readonly dragOrderCustomText = this.dragOrder.customOrderText;
   readonly dragOrderCustomLoading = this.dragOrder.customOrderLoading;
   readonly dragOrderCustomResult = this.dragOrder.customOrderResult;
-
-  // Link/unlink eredmény — delegálva qa service-be, alias a template-hez
   readonly linkResult = this.qa.result;
 
-  // Teacher link & photo chooser dialog state
   readonly showTeacherLinkDialog = signal(false);
   readonly showPhotoChooserDialog = signal(false);
   readonly linkDialogTeacher = signal<TeacherListItem | null>(null);
@@ -139,7 +129,6 @@ export class OverlayComponent implements OnInit {
   readonly photoChooserPhotos = signal<LinkedGroupPhoto[]>([]);
   readonly photoChooserMode = signal<PhotoChooserMode | null>(null);
 
-  // Upload panel — alias-ok a service signal-ekre
   readonly uploadPanelOpen = this.uploadPanel.panelOpen;
   readonly selectedPerson = this.uploadPanel.selectedPerson;
   readonly searchQuery = this.uploadPanel.searchQuery;
@@ -157,23 +146,17 @@ export class OverlayComponent implements OnInit {
   readonly matching = this.uploadPanel.matching;
   readonly batchResult = this.uploadPanel.batchResult;
 
-  // Email panel — alias-ok
   readonly emailPanelOpen = this.emailService.panelOpen;
   readonly emailLoading = this.emailService.loading;
   readonly emailTemplates = this.emailService.templates;
   readonly emailSelectedTemplate = this.emailService.selectedTemplateName;
   readonly emailSubject = this.emailService.resolvedSubject;
-  readonly emailBodyHtml = computed(() =>
-    this.sanitizer.bypassSecurityTrustHtml(this.emailService.resolvedBodyHtml())
-  );
+  readonly emailBodyHtml = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.emailService.resolvedBodyHtml()));
   readonly emailContactName = this.emailService.contactName;
   readonly emailContactEmail = this.emailService.contactEmail;
   readonly emailCopyFeedback = this.emailService.copyFeedback;
-
-  // Generate state (alias)
   readonly generating = this.generateService.generating;
   readonly generateResult = this.generateService.generateResult;
-
   readonly hasPsLayers = this.uploadPanel.hasPsLayers;
   readonly uploadableLayers = this.uploadPanel.uploadableLayers;
   readonly placableLayers = this.uploadPanel.placableLayers;
@@ -183,14 +166,10 @@ export class OverlayComponent implements OnInit {
     const name = this.activeDoc().name;
     if (!name) return null;
     const base = name.replace(/\.(psd|psb|pdd)$/i, '');
-    if (base.length <= 30) return base;
-    return base.slice(0, 12) + '...' + base.slice(-12);
+    return base.length <= 30 ? base : base.slice(0, 12) + '...' + base.slice(-12);
   });
   readonly selectedLayers = computed(() => this.activeDoc().selectedLayers ?? 0);
-
   readonly groups = computed(() => TOOLBAR_GROUPS.filter(g => !g.designerOnly));
-
-  // ============ Lifecycle ============
 
   ngOnInit(): void {
     document.body.classList.add('overlay-mode');
@@ -208,8 +187,6 @@ export class OverlayComponent implements OnInit {
     this.uploadPanel.setContextResolver(() => this.context());
   }
 
-  // ============ Command router ============
-
   onCommand(commandId: string): void {
     if (commandId === 'upload-photo') { this.toggleUploadPanel(); return; }
     if (commandId === 'email-template') { this.toggleEmailPanel(); return; }
@@ -220,7 +197,6 @@ export class OverlayComponent implements OnInit {
       return;
     }
     this.closeSubmenu();
-
     if (commandId === 'rename-layer-ids') { this.layerMgmt.renameLayerIds(this.context()); return; }
     if (commandId === 'refresh-roster') { this.layerMgmt.refreshRoster(this.context()); return; }
     if (commandId === 'link-layers') { this.runLinkCommand(commandId, 'actions/link-selected.jsx', 'link'); return; }
@@ -241,8 +217,6 @@ export class OverlayComponent implements OnInit {
     }
   }
 
-  // ============ Rendezés delegálás ============
-
   arrangeNames(textAlign: string): void { this.closeSubmenu(); this.sortService.arrangeNames(textAlign); }
   cycleBreakAfter(): void { this.settings.cycleBreakAfter(); }
   adjustGap(delta: number): void { this.settings.adjustGap(delta); }
@@ -250,12 +224,8 @@ export class OverlayComponent implements OnInit {
   async sortGender(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGender(); }
   async sortGrid(): Promise<void> { this.closeSubmenu(); await this.sortService.sortGrid(this.activeDoc()); }
 
-  // ============ Drag Order Panel (delegálva: OverlayDragOrderService) ============
-
   async toggleDragOrderPanel(): Promise<void> {
-    if (this.dragOrderPanelOpen()) {
-      this.dragOrder.closePanel();
-    } else {
+    if (this.dragOrderPanelOpen()) { this.dragOrder.closePanel(); } else {
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.qa.panelOpen()) this.closeQuickActions();
@@ -284,49 +254,29 @@ export class OverlayComponent implements OnInit {
     else el.textContent = this.dragOrder.groups().find(g => g.id === groupId)?.name ?? 'Csoport';
   }
   onDragOrderGroupNameKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      (event.target as HTMLElement).blur();
-    }
+    if (event.key === 'Enter') { event.preventDefault(); (event.target as HTMLElement).blur(); }
   }
   toggleDragOrderGroupCollapse(id: string): void { this.dragOrder.toggleGroupCollapse(id); }
   onDropToGroup(event: CdkDragDrop<PersonItem[]>, groupId: string): void { this.dragOrder.onDropToGroup(event, groupId); }
   onDropToUngrouped(event: CdkDragDrop<PersonItem[]>): void { this.dragOrder.onDropToUngrouped(event); }
   moveDragOrderGroup(id: string, direction: -1 | 1): void { this.dragOrder.moveGroup(id, direction); }
 
-  // ============ Sync & Generate delegálás ============
-
-  syncPhotos(mode: 'all' | 'missing' | 'selected'): void {
-    this.closeSubmenu();
-    this.syncService.syncPhotos(mode, this.context());
-  }
-
+  syncPhotos(mode: 'all' | 'missing' | 'selected'): void { this.closeSubmenu(); this.syncService.syncPhotos(mode, this.context()); }
   confirmRefreshPlacedJson(): void { this.closeSubmenu(); this.syncService.refreshPlacedJson(this.context()); }
-
   toggleSyncBorder(): void { this.settings.toggleSyncBorder(this.context().projectId); }
-
   private get pid(): number | null { return this.context().projectId || this.projectService.getLastProjectId(); }
-
   toggleSampleSize(): void { this.settings.toggleSampleSize(this.pid); }
   toggleWatermarkColor(): void { this.settings.toggleWatermarkColor(this.pid); }
   cycleOpacity(direction: 1 | -1 = 1): void { this.settings.cycleOpacity(direction, this.pid); }
   cycleSampleVersion(direction: 1 | -1 = 1): void { this.settings.cycleSampleVersion(direction, this.pid); }
-
-  async confirmGenerate(type: 'sample' | 'final'): Promise<void> {
-    this.closeSubmenu();
-    this.generateService.confirmGenerate(type, this.context());
-  }
+  async confirmGenerate(type: 'sample' | 'final'): Promise<void> { this.closeSubmenu(); this.generateService.confirmGenerate(type, this.context()); }
   cancelGenerate(): void { this.closeSubmenu(); }
-
-  // ============ Rename & Roster delegálás ============
 
   updateUnmatchedId(index: number, newId: string): void { this.layerMgmt.updateUnmatchedId(index, newId); }
   applyRename(): Promise<void> { return this.layerMgmt.applyRename(); }
   closeRenameDialog(): void { this.layerMgmt.closeRenameDialog(); }
   applyRefreshRoster(): Promise<void> { return this.layerMgmt.applyRefreshRoster(); }
   closeRefreshRosterDialog(): void { this.layerMgmt.closeRefreshRosterDialog(); }
-
-  // ============ Upload Panel (delegálva: OverlayUploadPanelService) ============
 
   toggleUploadPanel(): void {
     if (this.uploadPanelOpen()) { this.uploadPanel.closePanel(); } else { this.closeSubmenu(); this.uploadPanel.openPanel(); }
@@ -354,7 +304,6 @@ export class OverlayComponent implements OnInit {
   uploadAndPlace(): Promise<void> { return this.uploadPanel.uploadAndPlace(); }
   placeInPs(): Promise<void> { return this.uploadPanel.placeInPs(); }
 
-  // ============ Quick actions (delegálva: OverlayQuickActionsService) ============
   toggleQuickActions(): void { this.qa.togglePanel(); }
   closeQuickActions(): void { this.qa.closePanel(); }
   toggleSpecPanel(): void { this.qa.toggleSpecPanel(); }
@@ -364,11 +313,8 @@ export class OverlayComponent implements OnInit {
   applyBorderRadius(): void { this.qa.applyBorderRadiusSelected(); }
   applyRotate(): void { this.qa.applyRotateSelected(); }
 
-  // ============ Email Panel (delegálva: OverlayEmailService) ============
   toggleEmailPanel(): void {
-    if (this.emailPanelOpen()) {
-      this.emailService.closePanel();
-    } else {
+    if (this.emailPanelOpen()) { this.emailService.closePanel(); } else {
       this.closeSubmenu();
       if (this.uploadPanelOpen()) this.closeUploadPanel();
       if (this.dragOrderPanelOpen()) this.closeDragOrderPanel();
@@ -381,14 +327,12 @@ export class OverlayComponent implements OnInit {
   copyEmailText(text: string, label: string): void { this.emailService.copyText(text, label); }
   copyEmailHtml(html: string, label: string): void { this.emailService.copyHtml(html, label); }
 
-  // ============ Turbo & UI ============
   togglePolling(): void { this.polling.toggleEnabled(); }
   toggleTurbo(): void { this.polling.toggleTurbo(); }
   hide(): void { window.electronAPI?.overlay.hide(); }
   showLogin(): void { window.electronAPI?.overlay.showMainWindow(); }
   openActiveDocDir(): void { this.onCommand('ps-open-workdir'); }
 
-  // ============ Teacher link & photo chooser ============
   openLinkDialog(person: PersonItem): void {
     if (!person.archiveId) return;
     forkJoin({
@@ -419,9 +363,7 @@ export class OverlayComponent implements OnInit {
   openPhotoChooser(person: PersonItem): void {
     if (!person.linkedGroup) return;
     const group = person.linkedGroup;
-    this.teacherService.getLinkedGroupPhotos(group).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
+    this.teacherService.getLinkedGroupPhotos(group).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.ngZone.run(() => {
           this.photoChooserPhotos.set(res.data || []);
@@ -433,9 +375,7 @@ export class OverlayComponent implements OnInit {
   }
   onOpenPhotoChooserFromLink(groupId: string): void {
     this.showTeacherLinkDialog.set(false);
-    this.teacherService.getLinkedGroupPhotos(groupId).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
+    this.teacherService.getLinkedGroupPhotos(groupId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.ngZone.run(() => {
           this.photoChooserPhotos.set(res.data || []);
@@ -447,14 +387,11 @@ export class OverlayComponent implements OnInit {
   }
   onPhotoChosen(): void { this.showPhotoChooserDialog.set(false); this.reloadPersons(); }
 
-  // ============ Submenu / collapse ============
   onCollapseEnter(): void { this.collapseHover = true; this.clearCollapseTimer(); }
   onCollapseLeave(): void {
     this.collapseHover = false;
     if (this.openSubmenu()) this.resetCollapseTimer(this.openSubmenu());
   }
-
-  // ============ Private helpers ============
 
   private async runLinkCommand(commandId: string, script: string, type: 'link' | 'unlink'): Promise<void> {
     const result = await this.ps.runJsx(commandId, script);
@@ -501,12 +438,8 @@ export class OverlayComponent implements OnInit {
         this.context.set(ctx);
         this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(ctx.projectId));
         if (ctx.projectId) this.settings.loadSampleSettingsForProject(ctx.projectId);
-        if (this.isLoggedOut() && ctx.projectId) {
-          this.isLoggedOut.set(false);
-        }
-        if (ctx.projectId) {
-          this.projectService.loadPersons(ctx.projectId);
-        }
+        if (this.isLoggedOut() && ctx.projectId) this.isLoggedOut.set(false);
+        if (ctx.projectId) this.projectService.loadPersons(ctx.projectId);
       });
     });
     this.destroyRef.onDestroy(cleanup);
@@ -544,7 +477,6 @@ export class OverlayComponent implements OnInit {
           window.electronAPI.overlay.setActiveDoc(doc);
         }
       }
-    } catch { /* PS nem elerheto */ }
+    } catch { /* PS nem elérhető */ }
   }
-
 }

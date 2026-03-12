@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
-import { PartnerProjectService } from '../../services/partner-project.service';
+import { PartnerPersonService } from '../../services/partner-person.service';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherListItem, LinkedGroupPhoto, PhotoChooserMode } from '../../models/teacher.models';
 import { TabloPersonItem } from './persons-modal.types';
@@ -22,7 +22,7 @@ export interface EditRow {
  */
 @Injectable()
 export class PersonsModalActionsService {
-  private readonly projectService = inject(PartnerProjectService);
+  private readonly personService = inject(PartnerPersonService);
   private readonly teacherService = inject(PartnerTeacherService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -108,7 +108,7 @@ export class PersonsModalActionsService {
     if (!row?.dirty || row.saving || !row.name.trim()) return;
 
     this.setEditRow(personId, { ...row, saving: true });
-    this.projectService.updatePerson(projectId, personId, {
+    this.personService.updatePerson(projectId, personId, {
       name: row.name.trim(), title: row.title.trim() || null, note: row.note.trim() || null,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
@@ -165,7 +165,7 @@ export class PersonsModalActionsService {
     if (!personId || !data || !data.name.trim() || this.inlineEditSaving()) return;
 
     this.inlineEditSaving.set(true);
-    this.projectService.updatePerson(projectId, personId, {
+    this.personService.updatePerson(projectId, personId, {
       name: data.name.trim(), title: data.title.trim() || null, note: data.note.trim() || null,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
@@ -188,7 +188,7 @@ export class PersonsModalActionsService {
   ): void {
     const person = this.deleteConfirmPerson();
     if (!person) return;
-    this.projectService.deletePerson(projectId, person.id)
+    this.personService.deletePerson(projectId, person.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -218,7 +218,7 @@ export class PersonsModalActionsService {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     this.batchDeleting.set(true);
-    this.projectService.deletePersonsBatch(projectId, ids)
+    this.personService.deletePersonsBatch(projectId, ids)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -304,7 +304,7 @@ export class PersonsModalActionsService {
     if (person.archiveId) {
       doOpen(person.archiveId);
     } else {
-      this.projectService.ensurePersonArchive(projectId, person.id)
+      this.personService.ensurePersonArchive(projectId, person.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res) => {

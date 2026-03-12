@@ -16,35 +16,15 @@ import {
   TabloSizeThreshold,
 } from '../models/partner.models';
 
-/**
- * Projekt kezelés service.
- * CRUD, settings, order data, dashboard statisztikák.
- */
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class PartnerProjectService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner`;
 
-  // ============================================
-  // DASHBOARD
-  // ============================================
-
-  /**
-   * Dashboard statisztikák lekérése
-   */
   getStats(): Observable<PartnerDashboardStats> {
     return this.http.get<PartnerDashboardStats>(`${this.baseUrl}/stats`);
   }
 
-  // ============================================
-  // PROJECTS CRUD
-  // ============================================
-
-  /**
-   * Projektek listázása (paginált, limitekkel)
-   */
   getProjects(params?: {
     page?: number;
     per_page?: number;
@@ -79,21 +59,13 @@ export class PartnerProjectService {
       project_ids: params?.project_ids,
       exclude_statuses: params?.exclude_statuses,
     });
-
     return this.http.get<ProjectListResponse>(`${this.baseUrl}/projects`, { params: httpParams });
   }
 
-  /**
-   * Projekt részletek lekérése
-   */
   getProjectDetails(id: number): Observable<PartnerProjectDetails> {
     return this.http.get<PartnerProjectDetails>(`${this.baseUrl}/projects/${id}`);
   }
 
-  /**
-   * Fotóváltozások ellenőrzése a placed-photos.json alapján.
-   * Visszaadja a megváltozott személyek számát.
-   */
   checkPhotoChanges(projectId: number, placedPhotos: Record<string, number>): Observable<{
     changed: Array<{ personId: number; personName: string; type: string; newPhotoUrl: string }>;
     unchanged: number;
@@ -108,10 +80,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/check-photo-changes`, { placedPhotos });
   }
 
-  /**
-   * Batch fotóváltozás ellenőrzés — több projekt egyszerre.
-   * Visszaadja a módosult projekt ID-kat.
-   */
   batchCheckPhotoChanges(items: Array<{ projectId: number; placedPhotos: Record<string, number> }>): Observable<{
     data: { modifiedProjectIds: number[]; checkedCount: number };
   }> {
@@ -120,335 +88,102 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/batch-check-photo-changes`, { items });
   }
 
-  /**
-   * Új projekt létrehozása
-   */
   createProject(data: CreateProjectRequest): Observable<{
-    success: boolean;
-    message: string;
-    data: PartnerProjectListItem;
+    success: boolean; message: string; data: PartnerProjectListItem;
   }> {
     return this.http.post<{
-      success: boolean;
-      message: string;
-      data: PartnerProjectListItem;
+      success: boolean; message: string; data: PartnerProjectListItem;
     }>(`${this.baseUrl}/projects`, data);
   }
 
-  /**
-   * Projekt módosítása
-   */
   updateProject(projectId: number, data: Partial<CreateProjectRequest> & { status?: string }): Observable<{
-    success: boolean;
-    message: string;
+    success: boolean; message: string;
     data?: { status: string; statusLabel: string; statusColor: string };
   }> {
     return this.http.put<{
-      success: boolean;
-      message: string;
+      success: boolean; message: string;
       data?: { status: string; statusLabel: string; statusColor: string };
-    }>(
-      `${this.baseUrl}/projects/${projectId}`,
-      data,
-    );
+    }>(`${this.baseUrl}/projects/${projectId}`, data);
   }
 
-  /**
-   * Projekt törlése
-   */
   deleteProject(projectId: number): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(
-      `${this.baseUrl}/projects/${projectId}`,
-    );
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/projects/${projectId}`);
   }
 
-  /**
-   * Feltöltve státusz toggle
-   */
   togglePhotosUploaded(projectId: number): Observable<{
-    success: boolean;
-    message: string;
-    photosUploaded: boolean;
+    success: boolean; message: string; photosUploaded: boolean;
   }> {
     return this.http.patch<{
-      success: boolean;
-      message: string;
-      photosUploaded: boolean;
+      success: boolean; message: string; photosUploaded: boolean;
     }>(`${this.baseUrl}/projects/${projectId}/toggle-photos-uploaded`, {});
   }
 
-  /**
-   * Tudnak róla státusz toggle
-   */
   toggleProjectAware(projectId: number): Observable<{
-    success: boolean;
-    message: string;
-    isAware: boolean;
+    success: boolean; message: string; isAware: boolean;
   }> {
     return this.http.patch<{
-      success: boolean;
-      message: string;
-      isAware: boolean;
+      success: boolean; message: string; isAware: boolean;
     }>(`${this.baseUrl}/projects/${projectId}/toggle-aware`, {});
   }
 
-  // ============================================
-  // SAMPLES & PERSONS
-  // ============================================
-
-  /**
-   * Projekt minták lekérése
-   */
   getProjectSamples(projectId: number): Observable<{ data: SampleItem[] }> {
-    return this.http.get<{ data: SampleItem[] }>(
-      `${this.baseUrl}/projects/${projectId}/samples`,
-    );
+    return this.http.get<{ data: SampleItem[] }>(`${this.baseUrl}/projects/${projectId}/samples`);
   }
 
-  /**
-   * Projekt személyeinek lekérése
-   */
   getProjectPersons(projectId: number, withoutPhoto?: boolean): Observable<{
     data: TabloPersonItem[];
     extraNames: { students: string; teachers: string };
   }> {
-    const httpParams = buildHttpParams({
-      without_photo: withoutPhoto || undefined,
-    });
+    const httpParams = buildHttpParams({ without_photo: withoutPhoto || undefined });
     return this.http.get<{
       data: TabloPersonItem[];
       extraNames: { students: string; teachers: string };
-    }>(
-      `${this.baseUrl}/projects/${projectId}/persons`,
-      { params: httpParams },
-    );
+    }>(`${this.baseUrl}/projects/${projectId}/persons`, { params: httpParams });
   }
 
-  /**
-   * @deprecated Use getProjectPersons instead
-   */
+  /** @deprecated Use getProjectPersons instead */
   getProjectMissingPersons(projectId: number, withoutPhoto?: boolean): Observable<{ data: TabloPersonItem[] }> {
     return this.getProjectPersons(projectId, withoutPhoto);
   }
 
-  /**
-   * Személy archív rekord biztosítása (ha nincs, létrehozza).
-   */
-  ensurePersonArchive(projectId: number, personId: number): Observable<{ success: boolean; data: { archiveId: number }; message: string }> {
-    return this.http.post<{ success: boolean; data: { archiveId: number }; message: string }>(
-      `${this.baseUrl}/projects/${projectId}/persons/${personId}/ensure-archive`,
-      {},
-    );
-  }
-
-  /**
-   * Személy adatainak módosítása (név, pozíció/tantárgy)
-   */
-  updatePerson(projectId: number, personId: number, data: { name?: string; title?: string | null; note?: string | null }): Observable<{
-    success: boolean;
-    message: string;
-    data: { id: number; name: string; title: string | null; note: string | null };
-  }> {
-    return this.http.patch<{
-      success: boolean;
-      message: string;
-      data: { id: number; name: string; title: string | null; note: string | null };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}`, data);
-  }
-
-  /**
-   * Személy törlése a projektből
-   */
-  deletePerson(projectId: number, personId: number): Observable<{
-    success: boolean;
-    message: string;
-    data: { id: number };
-  }> {
-    return this.http.delete<{
-      success: boolean;
-      message: string;
-      data: { id: number };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}`);
-  }
-
-  /**
-   * Több személy törlése egyszerre (batch)
-   */
-  deletePersonsBatch(projectId: number, ids: number[]): Observable<{
-    success: boolean;
-    message: string;
-    data: { deleted_count: number };
-  }> {
-    return this.http.post<{
-      success: boolean;
-      message: string;
-      data: { deleted_count: number };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/batch-delete`, { ids });
-  }
-
-  /**
-   * Override: projekt-specifikus fotó beállítása
-   */
-  overridePersonPhoto(projectId: number, personId: number, photoId: number): Observable<{
-    success: boolean;
-    message: string;
-    data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
-  }> {
-    return this.http.patch<{
-      success: boolean;
-      message: string;
-      data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: photoId });
-  }
-
-  /**
-   * Extra nevek frissítése (tanítottak még / egyéb nevek)
-   */
-  updateExtraNames(projectId: number, data: { students: string; teachers: string }): Observable<{
-    success: boolean;
-    message: string;
-    data: { extraNames: { students: string; teachers: string } };
-  }> {
-    return this.http.patch<{
-      success: boolean;
-      message: string;
-      data: { extraNames: { students: string; teachers: string } };
-    }>(`${this.baseUrl}/projects/${projectId}/extra-names`, data);
-  }
-
-  /**
-   * Override visszaállítása (archive default fotó)
-   */
-  resetPersonPhoto(projectId: number, personId: number): Observable<{
-    success: boolean;
-    message: string;
-    data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
-  }> {
-    return this.http.patch<{
-      success: boolean;
-      message: string;
-      data: { id: number; hasPhoto: boolean; photoThumbUrl: string | null; photoUrl: string | null; hasOverride: boolean };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/${personId}/override-photo`, { photo_id: null });
-  }
-
-  /**
-   * Személyek hozzáadása névlista alapján
-   */
-  addPersons(projectId: number, names: string, type: 'student' | 'teacher'): Observable<{
-    success: boolean;
-    message: string;
-    data: {
-      created: Array<{ id: number; name: string; type: string; archiveLinked: boolean; hasPhoto: boolean }>;
-      duplicates: string[];
-      archiveMatches: number;
-    };
-  }> {
-    return this.http.post<{
-      success: boolean;
-      message: string;
-      data: {
-        created: Array<{ id: number; name: string; type: string; archiveLinked: boolean; hasPhoto: boolean }>;
-        duplicates: string[];
-        archiveMatches: number;
-      };
-    }>(`${this.baseUrl}/projects/${projectId}/persons/add`, { names, type });
-  }
-
-  // ============================================
-  // AUTOCOMPLETE
-  // ============================================
-
-  /**
-   * Projektek lekérése autocomplete-hez (kapcsolattartó modalhoz)
-   */
   getProjectsAutocomplete(search?: string): Observable<ProjectAutocompleteItem[]> {
     const httpParams = buildHttpParams({ search });
-    return this.http.get<ProjectAutocompleteItem[]>(
-      `${this.baseUrl}/projects/autocomplete`,
-      { params: httpParams },
+    return this.http.get<ProjectAutocompleteItem[]>(`${this.baseUrl}/projects/autocomplete`, { params: httpParams });
+  }
+
+  getProjectOrderData(projectId: number): Observable<{ success: boolean; data: unknown; message?: string }> {
+    return this.http.get<{ success: boolean; data: unknown; message?: string }>(`${this.baseUrl}/projects/${projectId}/order-data`);
+  }
+
+  viewProjectOrderPdf(projectId: number): Observable<{ success: boolean; pdfUrl?: string; message?: string }> {
+    return this.http.post<{ success: boolean; pdfUrl?: string; message?: string }>(
+      `${this.baseUrl}/projects/${projectId}/order-data/view-pdf`, {},
     );
   }
 
-  // ============================================
-  // ORDER DATA
-  // ============================================
-
-  /**
-   * Megrendelési adatok lekérése projekthez (partner view)
-   */
-  getProjectOrderData(projectId: number): Observable<{
-    success: boolean;
-    data: unknown;
-    message?: string;
-  }> {
-    return this.http.get<{ success: boolean; data: unknown; message?: string }>(
-      `${this.baseUrl}/projects/${projectId}/order-data`,
-    );
-  }
-
-  /**
-   * Megrendelési adatlap PDF generálása (partner view)
-   */
-  viewProjectOrderPdf(projectId: number): Observable<{
-    success: boolean;
-    pdfUrl?: string;
-    message?: string;
-  }> {
-    return this.http.post<{
-      success: boolean;
-      pdfUrl?: string;
-      message?: string;
-    }>(`${this.baseUrl}/projects/${projectId}/order-data/view-pdf`, {});
-  }
-
-  // ============================================
-  // TABLO SIZES
-  // ============================================
-
-  /**
-   * Elérhető tablóméretek lekérése
-   */
   getTabloSizes(): Observable<{
-    sizes: TabloSize[];
-    defaults: TabloSize[];
-    isDefault: boolean;
-    threshold: TabloSizeThreshold | null;
+    sizes: TabloSize[]; defaults: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null;
   }> {
     return this.http.get<{
-      sizes: TabloSize[];
-      defaults: TabloSize[];
-      isDefault: boolean;
-      threshold: TabloSizeThreshold | null;
+      sizes: TabloSize[]; defaults: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null;
     }>(`${this.baseUrl}/tablo-sizes`);
   }
 
-  /**
-   * Elérhető tablóméretek mentése (méretekkel és küszöbértékkel)
-   */
   updateTabloSizes(data: {
     sizes: TabloSize[];
     threshold?: number | null;
     size_below_threshold?: string | null;
     size_above_threshold?: string | null;
   }): Observable<{
-    success: boolean;
-    message: string;
+    success: boolean; message: string;
     data: { sizes: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null };
   }> {
     return this.http.put<{
-      success: boolean;
-      message: string;
+      success: boolean; message: string;
       data: { sizes: TabloSize[]; isDefault: boolean; threshold: TabloSizeThreshold | null };
     }>(`${this.baseUrl}/tablo-sizes`, data);
   }
 
-  // ============================================
-  // SETTINGS
-  // ============================================
-
-  /**
-   * Projekt beállítások lekérése
-   */
   getProjectSettings(projectId: number): Observable<{
     data: {
       max_retouch_photos: number | null;
@@ -485,9 +220,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/settings`);
   }
 
-  /**
-   * Projekt beállítások módosítása
-   */
   updateProjectSettings(projectId: number, data: {
     max_retouch_photos: number | null;
     free_edit_window_hours?: number | null;
@@ -495,8 +227,7 @@ export class PartnerProjectService {
     export_file_naming?: string | null;
     export_always_ask?: boolean | null;
   }): Observable<{
-    success: boolean;
-    message: string;
+    success: boolean; message: string;
     data: {
       max_retouch_photos: number | null;
       effective_max_retouch_photos: number;
@@ -506,8 +237,7 @@ export class PartnerProjectService {
     };
   }> {
     return this.http.put<{
-      success: boolean;
-      message: string;
+      success: boolean; message: string;
       data: {
         max_retouch_photos: number | null;
         effective_max_retouch_photos: number;
@@ -518,13 +248,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/settings`, data);
   }
 
-  // ============================================
-  // SAMPLE SETTINGS (overlay toolbar)
-  // ============================================
-
-  /**
-   * Minta generálás beállítások lekérése projekthez
-   */
   getSampleSettings(projectId: number): Observable<{
     data: {
       sample_use_large_size: boolean | null;
@@ -541,9 +264,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/sample-settings`);
   }
 
-  /**
-   * Minta generálás beállítások mentése projekthez
-   */
   updateSampleSettings(projectId: number, data: {
     sample_use_large_size?: boolean | null;
     sample_watermark_color?: 'white' | 'black' | null;
@@ -566,9 +286,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/projects/${projectId}/sample-settings`, data);
   }
 
-  /**
-   * Globális beállítások lekérése
-   */
   getGlobalSettings(): Observable<{
     data: {
       default_max_retouch_photos: number;
@@ -593,9 +310,6 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/settings`);
   }
 
-  /**
-   * Globális beállítások módosítása
-   */
   updateGlobalSettings(data: {
     default_max_retouch_photos: number | null;
     default_free_edit_window_hours?: number | null;
@@ -605,8 +319,7 @@ export class PartnerProjectService {
     export_always_ask?: boolean;
     project_creation_mode?: 'simple' | 'wizard';
   }): Observable<{
-    success: boolean;
-    message: string;
+    success: boolean; message: string;
     data: {
       default_max_retouch_photos: number;
       default_free_edit_window_hours: number;
@@ -618,8 +331,7 @@ export class PartnerProjectService {
     };
   }> {
     return this.http.put<{
-      success: boolean;
-      message: string;
+      success: boolean; message: string;
       data: {
         default_max_retouch_photos: number;
         default_free_edit_window_hours: number;
@@ -632,18 +344,8 @@ export class PartnerProjectService {
     }>(`${this.baseUrl}/settings`, data);
   }
 
-  /**
-   * Projekt létrehozása wizard módban
-   */
   createProjectWithWizard(data: {
-    // Új formátum: contacts tömb
-    contacts?: Array<{
-      name: string;
-      email?: string;
-      phone?: string;
-      is_primary?: boolean;
-    }>;
-    // Backward compat: régi single contact
+    contacts?: Array<{ name: string; email?: string; phone?: string; is_primary?: boolean }>;
     contact_name?: string;
     contact_email?: string;
     contact_phone?: string;
@@ -658,40 +360,21 @@ export class PartnerProjectService {
     sort_type?: string;
     student_roster?: string;
     teacher_roster?: string;
-  }): Observable<{
-    success: boolean;
-    message: string;
-    data: PartnerProjectListItem;
-  }> {
+  }): Observable<{ success: boolean; message: string; data: PartnerProjectListItem }> {
     return this.http.post<{
-      success: boolean;
-      message: string;
-      data: PartnerProjectListItem;
+      success: boolean; message: string; data: PartnerProjectListItem;
     }>(`${this.baseUrl}/projects/wizard`, data);
   }
 
-  /**
-   * Projekt frissítése wizard módban
-   */
   updateProjectWithWizard(projectId: number, data: {
-    contacts?: Array<{
-      name: string;
-      email?: string;
-      phone?: string;
-      is_primary?: boolean;
-    }>;
+    contacts?: Array<{ name: string; email?: string; phone?: string; is_primary?: boolean }>;
     school_name: string;
     class_name: string;
     class_year: string;
     description?: string;
-  }): Observable<{
-    success: boolean;
-    message: string;
-  }> {
+  }): Observable<{ success: boolean; message: string }> {
     return this.http.put<{
-      success: boolean;
-      message: string;
+      success: boolean; message: string;
     }>(`${this.baseUrl}/projects/${projectId}/wizard`, data);
   }
-
 }

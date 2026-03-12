@@ -330,11 +330,6 @@ function doEqualizeGrid() {
     // Unlink hogy a mozgatas izolalt legyen
     unlinkAll(doc, items);
 
-    if (!imagesOnly) {
-      // Relink: szemelye nkent minden azonos nevu layer ossze (linkelt mozgatas)
-      relinkAll(doc, items);
-    }
-
     // 3. Grid pozicio szamitas es eltolas
     var startLeft = items[0].bounds.left;
     var startTop = items[0].bounds.top;
@@ -367,8 +362,18 @@ function doEqualizeGrid() {
 
       if (gdx === 0 && gdy === 0) { placed++; continue; }
 
-      // Linkelt mozgatas: a kep mozgatasa magaval viszi az osszes linkelt layert
+      // Kep mozgatasa
       translateLayer(items[gi].id, gdx, gdy);
+
+      if (!imagesOnly) {
+        // Testver layerek mozgatasa ugyanazzal a delta-val
+        var gridSibs = [];
+        findAllLayersByName(doc, items[gi].name, gridSibs);
+        for (var gs2 = 0; gs2 < gridSibs.length; gs2++) {
+          if (gridSibs[gs2].id === items[gi].id) continue;
+          translateLayer(gridSibs[gs2].id, gdx, gdy);
+        }
+      }
 
       // Bounds frissitese a kovetkezo iteraciohoz
       items[gi].bounds.left += gdx;

@@ -203,6 +203,56 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Értesítés gyors létrehozás */
+  async seedNotification(data: {
+    userEmail: string;
+    title: string;
+    message?: string;
+    emoji?: string;
+    type?: string;
+    actionUrl?: string;
+    isRead?: boolean;
+  }): Promise<{ notification_id: number }> {
+    const res = await this.context.post('/api/e2e/seed/notification', {
+      data: {
+        user_email: data.userEmail,
+        title: data.title,
+        message: data.message,
+        emoji: data.emoji,
+        type: data.type,
+        action_url: data.actionUrl,
+        is_read: data.isRead,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed notification failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Tanár archívum rekord gyors létrehozás */
+  async seedTeacher(data: {
+    partnerId: number;
+    schoolId: number;
+    canonicalName: string;
+    titlePrefix?: string;
+    position?: string;
+  }): Promise<{ teacher_id: number }> {
+    const res = await this.context.post('/api/e2e/seed/teacher', {
+      data: {
+        partner_id: data.partnerId,
+        school_id: data.schoolId,
+        canonical_name: data.canonicalName,
+        title_prefix: data.titlePrefix,
+        position: data.position,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed teacher failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

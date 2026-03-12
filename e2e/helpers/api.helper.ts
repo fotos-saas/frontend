@@ -61,6 +61,8 @@ export class ApiHelper {
     projectName: string;
     classNames?: string[];
     studentsPerClass?: number;
+    status?: string;
+    classYear?: string;
   }): Promise<{ project_id: number; school_id: number; access_code: string }> {
     const res = await this.context.post('/api/e2e/seed/project', {
       data: {
@@ -70,6 +72,8 @@ export class ApiHelper {
         project_name: data.projectName,
         class_names: data.classNames,
         students_per_class: data.studentsPerClass,
+        status: data.status,
+        class_year: data.classYear,
       },
     });
     if (!res.ok()) {
@@ -128,6 +132,29 @@ export class ApiHelper {
     });
     if (!res.ok()) {
       throw new Error(`Seed team member failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Nyomda (Print Shop) komplett setup */
+  async seedPrintShop(data: {
+    name: string;
+    email: string;
+    password?: string;
+    companyName: string;
+    connectToPartnerId?: number;
+  }): Promise<{ user_id: number; partner_id: number; tablo_partner_id: number; connection_id: number | null }> {
+    const res = await this.context.post('/api/e2e/seed/print-shop', {
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        company_name: data.companyName,
+        connect_to_partner_id: data.connectToPartnerId,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed print shop failed: ${res.status()} ${await res.text()}`);
     }
     return res.json();
   }

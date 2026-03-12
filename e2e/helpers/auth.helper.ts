@@ -56,6 +56,7 @@ export class AuthHelper {
 
   /**
    * Vendég belépés kóddal (tabló frontend).
+   * Az első belépésnél jelszó beállítás dialog jelenik meg — kitöltjük.
    */
   async loginAsGuest(accessCode: string): Promise<void> {
     await this.page.goto('/login');
@@ -69,6 +70,30 @@ export class AuthHelper {
 
     await this.page.getByRole('button', { name: /belépés kóddal/i }).click();
 
+    // Várakozás: az oldal betöltődik (akár /home, akár más)
+    await this.page.waitForLoadState('networkidle');
+
+    // Jelszó beállítás dialog — MINDIG megjelenik első belépésnél (password_set = false)
+    const passwordDialog = this.page.getByRole('dialog', { name: 'Jelszó beállítása' });
+    const hasPasswordDialog = await passwordDialog.waitFor({ state: 'visible', timeout: 5_000 }).then(() => true).catch(() => false);
+
+    if (hasPasswordDialog) {
+      const testPassword = 'TestVendeg1234!';
+      // A snapshot alapján: textbox "Jelszó *" és "Jelszó megerősítése *"
+      await passwordDialog.getByRole('textbox', { name: /^Jelszó/ }).first().fill(testPassword);
+      await passwordDialog.getByRole('textbox', { name: /megerősítése/i }).fill(testPassword);
+
+      // Várjuk, hogy a gomb engedélyeződjön (Angular change detection)
+      await this.page.waitForTimeout(500);
+
+      // "Jelszó beállítása" gomb kattintás
+      await passwordDialog.getByRole('button', { name: 'Jelszó beállítása' }).click();
+
+      // Várjuk, hogy a dialog eltűnjön
+      await passwordDialog.waitFor({ state: 'hidden', timeout: 10_000 });
+    }
+
+    // A home oldalra kell kerülni
     await this.page.waitForURL(/\/(home|samples|finalization|session-chooser|choose-session)/, { timeout: 15_000 });
   }
 

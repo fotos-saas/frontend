@@ -48,6 +48,8 @@ export class PartnerNotificationService {
     return `${environment.apiUrl}/${prefix}/notifications`;
   }
   private pollingTimer: ReturnType<typeof setInterval> | null = null;
+  /** Kijelentkezés után true — megakadályozza az újraindítást */
+  private pollingStopped = false;
 
   /** Dropdown értesítések */
   readonly notifications = signal<PartnerNotification[]>([]);
@@ -66,7 +68,10 @@ export class PartnerNotificationService {
    * Hívd meg a partner shell init-ben.
    */
   startPolling(): void {
-    if (this.pollingTimer) return;
+    if (this.pollingTimer || this.pollingStopped) return;
+
+    // Ha nincs session, ne indítsunk polling-ot
+    if (!this.authService.getMarketerToken()) return;
 
     // Azonnal lekérjük
     this.refreshUnreadCount();
@@ -206,8 +211,10 @@ export class PartnerNotificationService {
 
   /**
    * State törlése (kijelentkezéskor).
+   * A pollingStopped flag megakadályozza az újraindítást ugyanabban az app lifecycle-ban.
    */
   clear(): void {
+    this.pollingStopped = true;
     this.stopPolling();
     this.notifications.set([]);
     this.unreadCount.set(0);

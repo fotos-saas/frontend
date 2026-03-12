@@ -424,8 +424,39 @@ async function syncAuthToOverlay(): Promise<void> {
       await overlayWindow.webContents.executeJavaScript(
         `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
       );
+      // Értesítjük az overlay Angular app-ot hogy a token megérkezett
+      overlayWindow.webContents.send('overlay:auth-synced');
     }
   } catch { /* window may not be ready */ }
+}
+
+// Main window login után szinkronizálja a tokent az overlay-be
+function listenMainWindowAuthChanges(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  // Figyeljük ha a main window sessionStorage-ába bekerül a marketer_token
+  // Ez 2 mp-enként ellenőriz — ha van token és az overlay-ben nincs, szinkronizál
+  const authCheckInterval = setInterval(async () => {
+    if (!mainWindow || mainWindow.isDestroyed()) { clearInterval(authCheckInterval); return; }
+    if (!overlayWindow || overlayWindow.isDestroyed()) return;
+    try {
+      const mainToken = await mainWindow.webContents.executeJavaScript(
+        `sessionStorage.getItem('marketer_token')`,
+      );
+      if (!mainToken) return;
+      const overlayToken = await overlayWindow.webContents.executeJavaScript(
+        `sessionStorage.getItem('marketer_token')`,
+      );
+      if (!overlayToken || overlayToken !== mainToken) {
+        await overlayWindow.webContents.executeJavaScript(
+          `sessionStorage.setItem('marketer_token', ${JSON.stringify(mainToken)})`,
+        );
+        overlayWindow.webContents.send('overlay:auth-synced');
+        log.info('Auth token synced to overlay (periodic check)');
+      }
+    } catch { /* window not ready */ }
+  }, 2000);
+
+  mainWindow.on('closed', () => clearInterval(authCheckInterval));
 }
 
 
@@ -741,6 +772,9 @@ app.whenReady().then(async () => {
   }
 
   createWindow();
+
+  // Auth szinkronizáció figyelés: main window → overlay
+  listenMainWindowAuthChanges();
 
   // Overlay window letrehozasa (rejtett, Ctrl+Space-re jelenik meg)
   createOverlayWindow();

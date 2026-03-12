@@ -1,4 +1,4 @@
-import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { Injectable, inject, NgZone, DestroyRef, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -144,6 +144,22 @@ export class OverlayProjectService {
       this.logger.error('[PROJECT] fetch meta error:', e);
       return null;
     }
+  }
+
+  /**
+   * Figyeli a main window-ból érkező auth token szinkronizálást (IPC).
+   * Ha a token megérkezett, reseteli az isLoggedOut flag-et és újratölti a személylistát.
+   */
+  listenAuthSync(destroyRef: DestroyRef, ngZone: NgZone, getContext: () => OverlayContext): void {
+    if (!window.electronAPI) return;
+    const cleanup = window.electronAPI.overlay.onAuthSynced(() => {
+      ngZone.run(() => {
+        this.isLoggedOut.set(false);
+        const pid = getContext().projectId || this.lastProjectId;
+        if (pid) this.loadPersons(pid);
+      });
+    });
+    destroyRef.onDestroy(cleanup);
   }
 
   /** Auth recovery: ha kijelentkezve, próbáljuk újra */

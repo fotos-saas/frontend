@@ -285,6 +285,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay:active-doc-changed', handler);
       return () => ipcRenderer.removeListener('overlay:active-doc-changed', handler);
     },
+    onAuthSynced: (callback: () => void): CleanupFn => {
+      const handler = () => callback();
+      ipcRenderer.on('overlay:auth-synced', handler);
+      return () => ipcRenderer.removeListener('overlay:auth-synced', handler);
+    },
   },
 
   // ============ Photoshop Integration ============

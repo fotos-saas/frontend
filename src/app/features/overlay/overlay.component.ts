@@ -175,6 +175,7 @@ export class OverlayComponent implements OnInit {
     document.body.classList.add('overlay-mode');
     this.loadContext();
     this.listenContextChanges();
+    this.projectService.listenAuthSync(this.destroyRef, this.ngZone, () => this.context());
     this.loadActiveDoc();
     this.listenActiveDocChanges();
     this.polling.startPolling(this.destroyRef, () => this.pollActiveDoc());

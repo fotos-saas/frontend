@@ -94,6 +94,44 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Csapattag meghívó létrehozás (email küldés nélkül) */
+  async seedInvitation(data: {
+    partnerId: number;
+    email: string;
+    role: 'designer' | 'marketer' | 'printer' | 'assistant';
+  }): Promise<{ invitation_id: number; code: string; register_url: string }> {
+    const res = await this.context.post('/api/e2e/seed/invitation', {
+      data: { partner_id: data.partnerId, email: data.email, role: data.role },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed invitation failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Csapattag közvetlen hozzáadása (invite nélkül) */
+  async seedTeamMember(data: {
+    partnerId: number;
+    name: string;
+    email: string;
+    password?: string;
+    role: 'designer' | 'marketer' | 'printer' | 'assistant';
+  }): Promise<{ user_id: number; email: string }> {
+    const res = await this.context.post('/api/e2e/seed/team-member', {
+      data: {
+        partner_id: data.partnerId,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed team member failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

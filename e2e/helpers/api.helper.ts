@@ -159,6 +159,29 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Kontakt gyors létrehozás */
+  async seedContact(data: {
+    partnerId: number;
+    name: string;
+    email?: string;
+    phone?: string;
+    note?: string;
+  }): Promise<{ contact_id: number }> {
+    const res = await this.context.post('/api/e2e/seed/contact', {
+      data: {
+        partner_id: data.partnerId,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        note: data.note,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed contact failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

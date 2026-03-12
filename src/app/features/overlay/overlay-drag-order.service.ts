@@ -215,6 +215,21 @@ export class OverlayDragOrderService {
     });
   }
 
+  /** ABC rendezés, de az osztályfőnökök a lista végére kerülnek */
+  sortClassTeachersLast(): void {
+    const isClassTeacher = (title: string | null): boolean => {
+      if (!title) return false;
+      return title.toLowerCase().trim().includes('osztályfőnök');
+    };
+    const collator = new Intl.Collator('hu', { sensitivity: 'base' });
+    this.groupsService.sortItems((a, b) => {
+      const aIsClass = isClassTeacher(a.title);
+      const bIsClass = isClassTeacher(b.title);
+      if (aIsClass !== bIsClass) return aIsClass ? 1 : -1;
+      return collator.compare(a.name, b.name);
+    });
+  }
+
   // === Flat lista Drag & Drop ===
 
   onDrop(event: CdkDragDrop<PersonItem[]>): void {

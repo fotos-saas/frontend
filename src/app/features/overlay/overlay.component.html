@@ -700,6 +700,7 @@
           </button>
           @if (dragOrderScope() === 'teachers' || dragOrderScope() === 'all') {
             <button class="qa-btn qa-btn--amber" (click)="dragOrderSortLeadership()" matTooltip="Vezetőség (igazgató, helyettes) előre">Vezetőség</button>
+            <button class="qa-btn qa-btn--amber" (click)="dragOrderSortClassTeachersLast()" matTooltip="ABC sorrend, osztályfőnökök a végére">Ofők végére</button>
           }
           <button class="qa-btn" [class.qa-btn--active]="dragOrderCustomOpen()" (click)="dragOrder.toggleCustomOrder()" matTooltip="Nevek beírásával rendezés">Egyedi</button>
         </div>

@@ -88,6 +88,7 @@
         @defer {
           <app-project-print-tab
             [project]="facade.projectData()"
+            [downloadingType]="printActions.downloadingType()"
             (downloadClick)="downloadPrintFile($event)"
             (uploadFile)="uploadPrintFile($event)"
             (deleteClick)="confirmDeletePrintFile($event)"

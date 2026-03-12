@@ -28,6 +28,7 @@ export class ProjectPrintTabComponent {
   readonly state = inject(ProjectPrintTabStateService);
 
   readonly project = input<ProjectDetailData | null>(null);
+  readonly downloadingType = input<'small_tablo' | 'flat' | null>(null);
   readonly downloadClick = output<PrintFileDownloadEvent>();
   readonly uploadFile = output<PrintFileUploadEvent>();
   readonly deleteClick = output<PrintFileDeleteEvent>();

@@ -55,9 +55,15 @@
             </div>
           </div>
           <div class="file-actions">
-            <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'small_tablo' })">
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-              Letöltés
+            <button
+              type="button"
+              class="download-btn"
+              [class.download-btn--loading]="downloadingType() === 'small_tablo'"
+              [disabled]="!!downloadingType()"
+              (click)="downloadClick.emit({ type: 'small_tablo' })"
+            >
+              <lucide-icon [name]="downloadingType() === 'small_tablo' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="16" [class.spin]="downloadingType() === 'small_tablo'" />
+              {{ downloadingType() === 'small_tablo' ? 'Letöltés...' : 'Letöltés' }}
             </button>
             <button type="button" class="replace-btn" (click)="smallTabloInput()?.nativeElement?.click()">
               <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />
@@ -107,9 +113,15 @@
             </div>
           </div>
           <div class="file-actions">
-            <button type="button" class="download-btn" (click)="downloadClick.emit({ type: 'flat' })">
-              <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16" />
-              Letöltés
+            <button
+              type="button"
+              class="download-btn"
+              [class.download-btn--loading]="downloadingType() === 'flat'"
+              [disabled]="!!downloadingType()"
+              (click)="downloadClick.emit({ type: 'flat' })"
+            >
+              <lucide-icon [name]="downloadingType() === 'flat' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="16" [class.spin]="downloadingType() === 'flat'" />
+              {{ downloadingType() === 'flat' ? 'Letöltés...' : 'Letöltés' }}
             </button>
             <button type="button" class="replace-btn" (click)="flatInput()?.nativeElement?.click()">
               <lucide-icon [name]="ICONS.UPLOAD" [size]="16" />

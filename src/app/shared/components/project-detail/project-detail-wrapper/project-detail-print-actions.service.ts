@@ -28,6 +28,9 @@ export class ProjectDetailPrintActionsService {
   readonly showDeletePrintFileConfirm = signal(false);
   readonly deletingPrintFileType = signal<'small_tablo' | 'flat' | null>(null);
 
+  // Letöltés állapot
+  readonly downloadingType = signal<'small_tablo' | 'flat' | null>(null);
+
   // Task allapotok
   readonly showTaskDialog = signal(false);
   readonly editingTaskData = signal<ProjectTask | null>(null);
@@ -63,11 +66,18 @@ export class ProjectDetailPrintActionsService {
     const file = event.type === 'small_tablo' ? project.printSmallTablo : project.printFlat;
     if (!file) return;
 
+    this.downloadingType.set(event.type);
     this.finalizationService.downloadPrintReady(project.id, event.type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (blob) => saveFile(blob, file.fileName),
-        error: () => this.toast.error('Hiba', 'Nem sikerult letolteni a fajlt.'),
+        next: (blob) => {
+          saveFile(blob, file.fileName);
+          this.downloadingType.set(null);
+        },
+        error: () => {
+          this.downloadingType.set(null);
+          this.toast.error('Hiba', 'Nem sikerült letölteni a fájlt.');
+        },
       });
   }
 

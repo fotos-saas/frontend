@@ -168,9 +168,23 @@
   cursor: pointer;
   transition: background 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #059669;
   }
+
+  &--loading {
+    background: #6ee7b7;
+    cursor: wait;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
 }
 
 .replace-btn {

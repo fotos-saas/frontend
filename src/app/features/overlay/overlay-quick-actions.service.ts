@@ -56,6 +56,7 @@ export class OverlayQuickActionsService {
   readonly gridGapH = this.effects.gridGapH;
   readonly gridGapV = this.effects.gridGapV;
   readonly gridAlign = this.effects.gridAlign;
+  readonly imagesOnly = this.effects.imagesOnly;
   readonly gridGapDisplay = this.effects.gridGapDisplay;
   readonly gridGapHDisplay = this.effects.gridGapHDisplay;
   readonly gridGapVDisplay = this.effects.gridGapVDisplay;

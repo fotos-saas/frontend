@@ -26,6 +26,7 @@ export class OverlayEffectsService {
   readonly gridGapH = signal(2);
   readonly gridGapV = signal(3);
   readonly gridAlign = signal<'left' | 'center' | 'right'>('center');
+  readonly imagesOnly = signal(false);
   private gridDpi = 300;
 
   readonly gridGapDisplay = computed(() => {
@@ -109,7 +110,9 @@ export class OverlayEffectsService {
   async alignTopOnly(): Promise<void> {
     this.loading.set(true);
     try {
-      const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', { ALIGN_TOP_ONLY: 'true' });
+      const params: Record<string, string> = { ALIGN_TOP_ONLY: 'true' };
+      if (this.imagesOnly()) params['IMAGES_ONLY'] = 'true';
+      const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', params);
       this.handleJsxResult(result, data => `${data['aligned']} kep egy szintre igazitva`, 'Felso el igazitas kesz');
     } finally { this.loading.set(false); }
   }
@@ -140,10 +143,13 @@ export class OverlayEffectsService {
   async executeEqualizeGrid(): Promise<void> {
     const gap = this.gridGapPx();
     if (gap === null) { this.setResult(false, 'Elobb merd meg a terkoezt'); return; }
-    const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', {
+    const params: Record<string, string> = {
       GAP_H_PX: String(gap), ALIGN_TOP: this.gridAlignTop() ? 'true' : 'false',
-    });
-    this.handleJsxResult(result, data => `${data['moved']} kep elosztva`, 'Elosztas kesz');
+    };
+    if (this.imagesOnly()) params['IMAGES_ONLY'] = 'true';
+    const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', params);
+    const label = this.imagesOnly() ? 'kep elosztva (csak kepek)' : 'kep elosztva';
+    this.handleJsxResult(result, data => `${data['moved']} ${label}`, 'Elosztas kesz');
   }
 
   async executeGridArrange(): Promise<void> {
@@ -153,11 +159,13 @@ export class OverlayEffectsService {
     const dpi = this.gridDpi || 300;
     const cmToPx = (cm: number) => Math.round((cm / 2.54) * dpi);
     const rows = this.gridRows();
-    const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', {
+    const params: Record<string, string> = {
       GRID_COLS: String(cols), GRID_ROWS: rows > 0 ? String(rows) : '',
       GRID_GAP_H_PX: String(cmToPx(this.gridGapH())), GRID_GAP_V_PX: String(cmToPx(this.gridGapV())),
       GRID_ALIGN: this.gridAlign(),
-    });
+    };
+    if (this.imagesOnly()) params['IMAGES_ONLY'] = 'true';
+    const result = await this.ps.runJsx('equalize-grid', 'actions/equalize-grid-selected.jsx', params);
     this.handleJsxResult(result,
       data => `${data['placed']} kep racsba rendezve (${data['cols']}x${data['rows']})`,
       'Racsba rendezes kesz',

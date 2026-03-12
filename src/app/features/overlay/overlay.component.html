@@ -1386,6 +1386,21 @@
   </div>
   <div class="grid-panel__body">
     <div class="qa-section__row">
+      <span class="qa-section__row-label">Csak képek</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--toggle"
+          [class.qa-btn--active]="qa.imagesOnly()"
+          (click)="qa.imagesOnly.set(!qa.imagesOnly())"
+          matTooltip="Csak a kép layereket mozgatja, a nevek/pozíciók maradnak">
+          @if (qa.imagesOnly()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          } @else {
+            <lucide-icon [name]="ICONS.MINUS" [size]="12" />
+          }
+        </button>
+      </div>
+    </div>
+    <div class="qa-section__row">
       <span class="qa-section__row-label">Térköz</span>
       <div class="qa-section__buttons">
         <button class="qa-btn qa-btn--cyan" [disabled]="qa.loading()" (click)="qa.measureGridGaps()">

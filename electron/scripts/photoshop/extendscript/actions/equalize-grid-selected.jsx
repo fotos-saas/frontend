@@ -13,6 +13,7 @@
  *   CONFIG.GRID_GAP_H_PX   — vizszintes gap pixelben (grid mod)
  *   CONFIG.GRID_GAP_V_PX   — fuggoleges gap pixelben (grid mod)
  *   CONFIG.GRID_ALIGN      — "left" / "center" / "right" (soron beluli igazitas)
+ *   CONFIG.IMAGES_ONLY     — "true" → CSAK a kep layert mozgatja, testverlayerek maradnak
  */
 
 // #include "../lib/config.jsx"
@@ -142,6 +143,27 @@ function unlinkByName(doc, layerName) {
   findAllLayersByName(doc, layerName, found);
   for (var i = 0; i < found.length; i++) {
     try { found[i].unlink(); } catch (e) {}
+  }
+}
+
+// --- Batch unlink: tomb minden elemenek nevere ---
+function unlinkAll(doc, items) {
+  for (var i = 0; i < items.length; i++) {
+    unlinkByName(doc, items[i].name);
+  }
+}
+
+// --- Batch relink: szemelveneknt visszalinkel ---
+function relinkAll(doc, items) {
+  for (var i = 0; i < items.length; i++) {
+    var sibs = [];
+    findAllLayersByName(doc, items[i].name, sibs);
+    if (sibs.length >= 2) {
+      var ids = [];
+      for (var j = 0; j < sibs.length; j++) ids.push(sibs[j].id);
+      selectLayersById(ids);
+      linkSelectedLayers();
+    }
   }
 }
 
@@ -285,6 +307,7 @@ function doEqualizeGrid() {
   var alignTop = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP === "true";
   var alignTopOnly = typeof CONFIG !== "undefined" && CONFIG.ALIGN_TOP_ONLY === "true";
   var gridColsStr = typeof CONFIG !== "undefined" && CONFIG.GRID_COLS ? CONFIG.GRID_COLS : "";
+  var imagesOnly = typeof CONFIG !== "undefined" && CONFIG.IMAGES_ONLY === "true";
 
   // --- GRID MOD: racsba rendezes ---
   if (gridColsStr !== "") {
@@ -304,26 +327,15 @@ function doEqualizeGrid() {
     // Ha sorok megadva, csak annyi kepet rendezunk
     var maxItems = gridMaxRows > 0 ? Math.min(items.length, gridCols * gridMaxRows) : items.length;
 
-    // 1. Unlink az erintett layerekrol
-    for (var gu = 0; gu < items.length; gu++) {
-      unlinkByName(doc, items[gu].name);
+    // Unlink hogy a mozgatas izolalt legyen
+    unlinkAll(doc, items);
+
+    if (!imagesOnly) {
+      // Relink: szemelye nkent minden azonos nevu layer ossze (linkelt mozgatas)
+      relinkAll(doc, items);
     }
 
-    // 2. Relink: szemelye nkent minden azonos nevu layer ossze
-    for (var rl = 0; rl < items.length; rl++) {
-      var relinkSibs = [];
-      findAllLayersByName(doc, items[rl].name, relinkSibs);
-      if (relinkSibs.length >= 2) {
-        var relinkIds = [];
-        for (var ri = 0; ri < relinkSibs.length; ri++) {
-          relinkIds.push(relinkSibs[ri].id);
-        }
-        selectLayersById(relinkIds);
-        linkSelectedLayers();
-      }
-    }
-
-    // 3. Grid pozicio szamitas es linkelt eltolas
+    // 3. Grid pozicio szamitas es eltolas
     var startLeft = items[0].bounds.left;
     var startTop = items[0].bounds.top;
     var photoW = items[0].bounds.right - items[0].bounds.left;
@@ -367,8 +379,11 @@ function doEqualizeGrid() {
       placed++;
     }
 
+    // Relink: visszalinkeljuk a szemelyek layereit
+    relinkAll(doc, items);
+
     restoreSelection(selected);
-    _eqResult = '{"mode":"grid","placed":' + placed + ',"cols":' + gridCols + ',"rows":' + totalRows + '}';
+    _eqResult = '{"mode":"grid","placed":' + placed + ',"cols":' + gridCols + ',"rows":' + totalRows + ',"imagesOnly":' + (imagesOnly ? 'true' : 'false') + '}';
     return;
   }
 
@@ -377,9 +392,7 @@ function doEqualizeGrid() {
     var refTop = items[0].bounds.top;
     var aligned = 0;
 
-    for (var a = 0; a < items.length; a++) {
-      unlinkByName(doc, items[a].name);
-    }
+    unlinkAll(doc, items);
 
     for (var t = 1; t < items.length; t++) {
       var dy2 = refTop - items[t].bounds.top;
@@ -387,17 +400,22 @@ function doEqualizeGrid() {
 
       translateLayer(items[t].id, 0, dy2);
 
-      var sibs = [];
-      findAllLayersByName(doc, items[t].name, sibs);
-      for (var sb = 0; sb < sibs.length; sb++) {
-        if (sibs[sb].id === items[t].id) continue;
-        translateLayer(sibs[sb].id, 0, dy2);
+      if (!imagesOnly) {
+        var sibs = [];
+        findAllLayersByName(doc, items[t].name, sibs);
+        for (var sb = 0; sb < sibs.length; sb++) {
+          if (sibs[sb].id === items[t].id) continue;
+          translateLayer(sibs[sb].id, 0, dy2);
+        }
       }
       aligned++;
     }
 
+    // Relink
+    relinkAll(doc, items);
+
     restoreSelection(selected);
-    _eqResult = '{"mode":"align-top","aligned":' + aligned + '}';
+    _eqResult = '{"mode":"align-top","aligned":' + aligned + ',"imagesOnly":' + (imagesOnly ? 'true' : 'false') + '}';
     return;
   }
 
@@ -434,9 +452,7 @@ function doEqualizeGrid() {
   var moved = 0;
 
   // Unlink az erintett layerekrol (kulonben a linkelt nevek/poziciok duplán mozdulnak)
-  for (var u = 0; u < items.length; u++) {
-    unlinkByName(doc, items[u].name);
-  }
+  unlinkAll(doc, items);
 
   for (var e = 1; e < items.length; e++) {
     var prevRight = items[e - 1].bounds.right;
@@ -455,13 +471,15 @@ function doEqualizeGrid() {
     // Kep mozgatasa
     translateLayer(items[e].id, dx, dy);
 
-    // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
-    var siblings = [];
-    findAllLayersByName(doc, items[e].name, siblings);
-    for (var s = 0; s < siblings.length; s++) {
-      // A kepet mar mozgattuk, azt kihagyjuk
-      if (siblings[s].id === items[e].id) continue;
-      translateLayer(siblings[s].id, dx, dy);
+    if (!imagesOnly) {
+      // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
+      var siblings = [];
+      findAllLayersByName(doc, items[e].name, siblings);
+      for (var s = 0; s < siblings.length; s++) {
+        // A kepet mar mozgattuk, azt kihagyjuk
+        if (siblings[s].id === items[e].id) continue;
+        translateLayer(siblings[s].id, dx, dy);
+      }
     }
 
     // Bounds frissitese a kovetkezo iteraciohoz
@@ -473,9 +491,12 @@ function doEqualizeGrid() {
     moved++;
   }
 
+  // Relink
+  relinkAll(doc, items);
+
   restoreSelection(selected);
 
-  _eqResult = '{"mode":"execute","moved":' + moved + '}';
+  _eqResult = '{"mode":"execute","moved":' + moved + ',"imagesOnly":' + (imagesOnly ? 'true' : 'false') + '}';
 
   } finally {
     app.preferences.rulerUnits = oldRulerUnits;

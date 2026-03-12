@@ -182,6 +182,27 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Diák archívum rekord gyors létrehozás */
+  async seedStudentArchive(data: {
+    partnerId: number;
+    schoolId: number;
+    canonicalName: string;
+    className?: string;
+  }): Promise<{ student_id: number }> {
+    const res = await this.context.post('/api/e2e/seed/student-archive', {
+      data: {
+        partner_id: data.partnerId,
+        school_id: data.schoolId,
+        canonical_name: data.canonicalName,
+        class_name: data.className,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed student archive failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

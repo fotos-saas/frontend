@@ -236,7 +236,7 @@ async function uploadChunked(
   log.info(`[CHUNKED] Session: ${uploadId}, ${totalChunks} chunk × ${(chunkSize / 1024 / 1024).toFixed(1)}MB`);
 
   // 2. Chunk-ok feltöltése párhuzamosan (3 egyszerre) — fájlt egyszer nyitjuk meg
-  const CONCURRENCY = 3;
+  const CONCURRENCY = 5;
   const fd = await fs.promises.open(filePath, 'r');
   try {
   for (let batchStart = 0; batchStart < totalChunks; batchStart += CONCURRENCY) {

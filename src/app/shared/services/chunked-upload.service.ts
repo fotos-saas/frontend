@@ -75,7 +75,7 @@ export class ChunkedUploadService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/partner/chunked-upload`;
   private readonly MAX_RETRIES = 3;
-  private readonly CONCURRENCY = 3; // Párhuzamos chunk feltöltések száma
+  private readonly CONCURRENCY = 5; // Párhuzamos chunk feltöltések száma
 
   /**
    * Fájl feltöltése — automatikusan chunked ha >8MB.

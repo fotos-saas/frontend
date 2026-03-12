@@ -44,7 +44,7 @@ test.describe.serial('Fázis 1: Partner setup', () => {
 
     // Dashboard betöltődik
     await expect(page).toHaveURL(/\/partner/);
-    await expect(page.locator('body')).not.toContainText('Hiba');
+    await expect(page.getByText('Üdvözöljük')).toBeVisible({ timeout: 10_000 });
   });
 
   test('Partner API tokennel is be tud lépni', async ({ page }) => {
@@ -61,10 +61,10 @@ test.describe.serial('Fázis 1: Partner setup', () => {
 
 test.describe.serial('Fázis 2: Projekt és diákok', () => {
   test('Projekt létrehozás seeder-rel', async () => {
-    // Partner ID lekérés
+    // Partner ID lekérés — a login response-ban partner_id közvetlenül a user-en
     const loginResult = await api.login('partner@e2e.test', 'Partner1234!');
-    const partnerData = loginResult.user as Record<string, unknown>;
-    const partnerId = (partnerData.partner as Record<string, unknown>)?.id as number;
+    const userData = loginResult.user as Record<string, unknown>;
+    const partnerId = userData.partner_id as number;
 
     const result = await api.seedProject({
       partnerId,
@@ -83,22 +83,31 @@ test.describe.serial('Fázis 2: Projekt és diákok', () => {
     expect(state.accessCode).toBeTruthy();
   });
 
-  test('Partner látja a projektet a dashboardon', async ({ page }) => {
+  test('Partner látja a projektet a listában', async ({ page }) => {
     const auth = new AuthHelper(page, api);
     await auth.loginViaUi('partner@e2e.test', 'Partner1234!');
 
-    // Projekt megjelenik a listában
-    await expect(page.getByText('2026 Tablófotózás')).toBeVisible({ timeout: 10_000 });
+    // Navigálás a projekt listára
+    await page.goto('/partner/projects');
+    await page.waitForLoadState('networkidle');
+
+    // Projekt megjelenik a listában (az iskola neve jelenik meg a listában)
+    await expect(page.getByText('Boronkay György Technikum').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('Partner meg tudja nyitni a projektet', async ({ page }) => {
     const auth = new AuthHelper(page, api);
     await auth.loginViaUi('partner@e2e.test', 'Partner1234!');
 
-    await page.getByText('2026 Tablófotózás').click();
+    // Navigálás a projekt listára
+    await page.goto('/partner/projects');
+    await page.waitForLoadState('networkidle');
+
+    // Kattintás az első Boronkay projektre
+    await page.getByText('Boronkay György Technikum').first().click();
 
     // Projekt részletek betöltődnek
-    await expect(page.getByText('Boronkay')).toBeVisible({ timeout: 10_000 });
+    await expect(page).toHaveURL(/\/partner\/projects\/\d+/, { timeout: 10_000 });
   });
 });
 
@@ -126,7 +135,7 @@ test.describe.serial('Fázis 4: Jogosultság ellenőrzés', () => {
   test('Nem bejelentkezett user nem éri el a partner dashboard-ot', async ({ page }) => {
     await page.goto('/partner/projects');
 
-    // Redirect login-ra vagy 401
-    await expect(page).toHaveURL(/\/(partner\/login|login)/, { timeout: 10_000 });
+    // Redirect login-ra
+    await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 });

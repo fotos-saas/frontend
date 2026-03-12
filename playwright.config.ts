@@ -38,8 +38,8 @@ export default defineConfig({
 
   testDir: './e2e',
 
-  // Default: unit tesztek futnak
-  testMatch: 'tests/**/*.spec.ts',
+  // Unit tesztek + smoke tesztek
+  testMatch: ['tests/**/*.spec.ts', 'smoke/**/*.smoke.ts'],
 
   workers: process.env.CI ? 1 : 3,
 

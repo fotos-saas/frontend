@@ -17,13 +17,12 @@ test.describe('Smoke @smoke', () => {
     await expect(body).not.toBeEmpty();
   });
 
-  test('Partner login oldal elérhető', async ({ page }) => {
-    await page.goto('/partner/login');
+  test('Partner regisztráció oldal elérhető', async ({ page }) => {
+    await page.goto('/register-app');
     await page.waitForLoadState('networkidle');
 
-    // Van login form
-    const emailInput = page.locator('input[type="email"], input[formControlName="email"]');
-    await expect(emailInput).toBeVisible({ timeout: 10_000 });
+    // A csomag választó oldal betölt (1. lépés)
+    await expect(page.getByText('Válaszd ki a csomagodat')).toBeVisible({ timeout: 10_000 });
   });
 
   test('Tabló login oldal elérhető', async ({ page }) => {

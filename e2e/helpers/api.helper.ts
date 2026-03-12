@@ -16,6 +16,9 @@ export class ApiHelper {
   async init(): Promise<void> {
     this.context = await request.newContext({
       baseURL: this.baseUrl,
+      extraHTTPHeaders: {
+        'Accept': 'application/json',
+      },
     });
   }
 

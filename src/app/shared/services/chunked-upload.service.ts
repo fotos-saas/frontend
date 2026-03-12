@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, of, EMPTY, timer } from 'rxjs';
-import { concatMap, map, catchError, retry, scan } from 'rxjs/operators';
+import { Observable, from, of, EMPTY, timer, Subject, merge } from 'rxjs';
+import { concatMap, map, catchError, retry, tap, toArray } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // ─── Types ───
@@ -75,6 +75,7 @@ export class ChunkedUploadService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/partner/chunked-upload`;
   private readonly MAX_RETRIES = 3;
+  private readonly CONCURRENCY = 3; // Párhuzamos chunk feltöltések száma
 
   /**
    * Fájl feltöltése — automatikusan chunked ha >8MB.
@@ -100,45 +101,55 @@ export class ChunkedUploadService {
           uploadId = initData.upload_id;
           const chunkSize = initData.chunk_size;
           const totalChunks = initData.total_chunks;
+
+          // 2. Párhuzamos chunk feltöltés (CONCURRENCY darab egyszerre)
+          let completedCount = 0;
           const chunkIndices = Array.from({ length: totalChunks }, (_, i) => i);
 
-          // 2. Chunk-ok szekvenciális feltöltése
-          return from(chunkIndices).pipe(
-            concatMap(index => this.uploadChunk(uploadId!, file, index, chunkSize).pipe(
-              retry({
-                count: this.MAX_RETRIES,
-                delay: (_, attempt) => timer(Math.pow(2, attempt) * 1000),
-              }),
-            )),
-            scan((acc: number, _result: ChunkResponse['data']) => acc + 1, 0),
-            map(completedCount => ({
-              phase: 'uploading' as const,
-              chunkIndex: completedCount,
-              totalChunks,
-              percent: Math.round((completedCount / totalChunks) * 95),
-              uploadId,
-            })),
-            // 3. Complete — az utolsó chunk után
-            concatMap(progress => {
-              if (progress.chunkIndex < totalChunks) {
-                return of(progress);
-              }
-              // Minden chunk kész → complete hívás
-              return of(
-                { phase: 'completing' as const, chunkIndex: totalChunks, totalChunks, percent: 96, uploadId },
-              ).pipe(
-                concatMap(completingProgress => {
-                  subscriber.next(completingProgress);
-                  return this.completeUpload(uploadId!).pipe(
-                    map(() => ({
-                      phase: 'completed' as const,
-                      chunkIndex: totalChunks,
+          // Chunk-ok CONCURRENCY darabos csoportokra bontása
+          const batches: number[][] = [];
+          for (let i = 0; i < chunkIndices.length; i += this.CONCURRENCY) {
+            batches.push(chunkIndices.slice(i, i + this.CONCURRENCY));
+          }
+
+          // Batch-ek szekvenciálisan, batch-en belül párhuzamosan
+          return from(batches).pipe(
+            concatMap(batch => {
+              const chunkUploads$ = batch.map(index =>
+                this.uploadChunk(uploadId!, file, index, chunkSize).pipe(
+                  retry({
+                    count: this.MAX_RETRIES,
+                    delay: (_, attempt) => timer(Math.pow(2, attempt) * 1000),
+                  }),
+                  tap(() => {
+                    completedCount++;
+                    subscriber.next({
+                      phase: 'uploading',
+                      chunkIndex: completedCount,
                       totalChunks,
-                      percent: 100,
+                      percent: Math.round((completedCount / totalChunks) * 95),
                       uploadId,
-                    })),
-                  );
-                }),
+                    });
+                  }),
+                ),
+              );
+              // Párhuzamos futtatás a batch-en belül, megvárjuk mindet
+              return merge(...chunkUploads$).pipe(toArray());
+            }),
+            toArray(),
+            // 3. Complete — minden chunk kész
+            concatMap(() => {
+              subscriber.next({
+                phase: 'completing', chunkIndex: totalChunks, totalChunks, percent: 96, uploadId,
+              });
+              return this.completeUpload(uploadId!).pipe(
+                map(() => ({
+                  phase: 'completed' as const,
+                  chunkIndex: totalChunks,
+                  totalChunks,
+                  percent: 100,
+                  uploadId,
+                })),
               );
             }),
           );

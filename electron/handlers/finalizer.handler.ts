@@ -235,71 +235,78 @@ async function uploadChunked(
 
   log.info(`[CHUNKED] Session: ${uploadId}, ${totalChunks} chunk × ${(chunkSize / 1024 / 1024).toFixed(1)}MB`);
 
-  // 2. Chunk-ok feltöltése szekvenciálisan — fájlt egyszer nyitjuk meg
+  // 2. Chunk-ok feltöltése párhuzamosan (3 egyszerre) — fájlt egyszer nyitjuk meg
+  const CONCURRENCY = 3;
   const fd = await fs.promises.open(filePath, 'r');
   try {
-  for (let i = 0; i < totalChunks; i++) {
-    const start = i * chunkSize;
-    const end = Math.min(start + chunkSize, fileSize);
-    const chunkBuffer = Buffer.alloc(end - start);
+  for (let batchStart = 0; batchStart < totalChunks; batchStart += CONCURRENCY) {
+    const batchEnd = Math.min(batchStart + CONCURRENCY, totalChunks);
+    const batchIndices = Array.from({ length: batchEnd - batchStart }, (_, j) => batchStart + j);
 
-    // Chunk olvasása az egyszer megnyitott file descriptor-ból
-    await fd.read(chunkBuffer, 0, end - start, start);
-
-    // Multipart formdata a chunk-hoz
-    const boundary = `----ChunkBoundary${Date.now()}${i}`;
-    const indexPart = Buffer.from(
-      `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="chunk_index"\r\n\r\n` +
-      `${i}\r\n`,
-    );
-    const chunkPart = Buffer.from(
-      `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="chunk"; filename="chunk_${i}"\r\n` +
-      `Content-Type: application/octet-stream\r\n\r\n`,
-    );
-    const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
-
-    let success = false;
-    let lastError = '';
-
-    // Retry: max 3x exponential backoff
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const chunkRes = await httpJson(
-          apiBaseUrl, `/${uploadId}/chunk`, 'POST', authToken,
-          undefined,
-          { boundary, parts: [indexPart, chunkPart, chunkBuffer, footer] },
-        );
-
-        if (chunkRes.status >= 200 && chunkRes.status < 300) {
-          success = true;
-          break;
-        }
-
-        lastError = `HTTP ${chunkRes.status}: ${chunkRes.body.slice(0, 200)}`;
-        log.warn(`[CHUNKED] Chunk ${i}/${totalChunks} retry ${attempt + 1}: ${lastError}`);
-      } catch (err) {
-        lastError = err instanceof Error ? err.message : 'Ismeretlen hiba';
-        log.warn(`[CHUNKED] Chunk ${i}/${totalChunks} retry ${attempt + 1}: ${lastError}`);
-      }
-
-      if (attempt < 2) {
-        await new Promise(r => setTimeout(r, Math.pow(2, attempt + 1) * 1000));
-      }
+    // Chunk-ok előolvasása a batch-hez (szekvenciális I/O)
+    const chunkBuffers: { index: number; buffer: Buffer }[] = [];
+    for (const i of batchIndices) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, fileSize);
+      const buffer = Buffer.alloc(end - start);
+      await fd.read(buffer, 0, end - start, start);
+      chunkBuffers.push({ index: i, buffer });
     }
 
-    if (!success) {
-      log.error(`[CHUNKED] Chunk ${i} véglegesen sikertelen: ${lastError}`);
+    // Párhuzamos feltöltés a batch-en belül
+    const results = await Promise.all(chunkBuffers.map(async ({ index: i, buffer: chunkBuffer }) => {
+      const boundary = `----ChunkBoundary${Date.now()}${i}`;
+      const indexPart = Buffer.from(
+        `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="chunk_index"\r\n\r\n` +
+        `${i}\r\n`,
+      );
+      const chunkPart = Buffer.from(
+        `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="chunk"; filename="chunk_${i}"\r\n` +
+        `Content-Type: application/octet-stream\r\n\r\n`,
+      );
+      const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
+
+      let lastError = '';
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const chunkRes = await httpJson(
+            apiBaseUrl, `/${uploadId}/chunk`, 'POST', authToken,
+            undefined,
+            { boundary, parts: [indexPart, chunkPart, chunkBuffer, footer] },
+          );
+
+          if (chunkRes.status >= 200 && chunkRes.status < 300) {
+            log.info(`[CHUNKED] Chunk ${i + 1}/${totalChunks} OK`);
+            return { success: true as const, index: i };
+          }
+
+          lastError = `HTTP ${chunkRes.status}: ${chunkRes.body.slice(0, 200)}`;
+          log.warn(`[CHUNKED] Chunk ${i}/${totalChunks} retry ${attempt + 1}: ${lastError}`);
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : 'Ismeretlen hiba';
+          log.warn(`[CHUNKED] Chunk ${i}/${totalChunks} retry ${attempt + 1}: ${lastError}`);
+        }
+
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, Math.pow(2, attempt + 1) * 1000));
+        }
+      }
+
+      return { success: false as const, index: i, error: lastError };
+    }));
+
+    const failed = results.find(r => !r.success);
+    if (failed && !failed.success) {
+      log.error(`[CHUNKED] Chunk ${failed.index} véglegesen sikertelen: ${failed.error}`);
       await fd.close();
-      // Abort
       try {
         await httpJson(apiBaseUrl, `/${uploadId}`, 'DELETE', authToken);
       } catch (_) { /* ignore */ }
-      return { success: false, error: `Chunk ${i + 1}/${totalChunks} feltöltése sikertelen: ${lastError}` };
+      return { success: false, error: `Chunk ${failed.index + 1}/${totalChunks} feltöltése sikertelen: ${failed.error}` };
     }
-
-    log.info(`[CHUNKED] Chunk ${i + 1}/${totalChunks} OK`);
   }
   } finally {
     await fd.close();

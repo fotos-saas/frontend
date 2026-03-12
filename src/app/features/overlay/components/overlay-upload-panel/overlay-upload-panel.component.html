@@ -1,0 +1,280 @@
+<div class="upload-panel" [style.height.px]="uploadPanel.panelHeight()">
+  <div class="upload-panel__resize" (mousedown)="uploadPanel.startResize($event)"></div>
+  <div class="upload-panel__header">
+    <lucide-icon [name]="ICONS.CAMERA" [size]="14" />
+    <span>Fotó feltöltés</span>
+    @if (uploadPanel.hasPsLayers()) {
+      <button class="upload-panel__refresh" (click)="uploadPanel.resetUploadState()" type="button" matTooltip="Reset">
+        <lucide-icon [name]="ICONS.UNDO" [size]="13" />
+      </button>
+      <button class="upload-panel__refresh" (click)="uploadPanel.refreshPsLayers()" type="button" matTooltip="Frissítés">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="13" />
+      </button>
+    }
+    <button class="upload-panel__close" (click)="uploadPanel.closePanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="upload-panel__body">
+      <!-- v2: PS Layer mód (ha vannak kijelölt layerek slug---id formatummal) -->
+      @if (uploadPanel.hasPsLayers()) {
+        <!-- Tallózás gomb -->
+        <label class="upload-panel__browse">
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+          <span>Képek kiválasztása</span>
+          <input type="file" accept="image/*" multiple (change)="uploadPanel.onBatchFileSelect($event)" hidden />
+        </label>
+
+        <!-- Layer lista -->
+        <div class="upload-panel__layer-list">
+          @for (layer of uploadPanel.psLayers(); track layer.personId; let i = $index) {
+            <div
+              class="upload-panel__layer-row"
+              [class.upload-panel__layer-row--done]="layer.uploadStatus === 'done'"
+              [class.upload-panel__layer-row--error]="layer.uploadStatus === 'error'"
+              [class.upload-panel__layer-row--uploading]="layer.uploadStatus === 'uploading'"
+              [class.upload-panel__layer-row--assignable]="uploadPanel.selectedUnmatchedFile() && !layer.file && layer.uploadStatus !== 'done'"
+              (click)="uploadPanel.onLayerRowClick(i)"
+            >
+              <div class="upload-panel__layer-thumb">
+                @if (layer.photoThumbUrl) {
+                  <img [src]="layer.photoThumbUrl" [alt]="layer.personName || layer.slug" />
+                } @else if (layer.file) {
+                  <img [src]="uploadPanel.getFilePreview(layer.file)" [alt]="layer.file.name" />
+                } @else {
+                  <lucide-icon [name]="ICONS.USER" [size]="12" />
+                }
+              </div>
+              <span class="upload-panel__layer-name">{{ layer.personName || layer.slug }}</span>
+              <span class="upload-panel__layer-file">
+                @if (layer.file) {
+                  {{ layer.file.name }}
+                  @if (layer.uploadStatus === 'pending') {
+                    <button class="upload-panel__layer-remove" (click)="uploadPanel.removeFileFromLayer(i)" type="button">
+                      <lucide-icon [name]="ICONS.X" [size]="10" />
+                    </button>
+                  }
+                } @else {
+                  <span class="upload-panel__layer-no-file">—</span>
+                }
+              </span>
+              @if (layer.matchType === 'ambiguous') {
+                <span class="upload-panel__layer-ambiguous" matTooltip="Bizonytalan párosítás — ellenőrizd!">
+                  <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="12" />
+                </span>
+              }
+              <span class="upload-panel__layer-status">
+                @if (layer.uploadStatus === 'done') {
+                  <lucide-icon [name]="ICONS.CHECK" [size]="13" class="upload-panel__status--done" />
+                } @else if (layer.uploadStatus === 'error') {
+                  <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="13" class="upload-panel__status--error" />
+                } @else if (layer.uploadStatus === 'uploading') {
+                  <span class="upload-panel__spinner"></span>
+                } @else {
+                  <span class="upload-panel__status--pending">–</span>
+                }
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Nem párosított fájlok -->
+        @if (uploadPanel.unmatchedFiles().length > 0) {
+          <div class="upload-panel__unmatched">
+            <span class="upload-panel__unmatched-label">Nem párosított ({{ uploadPanel.unmatchedFiles().length }}):</span>
+            <button class="upload-panel__unmatched-match" [disabled]="uploadPanel.matching()" (click)="uploadPanel.retrySmartMatch()" type="button" matTooltip="Intelligens párosítás">
+              @if (uploadPanel.matching()) {
+                <span class="upload-panel__spinner"></span>
+              } @else {
+                <lucide-icon [name]="ICONS.SPARKLES" [size]="11" />
+              }
+              Párosítás
+            </button>
+            <button class="upload-panel__unmatched-clear" (click)="uploadPanel.clearUnmatchedFiles()" type="button" matTooltip="Lista törlése">
+              <lucide-icon [name]="ICONS.X" [size]="11" />
+            </button>
+            @for (file of uploadPanel.unmatchedFiles(); track file.name; let fi = $index) {
+              <button
+                class="upload-panel__unmatched-file"
+                [class.upload-panel__unmatched-file--selected]="uploadPanel.selectedUnmatchedFile() === file"
+                (click)="uploadPanel.selectUnmatchedFile(file)"
+                type="button"
+              >
+                <img class="upload-panel__unmatched-thumb" [src]="uploadPanel.getFilePreview(file)" [alt]="file.name" />
+                {{ file.name }}
+              </button>
+            }
+            @if (uploadPanel.selectedUnmatchedFile()) {
+              <span class="upload-panel__unmatched-hint">Kattints egy layer sorra a hozzárendeléshez</span>
+            }
+          </div>
+        }
+
+        <!-- Akció gomb -->
+        <div class="upload-panel__batch-actions">
+          <button
+            class="upload-panel__btn upload-panel__btn--green"
+            [disabled]="uploadPanel.batchUploading() || uploadPanel.placing() || uploadPanel.uploadableLayers().length === 0"
+            (click)="uploadPanel.uploadAndPlace()"
+            type="button"
+          >
+            @if (uploadPanel.batchUploading()) {
+              <span class="upload-panel__spinner"></span>
+              Feltöltés ({{ uploadPanel.batchProgress().done }}/{{ uploadPanel.batchProgress().total }})
+            } @else if (uploadPanel.placing()) {
+              <span class="upload-panel__spinner"></span>
+              Behelyezés PS-be...
+            } @else {
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+              Feltöltés + Behelyezés ({{ uploadPanel.uploadableLayers().length }})
+            }
+          </button>
+        </div>
+
+        @if (uploadPanel.batchResult()) {
+          <div class="upload-panel__result" [class.upload-panel__result--success]="uploadPanel.batchResult()!.success" [class.upload-panel__result--error]="!uploadPanel.batchResult()!.success">
+            @if (uploadPanel.batchResult()!.success) {
+              <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+            } @else {
+              <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+            }
+            <span>{{ uploadPanel.batchResult()!.message }}</span>
+          </div>
+        }
+
+      } @else {
+        <!-- v1 fallback: egyedi feltöltés (nincs PS layer) -->
+        <div class="upload-panel__search">
+          <lucide-icon [name]="ICONS.SEARCH" [size]="14" class="upload-panel__search-icon" />
+          <input
+            type="text"
+            placeholder="Személy keresése..."
+            [value]="uploadPanel.searchQuery()"
+            (input)="uploadPanel.onSearchInput($event)"
+            class="upload-panel__search-input"
+          />
+        </div>
+
+        <div class="upload-panel__content">
+          <div class="upload-panel__persons">
+            @if (projectService.loadingPersons()) {
+              <div class="upload-panel__loading">Betöltés...</div>
+            } @else if (uploadPanel.filteredPersons().length === 0) {
+              <div class="upload-panel__loading">
+                @if (uploadPanel.searchQuery()) {
+                  Nincs találat
+                } @else {
+                  Üres lista
+                }
+              </div>
+            } @else {
+              @for (person of uploadPanel.filteredPersons(); track person.id) {
+                <button
+                  class="upload-panel__person"
+                  [class.upload-panel__person--selected]="uploadPanel.selectedPerson()?.id === person.id"
+                  [class.upload-panel__person--has-photo]="person.hasPhoto"
+                  (click)="uploadPanel.selectPerson(person)"
+                  type="button"
+                >
+                  <div class="upload-panel__avatar">
+                    @if (person.photoThumbUrl) {
+                      <img [src]="person.photoThumbUrl" [alt]="person.name" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.USER" [size]="14" />
+                    }
+                    @if (person.linkedGroup) {
+                      <span class="upload-panel__linked-badge">
+                        <lucide-icon [name]="ICONS.LINK" [size]="8" />
+                      </span>
+                    }
+                  </div>
+                  <span class="upload-panel__name">{{ person.name }}</span>
+                  <span class="upload-panel__type">{{ person.type === 'teacher' ? 'T' : 'D' }}</span>
+                  @if (person.hasPhoto) {
+                    <lucide-icon [name]="ICONS.CHECK" [size]="12" class="upload-panel__check" />
+                  }
+                  @if (person.type === 'teacher' && person.archiveId) {
+                    <div class="upload-panel__teacher-actions" (click)="$event.stopPropagation()">
+                      <button class="upload-panel__action-btn" matTooltip="Összekapcsolás"
+                        (click)="openLinkDialog.emit(person)">
+                        <lucide-icon [name]="ICONS.LINK" [size]="10" />
+                      </button>
+                      @if (person.linkedGroup) {
+                        <button class="upload-panel__action-btn" matTooltip="Fotó csere"
+                          (click)="openPhotoChooser.emit(person)">
+                          <lucide-icon [name]="ICONS.IMAGE" [size]="10" />
+                        </button>
+                      }
+                    </div>
+                  }
+                </button>
+              }
+            }
+          </div>
+
+          <div class="upload-panel__upload">
+            @if (uploadPanel.selectedPerson()) {
+              <div class="upload-panel__selected">
+                <lucide-icon [name]="ICONS.USER" [size]="12" />
+                <span>{{ uploadPanel.selectedPerson()!.name }}</span>
+              </div>
+
+              <div
+                class="upload-panel__drop"
+                [class.upload-panel__drop--drag-over]="uploadPanel.dragOver()"
+                [class.upload-panel__drop--has-file]="!!uploadPanel.selectedFile()"
+                (dragover)="uploadPanel.onDragOver($event)"
+                (dragleave)="uploadPanel.onDragLeave($event)"
+                (drop)="uploadPanel.onDrop($event)"
+              >
+                @if (uploadPanel.selectedFile()) {
+                  <lucide-icon [name]="ICONS.IMAGE" [size]="20" class="upload-panel__file-icon" />
+                  <span class="upload-panel__file-name">{{ uploadPanel.selectedFile()!.name }}</span>
+                } @else {
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="20" />
+                  <span>Húzd ide</span>
+                  <label class="upload-panel__file-label">
+                    vagy válassz
+                    <input type="file" accept="image/*" (change)="uploadPanel.onFileSelect($event)" hidden />
+                  </label>
+                }
+              </div>
+
+              <button
+                class="upload-panel__btn"
+                [disabled]="!uploadPanel.canUpload()"
+                (click)="uploadPanel.upload()"
+                type="button"
+              >
+                @if (uploadPanel.uploading()) {
+                  <span class="upload-panel__spinner"></span>
+                  Feltöltés...
+                } @else {
+                  <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+                  Feltöltés
+                }
+              </button>
+
+              @if (uploadPanel.uploadResult()) {
+                <div class="upload-panel__result" [class.upload-panel__result--success]="uploadPanel.uploadResult()!.success" [class.upload-panel__result--error]="!uploadPanel.uploadResult()!.success">
+                  @if (uploadPanel.uploadResult()!.success) {
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+                    <span>Sikeres!</span>
+                  } @else {
+                    <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+                    <span>{{ uploadPanel.uploadResult()!.message }}</span>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="upload-panel__placeholder">
+                <lucide-icon [name]="ICONS.USER" [size]="24" />
+                <span>Válassz személyt a listából</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+  </div>
+</div>

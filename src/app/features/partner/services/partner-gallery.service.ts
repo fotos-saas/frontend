@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
 import { concatMap, scan, map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { chunkArray } from '@shared/utils/array.util';
 import {
   GalleryResponse,
   CreateGalleryResponse,
@@ -78,7 +79,7 @@ export class PartnerGalleryService {
     errorCount: number;
   }> {
     const totalCount = files.length;
-    const chunks = this.chunkArray(files, this.CHUNK_SIZE);
+    const chunks = chunkArray(files, this.CHUNK_SIZE);
     const totalChunks = chunks.length;
 
     const initialState = {
@@ -257,18 +258,4 @@ export class PartnerGalleryService {
     );
   }
 
-  // ============================================
-  // PRIVATE HELPERS
-  // ============================================
-
-  /**
-   * Tömb chunk-okra bontása
-   */
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  }
 }

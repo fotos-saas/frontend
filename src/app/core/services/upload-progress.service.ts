@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { chunkArray } from '@shared/utils/array.util';
 import { HttpClient, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Observable, from, of, interval, EMPTY } from 'rxjs';
 import {
@@ -41,7 +42,7 @@ export class UploadProgressService {
     fieldName = 'photos[]',
   ): Observable<FileUploadProgress> {
     const totalCount = files.length;
-    const chunks = this.chunkArray(files, this.CHUNK_SIZE);
+    const chunks = chunkArray(files, this.CHUNK_SIZE);
     const totalChunks = chunks.length;
 
     if (files.length === 0) {
@@ -308,13 +309,6 @@ export class UploadProgressService {
     };
   }
 
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  }
 }
 
 // === Internal Types ===

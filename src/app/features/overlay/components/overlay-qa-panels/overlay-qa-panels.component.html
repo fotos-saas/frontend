@@ -1,0 +1,391 @@
+<!-- Quick Actions Panel -->
+@if (qa.panelOpen()) {
+<div class="quick-actions-panel">
+  <div class="quick-actions-panel__header">
+    <lucide-icon [name]="ICONS.SPARKLE" [size]="14" />
+    <span>Gyors akciók</span>
+    <button class="quick-actions-panel__close" (click)="qa.closePanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="quick-actions-panel__body">
+    <!-- Link -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.LINK" [size]="11" />
+        Link
+      </div>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--green" [disabled]="qa.loading()" (click)="qa.onAction('link', 'all')">Mind</button>
+        <button class="qa-btn" [disabled]="qa.loading()" (click)="qa.onAction('link', 'teachers')">Tanárok</button>
+        <button class="qa-btn" [disabled]="qa.loading()" (click)="qa.onAction('link', 'students')">Diákok</button>
+      </div>
+    </div>
+
+    <!-- Feliratok frissítése -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.REFRESH" [size]="11" />
+        Feliratok frissítése
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Típus</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.refreshNames()" (click)="qa.toggleType('refresh', 'names')">Nevek</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.refreshPositions()" (click)="qa.toggleType('refresh', 'positions')">Pozíciók</button>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'students')">Diákok</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feliratok pozícionálása -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.ALIGN_CENTER" [size]="11" />
+        Feliratok pozícionálása
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Típus</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.positionNames()" (click)="qa.toggleType('position', 'names')">Nevek</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="qa.positionPositions()" (click)="qa.toggleType('position', 'positions')">Pozíciók</button>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'students')">Diákok</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kijelöltek visszahelyezése -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.PIN" [size]="11" />
+        Kijelöltek visszahelyezése
+      </div>
+      <div class="qa-section__row">
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--teal" [disabled]="qa.loading()" (click)="qa.onAction('reposition-to-image', 'selected')">Visszahelyezés</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pozíciók pótlása -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.BRIEFCASE" [size]="11" />
+        Pozíciók pótlása
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Célcsoport</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--amber" [disabled]="qa.loading()" (click)="qa.onAction('sync-positions', 'all')">Mind</button>
+          <button class="qa-btn qa-btn--amber" [disabled]="qa.loading()" (click)="qa.onAction('sync-positions', 'teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--amber" [disabled]="qa.loading()" (click)="qa.onAction('sync-positions', 'students')">Diákok</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading bar -->
+  @if (qa.loading()) {
+    <div class="quick-actions-panel__confirm quick-actions-panel__confirm--loading">
+      <span class="qa-spinner"></span>
+      <span class="quick-actions-panel__confirm-text">Feldolgozás...</span>
+    </div>
+  }
+
+  <!-- Confirm bar -->
+  @if (qa.confirm() && !qa.loading()) {
+    <div class="quick-actions-panel__confirm">
+      <span class="quick-actions-panel__confirm-text">Biztosan indítod?</span>
+      <button class="qa-btn qa-btn--green qa-btn--sm" (click)="qa.confirmAction()">
+        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+        Igen
+      </button>
+      <button class="qa-btn qa-btn--sm" (click)="qa.cancelAction()">
+        Mégse
+      </button>
+    </div>
+  }
+</div>
+}
+
+<!-- Spec panel -->
+@if (qa.specPanelOpen()) {
+<div class="quick-actions-panel spec-panel">
+  <div class="quick-actions-panel__header">
+    <lucide-icon [name]="ICONS.WAND" [size]="14" />
+    <span>Spec</span>
+    <button class="quick-actions-panel__close" (click)="qa.closeSpecPanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+
+  <div class="quick-actions-panel__body">
+    <!-- Lekerekítés -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.SQUARE_DASHED_BOTTOM" [size]="11" />
+        Lekerekítés (kijelöltek)
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Sugár</span>
+        <div class="qa-section__buttons">
+          <input type="number" class="qa-input qa-input--narrow" min="1" max="500"
+            [value]="qa.borderRadius()"
+            (change)="qa.setBorderRadius(+$any($event.target).value || 30)" />
+          <span class="qa-unit">px</span>
+          <button class="qa-btn qa-btn--amber qa-btn--sm" [disabled]="qa.loading()" (click)="applyBorderRadius()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+            Alkalmaz
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forgatás -->
+    <div class="qa-section">
+      <div class="qa-section__label">
+        <lucide-icon [name]="ICONS.ROTATE_CCW" [size]="11" />
+        Forgatás (kijelöltek)
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Szög</span>
+        <div class="qa-section__buttons">
+          <input type="number" class="qa-input qa-input--narrow" min="0.1" max="180" step="0.1"
+            [value]="qa.rotateAngle()"
+            (change)="qa.setRotateAngle(+$any($event.target).value || 2)" />
+          <span class="qa-unit">&deg;</span>
+        </div>
+      </div>
+      <div class="qa-section__row">
+        <span class="qa-section__row-label">Mód</span>
+        <div class="qa-section__buttons">
+          <button class="qa-btn qa-btn--sm qa-align-toggle"
+            [class.qa-align-toggle--active]="qa.rotateRandom()"
+            (click)="qa.rotateRandom.set(true)">
+            Random (&plusmn;)
+          </button>
+          <button class="qa-btn qa-btn--sm qa-align-toggle"
+            [class.qa-align-toggle--active]="!qa.rotateRandom()"
+            (click)="qa.rotateRandom.set(false)">
+            Egységes
+          </button>
+        </div>
+      </div>
+      <div class="rotate-panel__hint">
+        @if (qa.rotateRandom()) {
+          Minden képet véletlenszerűen forgat &plusmn;{{ qa.rotateAngle() }}&deg; között
+        } @else {
+          Minden képet {{ qa.rotateAngle() }}&deg;-kal forgat
+        }
+      </div>
+      <button class="qa-btn qa-btn--blue qa-btn--full" [disabled]="qa.loading()" (click)="applyRotate()">
+        @if (qa.loading()) {
+          <span class="qa-spinner"></span>
+          Forgatás...
+        } @else {
+          Forgatás indítása
+        }
+      </button>
+      @if (qa.result(); as r) {
+        <div class="grid-panel__status" [class.grid-panel__status--error]="!r.success">
+          <lucide-icon [name]="r.success ? ICONS.CHECK_CIRCLE : ICONS.ALERT_CIRCLE" [size]="13" />
+          <span>{{ r.message }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Loading bar -->
+  @if (qa.loading()) {
+    <div class="quick-actions-panel__confirm quick-actions-panel__confirm--loading">
+      <span class="qa-spinner"></span>
+      <span class="quick-actions-panel__confirm-text">Feldolgozás...</span>
+    </div>
+  }
+</div>
+}
+
+<!-- Grid elosztás panel -->
+@if (qa.gridPanelOpen()) {
+<div class="grid-panel">
+  <div class="grid-panel__header">
+    <lucide-icon [name]="ICONS.COLUMNS_3" [size]="13" />
+    <span>Egyenletes elosztás</span>
+    <button class="grid-panel__close" (click)="qa.closeGridPanel()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="13" />
+    </button>
+  </div>
+  <div class="grid-panel__body">
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Csak képek</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--toggle"
+          [class.qa-btn--active]="qa.imagesOnly()"
+          (click)="qa.imagesOnly.set(!qa.imagesOnly())"
+          matTooltip="Csak a kép layereket mozgatja, a nevek/pozíciók maradnak">
+          @if (qa.imagesOnly()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          } @else {
+            <lucide-icon [name]="ICONS.MINUS" [size]="12" />
+          }
+        </button>
+      </div>
+    </div>
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Térköz</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--cyan" [disabled]="qa.loading()" (click)="qa.measureGridGaps()">
+          Mérés
+        </button>
+        @if (qa.gridGapPx() !== null) {
+          <input type="number" class="qa-input" min="0"
+            [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+            [value]="qa.gridGapDisplay()"
+            (change)="qa.setGridGapFromDisplay(+$any($event.target).value || 0)" />
+          <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+            {{ qa.gridUnit() }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Egy szinten</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--toggle"
+          [class.qa-btn--active]="qa.gridAlignTop()"
+          (click)="qa.gridAlignTop.set(!qa.gridAlignTop())"
+          matTooltip="Elosztásnál is igazít">
+          @if (qa.gridAlignTop()) {
+            <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+          } @else {
+            <lucide-icon [name]="ICONS.MINUS" [size]="12" />
+          }
+        </button>
+        <button class="qa-btn qa-btn--cyan" [disabled]="qa.loading()"
+          (click)="qa.alignTopOnly()"
+          matTooltip="Csak felső él igazítás, térköz nélkül">
+          Felső él
+        </button>
+      </div>
+    </div>
+
+    @if (qa.gridGapPx() !== null) {
+      <button class="qa-btn qa-btn--cyan qa-btn--full" [disabled]="qa.loading()"
+        (click)="qa.onAction('equalize-grid', 'selected')">
+        Elosztás ({{ qa.gridLayerCount() }} kép)
+      </button>
+    }
+
+    <!-- Rácsba rendezés szekció -->
+    <div class="grid-panel__divider"></div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Oszlopok</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input qa-input--narrow" min="1"
+          [value]="qa.gridCols()"
+          (change)="qa.gridCols.set(+$any($event.target).value || 1)" />
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Sorok</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input qa-input--narrow" min="0"
+          placeholder="auto"
+          [value]="qa.gridRows() || ''"
+          (change)="qa.gridRows.set(+$any($event.target).value || 0)" />
+        <span class="qa-unit" style="font-size: 9px; opacity: 0.4">0 = auto</span>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Vízsz. köz</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input" min="0"
+          [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+          [value]="qa.gridGapHDisplay()"
+          (change)="qa.setGridGapHFromDisplay(+$any($event.target).value || 0)" />
+        <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+          {{ qa.gridUnit() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Függ. köz</span>
+      <div class="qa-section__buttons">
+        <input type="number" class="qa-input" min="0"
+          [attr.step]="qa.gridUnit() === 'cm' ? '0.01' : '1'"
+          [value]="qa.gridGapVDisplay()"
+          (change)="qa.setGridGapVFromDisplay(+$any($event.target).value || 0)" />
+        <button class="qa-unit-toggle" (click)="qa.toggleGridUnit()">
+          {{ qa.gridUnit() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="qa-section__row">
+      <span class="qa-section__row-label">Igazítás</span>
+      <div class="qa-section__buttons">
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'left'"
+          (click)="qa.gridAlign.set('left')">Bal</button>
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'center'"
+          (click)="qa.gridAlign.set('center')">Közép</button>
+        <button class="qa-btn qa-btn--sm qa-align-toggle"
+          [class.qa-align-toggle--active]="qa.gridAlign() === 'right'"
+          (click)="qa.gridAlign.set('right')">Jobb</button>
+      </div>
+    </div>
+
+    <button class="qa-btn qa-btn--cyan qa-btn--full" [disabled]="qa.loading()"
+      (click)="qa.onAction('grid-arrange', 'selected')">
+      Rácsba rendezés
+    </button>
+
+    <div class="grid-panel__divider"></div>
+
+    <button class="qa-btn qa-btn--teal qa-btn--full" [disabled]="qa.loading()"
+      (click)="qa.executeCenterSelected()">
+      Középre igazítás
+    </button>
+  </div>
+
+  @if (qa.loading()) {
+    <div class="grid-panel__status">
+      <span class="qa-spinner"></span>
+      <span>Feldolgozás...</span>
+    </div>
+  }
+
+  @if ((qa.confirm()?.action === 'equalize-grid' || qa.confirm()?.action === 'grid-arrange') && !qa.loading()) {
+    <div class="grid-panel__status">
+      <span>Biztosan indítod?</span>
+      <button class="qa-btn qa-btn--green qa-btn--sm" (click)="qa.confirmAction()">
+        <lucide-icon [name]="ICONS.CHECK" [size]="12" />
+        Igen
+      </button>
+      <button class="qa-btn qa-btn--sm" (click)="qa.cancelAction()">Mégse</button>
+    </div>
+  }
+</div>
+}

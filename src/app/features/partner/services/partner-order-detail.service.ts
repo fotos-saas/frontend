@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, concatMap, scan, map, catchError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { chunkArray } from '@shared/utils/array.util';
 import type {
   PartnerOrderAlbumDetails,
   PartnerOrderAlbumSummary,
@@ -100,7 +101,7 @@ export class PartnerOrderDetailService {
 
   uploadPhotosChunked(albumId: number, files: File[]): Observable<UploadProgress> {
     const totalCount = files.length;
-    const chunks = this.chunkArray(files, this.CHUNK_SIZE);
+    const chunks = chunkArray(files, this.CHUNK_SIZE);
     const totalChunks = chunks.length;
 
     return from(chunks).pipe(
@@ -167,11 +168,4 @@ export class PartnerOrderDetailService {
     );
   }
 
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  }
 }

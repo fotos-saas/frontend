@@ -91,11 +91,22 @@ export class PartnerNotificationService {
 
   /**
    * Olvasatlan szám frissítése (lightweight endpoint).
+   * Ha nincs marketer token (kijelentkezés után), leállítja a polling-ot.
    */
   refreshUnreadCount(): void {
+    // Ha nincs session, ne hívjunk API-t — polling leállítás
+    if (!this.authService.getMarketerToken()) {
+      this.clear();
+      return;
+    }
+
     this.http.get<UnreadCountResponse>(`${this.baseUrl}/unread-count`)
       .pipe(
         catchError(err => {
+          // 401 esetén polling leállítás (token lejárt/érvénytelen)
+          if (err.status === 401) {
+            this.clear();
+          }
           this.logger.error('[PartnerNotification] Unread count hiba:', err);
           return of({ success: false, data: { unread_count: 0 } });
         }),

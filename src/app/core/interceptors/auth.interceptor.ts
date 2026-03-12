@@ -84,9 +84,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
           // Overlay ablakban NE logout-oljon (nincs router navigate, overlay kezeli magának)
           const isOverlay = router.url.startsWith('/overlay');
+          // Aktuális marketer token ellenőrzés (a request indulása óta törölhették)
+          const currentMarketerToken = authService.getMarketerToken();
           if (isOverlay) {
             logger.info('[AuthInterceptor] 401 ignorálva (overlay mód)');
-          } else if (marketerToken) {
+          } else if (!currentMarketerToken && marketerToken) {
+            // A request marketer tokennel indult, de azóta kijelentkeztünk — ignoráljuk
+            logger.info('[AuthInterceptor] 401 ignorálva (marketer session már törölve)');
+          } else if (currentMarketerToken) {
             // Partner/marketer/admin session — marketer token törlés + login redirect
             logger.warn('[AuthInterceptor] Partner/admin logout 401 miatt', { url: req.url });
             authService.logoutMarketer();

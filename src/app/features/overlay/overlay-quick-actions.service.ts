@@ -83,7 +83,9 @@ export class OverlayQuickActionsService {
   closeSpecPanel(): void { this.specPanelOpen.set(false); }
 
   toggleGridPanel(): void { this.effects.toggleGridPanel(); this.panelOpen.set(false); this.specPanelOpen.set(false); }
+  closeGridPanel(): void { this.effects.closeGridPanel(); }
   toggleRotatePanel(): void { this.effects.toggleRotatePanel(); this.panelOpen.set(false); this.specPanelOpen.set(false); }
+  closeRotatePanel(): void { this.effects.closeRotatePanel(); }
 
   toggleGridUnit(): void { this.effects.toggleGridUnit(); }
   setGridGapHFromDisplay(value: number): void { this.effects.setGridGapHFromDisplay(value); }

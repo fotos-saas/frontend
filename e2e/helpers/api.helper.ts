@@ -253,6 +253,54 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Hibajelentés gyors létrehozás */
+  async seedBugReport(data: {
+    reporterEmail: string;
+    title: string;
+    description?: string;
+    status?: 'new' | 'in_progress' | 'resolved' | 'closed';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+  }): Promise<{ bug_report_id: number }> {
+    const res = await this.context.post('/api/e2e/seed/bug-report', {
+      data: {
+        reporter_email: data.reporterEmail,
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed bug report failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Árajánlat gyors létrehozás */
+  async seedQuote(data: {
+    partnerId: number;
+    customerName: string;
+    customerEmail?: string;
+    status?: 'draft' | 'sent' | 'accepted' | 'rejected';
+    basePrice?: number;
+    quoteCategory?: 'photographer' | 'custom';
+  }): Promise<{ quote_id: number; quote_number: string }> {
+    const res = await this.context.post('/api/e2e/seed/quote', {
+      data: {
+        partner_id: data.partnerId,
+        customer_name: data.customerName,
+        customer_email: data.customerEmail,
+        status: data.status,
+        base_price: data.basePrice,
+        quote_category: data.quoteCategory,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed quote failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

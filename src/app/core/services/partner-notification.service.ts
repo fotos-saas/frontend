@@ -5,6 +5,7 @@ import { catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { LoggerService } from './logger.service';
+import { WebsocketService } from './websocket.service';
 
 export interface PartnerNotification {
   id: number;
@@ -42,6 +43,7 @@ export class PartnerNotificationService {
   private readonly authService = inject(AuthService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly wsService = inject(WebsocketService);
 
   private get baseUrl(): string {
     const prefix = this.authService.isPrintShop() ? 'print-shop' : 'partner';
@@ -50,6 +52,8 @@ export class PartnerNotificationService {
   private pollingTimer: ReturnType<typeof setInterval> | null = null;
   /** Kijelentkezés után true — megakadályozza az újraindítást */
   private pollingStopped = false;
+  /** WebSocket csatorna neve (ha aktív) */
+  private wsChannelName: string | null = null;
 
   /** Dropdown értesítések */
   readonly notifications = signal<PartnerNotification[]>([]);
@@ -64,7 +68,8 @@ export class PartnerNotificationService {
   readonly hasUnread = computed(() => this.unreadCount() > 0);
 
   /**
-   * Polling indítása (60 másodpercenként lekérdezi az unread count-ot).
+   * Polling indítása (15 másodpercenként lekérdezi az unread count-ot).
+   * Ha WebSocket elérhető, arra is feliratkozik (azonnali értesítés).
    * Hívd meg a partner shell init-ben.
    */
   startPolling(): void {
@@ -76,10 +81,13 @@ export class PartnerNotificationService {
     // Azonnal lekérjük
     this.refreshUnreadCount();
 
-    // 60s polling
+    // WebSocket feliratkozás (ha elérhető)
+    this.subscribeToWebSocket();
+
+    // 15s polling (fallback ha nincs WebSocket)
     this.pollingTimer = setInterval(() => {
       this.refreshUnreadCount();
-    }, 60_000);
+    }, 15_000);
 
     this.destroyRef.onDestroy(() => this.stopPolling());
   }
@@ -91,6 +99,59 @@ export class PartnerNotificationService {
     if (this.pollingTimer) {
       clearInterval(this.pollingTimer);
       this.pollingTimer = null;
+    }
+    this.unsubscribeFromWebSocket();
+  }
+
+  /**
+   * WebSocket feliratkozás a privát user csatornára.
+   * Ha jön 'app.notification.created' event, azonnal frissíti a badge-et.
+   */
+  private subscribeToWebSocket(): void {
+    if (!environment.wsEnabled || !this.wsService.isConnected()) return;
+
+    const user = this.authService.currentUserSignal();
+    if (!user?.id) return;
+
+    this.wsChannelName = `App.Models.User.${user.id}`;
+
+    const channel = this.wsService.private(this.wsChannelName);
+    if (!channel) return;
+
+    channel.listen('.app.notification.created', (data: PartnerNotification) => {
+      this.logger.info('[PartnerNotification] WebSocket: új értesítés érkezett', data);
+
+      // Badge szám növelése
+      this.unreadCount.update(c => c + 1);
+
+      // Ha a dropdown nyitva van (vannak betöltött értesítések), hozzáadjuk az elejéhez
+      if (this.notifications().length > 0) {
+        const newNotification: PartnerNotification = {
+          id: data.id,
+          type: data.type,
+          title: data.title,
+          message: data.message,
+          emoji: data.emoji,
+          action_url: data.action_url,
+          metadata: data.metadata,
+          is_read: false,
+          read_at: null,
+          created_at: data.created_at,
+        };
+        this.notifications.update(list => [newNotification, ...list.slice(0, 4)]);
+      }
+    });
+
+    this.logger.info(`[PartnerNotification] WebSocket feliratkozva: ${this.wsChannelName}`);
+  }
+
+  /**
+   * WebSocket leiratkozás.
+   */
+  private unsubscribeFromWebSocket(): void {
+    if (this.wsChannelName) {
+      this.wsService.leave(this.wsChannelName);
+      this.wsChannelName = null;
     }
   }
 

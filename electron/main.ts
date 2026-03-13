@@ -417,42 +417,72 @@ function showOverlayWindow(): void {
 async function syncAuthToOverlay(): Promise<void> {
   if (!mainWindow || mainWindow.isDestroyed() || !overlayWindow || overlayWindow.isDestroyed()) return;
   try {
-    const token = await mainWindow.webContents.executeJavaScript(
-      `sessionStorage.getItem('marketer_token')`,
-    );
-    if (token) {
-      await overlayWindow.webContents.executeJavaScript(
-        `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
-      );
-      // Értesítjük az overlay Angular app-ot hogy a token megérkezett
+    // ÖSSZES sessionStorage kulcs szinkronizálása (marketer_token + tablo:*:*:token + egyéb)
+    const allEntries = await mainWindow.webContents.executeJavaScript(`
+      (() => {
+        const entries = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+            entries[key] = sessionStorage.getItem(key);
+          }
+        }
+        return entries;
+      })()
+    `);
+    if (allEntries && Object.keys(allEntries).length > 0) {
+      const entriesJson = JSON.stringify(allEntries);
+      await overlayWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = ${entriesJson};
+          Object.keys(entries).forEach(key => {
+            sessionStorage.setItem(key, entries[key]);
+          });
+        })()
+      `);
       overlayWindow.webContents.send('overlay:auth-synced');
+      log.info('Auth synced to overlay:', Object.keys(allEntries).join(', '));
     }
   } catch { /* window may not be ready */ }
 }
 
-// Main window login után szinkronizálja a tokent az overlay-be
+// Main window login után szinkronizálja az ÖSSZES tokent az overlay-be
 function listenMainWindowAuthChanges(): void {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  // Figyeljük ha a main window sessionStorage-ába bekerül a marketer_token
-  // Ez 2 mp-enként ellenőriz — ha van token és az overlay-ben nincs, szinkronizál
+  // 2 mp-enként ellenőrzi az összes auth kulcsot (marketer_token + tablo:* entries)
+  let lastSyncHash = '';
   const authCheckInterval = setInterval(async () => {
     if (!mainWindow || mainWindow.isDestroyed()) { clearInterval(authCheckInterval); return; }
     if (!overlayWindow || overlayWindow.isDestroyed()) return;
     try {
-      const mainToken = await mainWindow.webContents.executeJavaScript(
-        `sessionStorage.getItem('marketer_token')`,
-      );
-      if (!mainToken) return;
-      const overlayToken = await overlayWindow.webContents.executeJavaScript(
-        `sessionStorage.getItem('marketer_token')`,
-      );
-      if (!overlayToken || overlayToken !== mainToken) {
-        await overlayWindow.webContents.executeJavaScript(
-          `sessionStorage.setItem('marketer_token', ${JSON.stringify(mainToken)})`,
-        );
-        overlayWindow.webContents.send('overlay:auth-synced');
-        log.info('Auth token synced to overlay (periodic check)');
-      }
+      const allEntries = await mainWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = {};
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+              entries[key] = sessionStorage.getItem(key);
+            }
+          }
+          return entries;
+        })()
+      `);
+      if (!allEntries || Object.keys(allEntries).length === 0) return;
+      // Csak akkor szinkronizálunk ha változott
+      const currentHash = JSON.stringify(allEntries);
+      if (currentHash === lastSyncHash) return;
+      lastSyncHash = currentHash;
+      const entriesJson = JSON.stringify(allEntries);
+      await overlayWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = ${entriesJson};
+          Object.keys(entries).forEach(key => {
+            sessionStorage.setItem(key, entries[key]);
+          });
+        })()
+      `);
+      overlayWindow.webContents.send('overlay:auth-synced');
+      log.info('Auth synced to overlay (periodic):', Object.keys(allEntries).join(', '));
     } catch { /* window not ready */ }
   }, 2000);
 

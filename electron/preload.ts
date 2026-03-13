@@ -290,6 +290,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('overlay:auth-synced', handler);
       return () => ipcRenderer.removeListener('overlay:auth-synced', handler);
     },
+    requestAuthSync: () =>
+      ipcRenderer.invoke('overlay:request-auth-sync') as Promise<{ success: boolean; keys?: string[] }>,
   },
 
   // ============ Photoshop Integration ============

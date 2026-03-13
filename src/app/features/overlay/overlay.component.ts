@@ -120,7 +120,8 @@ export class OverlayComponent implements OnInit {
 
   ngOnInit(): void {
     document.body.classList.add('overlay-mode');
-    this.loadContext();
+    // Auth szinkron kérése a main window-ból MIELŐTT bármilyen API hívás indul
+    this.requestAuthSyncThenInit();
     this.listenContextChanges();
     this.projectService.listenAuthSync(this.destroyRef, this.ngZone, () => this.context());
     this.loadActiveDoc();
@@ -128,8 +129,6 @@ export class OverlayComponent implements OnInit {
     this.polling.startPolling(this.destroyRef, () => this.pollActiveDoc());
     this.setupClickThrough();
     this.polling.listenVisibility(this.destroyRef);
-    this.settings.loadSettings(this.context().projectId || this.projectService.getLastProjectId());
-    this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(this.context().projectId));
     this.qa.setProjectIdResolver(() => this.context().projectId);
     this.dragOrder.setProjectIdResolver(() => this.pid);
     this.uploadPanel.setContextResolver(() => this.context());
@@ -299,6 +298,19 @@ export class OverlayComponent implements OnInit {
   private reloadPersons(): void {
     const pid = this.projectService.getLastProjectId() || this.context().projectId;
     if (pid) this.projectService.loadPersons(pid);
+  }
+
+  /** Auth tokenek szinkronizálása a main window-ból, AZTÁN context + persons betöltése */
+  private async requestAuthSyncThenInit(): Promise<void> {
+    if (window.electronAPI) {
+      try {
+        await window.electronAPI.overlay.requestAuthSync();
+      } catch { /* main window may not be ready yet — periodic sync will catch up */ }
+    }
+    await this.loadContext();
+    const pid = this.context().projectId || this.projectService.getLastProjectId();
+    this.settings.loadSettings(pid);
+    this.settings.syncWithBorder.set(this.settings.loadSyncBorderForProject(this.context().projectId));
   }
 
   private setupClickThrough(): void {

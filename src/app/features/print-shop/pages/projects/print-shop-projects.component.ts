@@ -76,6 +76,9 @@ export class PrintShopProjectsComponent {
     if (params['class_year']) {
       this.classYearFilter.set(params['class_year']);
     }
+    if (params['search']) {
+      this.searchQuery.set(params['search']);
+    }
 
     // Search debounce
     this.searchSubject.pipe(

@@ -301,6 +301,102 @@ export class ApiHelper {
     return res.json();
   }
 
+  /** Partner modul aktiválás (booking, invoicing, stb.) */
+  async seedModule(data: {
+    partnerId: number;
+    moduleKey: string;
+    status?: 'active' | 'trial';
+  }): Promise<{ module_id: number; module_key: string; status: string }> {
+    const res = await this.context.post('/api/e2e/seed/module', {
+      data: {
+        partner_id: data.partnerId,
+        module_key: data.moduleKey,
+        status: data.status,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed module failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Fotózási típus (SessionType) gyors létrehozás */
+  async seedSessionType(data: {
+    partnerId: number;
+    name: string;
+    key?: string;
+    durationMinutes?: number;
+    bufferAfterMinutes?: number;
+    color?: string;
+    price?: number;
+    locationType?: 'on_site' | 'studio' | 'online' | 'flexible';
+    isActive?: boolean;
+  }): Promise<{ session_type_id: number; name: string }> {
+    const res = await this.context.post('/api/e2e/seed/session-type', {
+      data: {
+        partner_id: data.partnerId,
+        name: data.name,
+        key: data.key,
+        duration_minutes: data.durationMinutes,
+        buffer_after_minutes: data.bufferAfterMinutes,
+        color: data.color,
+        price: data.price,
+        location_type: data.locationType,
+        is_active: data.isActive,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed session type failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Foglalás (Booking) gyors létrehozás */
+  async seedBooking(data: {
+    partnerId: number;
+    sessionTypeId: number;
+    date: string;
+    startTime: string;
+    contactName: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    schoolName?: string;
+    status?: 'requested' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+    source?: 'manual' | 'public_link' | 'csv_import';
+  }): Promise<{ booking_id: number; booking_number: string; uuid: string }> {
+    const res = await this.context.post('/api/e2e/seed/booking', {
+      data: {
+        partner_id: data.partnerId,
+        session_type_id: data.sessionTypeId,
+        date: data.date,
+        start_time: data.startTime,
+        contact_name: data.contactName,
+        contact_email: data.contactEmail,
+        contact_phone: data.contactPhone,
+        school_name: data.schoolName,
+        status: data.status,
+        source: data.source,
+      },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed booking failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
+  /** Elérhetőségi minta létrehozás (hétfő-péntek 9-17) */
+  async seedAvailability(data: {
+    partnerId: number;
+  }): Promise<{ patterns_count: number; booking_slug: string }> {
+    const res = await this.context.post('/api/e2e/seed/availability', {
+      data: { partner_id: data.partnerId },
+    });
+    if (!res.ok()) {
+      throw new Error(`Seed availability failed: ${res.status()} ${await res.text()}`);
+    }
+    return res.json();
+  }
+
   // ─── Auth Endpoints ────────────────────────────────────
 
   /** Bejelentkezés és token visszaadás */

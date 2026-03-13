@@ -4,7 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '../../../../shared/constants/icons.constants';
 import { PrintShopService } from '../../services/print-shop.service';
-import { PrintShopConnectionRequest } from '../../models/print-shop.models';
+import { PrintShopConnection, PrintShopConnectionRequest } from '../../models/print-shop.models';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -23,14 +23,18 @@ export class PrintShopConnectionsComponent implements OnInit {
 
   readonly ICONS = ICONS;
 
+  activeConnections = signal<PrintShopConnection[]>([]);
   incoming = signal<PrintShopConnectionRequest[]>([]);
   outgoing = signal<PrintShopConnectionRequest[]>([]);
   loading = signal(true);
   actionLoadingId = signal<number | null>(null);
 
-  // Elutasítás megerősítés
+  // Elutasítás / leválasztás megerősítés
   showRejectConfirm = signal(false);
   pendingRejectRequest = signal<PrintShopConnectionRequest | null>(null);
+
+  showDisconnectConfirm = signal(false);
+  pendingDisconnect = signal<PrintShopConnection | null>(null);
 
   ngOnInit(): void {
     this.loadRequests();
@@ -38,6 +42,16 @@ export class PrintShopConnectionsComponent implements OnInit {
 
   loadRequests(): void {
     this.loading.set(true);
+
+    // Aktív kapcsolatok betöltése
+    this.service.getConnections()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.activeConnections.set(data),
+        error: () => {},
+      });
+
+    // Kérelmek betöltése
     this.service.getConnectionRequests()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -114,6 +128,35 @@ export class PrintShopConnectionsComponent implements OnInit {
           this.actionLoadingId.set(null);
         },
       });
+  }
+
+  confirmDisconnect(connection: PrintShopConnection): void {
+    this.pendingDisconnect.set(connection);
+    this.showDisconnectConfirm.set(true);
+  }
+
+  onDisconnectResult(result: { action: 'confirm' | 'cancel' }): void {
+    if (result.action === 'confirm') {
+      const conn = this.pendingDisconnect();
+      if (conn) {
+        this.actionLoadingId.set(conn.id);
+        this.service.removeConnection(conn.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (res) => {
+              this.toast.success('Siker', res.message);
+              this.actionLoadingId.set(null);
+              this.loadRequests();
+            },
+            error: (err) => {
+              this.toast.error('Hiba', err.error?.message ?? 'Nem sikerült leválasztani.');
+              this.actionLoadingId.set(null);
+            },
+          });
+      }
+    }
+    this.showDisconnectConfirm.set(false);
+    this.pendingDisconnect.set(null);
   }
 
   formatDate(dateStr: string): string {

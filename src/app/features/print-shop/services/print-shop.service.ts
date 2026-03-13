@@ -8,6 +8,7 @@ import {
   PrintShopProject,
   PrintShopProjectDetail,
   PrintShopProjectListParams,
+  PrintShopConnection,
   PrintShopConnectionRequests,
   PrintShopDashboardData,
   PaginatedResponse,
@@ -63,6 +64,12 @@ export class PrintShopService {
   }
 
   // === Connection endpoints ===
+
+  getConnections(): Observable<PrintShopConnection[]> {
+    return this.http.get<PaginatedResponse<PrintShopConnection>>(`${this.baseUrl}/connections`).pipe(
+      map(res => res.data)
+    );
+  }
 
   getConnectionRequests(): Observable<PrintShopConnectionRequests> {
     return this.http.get<{ data: PrintShopConnectionRequests }>(`${this.baseUrl}/connection-requests`).pipe(

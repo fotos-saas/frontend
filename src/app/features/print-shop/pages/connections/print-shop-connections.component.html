@@ -117,11 +117,68 @@
       </section>
     }
 
-    <!-- Ha nincs egy kérelem se -->
-    @if (incoming().length === 0 && outgoing().length === 0) {
+    <!-- Aktív kapcsolatok -->
+    @if (activeConnections().length > 0) {
+      <section class="section">
+        <div class="section-header">
+          <h2>
+            <lucide-icon [name]="ICONS.USERS" [size]="20" />
+            Aktív kapcsolatok
+          </h2>
+          <span class="badge badge--green">{{ activeConnections().length }}</span>
+        </div>
+
+        <div class="request-list">
+          @for (conn of activeConnections(); track conn.id) {
+            <div class="request-card request-card--active">
+              <div class="request-info">
+                <div class="request-name">
+                  <lucide-icon [name]="ICONS.CAMERA" [size]="18" class="name-icon" />
+                  <span>{{ conn.photoStudio.name }}</span>
+                </div>
+                @if (conn.photoStudio.email) {
+                  <div class="request-detail">
+                    <lucide-icon [name]="ICONS.MAIL" [size]="14" />
+                    {{ conn.photoStudio.email }}
+                  </div>
+                }
+                @if (conn.photoStudio.phone) {
+                  <div class="request-detail">
+                    <lucide-icon [name]="ICONS.PHONE" [size]="14" />
+                    {{ conn.photoStudio.phone }}
+                  </div>
+                }
+                <div class="request-detail request-detail--muted">
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+                  Kapcsolódva: {{ formatDate(conn.createdAt) }}
+                </div>
+              </div>
+              <div class="request-actions">
+                <button
+                  class="btn btn--outline btn--sm btn--danger-outline"
+                  matTooltip="Kapcsolat megszüntetése"
+                  [disabled]="actionLoadingId() === conn.id"
+                  (click)="confirmDisconnect(conn)"
+                >
+                  @if (actionLoadingId() === conn.id) {
+                    <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.UNLINK" [size]="16" />
+                  }
+                  Leválasztás
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Ha nincs semmi (se kapcsolat, se kérelem) -->
+    @if (activeConnections().length === 0 && incoming().length === 0 && outgoing().length === 0) {
       <div class="all-empty">
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="48" class="all-empty-icon" />
-        <p>Nincs függőben lévő kérelem</p>
+        <p>Nincs kapcsolat és függőben lévő kérelem</p>
         <span class="all-empty-hint">A fotós stúdiók a rendszeren belül küldhetnek kapcsolódási kérelmet.</span>
       </div>
     }
@@ -135,5 +192,15 @@
     [message]="'Biztosan elutasítod ' + pendingRejectRequest()?.photoStudio?.name + ' kapcsolódási kérelmét?'"
     confirmText="Elutasítás"
     (resultEvent)="onRejectResult($event)"
+  />
+}
+
+<!-- Leválasztás megerősítés -->
+@if (showDisconnectConfirm()) {
+  <app-confirm-dialog
+    title="Kapcsolat megszüntetése"
+    [message]="'Biztosan megszünteted a kapcsolatot a következővel: ' + pendingDisconnect()?.photoStudio?.name + '?'"
+    confirmText="Leválasztás"
+    (resultEvent)="onDisconnectResult($event)"
   />
 }

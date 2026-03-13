@@ -9,6 +9,7 @@ import { OverlayQuickActionsService } from '../../overlay-quick-actions.service'
   standalone: true,
   imports: [LucideAngularModule, MatTooltipModule],
   templateUrl: './overlay-qa-panels.component.html',
+  styleUrl: './overlay-qa-panels.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverlayQaPanelsComponent {

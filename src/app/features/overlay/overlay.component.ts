@@ -1,5 +1,5 @@
 import {
-  Component, ChangeDetectionStrategy, signal, computed,
+  Component, ChangeDetectionStrategy, ViewEncapsulation, signal, computed,
   OnInit, DestroyRef, inject, NgZone,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,6 +48,7 @@ import { OverlayQaPanelsComponent } from './components/overlay-qa-panels/overlay
   ],
   templateUrl: './overlay.component.html',
   styleUrl: './overlay.component.scss',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:click)': 'onDocumentClick($event)' },
 })

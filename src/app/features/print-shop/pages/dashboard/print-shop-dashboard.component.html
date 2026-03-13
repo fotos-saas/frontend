@@ -27,16 +27,6 @@
       </div>
     </a>
 
-    <a class="stat-card stat-card--link" routerLink="/print-shop/connections">
-      <div class="stat-icon stat-icon--blue">
-        <lucide-icon [name]="ICONS.BUILDING" [size]="22"></lucide-icon>
-      </div>
-      <div class="stat-content">
-        <span class="stat-value">{{ stats().connected_studios }}</span>
-        <span class="stat-label">Stúdió</span>
-      </div>
-    </a>
-
     @if (stats().pending_requests > 0) {
       <a class="stat-card stat-card--link" routerLink="/print-shop/connections">
         <div class="stat-icon stat-icon--amber">
@@ -55,7 +45,7 @@
     <div class="worktable">
       <div class="worktable__header">
         <span class="worktable__col worktable__col--name">Projekt</span>
-        <span class="worktable__col worktable__col--studio">Stúdió</span>
+
         <span class="worktable__col worktable__col--size">Méret</span>
         <span class="worktable__col worktable__col--days">Várakozás</span>
         <span class="worktable__col worktable__col--actions"></span>
@@ -63,7 +53,7 @@
       @for (i of [1, 2, 3, 4, 5]; track i) {
         <div class="worktable__row worktable__row--skeleton">
           <span class="skeleton-bar skeleton-bar--long"></span>
-          <span class="skeleton-bar skeleton-bar--mid"></span>
+
           <span class="skeleton-bar skeleton-bar--short"></span>
           <span class="skeleton-bar skeleton-bar--short"></span>
           <span class="skeleton-bar skeleton-bar--short"></span>
@@ -76,7 +66,7 @@
     <div class="worktable">
       <div class="worktable__header">
         <span class="worktable__col worktable__col--name">Projekt</span>
-        <span class="worktable__col worktable__col--studio">Stúdió</span>
+
         <span class="worktable__col worktable__col--size">Méret</span>
         <span class="worktable__col worktable__col--days">Várakozás</span>
         <span class="worktable__col worktable__col--actions"></span>
@@ -96,11 +86,6 @@
                 {{ project.schoolName }}@if (project.schoolName && project.className) {<span> · </span>}{{ project.className }}
               </span>
             }
-          </div>
-
-          <!-- Stúdió -->
-          <div class="worktable__col worktable__col--studio">
-            <span class="worktable__studio-name">{{ project.studioName ?? '–' }}</span>
           </div>
 
           <!-- Méret -->

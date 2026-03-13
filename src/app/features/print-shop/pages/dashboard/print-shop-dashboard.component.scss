@@ -1,8 +1,5 @@
 .print-shop-dashboard {
-  padding: 24px 0;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  padding-top: 0;
 }
 
 /* ============ Welcome ============ */
@@ -30,7 +27,6 @@
 }
 
 .stat-card {
-  background: #fff;
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -79,7 +75,6 @@
 
 /* ============ Worktable ============ */
 .worktable {
-  background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   overflow: hidden;

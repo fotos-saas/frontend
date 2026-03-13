@@ -70,19 +70,21 @@ export class PrintShopProjectsComponent {
   );
 
   constructor() {
-    // URL query params → initial filter state
-    const params = this.route.snapshot.queryParams;
-    if (params['status'] === 'in_print' || params['status'] === 'done' || params['status'] === '') {
-      this.statusFilter.set(params['status'] || '');
-    }
-    if (params['class_year']) {
-      this.classYearFilter.set(params['class_year']);
-    }
-    if (params['project_id']) {
-      this.projectIdFilter.set(Number(params['project_id']));
-      this.statusFilter.set('');
-      this.classYearFilter.set('');
-    }
+    // URL query params → filter state (snapshot az első betöltéshez)
+    this.applyQueryParams(this.route.snapshot.queryParams);
+
+    // Query param változás figyelése (ha már az oldalon vagyunk és értesítésre kattintunk)
+    this.route.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(params => {
+      if (params['project_id']) {
+        this.projectIdFilter.set(Number(params['project_id']));
+        this.statusFilter.set('');
+        this.classYearFilter.set('');
+        this.currentPage.set(1);
+        this.loadProjects();
+      }
+    });
 
     // Search debounce
     this.searchSubject.pipe(
@@ -98,6 +100,20 @@ export class PrintShopProjectsComponent {
     // Load studios + projects
     this.loadStudios();
     this.loadProjects();
+  }
+
+  private applyQueryParams(params: Record<string, string>): void {
+    if (params['status'] === 'in_print' || params['status'] === 'done' || params['status'] === '') {
+      this.statusFilter.set(params['status'] || '');
+    }
+    if (params['class_year']) {
+      this.classYearFilter.set(params['class_year']);
+    }
+    if (params['project_id']) {
+      this.projectIdFilter.set(Number(params['project_id']));
+      this.statusFilter.set('');
+      this.classYearFilter.set('');
+    }
   }
 
   onSearchInput(value: string): void {

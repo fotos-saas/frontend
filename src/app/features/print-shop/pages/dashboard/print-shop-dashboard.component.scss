@@ -1,4 +1,14 @@
-.print-shop-dashboard { padding: 24px 0; }
+.print-shop-dashboard {
+  padding: 24px 0;
+  /* Override a page-card glassmorphism — a dashboard átlátszó,
+     stat kártyák és worktable saját fehér dobozok */
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  transform: none !important;
+}
 
 /* ============ Welcome ============ */
 .welcome-section { margin-bottom: 24px; }

@@ -9,6 +9,7 @@ import {
   PrintShopProjectDetail,
   PrintShopProjectListParams,
   PrintShopConnectionRequests,
+  PrintShopDashboardData,
   PaginatedResponse,
 } from '../models/print-shop.models';
 
@@ -19,6 +20,12 @@ export class PrintShopService {
 
   getStats(): Observable<PrintShopStats> {
     return this.http.get<{ data: PrintShopStats }>(`${this.baseUrl}/stats`).pipe(
+      map(res => res.data)
+    );
+  }
+
+  getDashboardData(): Observable<PrintShopDashboardData> {
+    return this.http.get<{ data: PrintShopDashboardData }>(`${this.baseUrl}/dashboard-data`).pipe(
       map(res => res.data)
     );
   }
@@ -81,9 +88,12 @@ export class PrintShopService {
       observe: 'response',
     }).pipe(
       map(response => {
+        if (!response.body) {
+          throw new Error('A letöltött fájl üres');
+        }
         const disposition = response.headers.get('Content-Disposition');
         const fileName = disposition?.match(/filename="?([^"]+)"?/)?.[1] ?? `download-${projectId}`;
-        return { blob: response.body!, fileName };
+        return { blob: response.body, fileName };
       })
     );
   }

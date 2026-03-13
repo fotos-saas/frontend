@@ -91,5 +91,28 @@ export interface PrintShopConnectionRequests {
   outgoing: PrintShopConnectionRequest[];
 }
 
+// === Dashboard modellek ===
+
+export interface PrintShopDashboardProject {
+  id: number;
+  name: string;
+  schoolName: string | null;
+  className: string | null;
+  tabloSize: string | null;
+  studioName: string | null;
+  inPrintAt: string | null;
+  daysWaiting: number;
+  urgency: 'normal' | 'warning' | 'critical';
+  hasPrintFile: boolean;
+  printFileType: string | null;
+  hasSample: boolean;
+  thumbnailUrl: string | null;
+}
+
+export interface PrintShopDashboardData {
+  recent_projects: PrintShopDashboardProject[];
+  overdue_projects: PrintShopDashboardProject[];
+}
+
 // Re-export from canonical source
 export type { PaginatedResponse } from '../../../core/models/api.models';

@@ -58,6 +58,7 @@ export interface PrintShopProjectListParams {
   search?: string;
   studio_id?: number | null;
   class_year?: string;
+  project_id?: number | null;
 }
 
 // === Connection modellek ===

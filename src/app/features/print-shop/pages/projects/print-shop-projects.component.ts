@@ -40,6 +40,7 @@ export class PrintShopProjectsComponent {
   classYearFilter = signal<string>(new Date().getFullYear().toString());
   studioFilter = signal<number | null>(null);
   searchQuery = signal('');
+  projectIdFilter = signal<number | null>(null);
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
 
@@ -64,7 +65,8 @@ export class PrintShopProjectsComponent {
     this.statusFilter() !== 'in_print' ||
     this.classYearFilter() !== new Date().getFullYear().toString() ||
     this.studioFilter() !== null ||
-    this.searchQuery() !== ''
+    this.searchQuery() !== '' ||
+    this.projectIdFilter() !== null
   );
 
   constructor() {
@@ -76,8 +78,10 @@ export class PrintShopProjectsComponent {
     if (params['class_year']) {
       this.classYearFilter.set(params['class_year']);
     }
-    if (params['search']) {
-      this.searchQuery.set(params['search']);
+    if (params['project_id']) {
+      this.projectIdFilter.set(Number(params['project_id']));
+      this.statusFilter.set('');
+      this.classYearFilter.set('');
     }
 
     // Search debounce
@@ -125,6 +129,7 @@ export class PrintShopProjectsComponent {
     this.classYearFilter.set(new Date().getFullYear().toString());
     this.studioFilter.set(null);
     this.searchQuery.set('');
+    this.projectIdFilter.set(null);
     this.currentPage.set(1);
     this.updateUrl();
     this.loadProjects();
@@ -277,6 +282,7 @@ export class PrintShopProjectsComponent {
       search: this.searchQuery() || undefined,
       studio_id: this.studioFilter(),
       class_year: this.classYearFilter() || undefined,
+      project_id: this.projectIdFilter(),
     }).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: PaginatedResponse<PrintShopProject>) => {

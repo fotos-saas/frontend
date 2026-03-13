@@ -39,6 +39,7 @@ export class PrintShopService {
     if (params.search) httpParams = httpParams.set('search', params.search);
     if (params.studio_id) httpParams = httpParams.set('studio_id', params.studio_id);
     if (params.class_year) httpParams = httpParams.set('class_year', params.class_year);
+    if (params.project_id) httpParams = httpParams.set('project_id', params.project_id);
 
     return this.http.get<PaginatedResponse<PrintShopProject>>(`${this.baseUrl}/projects`, { params: httpParams });
   }

@@ -33,13 +33,11 @@ export class PrintShopDashboardComponent {
     pending_requests: 0,
   });
 
-  recentProjects = signal<PrintShopDashboardProject[]>([]);
-  overdueProjects = signal<PrintShopDashboardProject[]>([]);
+  /** Összes nyomdában lévő projekt — legrégebbi elöl */
+  allProjects = signal<PrintShopDashboardProject[]>([]);
   markingDone = signal<number | null>(null);
 
-  hasRecentProjects = computed(() => this.recentProjects().length > 0);
-  hasOverdueProjects = computed(() => this.overdueProjects().length > 0);
-  hasAnyProjects = computed(() => this.hasRecentProjects() || this.hasOverdueProjects());
+  hasProjects = computed(() => this.allProjects().length > 0);
 
   constructor() {
     this.loadData();
@@ -53,8 +51,7 @@ export class PrintShopDashboardComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.recentProjects.update(list => list.filter(p => p.id !== project.id));
-          this.overdueProjects.update(list => list.filter(p => p.id !== project.id));
+          this.allProjects.update(list => list.filter(p => p.id !== project.id));
           this.stats.update(s => ({
             ...s,
             in_print: Math.max(0, s.in_print - 1),
@@ -87,19 +84,16 @@ export class PrintShopDashboardComponent {
       });
   }
 
-  formatDaysWaiting(days: number): string {
-    if (days === 0) return 'Ma érkezett';
-    if (days === 1) return 'Tegnap';
+  formatDays(days: number): string {
+    if (days === 0) return 'ma';
+    if (days === 1) return '1 napja';
     return `${days} napja`;
   }
 
   formatArrivalTooltip(project: PrintShopDashboardProject): string {
     if (!project.inPrintAt) return 'Beérkezett';
     const d = new Date(project.inPrintAt);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `Beérkezett: ${year}.${month}.${day}.`;
+    return `Beérkezett: ${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}.`;
   }
 
   private loadData(): void {
@@ -112,8 +106,9 @@ export class PrintShopDashboardComponent {
         next: ({ stats, dashboard }) => {
           this.partnerName.set(stats.partner_name);
           this.stats.set(stats.stats);
-          this.recentProjects.set(dashboard.recent_projects);
-          this.overdueProjects.set(dashboard.overdue_projects);
+          // Egyetlen lista: overdue (legrégebbi) elöl, utána recent
+          const merged = [...dashboard.overdue_projects, ...dashboard.recent_projects];
+          this.allProjects.set(merged);
           this.loading.set(false);
         },
         error: () => {

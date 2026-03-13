@@ -1,261 +1,166 @@
 <div class="print-shop-dashboard page-card">
-  <!-- Üdvözlő fejléc -->
+  <!-- Fejléc -->
   <div class="welcome-section">
-    <h1 class="welcome-title">Üdvözöljük, {{ partnerName() }}!</h1>
+    <h1 class="welcome-title">{{ partnerName() }}</h1>
     <p class="welcome-subtitle">Nyomdai vezérlőpult</p>
   </div>
 
-  <!-- Statisztika kártyák -->
+  <!-- Stat kártyák -->
   <div class="stats-grid">
     <a class="stat-card stat-card--link" routerLink="/print-shop/projects" [queryParams]="{status: 'in_print'}">
       <div class="stat-icon">
-        <lucide-icon [name]="ICONS.PRINTER" [size]="24"></lucide-icon>
+        <lucide-icon [name]="ICONS.PRINTER" [size]="22"></lucide-icon>
       </div>
       <div class="stat-content">
         <span class="stat-value">{{ stats().in_print }}</span>
-        <span class="stat-label">Nyomdában lévő projekt</span>
+        <span class="stat-label">Nyomdában</span>
       </div>
     </a>
 
-    <div class="stat-card">
+    <a class="stat-card stat-card--link" routerLink="/print-shop/projects" [queryParams]="{status: 'done'}">
       <div class="stat-icon stat-icon--green">
-        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="24"></lucide-icon>
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="22"></lucide-icon>
       </div>
       <div class="stat-content">
         <span class="stat-value">{{ stats().done_this_month }}</span>
-        <span class="stat-label">Befejezett (hónap)</span>
+        <span class="stat-label">Kész (hónap)</span>
       </div>
-    </div>
+    </a>
 
-    <div class="stat-card">
+    <a class="stat-card stat-card--link" routerLink="/print-shop/connections">
       <div class="stat-icon stat-icon--blue">
-        <lucide-icon [name]="ICONS.BUILDING" [size]="24"></lucide-icon>
+        <lucide-icon [name]="ICONS.BUILDING" [size]="22"></lucide-icon>
       </div>
       <div class="stat-content">
         <span class="stat-value">{{ stats().connected_studios }}</span>
-        <span class="stat-label">Kapcsolt stúdió</span>
+        <span class="stat-label">Stúdió</span>
       </div>
-    </div>
+    </a>
 
-    <div class="stat-card">
-      <div class="stat-icon stat-icon--amber">
-        <lucide-icon [name]="ICONS.CLOCK" [size]="24"></lucide-icon>
-      </div>
-      <div class="stat-content">
-        <span class="stat-value">{{ stats().pending_requests }}</span>
-        <span class="stat-label">Függő kapcsolatkérés</span>
-      </div>
-    </div>
+    @if (stats().pending_requests > 0) {
+      <a class="stat-card stat-card--link" routerLink="/print-shop/connections">
+        <div class="stat-icon stat-icon--amber">
+          <lucide-icon [name]="ICONS.CLOCK" [size]="22"></lucide-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ stats().pending_requests }}</span>
+          <span class="stat-label">Függő kérés</span>
+        </div>
+      </a>
+    }
   </div>
 
-  <!-- Loading skeleton -->
+  <!-- Aktuális munkák lista -->
   @if (loading()) {
-    <div class="section-skeleton">
-      @for (i of [1, 2, 3]; track i) {
-        <div class="skeleton-card">
-          <div class="skeleton-thumb"></div>
-          <div class="skeleton-lines">
-            <div class="skeleton-line skeleton-line--wide"></div>
-            <div class="skeleton-line skeleton-line--narrow"></div>
-          </div>
+    <div class="worktable">
+      <div class="worktable__header">
+        <span class="worktable__col worktable__col--name">Projekt</span>
+        <span class="worktable__col worktable__col--studio">Stúdió</span>
+        <span class="worktable__col worktable__col--size">Méret</span>
+        <span class="worktable__col worktable__col--days">Várakozás</span>
+        <span class="worktable__col worktable__col--actions"></span>
+      </div>
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="worktable__row worktable__row--skeleton">
+          <span class="skeleton-bar skeleton-bar--long"></span>
+          <span class="skeleton-bar skeleton-bar--mid"></span>
+          <span class="skeleton-bar skeleton-bar--short"></span>
+          <span class="skeleton-bar skeleton-bar--short"></span>
+          <span class="skeleton-bar skeleton-bar--short"></span>
         </div>
       }
     </div>
   }
 
-  <!-- Régóta várakozó projektek (piros szekció — fontosabb, ezért fent) -->
-  @if (!loading() && hasOverdueProjects()) {
-    <section class="dashboard-section dashboard-section--overdue">
-      <div class="section-header">
-        <div class="section-title-group">
-          <div class="section-icon section-icon--critical">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20"></lucide-icon>
+  @if (!loading() && hasProjects()) {
+    <div class="worktable">
+      <div class="worktable__header">
+        <span class="worktable__col worktable__col--name">Projekt</span>
+        <span class="worktable__col worktable__col--studio">Stúdió</span>
+        <span class="worktable__col worktable__col--size">Méret</span>
+        <span class="worktable__col worktable__col--days">Várakozás</span>
+        <span class="worktable__col worktable__col--actions"></span>
+      </div>
+
+      @for (project of allProjects(); track project.id; let i = $index) {
+        <div class="worktable__row"
+             [class.worktable__row--warning]="project.urgency === 'warning'"
+             [class.worktable__row--critical]="project.urgency === 'critical'"
+             [style.animation-delay]="i * 0.03 + 's'">
+
+          <!-- Projekt név + iskola + osztály -->
+          <div class="worktable__col worktable__col--name">
+            <span class="worktable__name" [matTooltip]="project.name">{{ project.name }}</span>
+            @if (project.schoolName || project.className) {
+              <span class="worktable__sub">
+                {{ project.schoolName }}@if (project.schoolName && project.className) {<span> · </span>}{{ project.className }}
+              </span>
+            }
           </div>
-          <div>
-            <h2 class="section-title">Régóta várakozó projektek</h2>
-            <p class="section-subtitle">Több mint 7 napja nyomdában — érdemes rájuk figyelni</p>
+
+          <!-- Stúdió -->
+          <div class="worktable__col worktable__col--studio">
+            <span class="worktable__studio-name">{{ project.studioName ?? '–' }}</span>
+          </div>
+
+          <!-- Méret -->
+          <div class="worktable__col worktable__col--size">
+            {{ project.tabloSize ?? '–' }}
+          </div>
+
+          <!-- Várakozás (napok) -->
+          <div class="worktable__col worktable__col--days"
+               [matTooltip]="formatArrivalTooltip(project)">
+            <span class="days-indicator"
+                  [class.days-indicator--warning]="project.urgency === 'warning'"
+                  [class.days-indicator--critical]="project.urgency === 'critical'">
+            </span>
+            {{ formatDays(project.daysWaiting) }}
+          </div>
+
+          <!-- Műveletek -->
+          <div class="worktable__col worktable__col--actions">
+            @if (project.hasPrintFile) {
+              <button class="row-btn"
+                      (click)="downloadFile(project)"
+                      aria-label="Letöltés"
+                      matTooltip="Nyomdakész fájl letöltése">
+                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="15"></lucide-icon>
+              </button>
+            }
+            <button class="row-btn row-btn--done"
+                    (click)="markProjectDone(project)"
+                    [disabled]="markingDone() === project.id"
+                    aria-label="Készre állítás"
+                    matTooltip="Kész — kinyomtatva">
+              @if (markingDone() === project.id) {
+                <span class="btn-spinner"></span>
+              } @else {
+                <lucide-icon [name]="ICONS.CHECK" [size]="15"></lucide-icon>
+              }
+            </button>
           </div>
         </div>
-        <span class="section-badge section-badge--critical">{{ overdueProjects().length }}</span>
-      </div>
+      }
+    </div>
 
-      <div class="project-grid">
-        @for (project of overdueProjects(); track project.id; let i = $index) {
-          <div class="project-card project-card--critical" [style.animation-delay]="i * 0.04 + 's'">
-            <div class="project-card__top">
-              <!-- Thumbnail -->
-              <div class="project-card__thumb">
-                @if (project.thumbnailUrl) {
-                  <img [src]="project.thumbnailUrl" [alt]="project.name" loading="lazy" />
-                } @else {
-                  <div class="project-card__thumb-placeholder">
-                    <lucide-icon [name]="ICONS.IMAGE" [size]="20"></lucide-icon>
-                  </div>
-                }
-              </div>
-
-              <!-- Badge: napok száma -->
-              <span class="days-badge days-badge--critical" [matTooltip]="formatArrivalTooltip(project)">
-                {{ formatDaysWaiting(project.daysWaiting) }}
-              </span>
-            </div>
-
-            <div class="project-card__body">
-              <h3 class="project-card__name" [matTooltip]="project.name">{{ project.name }}</h3>
-
-              @if (project.schoolName) {
-                <p class="project-card__detail">
-                  <lucide-icon [name]="ICONS.BUILDING" [size]="13"></lucide-icon>
-                  {{ project.schoolName }}
-                </p>
-              }
-              @if (project.className) {
-                <p class="project-card__detail">
-                  <lucide-icon [name]="ICONS.USERS" [size]="13"></lucide-icon>
-                  {{ project.className }}
-                </p>
-              }
-
-              <div class="project-card__meta">
-                @if (project.studioName) {
-                  <span class="project-card__studio">{{ project.studioName }}</span>
-                }
-                @if (project.tabloSize) {
-                  <span class="project-card__size">{{ project.tabloSize }}</span>
-                }
-              </div>
-            </div>
-
-            <div class="project-card__actions">
-              @if (project.hasPrintFile) {
-                <button class="action-btn action-btn--download"
-                        (click)="downloadFile(project)"
-                        aria-label="Nyomdakész fájl letöltése"
-                        matTooltip="Nyomdakész fájl letöltése">
-                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="15"></lucide-icon>
-                </button>
-              }
-              <button class="action-btn action-btn--done"
-                      (click)="markProjectDone(project)"
-                      [disabled]="markingDone() === project.id"
-                      aria-label="Készre állítás"
-                      matTooltip="Készre állítás">
-                @if (markingDone() === project.id) {
-                  <span class="btn-spinner"></span>
-                } @else {
-                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="15"></lucide-icon>
-                }
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  }
-
-  <!-- Újonnan beérkezett projektek -->
-  @if (!loading() && hasRecentProjects()) {
-    <section class="dashboard-section dashboard-section--recent">
-      <div class="section-header">
-        <div class="section-title-group">
-          <div class="section-icon section-icon--recent">
-            <lucide-icon [name]="ICONS.INBOX" [size]="20"></lucide-icon>
-          </div>
-          <div>
-            <h2 class="section-title">Újonnan beérkezett</h2>
-            <p class="section-subtitle">Az elmúlt 7 napban érkezett projektek</p>
-          </div>
-        </div>
-        <span class="section-badge section-badge--recent">{{ recentProjects().length }}</span>
-      </div>
-
-      <div class="project-grid">
-        @for (project of recentProjects(); track project.id; let i = $index) {
-          <div class="project-card"
-               [class.project-card--warning]="project.urgency === 'warning'"
-               [style.animation-delay]="i * 0.04 + 's'">
-            <div class="project-card__top">
-              <div class="project-card__thumb">
-                @if (project.thumbnailUrl) {
-                  <img [src]="project.thumbnailUrl" [alt]="project.name" loading="lazy" />
-                } @else {
-                  <div class="project-card__thumb-placeholder">
-                    <lucide-icon [name]="ICONS.IMAGE" [size]="20"></lucide-icon>
-                  </div>
-                }
-              </div>
-
-              <span class="days-badge"
-                    [class.days-badge--warning]="project.urgency === 'warning'"
-                    [matTooltip]="formatArrivalTooltip(project)">
-                {{ formatDaysWaiting(project.daysWaiting) }}
-              </span>
-            </div>
-
-            <div class="project-card__body">
-              <h3 class="project-card__name" [matTooltip]="project.name">{{ project.name }}</h3>
-
-              @if (project.schoolName) {
-                <p class="project-card__detail">
-                  <lucide-icon [name]="ICONS.BUILDING" [size]="13"></lucide-icon>
-                  {{ project.schoolName }}
-                </p>
-              }
-              @if (project.className) {
-                <p class="project-card__detail">
-                  <lucide-icon [name]="ICONS.USERS" [size]="13"></lucide-icon>
-                  {{ project.className }}
-                </p>
-              }
-
-              <div class="project-card__meta">
-                @if (project.studioName) {
-                  <span class="project-card__studio">{{ project.studioName }}</span>
-                }
-                @if (project.tabloSize) {
-                  <span class="project-card__size">{{ project.tabloSize }}</span>
-                }
-              </div>
-            </div>
-
-            <div class="project-card__actions">
-              @if (project.hasPrintFile) {
-                <button class="action-btn action-btn--download"
-                        (click)="downloadFile(project)"
-                        aria-label="Nyomdakész fájl letöltése"
-                        matTooltip="Nyomdakész fájl letöltése">
-                  <lucide-icon [name]="ICONS.DOWNLOAD" [size]="15"></lucide-icon>
-                </button>
-              }
-              <button class="action-btn action-btn--done"
-                      (click)="markProjectDone(project)"
-                      [disabled]="markingDone() === project.id"
-                      aria-label="Készre állítás"
-                      matTooltip="Készre állítás">
-                @if (markingDone() === project.id) {
-                  <span class="btn-spinner"></span>
-                } @else {
-                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="15"></lucide-icon>
-                }
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  }
-
-  <!-- Üres állapot — nincs nyomdában projekt -->
-  @if (!loading() && !hasAnyProjects()) {
-    <div class="empty-dashboard">
-      <div class="empty-dashboard__icon">
-        <lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="48"></lucide-icon>
-      </div>
-      <h2 class="empty-dashboard__title">Nincs várakozó projekt</h2>
-      <p class="empty-dashboard__text">Jelenleg nincs nyomdában lévő anyag. Ha új projekt érkezik, itt fog megjelenni.</p>
-      <a class="empty-dashboard__link" routerLink="/print-shop/projects">
+    <!-- Link az összes projekthez -->
+    <div class="worktable-footer">
+      <a routerLink="/print-shop/projects" class="worktable-footer__link">
         Összes projekt megtekintése
-        <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="16"></lucide-icon>
+        <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14"></lucide-icon>
+      </a>
+    </div>
+  }
+
+  <!-- Üres állapot -->
+  @if (!loading() && !hasProjects()) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="40"></lucide-icon>
+      <p class="empty-state__text">Nincs nyomdában lévő projekt</p>
+      <a class="empty-state__link" routerLink="/print-shop/projects">
+        Összes projekt
+        <lucide-icon [name]="ICONS.ARROW_RIGHT" [size]="14"></lucide-icon>
       </a>
     </div>
   }

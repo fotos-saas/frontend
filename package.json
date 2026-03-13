@@ -22,7 +22,7 @@
     "e2e:debug": "playwright test --debug",
     "electron:compile": "tsc -p electron/tsconfig.json",
     "electron:compile:watch": "tsc -p electron/tsconfig.json --watch",
-    "electron:dev": "npm run electron:compile && concurrently \"npm run start\" \"npm run electron:compile:watch\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
+    "electron:dev": "npm run electron:compile && concurrently \"npm run start:local\" \"npm run electron:compile:watch\" \"wait-on http://localhost:4205 && NODE_ENV=development electron .\"",
     "electron:setup-portrait": "bash electron/scripts/portrait/setup-venv.sh",
     "electron:build": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --mac && npm run sentry:sourcemaps",
     "electron:build:win": "npm run electron:setup-portrait && npm run build && npm run electron:compile && electron-builder --win && npm run sentry:sourcemaps",

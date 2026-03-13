@@ -44,6 +44,21 @@ export class PrintShopProjectsComponent {
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
 
+  // Kijelölés
+  selectedIds = signal<Set<number>>(new Set());
+  lastClickedIndex = signal<number | null>(null);
+  batchDownloading = signal(false);
+
+  // Computed
+  selectedCount = computed(() => this.selectedIds().size);
+  allSelected = computed(() => {
+    const downloadable = this.projects().filter(p => p.hasPrintFile);
+    return downloadable.length > 0 && downloadable.every(p => this.selectedIds().has(p.id));
+  });
+  selectedDownloadable = computed(() =>
+    this.projects().filter(p => this.selectedIds().has(p.id) && p.hasPrintFile)
+  );
+
   // Mark-done / revert state
   markingDone = signal<number | null>(null);
   reverting = signal<number | null>(null);
@@ -242,6 +257,84 @@ export class PrintShopProjectsComponent {
     this.lightboxIndex.set(null);
   }
 
+  // === Kijelölés ===
+
+  toggleSelect(project: PrintShopProject, event: MouseEvent): void {
+    const projects = this.projects();
+    const clickedIndex = projects.findIndex(p => p.id === project.id);
+
+    if (event.shiftKey && this.lastClickedIndex() !== null) {
+      // Shift+klikk: tartomány kijelölés
+      const start = Math.min(this.lastClickedIndex()!, clickedIndex);
+      const end = Math.max(this.lastClickedIndex()!, clickedIndex);
+      const newSet = new Set(this.selectedIds());
+      for (let i = start; i <= end; i++) {
+        if (projects[i].hasPrintFile) {
+          newSet.add(projects[i].id);
+        }
+      }
+      this.selectedIds.set(newSet);
+    } else {
+      // Sima klikk: toggle
+      const newSet = new Set(this.selectedIds());
+      if (newSet.has(project.id)) {
+        newSet.delete(project.id);
+      } else {
+        newSet.add(project.id);
+      }
+      this.selectedIds.set(newSet);
+    }
+    this.lastClickedIndex.set(clickedIndex);
+  }
+
+  toggleSelectAll(): void {
+    const downloadable = this.projects().filter(p => p.hasPrintFile);
+    if (this.allSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(downloadable.map(p => p.id)));
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+    this.lastClickedIndex.set(null);
+  }
+
+  batchDownload(): void {
+    const ids = this.selectedDownloadable().map(p => p.id);
+    if (ids.length === 0) return;
+
+    this.batchDownloading.set(true);
+    this.service.batchDownload(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ blob, fileName }) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          a.click();
+          URL.revokeObjectURL(url);
+          this.batchDownloading.set(false);
+
+          // Letöltés időpont frissítése lokálisan
+          const now = new Date().toISOString();
+          const downloadedIds = new Set(ids);
+          this.projects.update(list =>
+            list.map(p => downloadedIds.has(p.id)
+              ? { ...p, printShopDownloadedAt: now }
+              : p
+            )
+          );
+          this.clearSelection();
+        },
+        error: () => {
+          this.batchDownloading.set(false);
+        }
+      });
+  }
+
   downloadFile(project: PrintShopProject): void {
     const type = project.printFileType === 'print_flat' ? 'flat' : 'small_tablo';
     this.triggerDownload(project.id, type);
@@ -262,10 +355,18 @@ export class PrintShopProjectsComponent {
           a.download = fileName;
           a.click();
           URL.revokeObjectURL(url);
+
+          // Letöltés időpont frissítése lokálisan
+          if (type !== 'sample') {
+            this.projects.update(list =>
+              list.map(p => p.id === projectId
+                ? { ...p, printShopDownloadedAt: new Date().toISOString() }
+                : p
+              )
+            );
+          }
         },
-        error: () => {
-          // Hiba esetén csendben marad
-        }
+        error: () => {}
       });
   }
 
@@ -290,6 +391,7 @@ export class PrintShopProjectsComponent {
 
   private loadProjects(): void {
     this.loading.set(true);
+    this.clearSelection();
 
     this.service.getProjects({
       page: this.currentPage(),

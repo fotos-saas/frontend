@@ -82,8 +82,42 @@
       }
     </div>
   } @else {
+    <!-- Batch toolbar -->
+    @if (selectedCount() > 0) {
+      <div class="batch-toolbar">
+        <span class="batch-toolbar__count">{{ selectedCount() }} kijelölve</span>
+        <button
+          class="batch-toolbar__btn batch-toolbar__btn--download"
+          [disabled]="batchDownloading() || selectedDownloadable().length === 0"
+          (click)="batchDownload()"
+          matTooltip="Kijelöltek letöltése ZIP-ben"
+        >
+          @if (batchDownloading()) {
+            <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
+            ZIP készítése...
+          } @else {
+            <lucide-icon [name]="ICONS.ARCHIVE" [size]="16"></lucide-icon>
+            Letöltés ({{ selectedDownloadable().length }})
+          }
+        </button>
+        <button class="batch-toolbar__btn batch-toolbar__btn--clear" (click)="clearSelection()">
+          <lucide-icon [name]="ICONS.X" [size]="16"></lucide-icon>
+          Mégsem
+        </button>
+      </div>
+    }
+
     <!-- Táblázat fejléc -->
     <div class="table-header">
+      <span class="th th-check">
+        <input
+          type="checkbox"
+          class="row-checkbox"
+          [checked]="allSelected()"
+          (change)="toggleSelectAll()"
+          matTooltip="Összes kijelölése"
+        />
+      </span>
       <span class="th th-thumb"></span>
       <span class="th th-name">Projekt</span>
       <span class="th th-studio">Stúdió</span>
@@ -96,7 +130,21 @@
     <!-- Lista -->
     <div class="row-grid">
       @for (project of projects(); track project.id; let i = $index) {
-        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+        <div class="list-row"
+             [class.list-row--selected]="selectedIds().has(project.id)"
+             [style.animation-delay]="i * 0.03 + 's'">
+          <!-- Checkbox -->
+          <div class="cell-check">
+            @if (project.hasPrintFile) {
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                [checked]="selectedIds().has(project.id)"
+                (click)="toggleSelect(project, $event)"
+              />
+            }
+          </div>
+
           <!-- Thumbnail -->
           <div class="cell-thumb">
             @if (project.thumbnailUrl) {
@@ -155,6 +203,11 @@
 
           <!-- Műveletek -->
           <div class="cell-actions">
+            @if (project.printShopDownloadedAt) {
+              <span class="downloaded-indicator" [matTooltip]="'Letöltve: ' + formatDate(project.printShopDownloadedAt)">
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon>
+              </span>
+            }
             @if (project.hasPrintFile) {
               <button
                 class="action-btn"

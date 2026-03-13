@@ -89,6 +89,22 @@ export class PrintShopService {
     return this.http.delete<{ message: string }>(`${this.baseUrl}/connections/${id}`);
   }
 
+  batchDownload(projectIds: number[]): Observable<{ blob: Blob; fileName: string }> {
+    return this.http.post(`${this.baseUrl}/projects/batch-download`, { project_ids: projectIds }, {
+      responseType: 'blob',
+      observe: 'response',
+    }).pipe(
+      map(response => {
+        if (!response.body) {
+          throw new Error('A letöltött fájl üres');
+        }
+        const disposition = response.headers.get('Content-Disposition');
+        const fileName = disposition?.match(/filename="?([^"]+)"?/)?.[1] ?? 'nyomdakesz.zip';
+        return { blob: response.body, fileName };
+      })
+    );
+  }
+
   downloadFile(projectId: number, type: string = 'small_tablo'): Observable<{ blob: Blob; fileName: string }> {
     return this.http.get(`${this.baseUrl}/projects/${projectId}/download`, {
       params: { type },

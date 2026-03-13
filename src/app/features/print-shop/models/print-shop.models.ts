@@ -31,6 +31,7 @@ export interface PrintShopProject {
   hasSample: boolean;
   thumbnailUrl: string | null;
   previewUrl: string | null;
+  printShopDownloadedAt: string | null;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

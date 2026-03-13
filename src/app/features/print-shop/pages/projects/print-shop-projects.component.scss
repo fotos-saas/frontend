@@ -2,7 +2,7 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --table-cols: 56px 1fr 140px 80px 100px 100px 90px;
+  --table-cols: 32px 56px 1fr 140px 80px 100px 100px 110px;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -221,10 +221,93 @@
   margin-top: 16px;
 }
 
+/* ============ Checkbox ============ */
+.cell-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.row-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary, #6d28d9);
+  cursor: pointer;
+}
+
+.list-row--selected {
+  background: rgba(109, 40, 217, 0.04);
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+/* ============ Batch Toolbar ============ */
+.batch-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  background: var(--color-primary, #6d28d9);
+  border-radius: 10px;
+  animation: cardEntry 0.2s ease forwards;
+  opacity: 0;
+}
+
+.batch-toolbar__count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  margin-right: auto;
+}
+
+.batch-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.15s;
+  margin-left: 8px;
+
+  lucide-icon {
+    margin-right: 6px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--download {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  &--clear {
+    background: transparent;
+    border-color: transparent;
+  }
+}
+
+/* ============ Downloaded Indicator ============ */
+.downloaded-indicator {
+  display: flex;
+  align-items: center;
+  color: #22c55e;
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 768px) {
   .print-shop-projects {
-    --table-cols: 40px 1fr 80px 80px;
+    --table-cols: 28px 40px 1fr 80px 80px;
   }
 
   .cell-studio,

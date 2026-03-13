@@ -104,16 +104,59 @@ export class PartnerNotificationService {
   }
 
   /**
-   * WebSocket feliratkozás a privát user csatornára.
+   * WebSocket kapcsolat inicializálása és feliratkozás a privát user csatornára.
    * Ha jön 'app.notification.created' event, azonnal frissíti a badge-et.
    */
   private subscribeToWebSocket(): void {
-    if (!environment.wsEnabled || !this.wsService.isConnected()) return;
+    if (!environment.wsEnabled) return;
 
     const user = this.authService.currentUserSignal();
     if (!user?.id) return;
 
-    this.wsChannelName = `App.Models.User.${user.id}`;
+    const token = this.authService.getMarketerToken();
+    if (!token) return;
+
+    // WebSocket connect indítása ha még nincs (partner shell-ben nincs külön init)
+    if (!this.wsService.isConnected()) {
+      this.wsService.connect(token);
+    }
+
+    // Várunk a connected állapotra, majd feliratkozunk
+    this.waitForConnectionAndSubscribe(user.id);
+  }
+
+  /**
+   * Megvárja a WebSocket connected állapotot, majd feliratkozik.
+   */
+  private waitForConnectionAndSubscribe(userId: number): void {
+    // Ha már connected, azonnal feliratkozunk
+    if (this.wsService.isConnected()) {
+      this.doSubscribe(userId);
+      return;
+    }
+
+    // Egyébként figyelünk a connection state-re (max 10s)
+    let attempts = 0;
+    const maxAttempts = 20;
+    const checkInterval = setInterval(() => {
+      attempts++;
+      if (this.wsService.isConnected()) {
+        clearInterval(checkInterval);
+        this.doSubscribe(userId);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        this.logger.warn('[PartnerNotification] WebSocket nem kapcsolódott 10s alatt, csak polling marad');
+      }
+    }, 500);
+
+    this.destroyRef.onDestroy(() => clearInterval(checkInterval));
+  }
+
+  /**
+   * Tényleges feliratkozás a privát csatornára.
+   */
+  private doSubscribe(userId: number): void {
+    this.wsChannelName = `App.Models.User.${userId}`;
 
     const channel = this.wsService.private(this.wsChannelName);
     if (!channel) return;

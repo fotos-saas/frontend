@@ -423,7 +423,7 @@ async function syncAuthToOverlay(): Promise<void> {
         const entries = {};
         for (let i = 0; i < sessionStorage.length; i++) {
           const key = sessionStorage.key(i);
-          if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+          if (key && (key === 'marketer_token' || key === 'marketer_user' || key.startsWith('tablo:'))) {
             entries[key] = sessionStorage.getItem(key);
           }
         }
@@ -460,7 +460,7 @@ function listenMainWindowAuthChanges(): void {
           const entries = {};
           for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
-            if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+            if (key && (key === 'marketer_token' || key === 'marketer_user' || key.startsWith('tablo:'))) {
               entries[key] = sessionStorage.getItem(key);
             }
           }

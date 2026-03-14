@@ -2073,6 +2073,96 @@
   }
 }
 
+// --- Shared Action Button (used by drag-order panel) ---
+.qa-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &--green {
+    border-color: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    &:hover { background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.35); }
+  }
+
+  &--blue {
+    border-color: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+    &:hover { background: rgba(96, 165, 250, 0.12); border-color: rgba(96, 165, 250, 0.35); }
+  }
+
+  &--purple {
+    border-color: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+    &:hover { background: rgba(167, 139, 250, 0.12); border-color: rgba(167, 139, 250, 0.35); }
+  }
+
+  &--toggle {
+    border-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+
+  &--sm {
+    padding: 3px 8px;
+    font-size: 10px;
+    gap: 3px;
+  }
+
+  &--amber {
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    &:hover { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.5); color: #fbbf24; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &--teal {
+    border-color: rgba(45, 212, 191, 0.25);
+    color: #2dd4bf;
+    &:hover { background: rgba(45, 212, 191, 0.12); border-color: rgba(45, 212, 191, 0.4); color: #5eead4; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &--cyan {
+    border-color: rgba(34, 211, 238, 0.25);
+    color: #22d3ee;
+    &:hover { background: rgba(34, 211, 238, 0.12); border-color: rgba(34, 211, 238, 0.4); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &--full {
+    width: 100%;
+    justify-content: center;
+    margin-top: 6px;
+    padding: 5px 10px;
+    gap: 5px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

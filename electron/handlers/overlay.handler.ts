@@ -183,6 +183,46 @@ export function registerOverlayHandlers(
     return { projectId: null };
   });
 
+  // Overlay kéri az auth token szinkront a main window-ból
+  ipcMain.handle('overlay:request-auth-sync', async () => {
+    const mainWindow = getMainWindow();
+    const overlayWin = getOverlayWindow();
+    if (!mainWindow || mainWindow.isDestroyed() || !overlayWin || overlayWin.isDestroyed()) {
+      return { success: false };
+    }
+    try {
+      const allEntries = await mainWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = {};
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+              entries[key] = sessionStorage.getItem(key);
+            }
+          }
+          return entries;
+        })()
+      `);
+      if (allEntries && Object.keys(allEntries).length > 0) {
+        const entriesJson = JSON.stringify(allEntries);
+        await overlayWin.webContents.executeJavaScript(`
+          (() => {
+            const entries = ${entriesJson};
+            Object.keys(entries).forEach(key => {
+              sessionStorage.setItem(key, entries[key]);
+            });
+          })()
+        `);
+        log.info('Auth synced to overlay (on-demand):', Object.keys(allEntries).join(', '));
+        return { success: true, keys: Object.keys(allEntries) };
+      }
+      return { success: false };
+    } catch (err) {
+      log.error('overlay:request-auth-sync error:', err);
+      return { success: false };
+    }
+  });
+
   // Click-through: az atlatszo terulet atenged a toolbar mogotti appnak
   ipcMain.on('overlay:set-ignore-mouse', (_event, ignore: boolean) => {
     const overlayWindow = getOverlayWindow();

@@ -42,6 +42,7 @@ testem.log
 
 # Playwright E2E tesztek
 playwright-report/
+playwright-report-journey/
 test-results/
 .auth/
 /e2e/.cache

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
 import { concatMap, scan, map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { chunkArray } from '@shared/utils/array.util';
 import {
   AlbumType,
   AlbumsSummary,
@@ -94,7 +95,7 @@ export class PartnerAlbumService {
    */
   uploadToAlbumChunked(projectId: number, album: AlbumType, files: File[]): Observable<UploadProgress> {
     const totalCount = files.length;
-    const chunks = this.chunkArray(files, this.CHUNK_SIZE);
+    const chunks = chunkArray(files, this.CHUNK_SIZE);
     const totalChunks = chunks.length;
 
     const initialState: UploadProgress = {
@@ -379,14 +380,4 @@ export class PartnerAlbumService {
     }>(`${this.baseUrl}/projects/${projectId}/albums/${album}/upload`, formData);
   }
 
-  /**
-   * Tömb chunk-okra bontása
-   */
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  }
 }

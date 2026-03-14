@@ -1,0 +1,271 @@
+<div class="drag-order-panel">
+  <div class="drag-order-panel__header">
+    <lucide-icon [name]="ICONS.GRIP" [size]="14" />
+    <span>Drag & Drop sorrend</span>
+    @if (dragOrderSelected().size > 0) {
+      <span class="drag-order-panel__sel-badge">{{ dragOrderSelected().size }} kijelölve</span>
+      <button class="drag-order-panel__sel-clear" (click)="clearDragOrderSelection()" type="button" matTooltip="Kijelölés törlése">
+        <lucide-icon [name]="ICONS.X" [size]="10" />
+      </button>
+    }
+    <button
+      class="drag-order-panel__refresh"
+      (click)="refreshDragOrder()"
+      [disabled]="dragOrderRefreshing()"
+      type="button"
+      matTooltip="Adatok frissítése"
+    >
+      @if (dragOrderRefreshing()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+      } @else {
+        <lucide-icon [name]="ICONS.REFRESH" [size]="12" />
+      }
+    </button>
+    <button class="drag-order-panel__close" (click)="onClose()" type="button">
+      <lucide-icon [name]="ICONS.X" [size]="14" />
+    </button>
+  </div>
+  <div class="drag-order-panel__body">
+    <div class="drag-order-panel__controls">
+      <div class="drag-order-panel__scope">
+        <span class="drag-order-panel__scope-label">Célcsoport</span>
+        <div class="drag-order-panel__scope-buttons">
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'students'" (click)="setDragOrderScope('students')">Diákok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'teachers'" (click)="setDragOrderScope('teachers')">Tanárok</button>
+          <button class="qa-btn qa-btn--toggle" [class.qa-btn--active]="dragOrderScope() === 'all'" (click)="setDragOrderScope('all')">Mind</button>
+        </div>
+      </div>
+      <div class="drag-order-panel__presets">
+        <span class="drag-order-panel__scope-label">Rendezés</span>
+        <div class="drag-order-panel__scope-buttons">
+          <button class="qa-btn qa-btn--blue" (click)="dragOrderSortAbc()" matTooltip="Magyar ABC sorrend">ABC</button>
+          <button class="qa-btn qa-btn--purple" [disabled]="dragOrderGenderLoading()" (click)="dragOrderSortGender()" matTooltip="Fiú-lány felváltva">
+            @if (dragOrderGenderLoading()) {
+              <span class="toolbar__spinner toolbar__spinner--sm"></span>
+            }
+            Fiú-lány
+          </button>
+          @if (dragOrderScope() === 'teachers' || dragOrderScope() === 'all') {
+            <button class="qa-btn qa-btn--amber" (click)="dragOrderSortLeadership()" matTooltip="Vezetőség (igazgató, helyettes) előre">Vezetőség</button>
+            <button class="qa-btn qa-btn--amber" (click)="dragOrderSortClassTeachersLast()" matTooltip="ABC sorrend, osztályfőnökök a végére">Ofők végére</button>
+          }
+          <button class="qa-btn" [class.qa-btn--active]="dragOrderCustomOpen()" (click)="dragOrder.toggleCustomOrder()" matTooltip="Nevek beírásával rendezés">Egyedi</button>
+        </div>
+      </div>
+      <div class="drag-order-panel__group-actions">
+        <button class="qa-btn qa-btn--green" (click)="createDragOrderGroup()" matTooltip="Új üres csoport">
+          <lucide-icon [name]="ICONS.PLUS" [size]="10" /> Csoport
+        </button>
+        @if (dragOrderSelected().size > 0) {
+          <button class="qa-btn qa-btn--green" (click)="createDragOrderGroupFromSelection()" matTooltip="Kijelöltekből csoport">
+            <lucide-icon [name]="ICONS.FOLDER_PLUS" [size]="10" /> Csoportba
+          </button>
+        }
+      </div>
+    </div>
+    @if (dragOrderCustomOpen()) {
+      <div class="drag-order-panel__custom-order">
+        <textarea
+          class="drag-order-panel__custom-textarea"
+          placeholder="Nevek soronként vagy utasítás (pl. Kiss Anna legyen elől, Bézi a végére...)"
+          [value]="dragOrderCustomText()"
+          (input)="dragOrder.customOrderText.set($any($event.target).value)"
+          rows="4"
+        ></textarea>
+        <div class="drag-order-panel__custom-actions">
+          <button
+            class="qa-btn qa-btn--blue"
+            [disabled]="dragOrderCustomLoading() || !dragOrderCustomText().trim()"
+            (click)="dragOrder.submitCustomOrder()"
+          >
+            @if (dragOrderCustomLoading()) {
+              <span class="toolbar__spinner toolbar__spinner--sm"></span>
+            }
+            Alkalmazás
+          </button>
+          @if (dragOrderCustomResult(); as result) {
+            <span class="drag-order-panel__custom-result" [class.drag-order-panel__custom-result--error]="!result.success">
+              {{ result.message }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+    <!-- Keresősáv -->
+    <div class="drag-order-panel__search">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="12" class="drag-order-panel__search-icon" />
+      <input
+        class="drag-order-panel__search-input"
+        type="text"
+        placeholder="Keresés név alapján..."
+        [value]="dragOrderSearchQuery()"
+        (input)="setDragOrderSearch($any($event.target).value)"
+      />
+      @if (dragOrderSearchQuery()) {
+        <button class="drag-order-panel__search-clear" (click)="setDragOrderSearch('')" type="button">
+          <lucide-icon [name]="ICONS.X" [size]="10" />
+        </button>
+      }
+    </div>
+
+    <div class="drag-order-panel__groups-container" cdkDropListGroup>
+      <!-- Csoportok -->
+      @for (group of dragOrderGroups(); track group.id) {
+        <div class="drag-order-panel__group">
+          <div class="drag-order-panel__group-header">
+            <div class="drag-order-panel__group-color" [style.background]="group.colorIndex | dragOrderColor"></div>
+            @if (!dragOrderSearchQuery()) {
+              <div class="drag-order-panel__group-order-btns">
+                <button class="drag-order-panel__group-order-btn" (click)="moveDragOrderGroup(group.id, -1)" type="button" matTooltip="Fel">
+                  <lucide-icon [name]="ICONS.CHEVRON_UP" [size]="10" />
+                </button>
+                <button class="drag-order-panel__group-order-btn" (click)="moveDragOrderGroup(group.id, 1)" type="button" matTooltip="Le">
+                  <lucide-icon [name]="ICONS.CHEVRON_DOWN" [size]="10" />
+                </button>
+              </div>
+            }
+            <button class="drag-order-panel__group-collapse" (click)="toggleDragOrderGroupCollapse(group.id)" type="button">
+              <lucide-icon [name]="group.collapsed ? ICONS.CHEVRON_RIGHT : ICONS.CHEVRON_DOWN" [size]="12" />
+            </button>
+            <span
+              class="drag-order-panel__group-name"
+              contenteditable="true"
+              spellcheck="false"
+              (blur)="onDragOrderGroupNameBlur($event, group.id)"
+              (keydown)="onDragOrderGroupNameKeydown($event)"
+            >{{ group.name }}</span>
+            <span class="drag-order-panel__group-count">{{ group.items.length }}</span>
+            <button class="drag-order-panel__group-remove" (click)="removeDragOrderGroup(group.id)" type="button" matTooltip="Csoport feloszlatása">
+              <lucide-icon [name]="ICONS.X" [size]="10" />
+            </button>
+          </div>
+
+          @if (!group.collapsed) {
+            <div
+              class="drag-order-panel__group-items"
+              cdkDropList
+              [id]="'drag-group-' + group.id"
+              [cdkDropListData]="group.items"
+              [cdkDropListDisabled]="!!dragOrderSearchQuery()"
+              (cdkDropListDropped)="onDropToGroup($event, group.id)"
+            >
+              @for (person of group.items; track person.id; let i = $index) {
+                <div
+                  class="drag-order-panel__item"
+                  [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
+                  [style.border-left-color]="group.colorIndex | dragOrderColor"
+                  cdkDrag
+                  [cdkDragData]="person"
+                  [cdkDragDisabled]="!!dragOrderSearchQuery()"
+                  (click)="toggleDragOrderSelect(person.id, $event)"
+                >
+                  @if (!dragOrderSearchQuery()) {
+                    <div class="drag-order-panel__handle">
+                      <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+                    </div>
+                  }
+                  <span class="drag-order-panel__index">{{ i + 1 }}.</span>
+                  <div class="drag-order-panel__avatar">
+                    @if (person.photoThumbUrl) {
+                      <img [src]="person.photoThumbUrl" [alt]="person.name" />
+                    } @else {
+                      <lucide-icon [name]="ICONS.USER" [size]="12" />
+                    }
+                  </div>
+                  <span class="drag-order-panel__name">{{ person.name }}</span>
+                  @if (person.title) {
+                    <span class="drag-order-panel__title">{{ person.title }}</span>
+                  }
+                  <div class="drag-order-panel__preview" *cdkDragPreview>
+                    <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+                    <span>{{ person.name }}</span>
+                    @if (dragOrderSelected().size > 1 && isDragOrderSelected(person.id)) {
+                      <span class="drag-order-panel__preview-badge">+{{ dragOrderSelected().size - 1 }}</span>
+                    }
+                  </div>
+                  <div class="drag-order-panel__placeholder" *cdkDragPlaceholder></div>
+                </div>
+              }
+              @if (group.items.length === 0) {
+                <div class="drag-order-panel__empty drag-order-panel__empty--group">Húzz ide személyeket</div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Ungrouped elválasztó -->
+      @if (dragOrderHasGroups()) {
+        <div class="drag-order-panel__ungrouped-label">
+          <span>Nincs csoport</span>
+        </div>
+      }
+
+      <!-- Ungrouped lista -->
+      <div
+        class="drag-order-panel__list"
+        cdkDropList
+        id="drag-group-ungrouped"
+        [cdkDropListData]="dragOrderUngroupedRaw()"
+        [cdkDropListDisabled]="!!dragOrderSearchQuery()"
+        (cdkDropListDropped)="onDropToUngrouped($event)"
+      >
+        @for (person of dragOrderUngrouped(); track person.id; let i = $index) {
+          <div
+            class="drag-order-panel__item"
+            [class.drag-order-panel__item--selected]="isDragOrderSelected(person.id)"
+            cdkDrag
+            [cdkDragData]="person"
+            [cdkDragDisabled]="!!dragOrderSearchQuery()"
+            (click)="toggleDragOrderSelect(person.id, $event)"
+          >
+            @if (!dragOrderSearchQuery()) {
+              <div class="drag-order-panel__handle">
+                <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+              </div>
+            }
+            <span class="drag-order-panel__index">{{ i + 1 }}.</span>
+            <div class="drag-order-panel__avatar">
+              @if (person.photoThumbUrl) {
+                <img [src]="person.photoThumbUrl" [alt]="person.name" />
+              } @else {
+                <lucide-icon [name]="ICONS.USER" [size]="12" />
+              }
+            </div>
+            <span class="drag-order-panel__name">{{ person.name }}</span>
+            @if (person.title) {
+              <span class="drag-order-panel__title">{{ person.title }}</span>
+            }
+            <div class="drag-order-panel__preview" *cdkDragPreview>
+              <lucide-icon [name]="ICONS.GRIP" [size]="12" />
+              <span>{{ person.name }}</span>
+              @if (dragOrderSelected().size > 1 && isDragOrderSelected(person.id)) {
+                <span class="drag-order-panel__preview-badge">+{{ dragOrderSelected().size - 1 }}</span>
+              }
+            </div>
+            <div class="drag-order-panel__placeholder" *cdkDragPlaceholder></div>
+          </div>
+        }
+        @if (dragOrderUngrouped().length === 0 && !dragOrderHasGroups()) {
+          <div class="drag-order-panel__empty">Nincs személy ebben a csoportban</div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="drag-order-panel__footer">
+    <button
+      class="drag-order-panel__btn drag-order-panel__btn--submit"
+      [disabled]="dragOrderSaving() || dragOrderList().length === 0"
+      (click)="saveDragOrder()"
+      type="button"
+    >
+      @if (dragOrderSaving()) {
+        <span class="toolbar__spinner toolbar__spinner--sm"></span>
+        Mentés...
+      } @else {
+        <lucide-icon [name]="ICONS.CHECK" [size]="14" />
+        Mentés
+      }
+    </button>
+  </div>
+</div>

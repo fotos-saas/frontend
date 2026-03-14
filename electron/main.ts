@@ -417,15 +417,76 @@ function showOverlayWindow(): void {
 async function syncAuthToOverlay(): Promise<void> {
   if (!mainWindow || mainWindow.isDestroyed() || !overlayWindow || overlayWindow.isDestroyed()) return;
   try {
-    const token = await mainWindow.webContents.executeJavaScript(
-      `sessionStorage.getItem('marketer_token')`,
-    );
-    if (token) {
-      await overlayWindow.webContents.executeJavaScript(
-        `sessionStorage.setItem('marketer_token', ${JSON.stringify(token)})`,
-      );
+    // ÖSSZES sessionStorage kulcs szinkronizálása (marketer_token + tablo:*:*:token + egyéb)
+    const allEntries = await mainWindow.webContents.executeJavaScript(`
+      (() => {
+        const entries = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+            entries[key] = sessionStorage.getItem(key);
+          }
+        }
+        return entries;
+      })()
+    `);
+    if (allEntries && Object.keys(allEntries).length > 0) {
+      const entriesJson = JSON.stringify(allEntries);
+      await overlayWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = ${entriesJson};
+          Object.keys(entries).forEach(key => {
+            sessionStorage.setItem(key, entries[key]);
+          });
+        })()
+      `);
+      overlayWindow.webContents.send('overlay:auth-synced');
+      log.info('Auth synced to overlay:', Object.keys(allEntries).join(', '));
     }
   } catch { /* window may not be ready */ }
+}
+
+// Main window login után szinkronizálja az ÖSSZES tokent az overlay-be
+function listenMainWindowAuthChanges(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  // 2 mp-enként ellenőrzi az összes auth kulcsot (marketer_token + tablo:* entries)
+  let lastSyncHash = '';
+  const authCheckInterval = setInterval(async () => {
+    if (!mainWindow || mainWindow.isDestroyed()) { clearInterval(authCheckInterval); return; }
+    if (!overlayWindow || overlayWindow.isDestroyed()) return;
+    try {
+      const allEntries = await mainWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = {};
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && (key === 'marketer_token' || key.startsWith('tablo:'))) {
+              entries[key] = sessionStorage.getItem(key);
+            }
+          }
+          return entries;
+        })()
+      `);
+      if (!allEntries || Object.keys(allEntries).length === 0) return;
+      // Csak akkor szinkronizálunk ha változott
+      const currentHash = JSON.stringify(allEntries);
+      if (currentHash === lastSyncHash) return;
+      lastSyncHash = currentHash;
+      const entriesJson = JSON.stringify(allEntries);
+      await overlayWindow.webContents.executeJavaScript(`
+        (() => {
+          const entries = ${entriesJson};
+          Object.keys(entries).forEach(key => {
+            sessionStorage.setItem(key, entries[key]);
+          });
+        })()
+      `);
+      overlayWindow.webContents.send('overlay:auth-synced');
+      log.info('Auth synced to overlay (periodic):', Object.keys(allEntries).join(', '));
+    } catch { /* window not ready */ }
+  }, 2000);
+
+  mainWindow.on('closed', () => clearInterval(authCheckInterval));
 }
 
 
@@ -741,6 +802,9 @@ app.whenReady().then(async () => {
   }
 
   createWindow();
+
+  // Auth szinkronizáció figyelés: main window → overlay
+  listenMainWindowAuthChanges();
 
   // Overlay window letrehozasa (rejtett, Ctrl+Space-re jelenik meg)
   createOverlayWindow();

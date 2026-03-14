@@ -100,6 +100,8 @@ interface OverlayAPI {
   getActiveDoc: () => Promise<ActiveDocInfo>;
   setActiveDoc: (doc: ActiveDocInfo) => Promise<{ success: boolean; error?: string }>;
   onActiveDocChanged: (callback: (doc: ActiveDocInfo) => void) => CleanupFn;
+  onAuthSynced: (callback: () => void) => CleanupFn;
+  requestAuthSync: () => Promise<{ success: boolean; keys?: string[] }>;
 }
 
 interface TouchBarAPI {

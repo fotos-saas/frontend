@@ -136,6 +136,42 @@ export const DESIGNER_CHILDREN_ROUTES: Routes = [
     loadComponent: () => import('../bug-reports/pages/bug-report-detail/bug-report-detail.component').then(m => m.BugReportDetailComponent)
   },
   {
+    path: 'email-hub',
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/email-hub-dashboard/email-hub-dashboard.component').then(m => m.EmailHubDashboardComponent),
+        title: 'Email Hub'
+      },
+      {
+        path: 'drafts',
+        loadComponent: () => import('./pages/email-hub-drafts/email-hub-drafts.component').then(m => m.EmailHubDraftsComponent),
+        title: 'Draft válaszok'
+      },
+      {
+        path: 'ai-costs',
+        loadComponent: () => import('./pages/email-hub-ai-costs/email-hub-ai-costs.component').then(m => m.EmailHubAiCostsComponent),
+        title: 'AI Költségek'
+      },
+      {
+        path: 'voice-profile',
+        loadComponent: () => import('./pages/email-hub-voice-profile/email-hub-voice-profile.component').then(m => m.EmailHubVoiceProfileComponent),
+        title: 'Hangprofil'
+      },
+      {
+        path: 'modifications',
+        loadComponent: () => import('./pages/email-hub-modifications/email-hub-modifications.component').then(m => m.EmailHubModificationsComponent),
+        title: 'Módosítási körök'
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./pages/email-hub-analytics/email-hub-analytics.component').then(m => m.EmailHubAnalyticsComponent),
+        title: 'Szezon Analitika'
+      },
+    ]
+  },
+  {
     path: 'booking',
     children: [
       { path: '', redirectTo: 'calendar', pathMatch: 'full' },

@@ -98,7 +98,15 @@
   font-size: 12px;
 }
 
-.project-link { color: var(--primary-600, #4f46e5); }
+.project-link {
+  color: var(--primary-600, #4f46e5);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
 
 .labels-row {
   display: flex;

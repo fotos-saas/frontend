@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef, effect } from '@angular/core';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -72,7 +73,7 @@ import { EmailInsightsPanelComponent } from './email-insights-panel.component';
           @if (email().project) {
             <div class="meta-row">
               <span class="meta-label">Projekt:</span>
-              <span class="meta-value project-link">{{ email().project!.name }}</span>
+              <a class="meta-value project-link" (click)="goToProject(email().project!.id)">{{ email().project!.name }}</a>
             </div>
           }
           @if (email().labels.length > 0) {
@@ -197,6 +198,7 @@ import { EmailInsightsPanelComponent } from './email-insights-panel.component';
 export class EmailReaderPanelComponent {
   private readonly emailClientService = inject(EmailClientService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;
@@ -243,6 +245,10 @@ export class EmailReaderPanelComponent {
   sendReply(): void {
     if (!this.replyBody.trim()) return;
     this.sendReplyEvent.emit({ emailId: this.email().id, body: this.replyBody });
+  }
+
+  goToProject(projectId: number): void {
+    this.router.navigate(['/partner/projects', projectId]);
   }
 
   formatDate(dateStr: string): string {

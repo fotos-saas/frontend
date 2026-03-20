@@ -1,0 +1,48 @@
+<div class="usage-meter" [class]="'state-' + usage().state" [class.compact]="compact()">
+  <!-- Progress bar -->
+  <div class="meter-bar">
+    <div class="meter-fill" [class]="'fill-' + usage().state" [style.width.%]="fillWidth()"></div>
+    @if (usage().state === 'overage') {
+      <div class="meter-overage" [style.width.%]="overageWidth()"></div>
+    }
+  </div>
+
+  <!-- Stats -->
+  <div class="meter-stats">
+    <span class="used">{{ usage().formatted.used }}</span>
+    <span class="separator"> / </span>
+    <span class="total">{{ usage().formatted.included }} keretből</span>
+  </div>
+
+  <!-- Állapot üzenet -->
+  @if (!compact()) {
+    @switch (usage().state) {
+      @case ('normal') {
+        <p class="meter-message">
+          Hátralévő idő: <strong>{{ usage().formatted.remaining }}</strong>
+        </p>
+      }
+      @case ('warning') {
+        <p class="meter-message warning">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+          Hátralévő idő: <strong>{{ usage().formatted.remaining }}</strong>
+        </p>
+      }
+      @case ('critical') {
+        <p class="meter-message critical">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+          Hátralévő idő: <strong>{{ usage().formatted.remaining }}</strong>
+          — további módosítások díjkötelesek ({{ usage().overage_rate | number }} Ft/megkezdett óra)
+        </p>
+      }
+      @case ('overage') {
+        <p class="meter-message overage">
+          <lucide-icon [name]="ICONS.ALERT_CIRCLE" [size]="14" />
+          Túllépés: {{ usage().formatted.overage }}
+          ({{ usage().overage_started_hours }} megkezdett óra)
+          — Többletköltség: <strong>{{ usage().overage_cost | number }} Ft</strong>
+        </p>
+      }
+    }
+  }
+</div>

@@ -459,6 +459,7 @@ export const ICONS = {
   BRAIN: 'brain',
   TRENDING_UP: 'trending-up',
   REFRESH_CW: 'refresh-cw',
+
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

@@ -1,0 +1,37 @@
+@if (timers().length > 0) {
+  <div class="timer-stack">
+    @for (timer of timers(); track timer.id) {
+      <div class="timer-row" [class.paused]="timer.is_paused">
+        <span class="timer-icon">{{ timer.is_paused ? '⏸' : '⏱' }}</span>
+        <span class="timer-display">{{ getDisplayTime(timer) }}</span>
+        <span class="timer-project">{{ timer.project_name }}</span>
+
+        @if (timer.work_type) {
+          <span class="timer-type">{{ timer.work_type }}</span>
+        }
+
+        <div class="timer-actions">
+          @if (timer.is_paused) {
+            <button class="btn-icon" matTooltip="Folytatás" (click)="resume(timer.id)">
+              <lucide-icon [name]="ICONS.PLAY" [size]="14" />
+            </button>
+          } @else {
+            <button class="btn-icon" matTooltip="Szünet" (click)="pause(timer.id)">
+              <lucide-icon [name]="ICONS.PAUSE" [size]="14" />
+            </button>
+          }
+          <button class="btn-icon btn-stop" matTooltip="Leállítás" (click)="stop(timer.id)">
+            <lucide-icon [name]="ICONS.SQUARE" [size]="14" />
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (showStopAll()) {
+      <button class="btn-stop-all" (click)="stopAll()">
+        <lucide-icon [name]="ICONS.SQUARE" [size]="12" />
+        Összes leállítása
+      </button>
+    }
+  </div>
+}

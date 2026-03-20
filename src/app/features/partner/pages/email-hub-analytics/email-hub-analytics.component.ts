@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, KeyValuePipe } from '@angular/common';
 import { ICONS } from '@shared/constants/icons.constants';
 import { environment } from '../../../../../environments/environment';
 import { createResourceLoader } from '@shared/utils/resource-loader.util';
@@ -44,7 +44,7 @@ interface WorkTypeStat {
 @Component({
   selector: 'app-email-hub-analytics',
   standalone: true,
-  imports: [LucideAngularModule, DecimalPipe],
+  imports: [LucideAngularModule, DecimalPipe, KeyValuePipe],
   templateUrl: './email-hub-analytics.component.html',
   styleUrl: './email-hub-analytics.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { QuickReply } from '../../../models/email-client.models';
@@ -33,8 +33,13 @@ import { QuickReply } from '../../../models/email-client.models';
             </button>
           }
         </div>
-      } @else {
+      } @else if (requested()) {
         <p class="no-replies">Nincs javaslat ehhez az emailhez</p>
+      } @else {
+        <button class="request-btn" (click)="onRequest()">
+          <lucide-icon [name]="ICONS.SPARKLES" [size]="14" />
+          Javaslatok kérése
+        </button>
       }
     </div>
   `,
@@ -114,6 +119,25 @@ import { QuickReply } from '../../../models/email-client.models';
       color: var(--primary-500, #6366f1);
       margin: 0;
     }
+
+    .request-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--primary-200, #c7d2fe);
+      background: var(--bg-primary, #fff);
+      color: var(--primary-700, #4338ca);
+      cursor: pointer;
+      transition: all 0.15s;
+
+      &:hover {
+        background: var(--primary-100, #e0e7ff);
+      }
+    }
   `],
 })
 export class QuickReplyBarComponent {
@@ -123,4 +147,12 @@ export class QuickReplyBarComponent {
   readonly loading = input(false);
 
   readonly selectReply = output<string>();
+  readonly requestReplies = output<void>();
+
+  readonly requested = signal(false);
+
+  onRequest(): void {
+    this.requested.set(true);
+    this.requestReplies.emit();
+  }
 }

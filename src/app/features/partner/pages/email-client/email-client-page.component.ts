@@ -142,10 +142,9 @@ export class EmailClientPageComponent implements OnInit {
           this.updateFolderCounts();
         }
 
-        // AI gyorsválasz bejövőnél
-        if (data.email.direction === 'inbound') {
-          this.loadQuickReplies(data.email.id);
-        }
+        // AI gyorsválasz reset (lazy load — gombra kattintva töltődik)
+        this.quickReplies.set([]);
+        this.loadingQuickReplies.set(false);
       },
       error: () => {
         this.toast.error('Hiba', 'Nem sikerült betölteni az emailt.');
@@ -188,6 +187,13 @@ export class EmailClientPageComponent implements OnInit {
     );
     if (this.selectedEmail()?.id === data.emailId) {
       this.selectedEmail.update(e => e ? { ...e, labels: data.labels } : e);
+    }
+  }
+
+  onRequestQuickReplies(): void {
+    const email = this.selectedEmail();
+    if (email && email.direction === 'inbound') {
+      this.loadQuickReplies(email.id);
     }
   }
 

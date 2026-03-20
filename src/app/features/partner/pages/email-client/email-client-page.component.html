@@ -59,6 +59,7 @@
         (toggleStar)="onToggleStar(selectedEmail()!)"
         (labelsChanged)="onLabelsChanged($event)"
         (sendReplyEvent)="onSendReply($event)"
+        (requestQuickReplies)="onRequestQuickReplies()"
       />
     } @else {
       <div class="empty-reader">

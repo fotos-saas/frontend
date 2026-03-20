@@ -126,6 +126,7 @@ import { LabelPickerDropdownComponent } from './label-picker-dropdown.component'
             [replies]="quickReplies()"
             [loading]="loadingQuickReplies()"
             (selectReply)="onQuickReplySelect($event)"
+            (requestReplies)="requestQuickReplies.emit()"
           />
         }
 
@@ -202,6 +203,7 @@ export class EmailReaderPanelComponent {
   readonly toggleStar = output<void>();
   readonly labelsChanged = output<{ emailId: number; labels: { id: number; name: string; color: string }[] }>();
   readonly sendReplyEvent = output<{ emailId: number; body: string }>();
+  readonly requestQuickReplies = output<void>();
 
   readonly showReply = signal(false);
   readonly sending = input(false);

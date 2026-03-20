@@ -6,12 +6,12 @@
 // --- Dashboard ---
 
 export interface EmailHubDashboard {
-  pendingDrafts: number;
-  pendingApproval: number;
-  escalationCount: number;
-  activeRounds: number;
-  todayProcessed: number;
-  monthlyCostUsd: number;
+  pending_drafts: number;
+  pending_approval: number;
+  escalation_count: number;
+  active_rounds: number;
+  today_processed: number;
+  monthly_cost_usd: number;
 }
 
 // --- Draft Válaszok ---

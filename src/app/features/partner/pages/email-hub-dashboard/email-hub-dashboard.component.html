@@ -20,7 +20,7 @@
           <lucide-icon [name]="ICONS.EDIT" [size]="24" />
         </div>
         <div class="card-content">
-          <span class="card-value">{{ d.pendingDrafts }}</span>
+          <span class="card-value">{{ d.pending_drafts }}</span>
           <span class="card-label">Jóváhagyásra vár</span>
         </div>
       </div>
@@ -30,7 +30,7 @@
           <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="24" />
         </div>
         <div class="card-content">
-          <span class="card-value">{{ d.pendingApproval }}</span>
+          <span class="card-value">{{ d.pending_approval }}</span>
           <span class="card-label">Gyártás jóváhagyás</span>
         </div>
       </div>
@@ -40,7 +40,7 @@
           <lucide-icon [name]="ICONS.REFRESH_CW" [size]="24" />
         </div>
         <div class="card-content">
-          <span class="card-value">{{ d.activeRounds }}</span>
+          <span class="card-value">{{ d.active_rounds }}</span>
           <span class="card-label">Aktív módosítási kör</span>
         </div>
       </div>
@@ -50,7 +50,7 @@
           <lucide-icon [name]="ICONS.TRENDING_UP" [size]="24" />
         </div>
         <div class="card-content">
-          <span class="card-value">${{ d.monthlyCostUsd.toFixed(2) }}</span>
+          <span class="card-value">${{ d.monthly_cost_usd.toFixed(2) }}</span>
           <span class="card-label">Havi AI költség</span>
         </div>
       </div>
@@ -59,14 +59,19 @@
     <div class="info-row">
       <span class="info-badge">
         <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-        Ma feldolgozva: {{ d.todayProcessed }} email
+        Ma feldolgozva: {{ d.today_processed }} email
       </span>
-      @if (d.escalationCount > 0) {
+      @if (d.escalation_count > 0) {
         <span class="info-badge info-badge--warning">
           <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
-          {{ d.escalationCount }} eszkaláció vár
+          {{ d.escalation_count }} eszkaláció vár
         </span>
       }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.INBOX" [size]="48" />
+      <p>Nincs elérhető adat</p>
     </div>
   }
 </div>

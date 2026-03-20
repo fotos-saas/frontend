@@ -140,6 +140,21 @@ export const PARTNER_CHILDREN_ROUTES: Routes = [
         loadComponent: () => import('./pages/email-hub-drafts/email-hub-drafts.component').then(m => m.EmailHubDraftsComponent),
         title: 'Draft válaszok'
       },
+      {
+        path: 'ai-costs',
+        loadComponent: () => import('./pages/email-hub-ai-costs/email-hub-ai-costs.component').then(m => m.EmailHubAiCostsComponent),
+        title: 'AI Költségek'
+      },
+      {
+        path: 'voice-profile',
+        loadComponent: () => import('./pages/email-hub-voice-profile/email-hub-voice-profile.component').then(m => m.EmailHubVoiceProfileComponent),
+        title: 'Hangprofil'
+      },
+      {
+        path: 'modifications',
+        loadComponent: () => import('./pages/email-hub-modifications/email-hub-modifications.component').then(m => m.EmailHubModificationsComponent),
+        title: 'Módosítási körök'
+      },
     ]
   },
   {

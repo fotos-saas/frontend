@@ -1,0 +1,79 @@
+<div class="email-hub-modifications page-card">
+  <div class="page-header">
+    <h1>Módosítási körök</h1>
+    <p class="subtitle">Projekt módosítási kérések és státuszuk</p>
+  </div>
+
+  @if (loading()) {
+    <div class="row-grid">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (rounds().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.REFRESH_CW" [size]="48" />
+      <h3>Nincs módosítási kör</h3>
+      <p>Az AI automatikusan nyit új kört, ha módosítási kérést észlel egy emailben.</p>
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-round">#</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-tasks">Feladatok</span>
+      <span class="th th-progress">Haladás</span>
+      <span class="th th-price">Ár</span>
+      <span class="th th-payment">Fizetés</span>
+      <span class="th th-date">Dátum</span>
+    </div>
+
+    <div class="row-grid">
+      @for (round of rounds(); track round.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <span class="td td-round">
+            <span class="round-number">{{ round.roundNumber }}. kör</span>
+          </span>
+          <span class="td td-status">
+            <span class="status-dot" [style.background]="statusColor(round.statusColor)"></span>
+            {{ round.statusLabel }}
+          </span>
+          <span class="td td-tasks">
+            {{ round.completedTasks }}/{{ round.totalTasks }}
+          </span>
+          <span class="td td-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="round.progressPercent"></div>
+            </div>
+            <span class="progress-text">{{ round.progressPercent }}%</span>
+          </span>
+          <span class="td td-price">
+            @if (round.isFree) {
+              <span class="free-badge">Ingyenes</span>
+            } @else {
+              {{ formatPrice(round.priceHuf) }}
+            }
+          </span>
+          <span class="td td-payment">
+            <span class="payment-badge payment-badge--{{ round.paymentStatus }}">
+              {{ round.paymentStatusLabel }}
+            </span>
+          </span>
+          <span class="td td-date">{{ formatDate(round.requestedAt) }}</span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        @for (p of [].constructor(totalPages()); track $index) {
+          <button
+            class="page-btn"
+            [class.active]="currentPage() === $index + 1"
+            (click)="goToPage($index + 1)">
+            {{ $index + 1 }}
+          </button>
+        }
+      </div>
+    }
+  }
+</div>

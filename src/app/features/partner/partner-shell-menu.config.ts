@@ -50,6 +50,9 @@ export function buildPartnerMenu(params: {
       children: [
         { id: 'email-hub-dashboard', route: `${base}/email-hub/dashboard`, label: 'Áttekintés', devBadge: true },
         { id: 'email-hub-drafts', route: `${base}/email-hub/drafts`, label: 'Draft válaszok', devBadge: true },
+        { id: 'email-hub-modifications', route: `${base}/email-hub/modifications`, label: 'Módosítási körök', devBadge: true },
+        { id: 'email-hub-voice', route: `${base}/email-hub/voice-profile`, label: 'Hangprofil', devBadge: true },
+        { id: 'email-hub-costs', route: `${base}/email-hub/ai-costs`, label: 'AI Költségek', devBadge: true },
       ]
     },
     { id: 'quotes', route: `${base}/quotes`, label: 'Árajánlatok', icon: 'file-text', devBadge: true },

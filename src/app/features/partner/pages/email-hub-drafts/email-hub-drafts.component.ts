@@ -63,11 +63,11 @@ export class EmailHubDraftsComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.success('Draft jóváhagyva és elküldve');
+          this.toast.success('Siker', 'Draft jóváhagyva és elküldve');
           this.loadDrafts();
         },
         error: (err) => {
-          this.toast.error('Hiba a jóváhagyásnál');
+          this.toast.error('Hiba', 'Nem sikerült a jóváhagyás');
           this.logger.error('Draft approve hiba', err);
         },
       });
@@ -79,11 +79,11 @@ export class EmailHubDraftsComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.info('Draft elutasítva');
+          this.toast.info('Kész', 'Draft elutasítva');
           this.loadDrafts();
         },
         error: (err) => {
-          this.toast.error('Hiba az elutasításnál');
+          this.toast.error('Hiba', 'Nem sikerült az elutasítás');
           this.logger.error('Draft reject hiba', err);
         },
       });

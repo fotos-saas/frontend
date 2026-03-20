@@ -1,0 +1,90 @@
+<div class="email-hub-ai-costs page-card">
+  <div class="page-header">
+    <h1>AI Költségek</h1>
+    <p class="subtitle">Havi token felhasználás és költség bontás</p>
+  </div>
+
+  @if (loading()) {
+    <div class="cost-grid">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="cost-card skeleton-card">
+          <div class="skeleton-line skeleton-line--short"></div>
+          <div class="skeleton-line skeleton-line--wide"></div>
+        </div>
+      }
+    </div>
+  } @else if (summary(); as s) {
+    <div class="cost-grid">
+      <div class="cost-card cost-card--total">
+        <div class="cost-icon">
+          <lucide-icon [name]="ICONS.TRENDING_UP" [size]="20" />
+        </div>
+        <div class="cost-value">{{ formatUsd(s.totalCostUsd) }}</div>
+        <div class="cost-label">Havi összköltség</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-icon cost-icon--input">
+          <lucide-icon [name]="ICONS.ARROW_UP" [size]="20" />
+        </div>
+        <div class="cost-value">{{ formatTokens(s.totalInputTokens) }}</div>
+        <div class="cost-label">Input tokenek</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-icon cost-icon--output">
+          <lucide-icon [name]="ICONS.ARROW_DOWN" [size]="20" />
+        </div>
+        <div class="cost-value">{{ formatTokens(s.totalOutputTokens) }}</div>
+        <div class="cost-label">Output tokenek</div>
+      </div>
+    </div>
+
+    <!-- Modell bontás -->
+    @if (s.byModel.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Modell bontás</h2>
+        <div class="breakdown-list">
+          @for (m of s.byModel; track m.model) {
+            <div class="breakdown-row">
+              <span class="breakdown-name">{{ m.model }}</span>
+              <span class="breakdown-calls">{{ m.callCount }} hívás</span>
+              <span class="breakdown-cost">{{ formatUsd(m.costUsd) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Művelet bontás -->
+    @if (s.byAction.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Művelet bontás</h2>
+        <div class="breakdown-list">
+          @for (a of s.byAction; track a.action) {
+            <div class="breakdown-row">
+              <span class="breakdown-name">{{ a.action }}</span>
+              <span class="breakdown-calls">{{ a.callCount }} hívás</span>
+              <span class="breakdown-cost">{{ formatUsd(a.costUsd) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Napi grafikon -->
+    @if (dailyCosts().length > 0) {
+      <section class="section">
+        <h2 class="section-title">Napi költség</h2>
+        <div class="chart-container">
+          <div class="bar-chart">
+            @for (day of dailyCosts(); track day.date) {
+              <div class="bar-col" [title]="day.date + ': ' + formatUsd(day.costUsd)">
+                <div class="bar" [style.height]="barHeight(day.costUsd)"></div>
+                <span class="bar-label">{{ day.date.slice(-2) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
+</div>

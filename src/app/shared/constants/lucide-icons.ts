@@ -250,6 +250,9 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Reply,
+  Star,
+  StarOff,
+  MailOpen,
   ScrollText,
   // Workflow
   Workflow,
@@ -505,6 +508,9 @@ export const LUCIDE_ICONS_MAP = {
   ArrowDownLeft,
   ArrowUpRight,
   Reply,
+  Star,
+  StarOff,
+  MailOpen,
   ScrollText,
   // Workflow
   Workflow,

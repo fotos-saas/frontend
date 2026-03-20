@@ -138,7 +138,12 @@ export const DESIGNER_CHILDREN_ROUTES: Routes = [
   {
     path: 'email-hub',
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '', redirectTo: 'inbox', pathMatch: 'full' },
+      {
+        path: 'inbox',
+        loadComponent: () => import('./pages/email-client/email-client-page.component').then(m => m.EmailClientPageComponent),
+        title: 'Postaláda'
+      },
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/email-hub-dashboard/email-hub-dashboard.component').then(m => m.EmailHubDashboardComponent),

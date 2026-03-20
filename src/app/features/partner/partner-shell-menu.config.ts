@@ -48,6 +48,7 @@ export function buildPartnerMenu(params: {
       icon: 'brain',
       devBadge: true,
       children: [
+        { id: 'email-hub-inbox', route: `${base}/email-hub/inbox`, label: 'Postaláda', devBadge: true },
         { id: 'email-hub-dashboard', route: `${base}/email-hub/dashboard`, label: 'Áttekintés', devBadge: true },
         { id: 'email-hub-drafts', route: `${base}/email-hub/drafts`, label: 'Draft válaszok', devBadge: true },
         { id: 'email-hub-modifications', route: `${base}/email-hub/modifications`, label: 'Módosítási körök', devBadge: true },

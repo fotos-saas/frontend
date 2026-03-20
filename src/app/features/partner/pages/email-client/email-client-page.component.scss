@@ -1,0 +1,151 @@
+.email-client {
+  display: flex;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  background: var(--bg-primary, #fff);
+}
+
+.mobile-header {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-primary, #fff);
+}
+
+.mobile-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+
+  &:hover {
+    background: var(--bg-hover, #f3f4f6);
+  }
+}
+
+// Sidebar
+.email-sidebar {
+  width: 220px;
+  min-width: 220px;
+  border-right: 1px solid var(--border-color, #e5e7eb);
+  overflow-y: auto;
+  background: var(--bg-secondary, #f9fafb);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 40;
+}
+
+// Lista panel
+.email-list-panel {
+  flex: 1;
+  min-width: 320px;
+  border-right: 1px solid var(--border-color, #e5e7eb);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// Olvasó panel
+.email-reader-panel {
+  flex: 1.5;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-reader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text-tertiary, #9ca3af);
+
+  p {
+    font-size: 14px;
+  }
+}
+
+// Tablet (<1200px)
+@media (max-width: 1200px) {
+  .email-sidebar {
+    position: fixed;
+    left: -220px;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    transition: left 0.2s ease;
+
+    &.sidebar-open {
+      left: 0;
+    }
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .email-client {
+    flex-direction: column;
+  }
+
+  .email-list-panel,
+  .email-reader-panel {
+    flex: 1;
+  }
+
+  .email-client > .email-list-panel,
+  .email-client > .email-reader-panel {
+    min-width: 0;
+  }
+}
+
+// Mobil (<768px)
+@media (max-width: 768px) {
+  .email-client {
+    flex-direction: column;
+    height: calc(100vh - 56px);
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  .email-list-panel,
+  .email-reader-panel {
+    border-right: none;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

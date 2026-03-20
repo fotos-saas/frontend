@@ -344,6 +344,9 @@ export const ICONS = {
   ARROW_DOWN_LEFT: 'arrow-down-left',
   ARROW_UP_RIGHT: 'arrow-up-right',
   REPLY: 'reply',
+  STAR_ICON: 'star',
+  STAR_OFF: 'star-off',
+  MAIL_OPEN: 'mail-open',
 
   // Monitoring & Export
   ACTIVITY: 'activity',

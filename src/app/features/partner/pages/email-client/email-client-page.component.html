@@ -1,0 +1,70 @@
+<div class="email-client">
+  <!-- Mobil fejléc -->
+  <div class="mobile-header">
+    <button class="sidebar-toggle" (click)="toggleSidebar()">
+      <lucide-icon [name]="ICONS.MENU" [size]="20" />
+    </button>
+    <span class="mobile-title">Postaláda</span>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="email-sidebar" [class.sidebar-open]="sidebarOpen()">
+    <app-email-sidebar
+      [folders]="folders()"
+      [labels]="labels()"
+      [activeFolder]="activeFolder()"
+      [activeLabel]="activeLabel()"
+      (folderSelect)="onFolderSelect($event)"
+      (labelSelect)="onLabelSelect($event)"
+      (labelCreated)="onLabelCreated($event)"
+      (labelUpdated)="onLabelUpdated($event)"
+      (labelDeleted)="onLabelDeleted($event)"
+    />
+  </aside>
+
+  <!-- Sidebar overlay (tablet) -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="sidebarOpen.set(false)"></div>
+  }
+
+  <!-- Lista panel -->
+  <div class="email-list-panel" [class.hidden-mobile]="selectedEmail()">
+    <app-email-list-panel
+      [emails]="emails()"
+      [loading]="loading()"
+      [search]="search()"
+      [page]="page()"
+      [lastPage]="lastPage()"
+      [total]="total()"
+      [selectedEmailId]="selectedEmail()?.id ?? null"
+      (searchChange)="onSearch($event)"
+      (selectEmail)="onSelectEmail($event)"
+      (toggleStar)="onToggleStar($event)"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+
+  <!-- Olvasó panel -->
+  <div class="email-reader-panel" [class.hidden-mobile]="!selectedEmail()">
+    @if (selectedEmail()) {
+      <app-email-reader-panel
+        [email]="selectedEmail()!"
+        [thread]="thread()"
+        [quickReplies]="quickReplies()"
+        [loadingDetail]="loadingDetail()"
+        [loadingQuickReplies]="loadingQuickReplies()"
+        [allLabels]="labels()"
+        [sending]="sendingReply()"
+        (close)="onCloseDetail()"
+        (toggleStar)="onToggleStar(selectedEmail()!)"
+        (labelsChanged)="onLabelsChanged($event)"
+        (sendReplyEvent)="onSendReply($event)"
+      />
+    } @else {
+      <div class="empty-reader">
+        <lucide-icon [name]="ICONS.MAIL" [size]="48" />
+        <p>Válassz egy emailt a megtekintéshez</p>
+      </div>
+    }
+  </div>
+</div>

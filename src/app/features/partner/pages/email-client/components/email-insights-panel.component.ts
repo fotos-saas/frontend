@@ -33,14 +33,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LucideAngularModule],
   template: `
-    @if (isProcessing()) {
-      <div class="insights-panel insights-panel--loading">
-        <div class="insights-loading">
-          <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin" />
-          <span>AI elemzés folyamatban...</span>
-        </div>
-      </div>
-    } @else if (insights()) {
+    @if (insights()) {
       <div class="insights-panel">
         <!-- Fejléc: szándék badge + kategória + megbízhatóság -->
         <div class="insights-header">
@@ -131,8 +124,6 @@ export class EmailInsightsPanelComponent {
 
   readonly tasks = input.required<EmailTask[]>();
   readonly insights = input.required<AiInsights | null>();
-
-  readonly isProcessing = computed(() => !this.insights());
 
   readonly taskItems = computed(() =>
     this.tasks().filter(t => t.type === 'task')

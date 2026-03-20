@@ -104,14 +104,13 @@ export interface AiDailyCost {
 
 export interface VoiceProfile {
   id: number;
-  styleDescription: string;
-  styleData: Record<string, unknown>;
-  formalityMap: Record<string, { formality: string; confidence: number }>;
-  analyzedEmailCount: number;
-  draftApprovedCount: number;
-  draftEditedCount: number;
-  draftRejectedCount: number;
-  approvalRate: number;
-  lastBuiltAt: string | null;
-  lastRefinedAt: string | null;
+  style_description: string;
+  analyzed_email_count: number;
+  draft_approved_count: number;
+  draft_edited_count: number;
+  draft_rejected_count: number;
+  approval_rate: number;
+  needs_rebuild: boolean;
+  last_built_at: string | null;
+  last_refined_at: string | null;
 }

@@ -60,13 +60,7 @@ export class EmailHubVoiceProfileComponent implements OnInit {
   }
 
   formalityEntries(): { email: string; formality: string; confidence: number }[] {
-    const map = this.profile()?.formalityMap;
-    if (!map) return [];
-    return Object.entries(map).map(([email, data]) => ({
-      email,
-      formality: data.formality,
-      confidence: data.confidence,
-    }));
+    return [];
   }
 
   formalityLabel(value: string): string {

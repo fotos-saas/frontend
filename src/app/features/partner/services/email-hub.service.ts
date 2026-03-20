@@ -107,10 +107,10 @@ export class EmailHubService {
 
   // --- Voice Profile ---
 
-  getVoiceProfile(): Observable<VoiceProfile> {
+  getVoiceProfile(): Observable<VoiceProfile | null> {
     return this.http
-      .get<ApiResponse<VoiceProfile>>(`${this.baseUrl}/voice-profile`)
-      .pipe(map((res) => res.data));
+      .get<ApiResponse<{ profile: VoiceProfile | null; is_built: boolean }>>(`${this.baseUrl}/voice-profile`)
+      .pipe(map((res) => res.data.profile));
   }
 
   rebuildVoiceProfile(): Observable<{ status: string }> {

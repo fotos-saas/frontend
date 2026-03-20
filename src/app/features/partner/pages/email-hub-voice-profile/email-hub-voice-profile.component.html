@@ -17,19 +17,19 @@
     <!-- Statisztika kártyák -->
     <div class="stats-row">
       <div class="stat">
-        <span class="stat-value">{{ p.analyzedEmailCount }}</span>
+        <span class="stat-value">{{ p.analyzed_email_count }}</span>
         <span class="stat-label">Elemzett email</span>
       </div>
       <div class="stat">
-        <span class="stat-value">{{ p.draftApprovedCount }}</span>
+        <span class="stat-value">{{ p.draft_approved_count }}</span>
         <span class="stat-label">Jóváhagyott</span>
       </div>
       <div class="stat">
-        <span class="stat-value">{{ p.draftEditedCount }}</span>
+        <span class="stat-value">{{ p.draft_edited_count }}</span>
         <span class="stat-label">Szerkesztett</span>
       </div>
       <div class="stat">
-        <span class="stat-value">{{ Math.round(p.approvalRate * 100) }}%</span>
+        <span class="stat-value">{{ Math.round(p.approval_rate * 100) }}%</span>
         <span class="stat-label">Jóváhagyási arány</span>
       </div>
     </div>
@@ -37,12 +37,12 @@
     <div class="meta-row">
       <span class="meta-item">
         <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
-        Utolsó építés: {{ formatDate(p.lastBuiltAt) }}
+        Utolsó építés: {{ formatDate(p.last_built_at) }}
       </span>
-      @if (p.lastRefinedAt) {
+      @if (p.last_refined_at) {
         <span class="meta-item">
           <lucide-icon [name]="ICONS.EDIT" [size]="14" />
-          Utolsó finomhangolás: {{ formatDate(p.lastRefinedAt) }}
+          Utolsó finomhangolás: {{ formatDate(p.last_refined_at) }}
         </span>
       }
     </div>
@@ -53,7 +53,7 @@
         <lucide-icon [name]="ICONS.BRAIN" [size]="18" />
         Így hangzol
       </h2>
-      <div class="style-description">{{ p.styleDescription }}</div>
+      <div class="style-description">{{ p.style_description }}</div>
     </section>
 
     <!-- Per-kliens formalitás -->

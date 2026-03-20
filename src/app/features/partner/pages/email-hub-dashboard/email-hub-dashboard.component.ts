@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { EmailHubService } from '../../services/email-hub.service';
 import type { EmailHubDashboard } from '../../models/email-hub.models';
-import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 
 @Component({
   selector: 'app-email-hub-dashboard',
@@ -18,11 +17,10 @@ import { LoggerService } from '../../../../core/services/logger.service';
 export class EmailHubDashboardComponent implements OnInit {
   private emailHubService = inject(EmailHubService);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
-  private logger = inject(LoggerService);
+  private rl = createResourceLoader();
 
   readonly ICONS = ICONS;
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly dashboard = signal<EmailHubDashboard | null>(null);
 
   ngOnInit(): void {
@@ -30,20 +28,11 @@ export class EmailHubDashboardComponent implements OnInit {
   }
 
   private loadDashboard(): void {
-    this.loading.set(true);
-    this.emailHubService
-      .getDashboard()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.dashboard.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Email Hub dashboard betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.emailHubService.getDashboard(),
+      (data) => this.dashboard.set(data),
+      'Email Hub dashboard betöltési hiba',
+    );
   }
 
   navigateTo(path: string): void {

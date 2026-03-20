@@ -6,6 +6,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { EmailHubService } from '../../services/email-hub.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 import type { DraftResponse, DraftFilter } from '../../models/email-hub.models';
 
 @Component({
@@ -21,10 +22,11 @@ export class EmailHubDraftsComponent implements OnInit {
   private toast = inject(ToastService);
   private logger = inject(LoggerService);
   private destroyRef = inject(DestroyRef);
+  private rl = createResourceLoader(this.destroyRef);
 
   readonly ICONS = ICONS;
   readonly drafts = signal<DraftResponse[]>([]);
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly filter = signal<DraftFilter>('pending');
   readonly currentPage = signal(1);
   readonly totalPages = signal(1);
@@ -40,21 +42,11 @@ export class EmailHubDraftsComponent implements OnInit {
   }
 
   loadDrafts(): void {
-    this.loading.set(true);
-    this.service
-      .getDrafts({ page: this.currentPage(), status: this.filter() })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.drafts.set(data.items);
-          this.totalPages.set(data.pagination.lastPage);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Draft-ok betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.service.getDrafts({ page: this.currentPage(), status: this.filter() }),
+      (data) => { this.drafts.set(data.items); this.totalPages.set(data.pagination.lastPage); },
+      'Draft-ok betöltési hiba',
+    );
   }
 
   approve(draft: DraftResponse): void {

@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { EmailHubService } from '../../services/email-hub.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 import type { AiCostSummary, AiDailyCost } from '../../models/email-hub.models';
 
 @Component({
@@ -18,9 +19,10 @@ export class EmailHubAiCostsComponent implements OnInit {
   private service = inject(EmailHubService);
   private destroyRef = inject(DestroyRef);
   private logger = inject(LoggerService);
+  private rl = createResourceLoader(this.destroyRef);
 
   readonly ICONS = ICONS;
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly summary = signal<AiCostSummary | null>(null);
   readonly dailyCosts = signal<AiDailyCost[]>([]);
 
@@ -29,20 +31,11 @@ export class EmailHubAiCostsComponent implements OnInit {
   }
 
   private loadData(): void {
-    this.loading.set(true);
-
-    this.service.getAiCosts()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.summary.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('AI költségek betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.service.getAiCosts(),
+      (data) => this.summary.set(data),
+      'AI költségek betöltési hiba',
+    );
 
     this.service.getAiCostsDaily()
       .pipe(takeUntilDestroyed(this.destroyRef))

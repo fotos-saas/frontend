@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
 import { EmailHubService } from '../../services/email-hub.service';
-import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 import type { ModificationRound } from '../../models/email-hub.models';
 
 @Component({
@@ -17,12 +16,11 @@ import type { ModificationRound } from '../../models/email-hub.models';
 })
 export class EmailHubModificationsComponent implements OnInit {
   private service = inject(EmailHubService);
-  private destroyRef = inject(DestroyRef);
-  private logger = inject(LoggerService);
+  private rl = createResourceLoader();
 
   readonly ICONS = ICONS;
   readonly rounds = signal<ModificationRound[]>([]);
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly currentPage = signal(1);
   readonly totalPages = signal(1);
 
@@ -31,20 +29,11 @@ export class EmailHubModificationsComponent implements OnInit {
   }
 
   loadRounds(): void {
-    this.loading.set(true);
-    this.service.getModificationRounds({ page: this.currentPage() })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.rounds.set(data.items);
-          this.totalPages.set(data.pagination.lastPage);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Módosítási körök betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.service.getModificationRounds({ page: this.currentPage() }),
+      (data) => { this.rounds.set(data.items); this.totalPages.set(data.pagination.lastPage); },
+      'Módosítási körök betöltési hiba',
+    );
   }
 
   goToPage(page: number): void {

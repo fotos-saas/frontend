@@ -6,6 +6,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 import { EmailHubService } from '../../services/email-hub.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 import type { VoiceProfile } from '../../models/email-hub.models';
 
 @Component({
@@ -21,9 +22,10 @@ export class EmailHubVoiceProfileComponent implements OnInit {
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private logger = inject(LoggerService);
+  private rl = createResourceLoader(this.destroyRef);
 
   readonly ICONS = ICONS;
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly rebuilding = signal(false);
   readonly profile = signal<VoiceProfile | null>(null);
 
@@ -32,19 +34,11 @@ export class EmailHubVoiceProfileComponent implements OnInit {
   }
 
   private loadProfile(): void {
-    this.loading.set(true);
-    this.service.getVoiceProfile()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.profile.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Voice profile betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.service.getVoiceProfile(),
+      (data) => this.profile.set(data),
+      'Voice profile betöltési hiba',
+    );
   }
 
   rebuild(): void {

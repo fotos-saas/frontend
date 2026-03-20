@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
 import { DecimalPipe } from '@angular/common';
 import { ICONS } from '@shared/constants/icons.constants';
 import { environment } from '../../../../../environments/environment';
-import { LoggerService } from '../../../../core/services/logger.service';
+import { createResourceLoader } from '@shared/utils/resource-loader.util';
 import type { ApiResponse } from '../../../../core/models/api.models';
 
 interface SeasonReport {
@@ -52,11 +51,10 @@ interface WorkTypeStat {
 })
 export class EmailHubAnalyticsComponent implements OnInit {
   private http = inject(HttpClient);
-  private destroyRef = inject(DestroyRef);
-  private logger = inject(LoggerService);
+  private rl = createResourceLoader();
 
   readonly ICONS = ICONS;
-  readonly loading = signal(true);
+  readonly loading = this.rl.loading;
   readonly report = signal<SeasonReport | null>(null);
 
   ngOnInit(): void {
@@ -64,23 +62,13 @@ export class EmailHubAnalyticsComponent implements OnInit {
   }
 
   private loadReport(): void {
-    this.loading.set(true);
-    this.http
-      .get<ApiResponse<SeasonReport>>(`${environment.apiUrl}/partner/analytics/season`)
-      .pipe(
-        map((res) => res.data),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (data) => {
-          this.report.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.logger.error('Analitika betöltési hiba', err);
-          this.loading.set(false);
-        },
-      });
+    this.rl.load(
+      this.http
+        .get<ApiResponse<SeasonReport>>(`${environment.apiUrl}/partner/analytics/season`)
+        .pipe(map((res) => res.data)),
+      (data) => this.report.set(data),
+      'Analitika betöltési hiba',
+    );
   }
 
   maxBarValue(): number {

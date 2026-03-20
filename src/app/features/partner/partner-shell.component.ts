@@ -227,7 +227,9 @@ export class PartnerShellComponent implements OnInit {
   }
 
   private loadSubscriptionInfo(): void {
-    this.subscriptionService.getSubscription().subscribe({
+    this.subscriptionService.getSubscription().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (info) => {
         this.subscriptionInfo.set(info);
         this.featureToggleService.setDisabledFeatures(info.disabled_features ?? []);
@@ -239,7 +241,9 @@ export class PartnerShellComponent implements OnInit {
 
 
   private loadBranding(): void {
-    this.brandingService.getBranding().subscribe({
+    this.brandingService.getBranding().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (response) => {
         const isEffective = response.feature_active && response.branding?.is_active;
         this.brandingService.updateState(isEffective ? response.branding : null);

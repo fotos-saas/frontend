@@ -101,7 +101,7 @@ export class TimerBarComponent implements OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (timers) => this.showStopAll.set(timers.length > 1),
-        error: () => {},
+        error: (err) => this.logger.error('Timerek betöltési hiba', err),
       });
   }
 

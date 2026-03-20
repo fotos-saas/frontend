@@ -40,22 +40,22 @@
         <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
           <span class="td td-project">{{ draft.project?.name ?? 'Ismeretlen' }}</span>
           <span class="td td-type">
-            <span class="type-badge">{{ draft.responseTypeLabel }}</span>
+            <span class="type-badge">{{ draft.response_type.label }}</span>
           </span>
           <span class="td td-subject">
-            <strong>{{ draft.draftSubject }}</strong>
-            <span class="from-info">{{ draft.projectEmail?.fromEmail }}</span>
+            <strong>{{ draft.draft_subject }}</strong>
+            <span class="from-info">{{ draft.project_email?.from_email }}</span>
           </span>
           <span class="td td-confidence">
-            <span class="confidence" [class]="confidenceClass(draft.aiConfidence)">
-              {{ confidencePercent(draft.aiConfidence) }}
+            <span class="confidence" [class]="confidenceClass(draft.ai_confidence)">
+              {{ confidencePercent(draft.ai_confidence) }}
             </span>
           </span>
           <span class="td td-status">
-            <span class="status-badge status-badge--{{ draft.status }}">{{ draft.statusLabel }}</span>
+            <span class="status-badge status-badge--{{ draft.status.value }}">{{ draft.status.label }}</span>
           </span>
           <span class="td td-actions">
-            @if (draft.status === 'pending') {
+            @if (draft.status.value === 'pending') {
               <button class="action-btn action-btn--approve" matTooltip="Jóváhagyás és küldés" (click)="approve(draft)">
                 <lucide-icon [name]="ICONS.CHECK" [size]="16" />
               </button>
@@ -63,7 +63,7 @@
                 <lucide-icon [name]="ICONS.X" [size]="16" />
               </button>
             }
-            @if (draft.requiresProductionApproval && draft.productionApproved === null) {
+            @if (draft.requires_production_approval && draft.production_approved === null) {
               <span class="production-badge" matTooltip="Gyártás jóváhagyás szükséges">
                 <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
               </span>

@@ -31,34 +31,34 @@
       @for (round of rounds(); track round.id; let i = $index) {
         <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
           <span class="td td-round">
-            <span class="round-number">{{ round.roundNumber }}. kör</span>
+            <span class="round-number">{{ round.round_number }}. kör</span>
           </span>
           <span class="td td-status">
-            <span class="status-dot" [style.background]="statusColor(round.statusColor)"></span>
-            {{ round.statusLabel }}
+            <span class="status-dot"></span>
+            {{ round.status.label }}
           </span>
           <span class="td td-tasks">
-            {{ round.completedTasks }}/{{ round.totalTasks }}
+            {{ round.completed_tasks }}/{{ round.total_tasks }}
           </span>
           <span class="td td-progress">
             <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="round.progressPercent"></div>
+              <div class="progress-fill" [style.width.%]="round.progress_percent"></div>
             </div>
-            <span class="progress-text">{{ round.progressPercent }}%</span>
+            <span class="progress-text">{{ round.progress_percent }}%</span>
           </span>
           <span class="td td-price">
-            @if (round.isFree) {
+            @if (round.is_free) {
               <span class="free-badge">Ingyenes</span>
             } @else {
-              {{ formatPrice(round.priceHuf) }}
+              {{ formatPrice(round.price_huf) }}
             }
           </span>
           <span class="td td-payment">
-            <span class="payment-badge payment-badge--{{ round.paymentStatus }}">
-              {{ round.paymentStatusLabel }}
+            <span class="payment-badge payment-badge--{{ round.payment_status.value }}">
+              {{ round.payment_status.label }}
             </span>
           </span>
-          <span class="td td-date">{{ formatDate(round.requestedAt) }}</span>
+          <span class="td td-date">{{ formatDate(round.requested_at) }}</span>
         </div>
       }
     </div>

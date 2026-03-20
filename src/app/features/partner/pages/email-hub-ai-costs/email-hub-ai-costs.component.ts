@@ -58,7 +58,7 @@ export class EmailHubAiCostsComponent implements OnInit {
   maxDailyCost(): number {
     const costs = this.dailyCosts();
     if (costs.length === 0) return 1;
-    return Math.max(...costs.map(d => d.costUsd), 0.001);
+    return Math.max(...costs.map(d => d.cost_usd), 0.001);
   }
 
   barHeight(cost: number): string {

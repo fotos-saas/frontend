@@ -18,35 +18,30 @@ export interface EmailHubDashboard {
 
 export interface DraftResponse {
   id: number;
-  responseType: string;
-  responseTypeLabel: string;
-  status: string;
-  statusLabel: string;
-  draftSubject: string;
-  draftBody: string;
-  draftBodyHtml: string | null;
-  finalBody: string | null;
-  aiConfidence: number;
-  aiModel: string;
-  aiReasoning: Record<string, unknown> | null;
-  requiresProductionApproval: boolean;
-  productionApproved: boolean | null;
-  fewShotEmailIds: number[] | null;
-  approvedAt: string | null;
-  sentAt: string | null;
-  rejectedAt: string | null;
-  createdAt: string;
-  projectEmail?: DraftEmailPreview | null;
+  response_type: { value: string; label: string };
+  status: { value: string; label: string };
+  draft_subject: string;
+  draft_body: string;
+  draft_body_html: string | null;
+  final_body: string | null;
+  ai_confidence: number;
+  ai_model: string;
+  requires_production_approval: boolean;
+  production_approved: boolean | null;
+  approved_at: string | null;
+  sent_at: string | null;
+  rejected_at: string | null;
+  created_at: string;
+  project_email?: DraftEmailPreview | null;
   project?: { id: number; name: string } | null;
 }
 
 export interface DraftEmailPreview {
   id: number;
-  fromEmail: string;
-  fromName: string | null;
+  from_email: string;
+  from_name: string | null;
   subject: string;
-  bodyPreview: string;
-  emailDate: string;
+  email_date: string;
 }
 
 export type DraftFilter = 'all' | 'pending' | 'sent' | 'rejected';
@@ -55,49 +50,37 @@ export type DraftFilter = 'all' | 'pending' | 'sent' | 'rejected';
 
 export interface ModificationRound {
   id: number;
-  roundNumber: number;
-  status: string;
-  statusLabel: string;
-  statusColor: string;
-  isFree: boolean;
-  priceHuf: number | null;
-  paymentStatus: string;
-  paymentStatusLabel: string;
-  aiSummary: string | null;
-  totalTasks: number;
-  completedTasks: number;
-  progressPercent: number;
-  requestedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
+  round_number: number;
+  status: { value: string; label: string };
+  is_free: boolean;
+  price_huf: number | null;
+  payment_status: { value: string; label: string };
+  ai_summary: string | null;
+  total_tasks: number;
+  completed_tasks: number;
+  progress_percent: number;
+  requested_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  project?: { id: number; name: string } | null;
 }
 
 // --- AI Költségek ---
 
 export interface AiCostSummary {
-  totalCostUsd: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  byModel: AiModelCost[];
-  byAction: AiActionCost[];
-}
-
-export interface AiModelCost {
-  model: string;
-  costUsd: number;
-  callCount: number;
-}
-
-export interface AiActionCost {
-  action: string;
-  costUsd: number;
-  callCount: number;
+  total_cost_usd: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_calls: number;
+  avg_latency_ms: number;
 }
 
 export interface AiDailyCost {
   date: string;
-  costUsd: number;
-  callCount: number;
+  cost_usd: number;
+  calls: number;
+  input_tokens: number;
+  output_tokens: number;
 }
 
 // --- Voice Profile ---

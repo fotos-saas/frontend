@@ -101,8 +101,8 @@ export class EmailHubService {
 
   getAiCostsDaily(): Observable<AiDailyCost[]> {
     return this.http
-      .get<ApiResponse<AiDailyCost[]>>(`${this.baseUrl}/ai-costs/daily`)
-      .pipe(map((res) => res.data));
+      .get<ApiResponse<{ month: string; days: AiDailyCost[] }>>(`${this.baseUrl}/ai-costs/daily`)
+      .pipe(map((res) => res.data.days));
   }
 
   // --- Voice Profile ---

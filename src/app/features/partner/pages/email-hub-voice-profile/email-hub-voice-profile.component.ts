@@ -25,6 +25,7 @@ export class EmailHubVoiceProfileComponent implements OnInit {
   private rl = createResourceLoader(this.destroyRef);
 
   readonly ICONS = ICONS;
+  readonly Math = Math;
   readonly loading = this.rl.loading;
   readonly rebuilding = signal(false);
   readonly profile = signal<VoiceProfile | null>(null);

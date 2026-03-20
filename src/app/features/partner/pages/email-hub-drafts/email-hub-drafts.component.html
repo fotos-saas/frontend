@@ -1,0 +1,89 @@
+<div class="email-hub-drafts page-card">
+  <div class="page-header">
+    <h1>Draft válaszok</h1>
+    <div class="filter-tabs">
+      @for (f of ['pending', 'sent', 'rejected', 'all']; track f) {
+        <button
+          class="filter-tab"
+          [class.active]="filter() === f"
+          (click)="setFilter($any(f))">
+          {{ f === 'pending' ? 'Jóváhagyásra vár' : f === 'sent' ? 'Elküldve' : f === 'rejected' ? 'Elutasítva' : 'Összes' }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="row-grid">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  } @else if (drafts().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.INBOX" [size]="48" />
+      <h3>Nincs draft</h3>
+      <p>Jelenleg nincs jóváhagyásra váró AI válasz.</p>
+    </div>
+  } @else {
+    <div class="table-header">
+      <span class="th th-project">Projekt</span>
+      <span class="th th-type">Típus</span>
+      <span class="th th-subject">Tárgy</span>
+      <span class="th th-confidence">AI Bizalom</span>
+      <span class="th th-status">Státusz</span>
+      <span class="th th-actions">Műveletek</span>
+    </div>
+
+    <div class="row-grid">
+      @for (draft of drafts(); track draft.id; let i = $index) {
+        <div class="list-row" [style.animation-delay]="i * 0.03 + 's'">
+          <span class="td td-project">{{ draft.project?.name ?? 'Ismeretlen' }}</span>
+          <span class="td td-type">
+            <span class="type-badge">{{ draft.responseTypeLabel }}</span>
+          </span>
+          <span class="td td-subject">
+            <strong>{{ draft.draftSubject }}</strong>
+            <span class="from-info">{{ draft.projectEmail?.fromEmail }}</span>
+          </span>
+          <span class="td td-confidence">
+            <span class="confidence" [class]="confidenceClass(draft.aiConfidence)">
+              {{ confidencePercent(draft.aiConfidence) }}
+            </span>
+          </span>
+          <span class="td td-status">
+            <span class="status-badge status-badge--{{ draft.status }}">{{ draft.statusLabel }}</span>
+          </span>
+          <span class="td td-actions">
+            @if (draft.status === 'pending') {
+              <button class="action-btn action-btn--approve" matTooltip="Jóváhagyás és küldés" (click)="approve(draft)">
+                <lucide-icon [name]="ICONS.CHECK" [size]="16" />
+              </button>
+              <button class="action-btn action-btn--reject" matTooltip="Elutasítás" (click)="reject(draft)">
+                <lucide-icon [name]="ICONS.X" [size]="16" />
+              </button>
+            }
+            @if (draft.requiresProductionApproval && draft.productionApproved === null) {
+              <span class="production-badge" matTooltip="Gyártás jóváhagyás szükséges">
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+              </span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        @for (p of [].constructor(totalPages()); track $index) {
+          <button
+            class="page-btn"
+            [class.active]="currentPage() === $index + 1"
+            (click)="goToPage($index + 1)">
+            {{ $index + 1 }}
+          </button>
+        }
+      </div>
+    }
+  }
+</div>

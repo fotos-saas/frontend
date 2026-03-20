@@ -42,6 +42,16 @@ export function buildPartnerMenu(params: {
       ]
     },
     { id: 'contacts', route: `${base}/contacts`, label: 'Kapcsolatok', icon: 'users' },
+    {
+      id: 'email-hub',
+      label: 'Email Hub',
+      icon: 'brain',
+      devBadge: true,
+      children: [
+        { id: 'email-hub-dashboard', route: `${base}/email-hub/dashboard`, label: 'Áttekintés', devBadge: true },
+        { id: 'email-hub-drafts', route: `${base}/email-hub/drafts`, label: 'Draft válaszok', devBadge: true },
+      ]
+    },
     { id: 'quotes', route: `${base}/quotes`, label: 'Árajánlatok', icon: 'file-text', devBadge: true },
     {
       id: 'booking',

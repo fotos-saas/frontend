@@ -1,0 +1,72 @@
+<div class="email-hub-dashboard page-card">
+  <div class="page-header">
+    <h1>Email Hub</h1>
+    <p class="subtitle">AI email feldolgozás — draft válaszok, módosítási körök, költségek</p>
+  </div>
+
+  @if (loading()) {
+    <div class="summary-grid">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="summary-card skeleton-card">
+          <div class="skeleton-line skeleton-line--short"></div>
+          <div class="skeleton-line skeleton-line--wide"></div>
+        </div>
+      }
+    </div>
+  } @else if (dashboard(); as d) {
+    <div class="summary-grid">
+      <div class="summary-card summary-card--drafts" (click)="navigateTo('drafts')">
+        <div class="card-icon">
+          <lucide-icon [name]="ICONS.EDIT" [size]="24" />
+        </div>
+        <div class="card-content">
+          <span class="card-value">{{ d.pendingDrafts }}</span>
+          <span class="card-label">Jóváhagyásra vár</span>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--approval" (click)="navigateTo('drafts')">
+        <div class="card-icon">
+          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="24" />
+        </div>
+        <div class="card-content">
+          <span class="card-value">{{ d.pendingApproval }}</span>
+          <span class="card-label">Gyártás jóváhagyás</span>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--rounds" (click)="navigateTo('modifications')">
+        <div class="card-icon">
+          <lucide-icon [name]="ICONS.REFRESH_CW" [size]="24" />
+        </div>
+        <div class="card-content">
+          <span class="card-value">{{ d.activeRounds }}</span>
+          <span class="card-label">Aktív módosítási kör</span>
+        </div>
+      </div>
+
+      <div class="summary-card summary-card--costs" (click)="navigateTo('ai-costs')">
+        <div class="card-icon">
+          <lucide-icon [name]="ICONS.TRENDING_UP" [size]="24" />
+        </div>
+        <div class="card-content">
+          <span class="card-value">${{ d.monthlyCostUsd.toFixed(2) }}</span>
+          <span class="card-label">Havi AI költség</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <span class="info-badge">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="14" />
+        Ma feldolgozva: {{ d.todayProcessed }} email
+      </span>
+      @if (d.escalationCount > 0) {
+        <span class="info-badge info-badge--warning">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+          {{ d.escalationCount }} eszkaláció vár
+        </span>
+      }
+    </div>
+  }
+</div>

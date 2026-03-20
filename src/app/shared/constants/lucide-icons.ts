@@ -39,6 +39,8 @@ import {
   RefreshCw,
   Printer,
   Ban,
+  Brain,
+  TrendingUp,
   // Marketer modul ikonok
   History,
   Phone,
@@ -514,4 +516,7 @@ export const LUCIDE_ICONS_MAP = {
   // Értesítések oldal
   CheckCheck,
   Inbox,
+  // Email Hub / AI
+  Brain,
+  TrendingUp,
 };

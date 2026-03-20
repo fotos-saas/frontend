@@ -127,6 +127,22 @@ export const PARTNER_CHILDREN_ROUTES: Routes = [
     title: 'Email sablon szerkesztése'
   },
   {
+    path: 'email-hub',
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/email-hub-dashboard/email-hub-dashboard.component').then(m => m.EmailHubDashboardComponent),
+        title: 'Email Hub'
+      },
+      {
+        path: 'drafts',
+        loadComponent: () => import('./pages/email-hub-drafts/email-hub-drafts.component').then(m => m.EmailHubDraftsComponent),
+        title: 'Draft válaszok'
+      },
+    ]
+  },
+  {
     path: 'notifications',
     loadComponent: () => import('./pages/notification-list/notification-list.component').then(m => m.NotificationListComponent),
     title: 'Értesítések'

@@ -454,6 +454,11 @@ export const ICONS = {
   BELL: 'bell',
   BELL_OFF: 'bell-off',
   CHECK_CHECK: 'check-check',
+
+  // Email Hub / AI
+  BRAIN: 'brain',
+  TRENDING_UP: 'trending-up',
+  REFRESH_CW: 'refresh-cw',
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

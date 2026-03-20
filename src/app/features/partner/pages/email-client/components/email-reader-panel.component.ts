@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -208,6 +208,20 @@ export class EmailReaderPanelComponent {
 
   replyBody = '';
 
+  private wasSending = false;
+
+  constructor() {
+    // Reply reset: ha sending true→false vált, a válasz sikeresen elküldve
+    effect(() => {
+      const isSending = this.sending();
+      if (this.wasSending && !isSending) {
+        this.replyBody = '';
+        this.showReply.set(false);
+      }
+      this.wasSending = isSending;
+    });
+  }
+
   onQuickReplySelect(text: string): void {
     this.replyBody = text;
     this.showReply.set(true);
@@ -216,11 +230,6 @@ export class EmailReaderPanelComponent {
   sendReply(): void {
     if (!this.replyBody.trim()) return;
     this.sendReplyEvent.emit({ emailId: this.email().id, body: this.replyBody });
-  }
-
-  onReplySent(): void {
-    this.replyBody = '';
-    this.showReply.set(false);
   }
 
   formatDate(dateStr: string): string {

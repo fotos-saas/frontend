@@ -254,6 +254,7 @@ export class EmailClientPageComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (data) => this.folders.set(data.folders),
+      error: () => this.toast.error('Hiba', 'Nem sikerült betölteni a mappákat.'),
     });
   }
 
@@ -262,6 +263,7 @@ export class EmailClientPageComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (data) => this.labels.set(data.labels),
+      error: () => this.toast.error('Hiba', 'Nem sikerült betölteni a címkéket.'),
     });
   }
 
@@ -282,10 +284,6 @@ export class EmailClientPageComponent implements OnInit {
   }
 
   private updateFolderCounts(): void {
-    this.emailClientService.getFolders().pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (data) => this.folders.set(data.folders),
-    });
+    this.loadFolders();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, inject, DestroyRef, ElementRef, HostListener } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
@@ -122,6 +122,14 @@ import { ToastService } from '../../../../../core/services/toast.service';
 export class LabelPickerDropdownComponent {
   private readonly emailClientService = inject(EmailClientService);
   private readonly toast = inject(ToastService);
+  private readonly elementRef = inject(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.open() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.open.set(false);
+    }
+  }
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ICONS = ICONS;

@@ -17,7 +17,7 @@ import { EmailListItem } from '../../../models/email-client.models';
     >
       <!-- Csillag -->
       <button class="star-btn" (click)="onStarClick($event)" [class.starred]="email().is_starred">
-        <lucide-icon [name]="email().is_starred ? ICONS.STAR_ICON : ICONS.STAR_ICON" [size]="14" />
+        <lucide-icon [name]="ICONS.STAR_ICON" [size]="14" />
       </button>
 
       <!-- Avatar -->

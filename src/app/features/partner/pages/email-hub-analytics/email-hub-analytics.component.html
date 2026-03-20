@@ -1,0 +1,110 @@
+<div class="email-hub-analytics page-card">
+  <div class="page-header">
+    <h1>Szezon Analitika</h1>
+    <p class="subtitle">Munkatípus statisztikák, AI pontosság, bevételi elemzés</p>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  } @else if (report(); as r) {
+    <!-- Áttekintés kártyák -->
+    <div class="overview-grid">
+      <div class="overview-card">
+        <span class="ov-value">{{ r.overview.total_projects }}</span>
+        <span class="ov-label">Projekt</span>
+      </div>
+      <div class="overview-card">
+        <span class="ov-value">{{ r.overview.total_hours }}ó</span>
+        <span class="ov-label">Összes munkaóra</span>
+      </div>
+      <div class="overview-card">
+        <span class="ov-value">{{ r.overview.avg_utilization_pct }}%</span>
+        <span class="ov-label">Átl. kihasználtság</span>
+      </div>
+      <div class="overview-card overview-card--revenue">
+        <span class="ov-value">{{ r.revenue.total_overage_revenue_ft | number }} Ft</span>
+        <span class="ov-label">Túllépés bevétel</span>
+      </div>
+    </div>
+
+    <!-- Munkatípus statisztikák -->
+    @if (r.work_type_stats.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Átlagos munkaidő típusonként</h2>
+        <div class="bar-list">
+          @for (stat of r.work_type_stats; track stat.work_type) {
+            <div class="bar-row">
+              <span class="bar-label">{{ workTypeLabel(stat.work_type) }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.width]="barWidth(stat.avg_minutes)">
+                  {{ stat.avg_minutes }}p
+                </div>
+              </div>
+              <span class="bar-meta">{{ stat.entry_count }}×</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- AI pontosság -->
+    @if (r.ai_accuracy.total_compared > 0) {
+      <section class="section">
+        <h2 class="section-title">
+          <lucide-icon [name]="ICONS.BRAIN" [size]="18" />
+          AI Becslés Pontosság
+        </h2>
+        <div class="accuracy-badge">
+          <span class="accuracy-value">{{ r.ai_accuracy.overall_accuracy }}%</span>
+          <span class="accuracy-label">átlagos pontosság ({{ r.ai_accuracy.total_compared }} összehasonlítás)</span>
+        </div>
+
+        <div class="accuracy-list">
+          @for (entry of r.ai_accuracy.by_work_type | keyvalue; track entry.key) {
+            <div class="accuracy-row">
+              <span class="acc-type">{{ workTypeLabel(entry.key) }}</span>
+              <span class="acc-pct">{{ entry.value.avg_accuracy_pct }}%</span>
+              <span class="acc-detail">becslés: {{ entry.value.avg_estimated }}p → valós: {{ entry.value.avg_actual }}p</span>
+              <span class="acc-bias" [class.over]="entry.value.bias > 2" [class.under]="entry.value.bias < -2">
+                {{ biasLabel(entry.value.bias) }}
+              </span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Bevétel -->
+    <section class="section">
+      <h2 class="section-title">Bevételi elemzés</h2>
+      <div class="revenue-grid">
+        <div class="rev-card">
+          <span class="rev-value">{{ r.revenue.projects_within_budget }}</span>
+          <span class="rev-label">Kereten belül</span>
+        </div>
+        <div class="rev-card">
+          <span class="rev-value">{{ r.revenue.projects_with_overage }}</span>
+          <span class="rev-label">Túllépéssel</span>
+        </div>
+        <div class="rev-card">
+          <span class="rev-value">{{ r.revenue.avg_overage_per_project | number }} Ft</span>
+          <span class="rev-label">Átl. túllépés/projekt</span>
+        </div>
+        <div class="rev-card">
+          <span class="rev-value">{{ r.revenue.max_overage | number }} Ft</span>
+          <span class="rev-label">Max túllépés</span>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <div class="empty-state">
+      <lucide-icon [name]="ICONS.TRENDING_UP" [size]="48" />
+      <h3>Nincs elég adat</h3>
+      <p>Az analitika az időbejegyzések alapján készül. Kezdj el időt rögzíteni a projektjeidhez!</p>
+    </div>
+  }
+</div>

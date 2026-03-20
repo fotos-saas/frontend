@@ -155,6 +155,11 @@ export const PARTNER_CHILDREN_ROUTES: Routes = [
         loadComponent: () => import('./pages/email-hub-modifications/email-hub-modifications.component').then(m => m.EmailHubModificationsComponent),
         title: 'Módosítási körök'
       },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./pages/email-hub-analytics/email-hub-analytics.component').then(m => m.EmailHubAnalyticsComponent),
+        title: 'Szezon Analitika'
+      },
     ]
   },
   {

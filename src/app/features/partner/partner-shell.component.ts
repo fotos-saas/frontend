@@ -26,6 +26,7 @@ import { PartnerSwitcherDropdownComponent } from '../../shared/components/partne
 import { BatchWorkspacePanelComponent } from './components/batch-workspace-panel/batch-workspace-panel.component';
 import { UploadQueueToastComponent } from '../../shared/components/upload-queue-toast/upload-queue-toast.component';
 import { PartnerNotificationBellComponent } from './components/partner-notification-bell/partner-notification-bell.component';
+import { TimerBarComponent } from '../../shared/components/timer-bar/timer-bar.component';
 import { FeatureToggleService } from '../../core/services/feature-toggle.service';
 import { ROLE_BADGES, buildPartnerMenu, buildTeamMemberMenu, filterMenuItems } from './partner-shell-menu.config';
 import { BUILD_VERSION } from '../../core/constants/build-version';
@@ -56,6 +57,7 @@ import { BUILD_VERSION } from '../../core/constants/build-version';
     BatchWorkspacePanelComponent,
     UploadQueueToastComponent,
     PartnerNotificationBellComponent,
+    TimerBarComponent,
   ],
   templateUrl: './partner-shell.component.html',
   styleUrl: './partner-shell.component.scss',

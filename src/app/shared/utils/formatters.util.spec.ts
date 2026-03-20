@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPrice, formatAmount, getInitials, formatDateTime, formatFileSize } from './formatters.util';
+import { formatPrice, formatAmount, getInitials, formatDateTime, formatFileSize, formatElapsedTime } from './formatters.util';
 
 describe('formatters.util', () => {
 
@@ -149,6 +149,27 @@ describe('formatters.util', () => {
 
     it('1 byte', () => {
       expect(formatFileSize(1)).toBe('1 B');
+    });
+  });
+
+  // ============================================================================
+  // formatElapsedTime
+  // ============================================================================
+  describe('formatElapsedTime', () => {
+    it('0 másodperc', () => {
+      expect(formatElapsedTime(0)).toBe('00:00:00');
+    });
+
+    it('65 másodperc', () => {
+      expect(formatElapsedTime(65)).toBe('00:01:05');
+    });
+
+    it('1 óra 1 perc 1 másodperc', () => {
+      expect(formatElapsedTime(3661)).toBe('01:01:01');
+    });
+
+    it('nagy szám', () => {
+      expect(formatElapsedTime(36000)).toBe('10:00:00');
     });
   });
 });

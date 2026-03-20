@@ -100,6 +100,28 @@ export function formatDateTime(date: string | null): string {
 // ============================================
 
 /**
+ * Másodpercek formázása HH:MM:SS formátumban (timer kijelzőkhöz)
+ *
+ * @param seconds - Eltelt idő másodpercben
+ * @returns Formázott string (pl. "01:30:05")
+ *
+ * @example
+ * formatElapsedTime(0)    // => "00:00:00"
+ * formatElapsedTime(65)   // => "00:01:05"
+ * formatElapsedTime(3661) // => "01:01:01"
+ */
+export function formatElapsedTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// ============================================
+// FÁJLMÉRET FORMÁZÓ
+// ============================================
+
+/**
  * Fájlméret formázása olvasható formátumban
  *
  * @param bytes - Méret byte-ban

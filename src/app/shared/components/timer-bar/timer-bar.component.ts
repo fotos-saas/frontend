@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ICONS } from '@shared/constants/icons.constants';
+import { formatElapsedTime } from '@shared/utils/formatters.util';
 import { TimeCreditService } from '../../../features/partner/services/time-credit.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -54,7 +55,7 @@ export class TimerBarComponent implements OnInit, OnDestroy {
   getDisplayTime(timer: TimerState): string {
     const offset = this.localOffsets.get(timer.id) ?? 0;
     const total = timer.elapsed_seconds + (timer.is_running ? offset : 0);
-    return this.formatSeconds(total);
+    return formatElapsedTime(total);
   }
 
   pause(timerId: number): void {
@@ -103,12 +104,5 @@ export class TimerBarComponent implements OnInit, OnDestroy {
         next: (timers) => this.showStopAll.set(timers.length > 1),
         error: (err) => this.logger.error('Timerek betöltési hiba', err),
       });
-  }
-
-  private formatSeconds(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 }

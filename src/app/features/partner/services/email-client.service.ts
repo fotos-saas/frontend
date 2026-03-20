@@ -8,6 +8,8 @@ import {
   EmailLabel,
   EmailListItem,
   EmailDetail,
+  EmailTask,
+  AiInsights,
   QuickReply,
   EmailClientStats,
 } from '../models/email-client.models';
@@ -57,8 +59,8 @@ export class EmailClientService {
     ).pipe(map(r => r.data));
   }
 
-  getEmail(id: number): Observable<{ email: EmailDetail; thread: EmailListItem[] }> {
-    return this.http.get<ApiResponse<{ email: EmailDetail; thread: EmailListItem[] }>>(
+  getEmail(id: number): Observable<{ email: EmailDetail; thread: EmailListItem[]; email_tasks: EmailTask[]; ai_insights: AiInsights | null }> {
+    return this.http.get<ApiResponse<{ email: EmailDetail; thread: EmailListItem[]; email_tasks: EmailTask[]; ai_insights: AiInsights | null }>>(
       `${this.baseUrl}/emails/${id}`
     ).pipe(map(r => r.data));
   }

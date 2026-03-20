@@ -53,3 +53,42 @@ export interface EmailClientStats {
   needs_reply: number;
   today: number;
 }
+
+export type EmailTaskPriority = 'high' | 'normal' | 'low';
+
+export interface EmailTask {
+  id: number;
+  title: string;
+  description: string | null;
+  type: 'task' | 'note';
+  task_type: string | null;
+  task_type_label: string | null;
+  priority: EmailTaskPriority;
+  complexity: number | null;
+  estimated_minutes: number | null;
+  student_name: string | null;
+  status: string;
+  ai_confidence: number | null;
+}
+
+export type AiResponseType =
+  | 'approval'
+  | 'conditional_approval'
+  | 'modification_request'
+  | 'reversal'
+  | 'question'
+  | 'complaint'
+  | 'payment_confirmation'
+  | 'unclear';
+
+export interface AiInsights {
+  ai_category: string | null;
+  ai_response_type: AiResponseType | null;
+  ai_response_type_label: string | null;
+  ai_category_confidence: number | null;
+  ai_processed_at: string | null;
+  total_estimated_minutes: number;
+  task_count: number;
+  note_count: number;
+  has_contradictions: boolean;
+}

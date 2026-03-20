@@ -4,17 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONS } from '@shared/constants/icons.constants';
 import { SafeHtmlPipe } from '@shared/pipes/safe-html.pipe';
-import { EmailDetail, EmailListItem, QuickReply, EmailLabel } from '../../../models/email-client.models';
+import { EmailDetail, EmailListItem, EmailTask, AiInsights, QuickReply, EmailLabel } from '../../../models/email-client.models';
 import { EmailClientService } from '../../../services/email-client.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { QuickReplyBarComponent } from './quick-reply-bar.component';
 import { LabelPickerDropdownComponent } from './label-picker-dropdown.component';
+import { EmailInsightsPanelComponent } from './email-insights-panel.component';
 
 @Component({
   selector: 'app-email-reader-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, SafeHtmlPipe, QuickReplyBarComponent, LabelPickerDropdownComponent],
+  imports: [FormsModule, LucideAngularModule, SafeHtmlPipe, QuickReplyBarComponent, LabelPickerDropdownComponent, EmailInsightsPanelComponent],
   template: `
     @if (loadingDetail()) {
       <div class="loading-detail">
@@ -87,6 +88,14 @@ import { LabelPickerDropdownComponent } from './label-picker-dropdown.component'
             </div>
           }
         </div>
+
+        <!-- AI Elemzés panel (csak bejövő emaileknél) -->
+        @if (email().direction === 'inbound') {
+          <app-email-insights-panel
+            [tasks]="emailTasks()"
+            [insights]="aiInsights()"
+          />
+        }
 
         <!-- Body -->
         <div class="email-body">
@@ -194,6 +203,8 @@ export class EmailReaderPanelComponent {
 
   readonly email = input.required<EmailDetail>();
   readonly thread = input.required<EmailListItem[]>();
+  readonly emailTasks = input<EmailTask[]>([]);
+  readonly aiInsights = input<AiInsights | null>(null);
   readonly quickReplies = input.required<QuickReply[]>();
   readonly loadingDetail = input(false);
   readonly loadingQuickReplies = input(false);

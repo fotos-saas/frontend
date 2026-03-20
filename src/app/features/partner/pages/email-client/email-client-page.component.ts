@@ -12,6 +12,8 @@ import {
   EmailLabel,
   EmailListItem,
   EmailDetail,
+  EmailTask,
+  AiInsights,
   QuickReply,
 } from '../../models/email-client.models';
 import { EmailSidebarComponent } from './components/email-sidebar.component';
@@ -51,6 +53,8 @@ export class EmailClientPageComponent implements OnInit {
   // Detail state
   readonly selectedEmail = signal<EmailDetail | null>(null);
   readonly thread = signal<EmailListItem[]>([]);
+  readonly emailTasks = signal<EmailTask[]>([]);
+  readonly aiInsights = signal<AiInsights | null>(null);
   readonly quickReplies = signal<QuickReply[]>([]);
   readonly loadingDetail = signal(false);
   readonly loadingQuickReplies = signal(false);
@@ -125,6 +129,8 @@ export class EmailClientPageComponent implements OnInit {
   onSelectEmail(email: EmailListItem): void {
     this.loadingDetail.set(true);
     this.quickReplies.set([]);
+    this.emailTasks.set([]);
+    this.aiInsights.set(null);
 
     this.emailClientService.getEmail(email.id).pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -132,6 +138,8 @@ export class EmailClientPageComponent implements OnInit {
       next: (data) => {
         this.selectedEmail.set(data.email);
         this.thread.set(data.thread);
+        this.emailTasks.set(data.email_tasks ?? []);
+        this.aiInsights.set(data.ai_insights ?? null);
         this.loadingDetail.set(false);
 
         // Olvasottnak jelölés a listában
@@ -178,6 +186,8 @@ export class EmailClientPageComponent implements OnInit {
   onCloseDetail(): void {
     this.selectedEmail.set(null);
     this.thread.set([]);
+    this.emailTasks.set([]);
+    this.aiInsights.set(null);
     this.quickReplies.set([]);
   }
 

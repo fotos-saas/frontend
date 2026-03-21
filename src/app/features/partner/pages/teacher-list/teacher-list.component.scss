@@ -92,6 +92,13 @@
   text-overflow: ellipsis;
 }
 
+.teacher-id-badge {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
 .teacher-school {
   display: flex;
   align-items: center;

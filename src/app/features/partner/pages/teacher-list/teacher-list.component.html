@@ -114,6 +114,7 @@
         <div class="teacher-details">
           <div class="teacher-name-row">
             <span class="teacher-name">{{ teacher.fullDisplayName }}</span>
+            <span class="teacher-id-badge">#{{ teacher.id }}</span>
             @if (teacher.linkedGroup) {
               <span class="linked-badge" matTooltip="Összekapcsolt tanár">
                 <lucide-icon [name]="ICONS.LINK" [size]="12" />

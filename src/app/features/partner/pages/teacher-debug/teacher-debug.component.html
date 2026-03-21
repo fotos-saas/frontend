@@ -227,18 +227,15 @@
 
     <!-- Paginator -->
     @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
-          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
-        </button>
-        @for (page of pageNumbers(); track page) {
-          <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
-        }
-        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
-          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
-        </button>
-        <span class="page-info">{{ currentPage() }} / {{ totalPages() }} oldal</span>
-      </div>
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalItems]="filtered().length"
+        [perPage]="perPage()"
+        itemLabel="tanár"
+        (pageChange)="goToPage($event)"
+        (perPageChange)="onPerPageChange($event)"
+      />
     }
   }
 

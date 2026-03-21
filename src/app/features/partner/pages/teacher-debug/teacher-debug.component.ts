@@ -6,11 +6,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
 import { TeacherDebugItem, TeacherDebugStats, TeacherDebugAnomaly } from '../../models/teacher.models';
 import { ICONS } from '@shared/constants/icons.constants';
+import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
 
 @Component({
   selector: 'app-teacher-debug',
   standalone: true,
-  imports: [FormsModule, RouterLink, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, RouterLink, LucideAngularModule, MatTooltipModule, ListPaginationComponent],
   templateUrl: './teacher-debug.component.html',
   styleUrls: ['./teacher-debug.component.scss'],
 })
@@ -27,7 +28,7 @@ export class TeacherDebugComponent implements OnInit {
   }
 
   readonly ICONS = ICONS;
-  readonly PAGE_SIZE = 30;
+  perPage = signal(50);
 
   // Base URL (pl. /designer vagy /partner) — az aktuális URL-ből deriválva
   readonly baseUrl = computed(() => {
@@ -106,10 +107,10 @@ export class TeacherDebugComponent implements OnInit {
   });
 
   // Paginálás
-  totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.PAGE_SIZE)));
+  totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.perPage())));
   paginatedItems = computed(() => {
-    const start = (this.currentPage() - 1) * this.PAGE_SIZE;
-    return this.filtered().slice(start, start + this.PAGE_SIZE);
+    const start = (this.currentPage() - 1) * this.perPage();
+    return this.filtered().slice(start, start + this.perPage());
   });
 
   ngOnInit(): void {
@@ -233,15 +234,8 @@ export class TeacherDebugComponent implements OnInit {
     }
   }
 
-  pageNumbers(): number[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: number[] = [];
-    const start = Math.max(1, current - 3);
-    const end = Math.min(total, current + 3);
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
+  onPerPageChange(value: number): void {
+    this.perPage.set(value);
+    this.currentPage.set(1);
   }
 }

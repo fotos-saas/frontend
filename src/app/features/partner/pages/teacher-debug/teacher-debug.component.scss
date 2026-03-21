@@ -246,6 +246,18 @@
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+
+    .sortable {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+
+      &:hover { color: #374151; }
+      &.sorted { color: var(--color-primary); }
+    }
   }
 
   .table-row {

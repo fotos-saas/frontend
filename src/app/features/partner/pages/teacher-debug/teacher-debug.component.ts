@@ -51,6 +51,8 @@ export class TeacherDebugComponent implements OnInit {
   schoolDropdownOpen = signal(false);
   classYear = signal('2026');
   currentPage = signal(1);
+  sortColumn = signal<'name' | 'schoolName' | 'className' | 'archiveSchoolName' | 'anomalies'>('name');
+  sortDir = signal<'asc' | 'desc'>('asc');
 
   // Elérhető iskolák (a betöltött adatból)
   schools = computed(() => {
@@ -87,6 +89,19 @@ export class TeacherDebugComponent implements OnInit {
     if (school) {
       list = list.filter(i => i.schoolName === school);
     }
+
+    // Rendezés
+    const col = this.sortColumn();
+    const dir = this.sortDir() === 'asc' ? 1 : -1;
+    list = [...list].sort((a, b) => {
+      if (col === 'anomalies') {
+        return (b.anomalies.length - a.anomalies.length) * dir;
+      }
+      const valA = (a[col] ?? '').toLowerCase();
+      const valB = (b[col] ?? '').toLowerCase();
+      return valA.localeCompare(valB, 'hu') * dir;
+    });
+
     return list;
   });
 
@@ -199,6 +214,16 @@ export class TeacherDebugComponent implements OnInit {
   clearSchool(): void {
     this.selectedSchool.set('');
     this.schoolSearch.set('');
+    this.currentPage.set(1);
+  }
+
+  toggleSort(col: 'name' | 'schoolName' | 'className' | 'archiveSchoolName' | 'anomalies'): void {
+    if (this.sortColumn() === col) {
+      this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortColumn.set(col);
+      this.sortDir.set('asc');
+    }
     this.currentPage.set(1);
   }
 

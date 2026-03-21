@@ -120,11 +120,36 @@
     <div class="debug-table">
       <div class="table-head">
         <span>Fotó</span>
-        <span>Név</span>
-        <span>Projekt iskola</span>
-        <span>Osztály</span>
-        <span>Archív iskola</span>
-        <span>Anomáliák</span>
+        <span class="sortable" (click)="toggleSort('name')" [class.sorted]="sortColumn() === 'name'">
+          Név
+          @if (sortColumn() === 'name') {
+            <lucide-icon [name]="sortDir() === 'asc' ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="12" />
+          }
+        </span>
+        <span class="sortable" (click)="toggleSort('schoolName')" [class.sorted]="sortColumn() === 'schoolName'">
+          Projekt iskola
+          @if (sortColumn() === 'schoolName') {
+            <lucide-icon [name]="sortDir() === 'asc' ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="12" />
+          }
+        </span>
+        <span class="sortable" (click)="toggleSort('className')" [class.sorted]="sortColumn() === 'className'">
+          Osztály
+          @if (sortColumn() === 'className') {
+            <lucide-icon [name]="sortDir() === 'asc' ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="12" />
+          }
+        </span>
+        <span class="sortable" (click)="toggleSort('archiveSchoolName')" [class.sorted]="sortColumn() === 'archiveSchoolName'">
+          Archív iskola
+          @if (sortColumn() === 'archiveSchoolName') {
+            <lucide-icon [name]="sortDir() === 'asc' ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="12" />
+          }
+        </span>
+        <span class="sortable" (click)="toggleSort('anomalies')" [class.sorted]="sortColumn() === 'anomalies'">
+          Anomáliák
+          @if (sortColumn() === 'anomalies') {
+            <lucide-icon [name]="sortDir() === 'asc' ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN" [size]="12" />
+          }
+        </span>
       </div>
 
       @for (item of paginatedItems(); track item.personId; let i = $index) {

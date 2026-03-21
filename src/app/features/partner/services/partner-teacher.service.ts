@@ -58,6 +58,12 @@ export class PartnerTeacherService implements ArchiveService {
     return this.http.get<{ success: boolean; data: TeacherDebugResponse }>(`${this.baseUrl}/debug`, { params });
   }
 
+  unlinkPerson(personId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/debug/unlink-person`, {
+      person_id: personId,
+    });
+  }
+
   getExpandedView(projectId: number): Observable<ExpandedViewResponse> {
     const params = buildHttpParams({ project_id: projectId });
     return this.http.get<ExpandedViewResponse>(`${this.baseUrl}/expanded-view`, { params });

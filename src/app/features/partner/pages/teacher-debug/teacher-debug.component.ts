@@ -293,4 +293,12 @@ export class TeacherDebugComponent implements OnInit {
     this.perPage.set(value);
     this.currentPage.set(1);
   }
+
+  unlinkPerson(personId: number, name: string): void {
+    if (!confirm(`Biztosan szétkapcsolod: ${name} (#${personId})?`)) return;
+    this.teacherService.unlinkPerson(personId).subscribe({
+      next: () => this.load(),
+      error: () => alert('Hiba történt a szétkapcsolás során.'),
+    });
+  }
 }

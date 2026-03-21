@@ -330,10 +330,18 @@
               <div class="person-row">
                 <span class="person-name">{{ p.name }}</span>
                 <span class="person-school">{{ p.schoolName }}</span>
-                <span class="person-class">{{ p.className }}</span>
+                <a [routerLink]="[baseUrl() + '/projects', p.projectId]"
+                   class="person-class-link" matTooltip="Projekt megnyitása">
+                  {{ p.className }}
+                  <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="10" />
+                </a>
                 @for (a of p.anomalies; track a) {
                   <span class="badge badge--sm" [class]="anomalyClass(a)">{{ anomalyLabel(a) }}</span>
                 }
+                <button class="unlink-btn" (click)="unlinkPerson(p.personId, p.name)"
+                        matTooltip="Szétkapcsolás az archívtól">
+                  <lucide-icon [name]="ICONS.UNLINK" [size]="13" />
+                </button>
               </div>
             }
           </div>

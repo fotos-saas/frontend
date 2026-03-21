@@ -191,7 +191,37 @@
 
   .person-name { font-weight: 500; min-width: 200px; }
   .person-school { color: #6b7280; min-width: 180px; }
-  .person-class { color: #9ca3af; min-width: 80px; }
+
+  .person-class-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    min-width: 80px;
+
+    &:hover { text-decoration: underline; }
+    lucide-icon { opacity: 0.5; }
+  }
+
+  .unlink-btn {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+    background: white;
+    color: #dc2626;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.15s;
+
+    &:hover { background: #fee2e2; }
+  }
+
+  &:hover .unlink-btn { opacity: 1; }
 }
 
 .badge--sm {

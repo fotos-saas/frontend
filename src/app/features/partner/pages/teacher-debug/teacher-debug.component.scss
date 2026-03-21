@@ -124,10 +124,24 @@
     }
   }
 
+  .school-filter {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #e5e7eb);
+    background: white;
+    font-size: 0.875rem;
+    color: #374151;
+    min-width: 200px;
+    cursor: pointer;
+
+    &:focus { outline: 2px solid var(--color-primary); outline-offset: -1px; }
+  }
+
   .result-count {
     font-size: 0.875rem;
     color: #6b7280;
     white-space: nowrap;
+    margin-left: auto;
   }
 
   // ── Loading / Error ──────────────────────────────
@@ -316,5 +330,43 @@
 
     p { margin: 0; font-size: 0.875rem; }
     lucide-icon { color: #16a34a; }
+  }
+
+  // ── Paginator ───────────────────────────────────
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 0;
+  }
+
+  .page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #e5e7eb);
+    background: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #374151;
+
+    &:hover:not(:disabled) { background: #f3f4f6; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+    &.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+  }
+
+  .page-info {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-left: 12px;
   }
 }

@@ -1,5 +1,4 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -11,7 +10,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 @Component({
   selector: 'app-teacher-debug',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, MatTooltipModule],
+  imports: [FormsModule, RouterLink, LucideAngularModule, MatTooltipModule],
   templateUrl: './teacher-debug.component.html',
   styleUrls: ['./teacher-debug.component.scss'],
 })
@@ -19,6 +18,7 @@ export class TeacherDebugComponent implements OnInit {
   private teacherService = inject(PartnerTeacherService);
 
   readonly ICONS = ICONS;
+  readonly PAGE_SIZE = 30;
 
   // State
   items = signal<TeacherDebugItem[]>([]);
@@ -30,13 +30,22 @@ export class TeacherDebugComponent implements OnInit {
   search = signal('');
   anomalyOnly = signal(false);
   selectedAnomaly = signal<TeacherDebugAnomaly | ''>('');
+  selectedSchool = signal('');
   classYear = signal('2026');
+  currentPage = signal(1);
+
+  // Elérhető iskolák (a betöltött adatból)
+  schools = computed(() => {
+    const names = [...new Set(this.items().map(i => i.schoolName).filter(Boolean))] as string[];
+    return names.sort();
+  });
 
   // Szűrt lista
   filtered = computed(() => {
     let list = this.items();
     const s = this.search().toLowerCase().trim();
     const anom = this.selectedAnomaly();
+    const school = this.selectedSchool();
 
     if (s) {
       list = list.filter(i =>
@@ -51,7 +60,17 @@ export class TeacherDebugComponent implements OnInit {
     if (this.anomalyOnly()) {
       list = list.filter(i => i.hasAnomaly);
     }
+    if (school) {
+      list = list.filter(i => i.schoolName === school);
+    }
     return list;
+  });
+
+  // Paginálás
+  totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.PAGE_SIZE)));
+  paginatedItems = computed(() => {
+    const start = (this.currentPage() - 1) * this.PAGE_SIZE;
+    return this.filtered().slice(start, start + this.PAGE_SIZE);
   });
 
   ngOnInit(): void {
@@ -64,7 +83,7 @@ export class TeacherDebugComponent implements OnInit {
 
     this.teacherService.getDebugList({
       class_year: this.classYear(),
-      anomaly_only: false, // mindent betöltünk, frontenden szűrünk
+      anomaly_only: false,
     }).subscribe({
       next: res => {
         this.items.set(res.data.items);
@@ -120,13 +139,47 @@ export class TeacherDebugComponent implements OnInit {
 
   filterByAnomaly(a: TeacherDebugAnomaly | ''): void {
     this.selectedAnomaly.set(a);
+    this.anomalyOnly.set(false);
+    this.currentPage.set(1);
+  }
+
+  filterAnomalyOnly(): void {
+    this.selectedAnomaly.set('');
+    this.anomalyOnly.set(true);
+    this.currentPage.set(1);
+  }
+
+  filterAll(): void {
+    this.selectedAnomaly.set('');
+    this.anomalyOnly.set(false);
+    this.currentPage.set(1);
   }
 
   onSearchChange(value: string): void {
     this.search.set(value);
+    this.currentPage.set(1);
   }
 
-  trackById(_: number, item: TeacherDebugItem): number {
-    return item.personId;
+  onSchoolChange(value: string): void {
+    this.selectedSchool.set(value);
+    this.currentPage.set(1);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  pageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    const start = Math.max(1, current - 3);
+    const end = Math.min(total, current + 3);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }

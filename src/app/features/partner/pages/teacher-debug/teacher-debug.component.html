@@ -17,39 +17,39 @@
   @if (stats(); as s) {
     <div class="stat-cards">
       <button class="stat-card stat-card--all" [class.active]="selectedAnomaly() === '' && !anomalyOnly()"
-              (click)="filterByAnomaly(''); anomalyOnly.set(false)">
+              (click)="filterAll()">
         <span class="stat-num">{{ s.total }}</span>
         <span class="stat-label">Összes</span>
       </button>
-      <button class="stat-card stat-card--ok" [class.active]="false">
+      <button class="stat-card stat-card--ok" (click)="filterAll()">
         <span class="stat-num">{{ s.ok }}</span>
         <span class="stat-label">Rendben</span>
       </button>
-      <button class="stat-card stat-card--warn" [class.active]="selectedAnomaly() === '' && anomalyOnly()"
-              (click)="filterByAnomaly(''); anomalyOnly.set(true)">
+      <button class="stat-card stat-card--warn" [class.active]="anomalyOnly()"
+              (click)="filterAnomalyOnly()">
         <span class="stat-num">{{ s.withAnomaly }}</span>
         <span class="stat-label">Anomália</span>
       </button>
       <button class="stat-card stat-card--red" [class.active]="selectedAnomaly() === 'no_archive'"
-              (click)="filterByAnomaly('no_archive'); anomalyOnly.set(false)">
+              (click)="filterByAnomaly('no_archive')">
         <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
         <span class="stat-num">{{ s.noArchive }}</span>
         <span class="stat-label">Nincs archív</span>
       </button>
       <button class="stat-card stat-card--orange" [class.active]="selectedAnomaly() === 'wrong_school'"
-              (click)="filterByAnomaly('wrong_school'); anomalyOnly.set(false)">
+              (click)="filterByAnomaly('wrong_school')">
         <lucide-icon [name]="ICONS.SCHOOL" [size]="14" />
         <span class="stat-num">{{ s.wrongSchool }}</span>
         <span class="stat-label">Rossz iskola</span>
       </button>
       <button class="stat-card stat-card--purple" [class.active]="selectedAnomaly() === 'photo_from_other'"
-              (click)="filterByAnomaly('photo_from_other'); anomalyOnly.set(false)">
+              (click)="filterByAnomaly('photo_from_other')">
         <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
         <span class="stat-num">{{ s.photoFromOther }}</span>
         <span class="stat-label">Idegen fotó</span>
       </button>
       <button class="stat-card stat-card--gray" [class.active]="selectedAnomaly() === 'no_photo'"
-              (click)="filterByAnomaly('no_photo'); anomalyOnly.set(false)">
+              (click)="filterByAnomaly('no_photo')">
         <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
         <span class="stat-num">{{ s.noPhoto }}</span>
         <span class="stat-label">Nincs fotó</span>
@@ -57,7 +57,7 @@
     </div>
   }
 
-  <!-- Keresősor -->
+  <!-- Toolbar: keresés + iskola szűrő -->
   <div class="toolbar">
     <div class="search-box">
       <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
@@ -65,6 +65,12 @@
              [value]="search()"
              (input)="onSearchChange($any($event.target).value)" />
     </div>
+    <select class="school-filter" [value]="selectedSchool()" (change)="onSchoolChange($any($event.target).value)">
+      <option value="">Minden iskola</option>
+      @for (school of schools(); track school) {
+        <option [value]="school">{{ school }}</option>
+      }
+    </select>
     <span class="result-count">{{ filtered().length }} tanár</span>
   </div>
 
@@ -87,7 +93,6 @@
   <!-- Táblázat -->
   @if (!loading() && !error()) {
     <div class="debug-table">
-      <!-- Fejléc -->
       <div class="table-head">
         <span>Fotó</span>
         <span>Név</span>
@@ -97,17 +102,15 @@
         <span>Anomáliák</span>
       </div>
 
-      <!-- Sorok -->
-      @for (item of filtered(); track item.personId; let i = $index) {
+      @for (item of paginatedItems(); track item.personId; let i = $index) {
         <div class="table-row" [class.has-anomaly]="item.hasAnomaly"
              [style.animation-delay]="i * 0.02 + 's'">
 
-          <!-- Fotó -->
           <div class="col-photo">
             @if (item.photoUrl) {
               <img [src]="item.photoUrl" [alt]="item.name"
                    [class.photo--wrong]="item.anomalies.includes('photo_from_other')"
-                   [matTooltip]="item.anomalies.includes('photo_from_other') ? 'Idegen fotó: ' + item.photoOwner?.name : ''" />
+                   [matTooltip]="item.anomalies.includes('photo_from_other') ? 'Idegen fotó: ' + (item.photoOwner?.name ?? '') : ''" />
             } @else {
               <div class="photo-placeholder">
                 <lucide-icon [name]="ICONS.USER" [size]="20" />
@@ -115,7 +118,6 @@
             }
           </div>
 
-          <!-- Név -->
           <div class="col-name">
             <span class="name">{{ item.name }}</span>
             @if (item.archiveId) {
@@ -129,20 +131,14 @@
             }
           </div>
 
-          <!-- Projekt iskola -->
-          <div class="col-school">
-            {{ item.schoolName ?? '–' }}
-          </div>
+          <div class="col-school">{{ item.schoolName ?? '–' }}</div>
 
-          <!-- Osztály -->
           <div class="col-class">
             {{ item.className }}
             <span class="class-year">{{ item.classYear }}</span>
           </div>
 
-          <!-- Archív iskola -->
-          <div class="col-archive-school"
-               [class.mismatch]="item.anomalies.includes('wrong_school')">
+          <div class="col-archive-school" [class.mismatch]="item.anomalies.includes('wrong_school')">
             @if (item.archiveSchoolName) {
               @if (item.anomalies.includes('wrong_school')) {
                 <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"
@@ -154,11 +150,9 @@
             }
           </div>
 
-          <!-- Anomáliák -->
           <div class="col-anomalies">
             @for (a of item.anomalies; track a) {
-              <span class="badge" [class]="anomalyClass(a)"
-                    [matTooltip]="anomalyTooltip(item, a)">
+              <span class="badge" [class]="anomalyClass(a)" [matTooltip]="anomalyTooltip(item, a)">
                 <lucide-icon [name]="anomalyIcon(a)" [size]="11" />
                 {{ anomalyLabel(a) }}
               </span>
@@ -170,7 +164,6 @@
               </span>
             }
           </div>
-
         </div>
       }
 
@@ -181,6 +174,22 @@
         </div>
       }
     </div>
+
+    <!-- Paginator -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_LEFT" [size]="16" />
+        </button>
+        @for (page of pageNumbers(); track page) {
+          <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button>
+        }
+        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+          <lucide-icon [name]="ICONS.CHEVRON_RIGHT" [size]="16" />
+        </button>
+        <span class="page-info">{{ currentPage() }} / {{ totalPages() }} oldal</span>
+      </div>
+    }
   }
 
 </div>

@@ -279,14 +279,6 @@
                   </a>
                 }
               </div>
-              <div class="archive-schools">
-                @for (school of group.uniqueSchools; track school) {
-                  <span class="school-tag">
-                    <lucide-icon [name]="ICONS.SCHOOL" [size]="11" />
-                    {{ school }}
-                  </span>
-                }
-              </div>
               <div class="archive-meta">
                 <span class="person-count">{{ group.personCount }} projektben</span>
                 @if (group.linkedGroup) {
@@ -343,6 +335,17 @@
                   <lucide-icon [name]="ICONS.UNLINK" [size]="13" />
                 </button>
               </div>
+            }
+          </div>
+
+          <!-- Összes iskola alul -->
+          <div class="archive-footer-schools">
+            <span class="footer-label">Iskolák:</span>
+            @for (school of group.uniqueSchools; track school) {
+              <span class="school-tag">
+                <lucide-icon [name]="ICONS.SCHOOL" [size]="11" />
+                {{ school }}
+              </span>
             }
           </div>
         </div>

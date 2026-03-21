@@ -228,3 +228,19 @@
   font-size: 0.65rem;
   padding: 1px 5px;
 }
+
+.archive-footer-schools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 18px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+
+  .footer-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+}

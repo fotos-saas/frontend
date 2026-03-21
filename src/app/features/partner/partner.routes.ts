@@ -38,7 +38,7 @@ export const PARTNER_CHILDREN_ROUTES: Routes = [
     loadComponent: () => import('./pages/school-detail/school-detail.component').then(m => m.PartnerSchoolDetailComponent)
   },
   {
-    path: 'projects/teachers/debug',
+    path: 'projects/teacher-debug',
     loadComponent: () => import('./pages/teacher-debug/teacher-debug.component').then(m => m.TeacherDebugComponent)
   },
   {

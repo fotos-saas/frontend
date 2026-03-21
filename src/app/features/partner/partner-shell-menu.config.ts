@@ -36,7 +36,7 @@ export function buildPartnerMenu(params: {
         { id: 'project-tasks', route: `${base}/projects/tasks`, label: 'Tennivalók', badge: pendingTaskCount || undefined },
         { id: 'schools', route: `${base}/projects/schools`, label: 'Iskolák' },
         { id: 'teachers', route: `${base}/projects/teachers`, label: 'Tanárok' },
-        { id: 'teachers-debug', route: `${base}/projects/teachers/debug`, label: 'Tanár ellenőrzés' },
+        { id: 'teachers-debug', route: `${base}/projects/teacher-debug`, label: 'Tanár ellenőrzés' },
         { id: 'students', route: `${base}/projects/students`, label: 'Diákok' },
         { id: 'settings', route: `${base}/projects/settings`, label: 'Beállítások' },
         { id: 'tablo-designer', route: `${base}/tablo-designer`, label: 'Tablókészítő', visible: () => isElectron },

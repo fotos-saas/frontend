@@ -38,6 +38,10 @@ export const DESIGNER_CHILDREN_ROUTES: Routes = [
     loadComponent: () => import('./pages/school-detail/school-detail.component').then(m => m.PartnerSchoolDetailComponent)
   },
   {
+    path: 'projects/teacher-debug',
+    loadComponent: () => import('./pages/teacher-debug/teacher-debug.component').then(m => m.TeacherDebugComponent)
+  },
+  {
     path: 'projects/teachers',
     loadComponent: () => import('./pages/teacher-list/teacher-list.component').then(m => m.PartnerTeacherListComponent)
   },

@@ -1,0 +1,186 @@
+<div class="teacher-debug page-card page-card--wide">
+
+  <!-- Fejléc -->
+  <div class="debug-header">
+    <div class="debug-title">
+      <lucide-icon [name]="ICONS.BUG" [size]="22" />
+      <h1>Tanár ellenőrzés</h1>
+      <span class="year-badge">{{ classYear() }}</span>
+    </div>
+    <button class="btn-reload" (click)="load()" [disabled]="loading()">
+      <lucide-icon [name]="ICONS.REFRESH_CW" [size]="16" />
+      Frissítés
+    </button>
+  </div>
+
+  <!-- Stat kártyák -->
+  @if (stats(); as s) {
+    <div class="stat-cards">
+      <button class="stat-card stat-card--all" [class.active]="selectedAnomaly() === '' && !anomalyOnly()"
+              (click)="filterByAnomaly(''); anomalyOnly.set(false)">
+        <span class="stat-num">{{ s.total }}</span>
+        <span class="stat-label">Összes</span>
+      </button>
+      <button class="stat-card stat-card--ok" [class.active]="false">
+        <span class="stat-num">{{ s.ok }}</span>
+        <span class="stat-label">Rendben</span>
+      </button>
+      <button class="stat-card stat-card--warn" [class.active]="selectedAnomaly() === '' && anomalyOnly()"
+              (click)="filterByAnomaly(''); anomalyOnly.set(true)">
+        <span class="stat-num">{{ s.withAnomaly }}</span>
+        <span class="stat-label">Anomália</span>
+      </button>
+      <button class="stat-card stat-card--red" [class.active]="selectedAnomaly() === 'no_archive'"
+              (click)="filterByAnomaly('no_archive'); anomalyOnly.set(false)">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+        <span class="stat-num">{{ s.noArchive }}</span>
+        <span class="stat-label">Nincs archív</span>
+      </button>
+      <button class="stat-card stat-card--orange" [class.active]="selectedAnomaly() === 'wrong_school'"
+              (click)="filterByAnomaly('wrong_school'); anomalyOnly.set(false)">
+        <lucide-icon [name]="ICONS.SCHOOL" [size]="14" />
+        <span class="stat-num">{{ s.wrongSchool }}</span>
+        <span class="stat-label">Rossz iskola</span>
+      </button>
+      <button class="stat-card stat-card--purple" [class.active]="selectedAnomaly() === 'photo_from_other'"
+              (click)="filterByAnomaly('photo_from_other'); anomalyOnly.set(false)">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
+        <span class="stat-num">{{ s.photoFromOther }}</span>
+        <span class="stat-label">Idegen fotó</span>
+      </button>
+      <button class="stat-card stat-card--gray" [class.active]="selectedAnomaly() === 'no_photo'"
+              (click)="filterByAnomaly('no_photo'); anomalyOnly.set(false)">
+        <lucide-icon [name]="ICONS.IMAGE_DOWN" [size]="14" />
+        <span class="stat-num">{{ s.noPhoto }}</span>
+        <span class="stat-label">Nincs fotó</span>
+      </button>
+    </div>
+  }
+
+  <!-- Keresősor -->
+  <div class="toolbar">
+    <div class="search-box">
+      <lucide-icon [name]="ICONS.SEARCH" [size]="16" />
+      <input type="text" placeholder="Keresés név, iskola, osztály..."
+             [value]="search()"
+             (input)="onSearchChange($any($event.target).value)" />
+    </div>
+    <span class="result-count">{{ filtered().length }} tanár</span>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Betöltés...</span>
+    </div>
+  }
+
+  <!-- Hiba -->
+  @if (error()) {
+    <div class="error-state">
+      <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="20" />
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Táblázat -->
+  @if (!loading() && !error()) {
+    <div class="debug-table">
+      <!-- Fejléc -->
+      <div class="table-head">
+        <span>Fotó</span>
+        <span>Név</span>
+        <span>Projekt iskola</span>
+        <span>Osztály</span>
+        <span>Archív iskola</span>
+        <span>Anomáliák</span>
+      </div>
+
+      <!-- Sorok -->
+      @for (item of filtered(); track item.personId; let i = $index) {
+        <div class="table-row" [class.has-anomaly]="item.hasAnomaly"
+             [style.animation-delay]="i * 0.02 + 's'">
+
+          <!-- Fotó -->
+          <div class="col-photo">
+            @if (item.photoUrl) {
+              <img [src]="item.photoUrl" [alt]="item.name"
+                   [class.photo--wrong]="item.anomalies.includes('photo_from_other')"
+                   [matTooltip]="item.anomalies.includes('photo_from_other') ? 'Idegen fotó: ' + item.photoOwner?.name : ''" />
+            } @else {
+              <div class="photo-placeholder">
+                <lucide-icon [name]="ICONS.USER" [size]="20" />
+              </div>
+            }
+          </div>
+
+          <!-- Név -->
+          <div class="col-name">
+            <span class="name">{{ item.name }}</span>
+            @if (item.archiveId) {
+              <a [routerLink]="['../../teachers', item.archiveId]"
+                 class="archive-link" matTooltip="Archív rekord megnyitása">
+                <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="12" />
+                #{{ item.archiveId }}
+              </a>
+            } @else {
+              <span class="no-archive-badge">nincs archív</span>
+            }
+          </div>
+
+          <!-- Projekt iskola -->
+          <div class="col-school">
+            {{ item.schoolName ?? '–' }}
+          </div>
+
+          <!-- Osztály -->
+          <div class="col-class">
+            {{ item.className }}
+            <span class="class-year">{{ item.classYear }}</span>
+          </div>
+
+          <!-- Archív iskola -->
+          <div class="col-archive-school"
+               [class.mismatch]="item.anomalies.includes('wrong_school')">
+            @if (item.archiveSchoolName) {
+              @if (item.anomalies.includes('wrong_school')) {
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"
+                             [matTooltip]="'Projekt: ' + item.schoolName + ' | Archív: ' + item.archiveSchoolName" />
+              }
+              {{ item.archiveSchoolName }}
+            } @else {
+              <span class="empty">–</span>
+            }
+          </div>
+
+          <!-- Anomáliák -->
+          <div class="col-anomalies">
+            @for (a of item.anomalies; track a) {
+              <span class="badge" [class]="anomalyClass(a)"
+                    [matTooltip]="anomalyTooltip(item, a)">
+                <lucide-icon [name]="anomalyIcon(a)" [size]="11" />
+                {{ anomalyLabel(a) }}
+              </span>
+            }
+            @if (item.anomalies.length === 0) {
+              <span class="badge badge--ok">
+                <lucide-icon [name]="ICONS.CHECK" [size]="11" />
+                OK
+              </span>
+            }
+          </div>
+
+        </div>
+      }
+
+      @if (filtered().length === 0 && !loading()) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.CHECK" [size]="32" />
+          <p>Nincs találat</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

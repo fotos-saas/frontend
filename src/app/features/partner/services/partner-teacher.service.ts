@@ -21,6 +21,7 @@ import {
   SyncPreviewResponse,
   SyncExecuteResponse,
   TeacherUploadHistoryResponse,
+  TeacherDebugResponse,
 } from '../models/teacher.models';
 import { PaginatedResponse } from '../models/partner.models';
 import { ExpandedViewResponse, ExpandedUploadedPhoto, SyncResult } from '../components/expanded-teacher-view/expanded-teacher-view.types';
@@ -45,6 +46,16 @@ import {
 export class PartnerTeacherService implements ArchiveService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/partner/teachers`;
+
+  getDebugList(filters: {
+    class_year?: string;
+    school_id?: number | null;
+    anomaly_only?: boolean;
+    search?: string;
+  } = {}): Observable<{ success: boolean; data: TeacherDebugResponse }> {
+    const params = buildHttpParams(filters);
+    return this.http.get<{ success: boolean; data: TeacherDebugResponse }>(`${this.baseUrl}/debug`, { params });
+  }
 
   getExpandedView(projectId: number): Observable<ExpandedViewResponse> {
     const params = buildHttpParams({ project_id: projectId });

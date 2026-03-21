@@ -2,6 +2,45 @@
  * Tanár archívum interface-ek és típusok.
  */
 
+// ============================================================
+// Debug / Ellenőrzés
+// ============================================================
+
+export type TeacherDebugAnomaly = 'no_archive' | 'wrong_school' | 'photo_from_other' | 'no_photo';
+
+export interface TeacherDebugItem {
+  personId: number;
+  name: string;
+  archiveId: number | null;
+  projectId: number;
+  className: string;
+  classYear: string;
+  projectSchoolId: number;
+  schoolName: string | null;
+  archiveSchoolId: number | null;
+  archiveSchoolName: string | null;
+  linkedGroup: string | null;
+  photoUrl: string | null;
+  photoOwner: { archiveId: number; name: string } | null;
+  anomalies: TeacherDebugAnomaly[];
+  hasAnomaly: boolean;
+}
+
+export interface TeacherDebugStats {
+  total: number;
+  noArchive: number;
+  wrongSchool: number;
+  photoFromOther: number;
+  noPhoto: number;
+  withAnomaly: number;
+  ok: number;
+}
+
+export interface TeacherDebugResponse {
+  items: TeacherDebugItem[];
+  stats: TeacherDebugStats;
+}
+
 export interface TeacherGroupRow {
   primary: TeacherListItem;
   members: TeacherListItem[];
@@ -302,3 +341,4 @@ export interface TeacherUploadHistoryResponse {
   };
   unseenCount: number;
 }
+

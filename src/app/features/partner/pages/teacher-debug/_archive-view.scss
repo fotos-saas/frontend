@@ -102,9 +102,24 @@
     }
   }
 
-  .archive-school {
-    font-size: 0.8rem;
-    color: #6b7280;
+  .archive-schools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+
+    .school-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.75rem;
+      color: #4b5563;
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 4px;
+
+      lucide-icon { color: #9ca3af; }
+    }
   }
 
   .archive-meta {

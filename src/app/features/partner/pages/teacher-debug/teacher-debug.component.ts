@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, HostListener, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,6 +17,14 @@ import { ICONS } from '@shared/constants/icons.constants';
 export class TeacherDebugComponent implements OnInit {
   private teacherService = inject(PartnerTeacherService);
   private router = inject(Router);
+  private el = inject(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.el.nativeElement.querySelector('.school-filter-wrap')?.contains(event.target)) {
+      this.schoolDropdownOpen.set(false);
+    }
+  }
 
   readonly ICONS = ICONS;
   readonly PAGE_SIZE = 30;
@@ -39,6 +47,8 @@ export class TeacherDebugComponent implements OnInit {
   anomalyOnly = signal(false);
   selectedAnomaly = signal<TeacherDebugAnomaly | ''>('');
   selectedSchool = signal('');
+  schoolSearch = signal('');
+  schoolDropdownOpen = signal(false);
   classYear = signal('2026');
   currentPage = signal(1);
 
@@ -46,6 +56,12 @@ export class TeacherDebugComponent implements OnInit {
   schools = computed(() => {
     const names = [...new Set(this.items().map(i => i.schoolName).filter(Boolean))] as string[];
     return names.sort();
+  });
+
+  filteredSchools = computed(() => {
+    const q = this.schoolSearch().toLowerCase().trim();
+    if (!q) return this.schools();
+    return this.schools().filter(s => s.toLowerCase().includes(q));
   });
 
   // Szűrt lista
@@ -168,8 +184,21 @@ export class TeacherDebugComponent implements OnInit {
     this.currentPage.set(1);
   }
 
-  onSchoolChange(value: string): void {
+  selectSchool(value: string): void {
     this.selectedSchool.set(value);
+    this.schoolSearch.set('');
+    this.schoolDropdownOpen.set(false);
+    this.currentPage.set(1);
+  }
+
+  onSchoolSearchInput(value: string): void {
+    this.schoolSearch.set(value);
+    this.schoolDropdownOpen.set(true);
+  }
+
+  clearSchool(): void {
+    this.selectedSchool.set('');
+    this.schoolSearch.set('');
     this.currentPage.set(1);
   }
 

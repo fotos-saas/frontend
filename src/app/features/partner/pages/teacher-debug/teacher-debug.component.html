@@ -65,12 +65,37 @@
              [value]="search()"
              (input)="onSearchChange($any($event.target).value)" />
     </div>
-    <select class="school-filter" [value]="selectedSchool()" (change)="onSchoolChange($any($event.target).value)">
-      <option value="">Minden iskola</option>
-      @for (school of schools(); track school) {
-        <option [value]="school">{{ school }}</option>
+    <div class="school-filter-wrap">
+      <div class="school-input-row">
+        <lucide-icon [name]="ICONS.SCHOOL" [size]="14" />
+        @if (selectedSchool()) {
+          <span class="selected-school" (click)="schoolDropdownOpen.set(!schoolDropdownOpen())">{{ selectedSchool() }}</span>
+          <button class="clear-btn" (click)="clearSchool()" matTooltip="Szűrő törlése">
+            <lucide-icon [name]="ICONS.X" [size]="14" />
+          </button>
+        } @else {
+          <input type="text" placeholder="Iskola keresése..."
+                 [value]="schoolSearch()"
+                 (input)="onSchoolSearchInput($any($event.target).value)"
+                 (focus)="schoolDropdownOpen.set(true)" />
+        }
+      </div>
+      @if (schoolDropdownOpen()) {
+        <div class="school-dropdown">
+          <div class="school-opt" (click)="selectSchool('')">
+            <em>Minden iskola</em>
+          </div>
+          @for (school of filteredSchools(); track school) {
+            <div class="school-opt" [class.active]="school === selectedSchool()" (click)="selectSchool(school)">
+              {{ school }}
+            </div>
+          }
+          @if (filteredSchools().length === 0) {
+            <div class="school-opt school-opt--empty">Nincs találat</div>
+          }
+        </div>
       }
-    </select>
+    </div>
     <span class="result-count">{{ filtered().length }} tanár</span>
   </div>
 

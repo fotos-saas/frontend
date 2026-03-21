@@ -13,7 +13,7 @@ import { ICONS } from '@shared/constants/icons.constants';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, MatTooltipModule],
   templateUrl: './teacher-debug.component.html',
-  styleUrl: './teacher-debug.component.scss',
+  styleUrls: ['./teacher-debug.component.scss'],
 })
 export class TeacherDebugComponent implements OnInit {
   private teacherService = inject(PartnerTeacherService);

@@ -36,9 +36,24 @@ export interface TeacherDebugStats {
   ok: number;
 }
 
+export interface TeacherDebugArchiveGroup {
+  archiveId: number | null;
+  archiveName: string | null;
+  archiveSchoolName: string | null;
+  photoUrl: string | null;
+  linkedGroup: string | null;
+  personCount: number;
+  uniqueNames: string[];
+  uniqueSchools: string[];
+  anomalies: string[];
+  hasAnomaly: boolean;
+  persons: TeacherDebugItem[];
+}
+
 export interface TeacherDebugResponse {
-  items: TeacherDebugItem[];
+  items: TeacherDebugItem[] | TeacherDebugArchiveGroup[];
   stats: TeacherDebugStats;
+  view: 'flat' | 'archive';
 }
 
 export interface TeacherGroupRow {

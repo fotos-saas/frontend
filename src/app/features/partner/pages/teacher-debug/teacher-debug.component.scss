@@ -403,6 +403,8 @@
     lucide-icon { color: #16a34a; }
   }
 
+  @import 'archive-view';
+
   // ── Paginator (app-list-pagination) ──────────────
   app-list-pagination {
     display: block;

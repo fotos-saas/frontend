@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
-import { TeacherDebugItem, TeacherDebugStats, TeacherDebugAnomaly } from '../../models/teacher.models';
+import { TeacherDebugItem, TeacherDebugStats, TeacherDebugAnomaly, TeacherDebugArchiveGroup } from '../../models/teacher.models';
 import { ICONS } from '@shared/constants/icons.constants';
 import { ListPaginationComponent } from '@shared/components/list-pagination/list-pagination.component';
 
@@ -38,7 +38,9 @@ export class TeacherDebugComponent implements OnInit {
   });
 
   // State
+  viewMode = signal<'flat' | 'archive'>('flat');
   items = signal<TeacherDebugItem[]>([]);
+  archiveGroups = signal<TeacherDebugArchiveGroup[]>([]);
   stats = signal<TeacherDebugStats | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -106,11 +108,44 @@ export class TeacherDebugComponent implements OnInit {
     return list;
   });
 
-  // Paginálás
-  totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.perPage())));
+  // Archive nézet szűrt lista
+  filteredArchive = computed(() => {
+    let list = this.archiveGroups();
+    const s = this.search().toLowerCase().trim();
+    const school = this.selectedSchool();
+
+    if (s) {
+      list = list.filter(g =>
+        g.archiveName?.toLowerCase().includes(s) ||
+        g.uniqueNames.some(n => n.toLowerCase().includes(s)) ||
+        g.archiveSchoolName?.toLowerCase().includes(s)
+      );
+    }
+    if (school) {
+      list = list.filter(g =>
+        g.archiveSchoolName === school ||
+        g.uniqueSchools.includes(school)
+      );
+    }
+    if (this.anomalyOnly()) {
+      list = list.filter(g => g.hasAnomaly);
+    }
+    if (this.selectedAnomaly()) {
+      list = list.filter(g => g.anomalies.includes(this.selectedAnomaly()));
+    }
+    return list;
+  });
+
+  // Paginálás — mindkét nézetre
+  activeList = computed(() => this.viewMode() === 'archive' ? this.filteredArchive() : this.filtered());
+  totalPages = computed(() => Math.max(1, Math.ceil(this.activeList().length / this.perPage())));
   paginatedItems = computed(() => {
     const start = (this.currentPage() - 1) * this.perPage();
     return this.filtered().slice(start, start + this.perPage());
+  });
+  paginatedArchive = computed(() => {
+    const start = (this.currentPage() - 1) * this.perPage();
+    return this.filteredArchive().slice(start, start + this.perPage());
   });
 
   ngOnInit(): void {
@@ -124,11 +159,19 @@ export class TeacherDebugComponent implements OnInit {
     this.teacherService.getDebugList({
       class_year: this.classYear(),
       anomaly_only: false,
+      view: this.viewMode(),
     }).subscribe({
       next: res => {
-        this.items.set(res.data.items);
+        if (res.data.view === 'archive') {
+          this.archiveGroups.set(res.data.items as TeacherDebugArchiveGroup[]);
+          this.items.set([]);
+        } else {
+          this.items.set(res.data.items as TeacherDebugItem[]);
+          this.archiveGroups.set([]);
+        }
         this.stats.set(res.data.stats);
         this.loading.set(false);
+        this.currentPage.set(1);
       },
       error: () => {
         this.error.set('Nem sikerült betölteni az adatokat.');
@@ -137,34 +180,46 @@ export class TeacherDebugComponent implements OnInit {
     });
   }
 
-  anomalyLabel(a: TeacherDebugAnomaly): string {
-    const map: Record<TeacherDebugAnomaly, string> = {
+  switchView(mode: 'flat' | 'archive'): void {
+    if (this.viewMode() === mode) return;
+    this.viewMode.set(mode);
+    this.load();
+  }
+
+  anomalyLabel(a: string): string {
+    const map: Record<string, string> = {
       no_archive: 'Nincs archív',
       wrong_school: 'Rossz iskola',
       photo_from_other: 'Idegen fotó',
       no_photo: 'Nincs fotó',
+      name_mismatch: 'Néveltérés',
+      name_vs_archive: 'Név ≠ archív',
     };
-    return map[a];
+    return map[a] ?? a;
   }
 
-  anomalyClass(a: TeacherDebugAnomaly): string {
-    const map: Record<TeacherDebugAnomaly, string> = {
+  anomalyClass(a: string): string {
+    const map: Record<string, string> = {
       no_archive: 'badge--red',
       wrong_school: 'badge--orange',
       photo_from_other: 'badge--purple',
       no_photo: 'badge--gray',
+      name_mismatch: 'badge--red',
+      name_vs_archive: 'badge--orange',
     };
-    return map[a];
+    return map[a] ?? 'badge--gray';
   }
 
-  anomalyIcon(a: TeacherDebugAnomaly): string {
-    const map: Record<TeacherDebugAnomaly, string> = {
+  anomalyIcon(a: string): string {
+    const map: Record<string, string> = {
       no_archive: ICONS.ALERT_TRIANGLE,
       wrong_school: ICONS.SCHOOL,
       photo_from_other: ICONS.IMAGE,
       no_photo: ICONS.IMAGE_DOWN,
+      name_mismatch: ICONS.ALERT_TRIANGLE,
+      name_vs_archive: ICONS.USER_CHECK,
     };
-    return map[a];
+    return map[a] ?? ICONS.ALERT_TRIANGLE;
   }
 
   anomalyTooltip(item: TeacherDebugItem, a: TeacherDebugAnomaly): string {

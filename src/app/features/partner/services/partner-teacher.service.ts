@@ -52,6 +52,7 @@ export class PartnerTeacherService implements ArchiveService {
     school_id?: number | null;
     anomaly_only?: boolean;
     search?: string;
+    view?: 'flat' | 'archive';
   } = {}): Observable<{ success: boolean; data: TeacherDebugResponse }> {
     const params = buildHttpParams(filters);
     return this.http.get<{ success: boolean; data: TeacherDebugResponse }>(`${this.baseUrl}/debug`, { params });

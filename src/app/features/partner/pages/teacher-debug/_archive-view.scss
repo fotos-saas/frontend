@@ -1,0 +1,185 @@
+// ── Nézet-váltó ─────────────────────────────────
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 3px;
+  width: fit-content;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.15s;
+
+    &.active {
+      background: white;
+      color: #374151;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    &:hover:not(.active) { color: #374151; }
+  }
+}
+
+// ── Archive nézet ──────────────────────────────
+.archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.archive-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease backwards;
+
+  &.has-anomaly {
+    border-color: #fbbf24;
+    background: #fffbeb;
+  }
+}
+
+.archive-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+.archive-photo {
+  img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+  }
+  .photo-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+  }
+}
+
+.archive-info {
+  flex: 1;
+  min-width: 0;
+
+  .archive-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .archive-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--color-primary);
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+
+  .archive-school {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .archive-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+
+    .person-count {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .linked-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.7rem;
+      color: var(--color-primary);
+      background: #ede9fe;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+  }
+}
+
+.archive-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.name-variants {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: #fef2f2;
+  border-top: 1px solid #fecaca;
+  font-size: 0.8rem;
+  color: #dc2626;
+
+  lucide-icon { flex-shrink: 0; }
+
+  .name-tag {
+    background: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid #fecaca;
+  }
+}
+
+.archive-persons {
+  border-top: 1px solid #f3f4f6;
+  padding: 6px 18px;
+}
+
+.person-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #f9fafb;
+
+  &:last-child { border-bottom: none; }
+
+  .person-name { font-weight: 500; min-width: 200px; }
+  .person-school { color: #6b7280; min-width: 180px; }
+  .person-class { color: #9ca3af; min-width: 80px; }
+}
+
+.badge--sm {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+}

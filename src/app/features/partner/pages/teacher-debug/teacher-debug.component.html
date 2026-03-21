@@ -57,6 +57,18 @@
     </div>
   }
 
+  <!-- Nézet-váltó -->
+  <div class="view-toggle">
+    <button [class.active]="viewMode() === 'flat'" (click)="switchView('flat')">
+      <lucide-icon [name]="ICONS.LIST" [size]="16" />
+      Személyenkénti
+    </button>
+    <button [class.active]="viewMode() === 'archive'" (click)="switchView('archive')">
+      <lucide-icon [name]="ICONS.LINK" [size]="16" />
+      Archív ID szerint
+    </button>
+  </div>
+
   <!-- Toolbar: keresés + iskola szűrő -->
   <div class="toolbar">
     <div class="search-box">
@@ -96,7 +108,7 @@
         </div>
       }
     </div>
-    <span class="result-count">{{ filtered().length }} tanár</span>
+    <span class="result-count">{{ activeList().length }} {{ viewMode() === 'archive' ? 'csoport' : 'tanár' }}</span>
   </div>
 
   <!-- Loading -->
@@ -116,7 +128,7 @@
   }
 
   <!-- Táblázat -->
-  @if (!loading() && !error()) {
+  @if (!loading() && !error() && viewMode() === 'flat') {
     <div class="debug-table">
       <div class="table-head">
         <span>Fotó</span>
@@ -225,14 +237,118 @@
       }
     </div>
 
-    <!-- Paginator -->
+    <!-- Paginator (flat) -->
     @if (totalPages() > 1) {
       <app-list-pagination
         [currentPage]="currentPage()"
         [totalPages]="totalPages()"
-        [totalItems]="filtered().length"
+        [totalItems]="activeList().length"
         [perPage]="perPage()"
         itemLabel="tanár"
+        (pageChange)="goToPage($event)"
+        (perPageChange)="onPerPageChange($event)"
+      />
+    }
+  }
+
+  <!-- ARCHIVE NÉZET -->
+  @if (!loading() && !error() && viewMode() === 'archive') {
+    <div class="archive-list">
+      @for (group of paginatedArchive(); track group.archiveId; let i = $index) {
+        <div class="archive-card" [class.has-anomaly]="group.hasAnomaly"
+             [style.animation-delay]="i * 0.03 + 's'">
+
+          <div class="archive-header">
+            <div class="archive-photo">
+              @if (group.photoUrl) {
+                <img [src]="group.photoUrl" [alt]="group.archiveName ?? ''" />
+              } @else {
+                <div class="photo-placeholder">
+                  <lucide-icon [name]="ICONS.USER" [size]="24" />
+                </div>
+              }
+            </div>
+            <div class="archive-info">
+              <div class="archive-name">
+                {{ group.archiveName ?? 'Nincs archív' }}
+                @if (group.archiveId) {
+                  <a [routerLink]="[baseUrl() + '/projects/teachers', group.archiveId]"
+                     class="archive-link" matTooltip="Megnyitás">
+                    <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="12" />
+                    #{{ group.archiveId }}
+                  </a>
+                }
+              </div>
+              <div class="archive-school">{{ group.archiveSchoolName ?? '–' }}</div>
+              <div class="archive-meta">
+                <span class="person-count">{{ group.personCount }} projektben</span>
+                @if (group.linkedGroup) {
+                  <span class="linked-badge">
+                    <lucide-icon [name]="ICONS.LINK" [size]="11" />
+                    Linked
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="archive-badges">
+              @for (a of group.anomalies; track a) {
+                <span class="badge" [class]="anomalyClass(a)">
+                  <lucide-icon [name]="anomalyIcon(a)" [size]="11" />
+                  {{ anomalyLabel(a) }}
+                </span>
+              }
+              @if (group.anomalies.length === 0) {
+                <span class="badge badge--ok">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="11" />
+                  OK
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Nevek kifejtve -->
+          @if (group.uniqueNames.length > 1) {
+            <div class="name-variants">
+              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14" />
+              <span>Eltérő nevek:</span>
+              @for (name of group.uniqueNames; track name) {
+                <span class="name-tag">{{ name }}</span>
+              }
+            </div>
+          }
+
+          <!-- Projektek -->
+          <div class="archive-persons">
+            @for (p of group.persons; track p.personId) {
+              <div class="person-row">
+                <span class="person-name">{{ p.name }}</span>
+                <span class="person-school">{{ p.schoolName }}</span>
+                <span class="person-class">{{ p.className }}</span>
+                @for (a of p.anomalies; track a) {
+                  <span class="badge badge--sm" [class]="anomalyClass(a)">{{ anomalyLabel(a) }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (filteredArchive().length === 0) {
+        <div class="empty-state">
+          <lucide-icon [name]="ICONS.CHECK" [size]="32" />
+          <p>Nincs találat</p>
+        </div>
+      }
+    </div>
+
+    <!-- Paginator (archive) -->
+    @if (totalPages() > 1) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalItems]="activeList().length"
+        [perPage]="perPage()"
+        itemLabel="csoport"
         (pageChange)="goToPage($event)"
         (perPageChange)="onPerPageChange($event)"
       />

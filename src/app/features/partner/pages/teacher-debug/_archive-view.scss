@@ -102,25 +102,6 @@
     }
   }
 
-  .archive-schools {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 2px;
-
-    .school-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 0.75rem;
-      color: #4b5563;
-      background: #f3f4f6;
-      padding: 2px 8px;
-      border-radius: 4px;
-
-      lucide-icon { color: #9ca3af; }
-    }
-  }
 
   .archive-meta {
     display: flex;
@@ -242,5 +223,19 @@
     font-size: 0.75rem;
     color: #9ca3af;
     font-weight: 500;
+  }
+
+  .school-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    color: #4b5563;
+    background: white;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+
+    lucide-icon { color: #9ca3af; }
   }
 }

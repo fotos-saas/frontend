@@ -121,7 +121,7 @@
           <div class="col-name">
             <span class="name">{{ item.name }}</span>
             @if (item.archiveId) {
-              <a [routerLink]="['../../teachers', item.archiveId]"
+              <a [routerLink]="[baseUrl() + '/projects/teachers', item.archiveId]"
                  class="archive-link" matTooltip="Archív rekord megnyitása">
                 <lucide-icon [name]="ICONS.EXTERNAL_LINK" [size]="12" />
                 #{{ item.archiveId }}

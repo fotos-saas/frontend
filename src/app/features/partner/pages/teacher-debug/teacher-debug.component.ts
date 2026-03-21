@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerTeacherService } from '../../services/partner-teacher.service';
@@ -16,9 +16,17 @@ import { ICONS } from '@shared/constants/icons.constants';
 })
 export class TeacherDebugComponent implements OnInit {
   private teacherService = inject(PartnerTeacherService);
+  private router = inject(Router);
 
   readonly ICONS = ICONS;
   readonly PAGE_SIZE = 30;
+
+  // Base URL (pl. /designer vagy /partner) — az aktuális URL-ből deriválva
+  readonly baseUrl = computed(() => {
+    const url = this.router.url; // pl. /designer/projects/teacher-debug
+    const match = url.match(/^\/(partner|designer|printer|assistant)/);
+    return match ? `/${match[1]}` : '/partner';
+  });
 
   // State
   items = signal<TeacherDebugItem[]>([]);

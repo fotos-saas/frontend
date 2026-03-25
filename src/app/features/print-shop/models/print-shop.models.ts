@@ -32,6 +32,7 @@ export interface PrintShopProject {
   thumbnailUrl: string | null;
   previewUrl: string | null;
   printShopDownloadedAt: string | null;
+  printShopDownloadCount: number;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

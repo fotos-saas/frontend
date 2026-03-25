@@ -323,7 +323,7 @@ export class PrintShopProjectsComponent {
           const downloadedIds = new Set(ids);
           this.projects.update(list =>
             list.map(p => downloadedIds.has(p.id)
-              ? { ...p, printShopDownloadedAt: now }
+              ? { ...p, printShopDownloadedAt: now, printShopDownloadCount: p.printShopDownloadCount + 1 }
               : p
             )
           );
@@ -360,7 +360,7 @@ export class PrintShopProjectsComponent {
           if (type !== 'sample') {
             this.projects.update(list =>
               list.map(p => p.id === projectId
-                ? { ...p, printShopDownloadedAt: new Date().toISOString() }
+                ? { ...p, printShopDownloadedAt: new Date().toISOString(), printShopDownloadCount: p.printShopDownloadCount + 1 }
                 : p
               )
             );

@@ -203,9 +203,10 @@
 
           <!-- Műveletek -->
           <div class="cell-actions">
-            @if (project.printShopDownloadedAt) {
-              <span class="downloaded-indicator" [matTooltip]="'Letöltve: ' + formatDate(project.printShopDownloadedAt)">
+            @if (project.printShopDownloadCount > 0) {
+              <span class="downloaded-indicator" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x — utoljára: ' + formatDate(project.printShopDownloadedAt)">
                 <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon>
+                <span class="download-count">{{ project.printShopDownloadCount }}</span>
               </span>
             }
             @if (project.hasPrintFile) {

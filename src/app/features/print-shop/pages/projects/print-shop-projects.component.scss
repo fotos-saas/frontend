@@ -3,7 +3,7 @@
 
 .print-shop-projects {
   --row-indent: 72px; // checkbox(16) + gap(8) + thumb(40) + gap(8)
-  --bottom-cols: minmax(90px, 150px) 66px 44px 106px 86px 86px auto;
+  --bottom-cols: minmax(90px, 150px) 66px 44px 106px 86px 86px 80px;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -465,7 +465,7 @@
 /* ============ Responsive ============ */
 @media (max-width: 1100px) {
   .cell-date, .th-date { display: none; }
-  .print-shop-projects { --bottom-cols: minmax(80px, 140px) 66px 44px 106px 86px auto; }
+  .print-shop-projects { --bottom-cols: minmax(80px, 140px) 66px 44px 106px 86px 80px; }
 }
 
 @media (max-width: 768px) {

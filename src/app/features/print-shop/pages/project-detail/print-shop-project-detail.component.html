@@ -4,138 +4,158 @@
     <button class="back-btn" (click)="goBack()" matTooltip="Vissza a listához">
       <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18"></lucide-icon>
     </button>
-    <h1>{{ project()?.name }}</h1>
-    @if (project()?.isUrgent) {
-      <span class="urgent-tag">
-        <lucide-icon [name]="ICONS.FLAME" [size]="14"></lucide-icon> Sürgős
-      </span>
-    }
-    @if (project()?.isReprint) {
-      <span class="reprint-tag">
-        <lucide-icon [name]="ICONS.REPEAT_2" [size]="14"></lucide-icon> Újranyomtatás ({{ project()?.reprintCount }}.)
-      </span>
-    }
+    <div class="detail-header__title">
+      <h1>{{ project()?.name }}</h1>
+      <div class="detail-header__badges">
+        @if (project()?.isUrgent) {
+          <span class="tag tag--urgent">
+            <lucide-icon [name]="ICONS.FLAME" [size]="12"></lucide-icon> Sürgős
+          </span>
+        }
+        @if (project()?.isReprint) {
+          <span class="tag tag--reprint">
+            <lucide-icon [name]="ICONS.REPEAT_2" [size]="12"></lucide-icon> Újranyomtatás ({{ project()?.reprintCount }}.)
+          </span>
+        }
+        @if (project()?.hasPrintError) {
+          <span class="tag tag--error">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="12"></lucide-icon> Hiba jelezve
+          </span>
+        }
+      </div>
+    </div>
   </div>
 
   @if (loading()) {
-    <!-- Skeleton -->
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card skeleton-card--short"></div>
+    <div class="skeleton-strip"></div>
+    <div class="skeleton-strip skeleton-strip--wide"></div>
   } @else if (project(); as p) {
-    <!-- Projekt info kártyák -->
-    <div class="info-grid">
-      <div class="info-card">
-        <span class="info-label">Stúdió</span>
-        <span class="info-value">{{ p.studioName }}</span>
+    <!-- Összefoglaló sáv -->
+    <div class="summary-bar">
+      <div class="summary-item">
+        <lucide-icon [name]="ICONS.BUILDING" [size]="15"></lucide-icon>
+        <span>{{ p.studioName }}</span>
       </div>
-      <div class="info-card">
-        <span class="info-label">Méret</span>
-        <span class="info-value">{{ p.tabloSize || '—' }}</span>
+      <div class="summary-sep"></div>
+      <div class="summary-item">
+        <lucide-icon [name]="ICONS.RULER" [size]="15"></lucide-icon>
+        <span>{{ p.tabloSize || '—' }}</span>
       </div>
-      <div class="info-card">
-        <span class="info-label">Példányszám</span>
-        <span class="info-value">{{ p.printCopies }} db</span>
+      <div class="summary-sep"></div>
+      <div class="summary-item">
+        <lucide-icon [name]="ICONS.COPY" [size]="15"></lucide-icon>
+        <span>{{ p.printCopies }} db</span>
       </div>
-      <div class="info-card">
-        <span class="info-label">Státusz</span>
-        <span class="info-value">{{ p.status === 'in_print' ? 'Nyomdában' : 'Kész' }}</span>
+      @if (p.printDeadline) {
+        <div class="summary-sep"></div>
+        <div class="summary-item" [class.summary-item--warn]="p.printDeadlineStatus === 'pending'">
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="15"></lucide-icon>
+          <span>{{ formatDate(p.printDeadline) }}</span>
+          @if (p.printDeadlineStatus === 'accepted') {
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" class="dl-ok"></lucide-icon>
+          } @else if (p.printDeadlineStatus === 'modified') {
+            <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-mod"></lucide-icon>
+          }
+        </div>
+      }
+      <div class="summary-status" [class.summary-status--done]="p.status === 'done'">
+        {{ p.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
       </div>
     </div>
 
-    <!-- Határidő kezelés -->
-    @if (p.printDeadline) {
-      <div class="deadline-section">
-        <h3>
-          <lucide-icon [name]="ICONS.CALENDAR" [size]="18"></lucide-icon>
-          Határidő: {{ formatDate(p.printDeadline) }}
-        </h3>
+    <!-- Határidő akciók (csak pending-nél) -->
+    @if (p.printDeadline && p.printDeadlineStatus === 'pending') {
+      <div class="action-bar">
+        <span class="action-bar__label">
+          <lucide-icon [name]="ICONS.CLOCK" [size]="14"></lucide-icon>
+          Határidő visszaigazolásra vár
+        </span>
+        <div class="action-bar__btns">
+          <button class="btn btn--sm btn--success" (click)="acceptDeadline()" [disabled]="respondingDeadline()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon> Elfogadom
+          </button>
+          <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(true)" [disabled]="respondingDeadline()">
+            <lucide-icon [name]="ICONS.EDIT" [size]="14"></lucide-icon> Módosítom
+          </button>
+        </div>
+      </div>
 
-        @if (p.printDeadlineStatus === 'pending') {
-          <div class="deadline-actions">
-            <button class="btn btn--sm btn--success" (click)="acceptDeadline()" [disabled]="respondingDeadline()">
-              <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon> Elfogadom
-            </button>
-            <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(true)" [disabled]="respondingDeadline()">
-              <lucide-icon [name]="ICONS.EDIT" [size]="14"></lucide-icon> Módosítom
+      @if (showDeadlineForm()) {
+        <div class="inline-form">
+          <div class="form-row">
+            <label>Javasolt dátum</label>
+            <input type="date" [min]="today" [ngModel]="proposedDate()" (ngModelChange)="proposedDate.set($event)">
+          </div>
+          <div class="form-row">
+            <label>Indoklás (opcionális)</label>
+            <textarea rows="2" placeholder="Miért szükséges a módosítás?"
+              [ngModel]="deadlineMessage()" (ngModelChange)="deadlineMessage.set($event)"></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(false)">Mégsem</button>
+            <button class="btn btn--sm btn--primary" (click)="modifyDeadline()" [disabled]="!proposedDate() || respondingDeadline()">
+              Javaslat küldése
             </button>
           </div>
+        </div>
+      }
+    }
 
-          @if (showDeadlineForm()) {
-            <div class="deadline-form">
-              <div class="form-row">
-                <label>Javasolt dátum</label>
-                <input type="date" [min]="today" [ngModel]="proposedDate()" (ngModelChange)="proposedDate.set($event)">
-              </div>
-              <div class="form-row">
-                <label>Indoklás (opcionális)</label>
-                <textarea rows="2" placeholder="Miért szükséges a módosítás?"
-                  [ngModel]="deadlineMessage()" (ngModelChange)="deadlineMessage.set($event)"></textarea>
-              </div>
-              <div class="form-actions">
-                <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(false)">Mégsem</button>
-                <button class="btn btn--sm btn--primary" (click)="modifyDeadline()" [disabled]="!proposedDate() || respondingDeadline()">
-                  Javaslat küldése
-                </button>
-              </div>
-            </div>
-          }
-        } @else if (p.printDeadlineStatus === 'accepted') {
-          <span class="deadline-status deadline-status--accepted">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon> Elfogadva
-          </span>
-        } @else if (p.printDeadlineStatus === 'modified') {
-          <span class="deadline-status deadline-status--modified">
-            <lucide-icon [name]="ICONS.CLOCK" [size]="14"></lucide-icon> Módosítás küldve, várakozás a fotós válaszára
-          </span>
-        }
+    @if (p.printDeadlineStatus === 'modified') {
+      <div class="action-bar action-bar--info">
+        <lucide-icon [name]="ICONS.CLOCK" [size]="14"></lucide-icon>
+        <span>Módosítás küldve, várakozás a fotós válaszára</span>
       </div>
     }
 
-    <!-- Hiba jelzés -->
-    <div class="error-section">
-      @if (project()?.hasPrintError) {
-        <div class="error-active">
-          <div class="error-active__header">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="18"></lucide-icon>
+    <!-- Hiba banner (ha aktív) -->
+    @if (p.hasPrintError) {
+      <div class="error-banner">
+        <div class="error-banner__body">
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="16"></lucide-icon>
+          <div>
             <strong>Hiba jelezve</strong>
+            <p>{{ p.printErrorMessage }}</p>
           </div>
-          <p class="error-active__message">{{ project()?.printErrorMessage }}</p>
-          <button class="btn btn--sm btn--secondary" (click)="resolveError()" [disabled]="resolvingError()">
-            <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon>
-            {{ resolvingError() ? 'Feldolgozás...' : 'Hiba visszavonása' }}
-          </button>
         </div>
-      } @else {
-        @if (showErrorForm()) {
-          <div class="error-form">
-            <div class="form-row">
-              <label>Mi a hiba?</label>
-              <textarea rows="3" placeholder="Írd le a hiba okát..."
-                [ngModel]="errorMessage()" (ngModelChange)="errorMessage.set($event)"></textarea>
-            </div>
-            <div class="form-actions">
-              <button class="btn btn--sm btn--secondary" (click)="showErrorForm.set(false)">Mégsem</button>
-              <button class="btn btn--sm btn--danger" (click)="reportError()" [disabled]="!errorMessage().trim() || reportingError()">
-                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
-                {{ reportingError() ? 'Küldés...' : 'Hiba jelzése' }}
-              </button>
-            </div>
-          </div>
-        } @else {
-          <button class="btn btn--sm btn--outline-danger" (click)="showErrorForm.set(true)">
-            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
-            Hiba jelzése
-          </button>
-        }
-      }
-    </div>
+        <button class="btn btn--sm btn--secondary" (click)="resolveError()" [disabled]="resolvingError()">
+          <lucide-icon [name]="ICONS.X" [size]="14"></lucide-icon>
+          Visszavonás
+        </button>
+      </div>
+    }
 
-    <!-- Üzenetek -->
+    <!-- Üzenetek + hiba gomb egy sorban -->
     <div class="messages-section">
-      <h3>
-        <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="18"></lucide-icon>
-        Üzenetek
-      </h3>
+      <div class="messages-section__header">
+        <div class="messages-section__title">
+          <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16"></lucide-icon>
+          <h3>Üzenetek</h3>
+        </div>
+        @if (!p.hasPrintError) {
+          @if (showErrorForm()) {
+            <!-- Inline hiba form -->
+          } @else {
+            <button class="btn-error-report" (click)="showErrorForm.set(true)" matTooltip="Hiba jelzése a fotósnak">
+              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+            </button>
+          }
+        }
+      </div>
+
+      @if (showErrorForm() && !p.hasPrintError) {
+        <div class="inline-error-form">
+          <textarea rows="2" placeholder="Írd le a hiba okát..."
+            [ngModel]="errorMessage()" (ngModelChange)="errorMessage.set($event)"></textarea>
+          <div class="inline-error-form__actions">
+            <button class="btn btn--sm btn--secondary" (click)="showErrorForm.set(false)">Mégsem</button>
+            <button class="btn btn--sm btn--danger" (click)="reportError()" [disabled]="!errorMessage().trim() || reportingError()">
+              {{ reportingError() ? 'Küldés...' : 'Hiba jelzése' }}
+            </button>
+          </div>
+        </div>
+      }
+
       <app-print-messages
         [messages]="messages()"
         [loading]="loadingMessages()"

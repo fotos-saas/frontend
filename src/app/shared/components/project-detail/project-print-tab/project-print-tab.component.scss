@@ -224,7 +224,7 @@
     lucide-icon { color: #8b5cf6; margin-right: 10px; }
     h3 { font-size: 0.9375rem; font-weight: 600; color: get-color('slate', 800); margin: 0; }
   }
-  app-print-messages { display: block; max-height: 380px; }
+  app-print-messages { display: flex; flex-direction: column; max-height: 380px; overflow: hidden; }
 }
 
 /* Responsive */

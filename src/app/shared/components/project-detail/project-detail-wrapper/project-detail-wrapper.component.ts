@@ -161,6 +161,11 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   private readonly printTab = viewChild(ProjectPrintTabComponent);
   readonly tasksTab = viewChild(ProjectTasksTabComponent);
 
+  reloadProject(): void {
+    const id = this.facade.projectData()?.id;
+    if (id) this.facade.loadProject(id, this.mapToDetailData());
+  }
+
   ngOnInit(): void {
     const reloadProject = () => this.facade.loadProject(
       this.facade.projectData()!.id,

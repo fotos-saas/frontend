@@ -46,6 +46,7 @@ export class ProjectPrintTabComponent {
   readonly downloadingType = input<'small_tablo' | 'flat' | null>(null);
   readonly downloadClick = output<PrintFileDownloadEvent>();
   readonly urgentChanged = output<boolean>();
+  readonly orderUpdated = output<void>();
   readonly uploadFile = output<PrintFileUploadEvent>();
   readonly deleteClick = output<PrintFileDeleteEvent>();
 
@@ -206,7 +207,7 @@ export class ProjectPrintTabComponent {
     this.projectService.updatePrintOrder(id, { print_copies: copies, print_deadline: deadline })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => { this.editingOrder.set(false); this.savingOrder.set(false); },
+        next: () => { this.editingOrder.set(false); this.savingOrder.set(false); this.orderUpdated.emit(); },
         error: () => { this.copiesOverride.set(null); this.deadlineOverride.set(undefined); this.savingOrder.set(false); },
       });
   }

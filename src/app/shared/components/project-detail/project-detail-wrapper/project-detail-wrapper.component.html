@@ -92,6 +92,8 @@
             (downloadClick)="downloadPrintFile($event)"
             (uploadFile)="uploadPrintFile($event)"
             (deleteClick)="confirmDeletePrintFile($event)"
+            (orderUpdated)="reloadProject()"
+            (urgentChanged)="reloadProject()"
           />
         }
       }

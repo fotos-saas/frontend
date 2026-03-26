@@ -13,6 +13,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged, map } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ElectronService } from '../../../../core/services/electron.service';
@@ -239,12 +240,19 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     window.addEventListener('hashchange', onHashChange);
     this.destroyRef.onDestroy(() => window.removeEventListener('hashchange', onHashChange));
 
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id || isNaN(id) || id < 1) {
-      this.facade.loading.set(false);
-      return;
-    }
-    this.facade.loadProject(id, this.mapToDetailData());
+    // Route param figyelése — ha másik projektre navigálunk (pl. notification kattintás), újratölt
+    this.route.paramMap.pipe(
+      map(params => Number(params.get('id'))),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(id => {
+      if (!id || isNaN(id) || id < 1) {
+        this.facade.loading.set(false);
+        return;
+      }
+      this.facade.loading.set(true);
+      this.facade.loadProject(id, this.mapToDetailData());
+    });
   }
 
   goBack(): void { this.facade.goBack(); }

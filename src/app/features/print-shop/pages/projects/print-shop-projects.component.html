@@ -229,9 +229,13 @@
           <!-- Műveletek -->
           <div class="cell-actions">
             @if (project.unreadMessagesCount > 0) {
-              <a class="unread-badge" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek">
+              <a class="message-badge message-badge--unread" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek">
                 <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="14"></lucide-icon>
-                <span class="unread-count">{{ project.unreadMessagesCount }}</span>
+                <span class="message-badge__count">{{ project.unreadMessagesCount }}</span>
+              </a>
+            } @else if (project.totalMessagesCount > 0) {
+              <a class="message-badge" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Üzenetek">
+                <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="14"></lucide-icon>
               </a>
             }
             @if (project.isUrgent) {

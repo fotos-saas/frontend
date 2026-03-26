@@ -41,6 +41,7 @@ export interface PrintShopProject {
   isReprint: boolean;
   reprintCount: number;
   unreadMessagesCount: number;
+  totalMessagesCount: number;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

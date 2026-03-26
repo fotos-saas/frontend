@@ -297,28 +297,37 @@
   }
 }
 
-/* ============ Unread Messages Badge ============ */
-.unread-badge {
+/* ============ Messages Badge ============ */
+.message-badge {
   display: flex;
   align-items: center;
   padding: 2px 6px;
-  background: #3b82f6;
-  color: #fff;
+  color: #94a3b8;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 
-  lucide-icon { margin-right: 3px; }
+  lucide-icon { margin-right: 2px; }
 
   &:hover {
-    background: #2563eb;
+    color: #64748b;
   }
-}
 
-.unread-count {
-  line-height: 1;
+  &--unread {
+    background: #3b82f6;
+    color: #fff;
+
+    &:hover {
+      background: #2563eb;
+      color: #fff;
+    }
+  }
+
+  &__count {
+    line-height: 1;
+  }
 }
 
 /* ============ Downloaded Indicator ============ */

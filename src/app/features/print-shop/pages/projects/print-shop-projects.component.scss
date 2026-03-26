@@ -2,7 +2,8 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --bottom-cols: minmax(90px, 150px) 70px 46px 96px 86px 86px auto;
+  --row-indent: 72px; // checkbox(16) + gap(8) + thumb(40) + gap(8)
+  --bottom-cols: minmax(90px, 150px) 66px 44px 106px 86px 86px auto;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -116,6 +117,7 @@
   flex-direction: column;
   grid-template-columns: none;
   gap: 2px;
+  align-items: stretch;
 }
 
 .row-top {
@@ -130,13 +132,14 @@
   grid-template-columns: var(--bottom-cols);
   gap: 8px;
   align-items: center;
-  margin-left: 76px; // checkbox (16+8) + thumb (40+8) + kis gap
+  margin-left: var(--row-indent);
   font-size: 0.8125rem;
 }
 
 .table-header {
   grid-template-columns: var(--bottom-cols);
-  padding-left: 92px;
+  // 16px padding + row-indent igazítás
+  padding-left: calc(16px + var(--row-indent));
   position: relative;
 }
 
@@ -462,7 +465,7 @@
 /* ============ Responsive ============ */
 @media (max-width: 1100px) {
   .cell-date, .th-date { display: none; }
-  .print-shop-projects { --bottom-cols: minmax(80px, 140px) 70px 46px 96px 86px auto; }
+  .print-shop-projects { --bottom-cols: minmax(80px, 140px) 66px 44px 106px 86px auto; }
 }
 
 @media (max-width: 768px) {

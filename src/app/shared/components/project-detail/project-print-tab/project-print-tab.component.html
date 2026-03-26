@@ -18,10 +18,12 @@
             {{ acknowledgingError() ? 'Feldolgozás...' : 'Tudomásul vettem' }}
           </button>
         }
-        <button class="error-banner__resolve" (click)="onSendCorrection()" [disabled]="sendingCorrection()">
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
-          {{ sendingCorrection() ? 'Küldés...' : 'Javítás küldése' }}
-        </button>
+        @if (project()?.status === 'done') {
+          <button class="error-banner__resolve" (click)="onSendCorrection()" [disabled]="sendingCorrection()">
+            <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+            {{ sendingCorrection() ? 'Küldés...' : 'Javítás küldése' }}
+          </button>
+        }
       </div>
     </section>
   }

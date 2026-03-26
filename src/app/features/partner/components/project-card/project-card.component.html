@@ -64,6 +64,17 @@
           {{ project().pendingTaskCount }}
         </span>
       }
+      @if (project().hasPrintError) {
+        <a
+          class="print-badge print-badge--error"
+          [routerLink]="['/partner/projects', project().id]"
+          fragment="print"
+          matTooltip="A nyomda hibát jelzett"
+          (click)="$event.stopPropagation()"
+        >
+          <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="10" /> Hiba
+        </a>
+      }
       @if (project().isUrgent) {
         <span class="print-badge print-badge--urgent" matTooltip="Sürgős nyomtatás">
           <lucide-icon [name]="ICONS.FLAME" [size]="10" /> Sürgős

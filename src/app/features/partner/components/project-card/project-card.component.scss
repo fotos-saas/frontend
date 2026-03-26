@@ -215,6 +215,7 @@
   &--urgent { background: #fef2f2; color: #dc2626; }
   &--reprint { background: #fff7ed; color: #ea580c; }
   &--chat { background: #eff6ff; color: #2563eb; }
+  &--error { background: #dc2626; color: #fff; text-decoration: none; cursor: pointer; &:hover { background: #b91c1c; } }
 }
 
 /* Preliminary badge */

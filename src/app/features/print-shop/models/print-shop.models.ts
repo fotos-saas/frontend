@@ -41,6 +41,7 @@ export interface PrintShopProject {
   printDeadlineReason: string | null;
   isUrgent: boolean;
   isReprint: boolean;
+  isCorrection: boolean;
   reprintCount: number;
   hasPrintError: boolean;
   printErrorMessage: string | null;

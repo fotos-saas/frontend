@@ -62,13 +62,13 @@ export class ProjectPrintTabComponent {
   readonly urgentState = signal<boolean | null>(null);
   readonly isUrgent = computed(() => this.urgentState() ?? this.project()?.isUrgent ?? false);
 
-  // Inline szerkesztés
-  readonly editingCopies = signal(false);
+  // Megrendelés szerkesztés
+  readonly editingOrder = signal(false);
   readonly editCopiesValue = signal(1);
+  readonly editDeadlineValue = signal('');
+  readonly savingOrder = signal(false);
   readonly copiesOverride = signal<number | null>(null);
   readonly copiesDisplay = computed(() => this.copiesOverride() ?? this.project()?.printCopies ?? 1);
-  readonly editingDeadline = signal(false);
-  readonly editDeadlineValue = signal('');
   readonly today = new Date().toISOString().split('T')[0];
 
   /** WebSocket csatorna neve (ha aktív) */
@@ -184,37 +184,25 @@ export class ProjectPrintTabComponent {
       });
   }
 
-  startEditCopies(): void {
-    if (this.project()?.status !== 'in_print') return;
+  startEditOrder(): void {
     this.editCopiesValue.set(this.copiesDisplay());
-    this.editingCopies.set(true);
-  }
-
-  saveCopies(): void {
-    this.editingCopies.set(false);
-    const val = Math.max(1, this.editCopiesValue());
-    const id = this.project()?.id;
-    if (!id || val === this.copiesDisplay()) return;
-    this.copiesOverride.set(val);
-    this.projectService.updatePrintOrder(id, { print_copies: val })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ error: () => this.copiesOverride.set(null) });
-  }
-
-  startEditDeadline(): void {
-    if (this.project()?.status !== 'in_print') return;
     this.editDeadlineValue.set(this.project()?.printDeadline?.split('T')[0] ?? '');
-    this.editingDeadline.set(true);
+    this.editingOrder.set(true);
   }
 
-  saveDeadline(): void {
-    this.editingDeadline.set(false);
-    const val = this.editDeadlineValue() || null;
+  saveOrder(): void {
     const id = this.project()?.id;
     if (!id) return;
-    this.projectService.updatePrintOrder(id, { print_deadline: val })
+    this.savingOrder.set(true);
+    const copies = Math.max(1, this.editCopiesValue());
+    const deadline = this.editDeadlineValue() || null;
+    this.copiesOverride.set(copies);
+    this.projectService.updatePrintOrder(id, { print_copies: copies, print_deadline: deadline })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+      .subscribe({
+        next: () => { this.editingOrder.set(false); this.savingOrder.set(false); },
+        error: () => { this.copiesOverride.set(null); this.savingOrder.set(false); },
+      });
   }
 
   onSendMessage(text: string): void {

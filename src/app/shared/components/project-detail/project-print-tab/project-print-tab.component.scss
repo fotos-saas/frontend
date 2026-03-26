@@ -55,10 +55,35 @@
   .order-stat + .order-stat { margin-left: 32px; padding-left: 32px; border-left: 1px solid get-color('slate', 200); }
 }
 
+.edit-order-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; margin-left: auto; background: transparent;
+  border: 1px solid transparent; border-radius: 6px; color: get-color('slate', 400); cursor: pointer;
+  @include transition-fast;
+  &:hover { color: #8b5cf6; background: rgba(139, 92, 246, 0.06); }
+}
+
+.order-edit-form {
+  display: flex; align-items: flex-end; flex-wrap: wrap; margin-top: 4px;
+}
+
+.order-edit-field {
+  display: flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px;
+  label { font-size: 0.6875rem; color: get-color('slate', 500); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; margin-bottom: 4px; }
+  input { padding: 6px 10px; border: 1px solid get-color('slate', 300); border-radius: 6px; font-size: 0.875rem; outline: none; &:focus { border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1); } }
+  input[type="number"] { width: 80px; }
+  input[type="date"] { width: 150px; }
+}
+
+.order-edit-actions {
+  display: flex; align-items: center; margin-bottom: 8px;
+  .btn-save { padding: 6px 16px; background: #8b5cf6; color: #fff; border: none; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; margin-right: 8px; &:hover { background: #7c3aed; } &:disabled { opacity: 0.5; } }
+  .btn-cancel { padding: 6px 12px; background: transparent; color: get-color('slate', 600); border: 1px solid get-color('slate', 300); border-radius: 6px; font-size: 0.8125rem; cursor: pointer; &:hover { background: get-color('slate', 50); } }
+}
+
 .order-stat {
   display: flex;
   flex-direction: column;
-  &--editable .order-stat__value { cursor: pointer; &:hover { color: #8b5cf6; } }
   &__value {
     font-size: 1.5rem; font-weight: 700; color: get-color('slate', 900); line-height: 1.2;
     display: flex; align-items: center;
@@ -69,12 +94,6 @@
 
 .dl-status { margin-left: 6px; &--ok { color: #22c55e; } &--mod { color: #3b82f6; } &--wait { color: #f59e0b; } }
 
-.inline-edit {
-  font-size: 1.5rem; font-weight: 700; color: get-color('slate', 900);
-  border: 1px solid #8b5cf6; border-radius: 6px; padding: 2px 8px;
-  outline: none; width: 80px; background: rgba(139, 92, 246, 0.04);
-  &--date { font-size: 0.875rem; font-weight: 600; width: 140px; }
-}
 
 .urgent-btn {
   display: inline-flex;

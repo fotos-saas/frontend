@@ -10,6 +10,11 @@
           <div class="order-card__header">
             <lucide-icon [name]="ICONS.CLIPBOARD_LIST" [size]="18" />
             <h3>Megrendelés</h3>
+            @if (project()?.status === 'in_print' && !editingOrder()) {
+              <button class="edit-order-btn" (click)="startEditOrder()" matTooltip="Szerkesztés">
+                <lucide-icon [name]="ICONS.EDIT" [size]="14" />
+              </button>
+            }
             @if (isUrgent()) {
               <span class="order-badge order-badge--urgent">
                 <lucide-icon [name]="ICONS.FLAME" [size]="11" />
@@ -24,30 +29,15 @@
             }
           </div>
 
-          <div class="order-grid-data">
-            <div class="order-stat" [class.order-stat--editable]="project()?.status === 'in_print'">
-              @if (editingCopies()) {
-                <input type="number" class="inline-edit" min="1" max="9999"
-                  [value]="editCopiesValue()"
-                  (input)="editCopiesValue.set(+$any($event.target).value)"
-                  (blur)="saveCopies()"
-                  (keydown.enter)="$any($event.target).blur()"
-                  #copiesInput />
-              } @else {
-                <span class="order-stat__value" (click)="startEditCopies()">{{ copiesDisplay() }}</span>
-              }
-              <span class="order-stat__label">példány</span>
-            </div>
-            <div class="order-stat" [class.order-stat--editable]="project()?.status === 'in_print'">
-              @if (editingDeadline()) {
-                <input type="date" class="inline-edit inline-edit--date" [min]="today"
-                  [value]="editDeadlineValue()"
-                  (input)="editDeadlineValue.set($any($event.target).value)"
-                  (blur)="saveDeadline()"
-                  (keydown.enter)="$any($event.target).blur()" />
-              } @else {
-                <span class="order-stat__value order-stat__value--date" (click)="startEditDeadline()">
-                  {{ project()?.printDeadline ? formatDate(project()?.printDeadline) : 'Nincs megadva' }}
+          @if (!editingOrder()) {
+            <div class="order-grid-data">
+              <div class="order-stat">
+                <span class="order-stat__value">{{ copiesDisplay() }}</span>
+                <span class="order-stat__label">példány</span>
+              </div>
+              <div class="order-stat">
+                <span class="order-stat__value order-stat__value--date">
+                  {{ project()?.printDeadline ? formatDate(project()?.printDeadline) : '—' }}
                   @if (project()?.printDeadlineStatus === 'accepted') {
                     <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" class="dl-status dl-status--ok" matTooltip="Elfogadva" />
                   } @else if (project()?.printDeadlineStatus === 'modified') {
@@ -56,10 +46,25 @@
                     <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--wait" matTooltip="Visszaigazolásra vár" />
                   }
                 </span>
-              }
-              <span class="order-stat__label">határidő</span>
+                <span class="order-stat__label">határidő</span>
+              </div>
             </div>
-          </div>
+          } @else {
+            <div class="order-edit-form">
+              <div class="order-edit-field">
+                <label>Példányszám</label>
+                <input type="number" min="1" max="9999" [value]="editCopiesValue()" (input)="editCopiesValue.set(+$any($event.target).value)" />
+              </div>
+              <div class="order-edit-field">
+                <label>Határidő</label>
+                <input type="date" [min]="today" [value]="editDeadlineValue()" (input)="editDeadlineValue.set($any($event.target).value)" />
+              </div>
+              <div class="order-edit-actions">
+                <button class="btn-save" (click)="saveOrder()" [disabled]="savingOrder()">Mentés</button>
+                <button class="btn-cancel" (click)="editingOrder.set(false)">Mégsem</button>
+              </div>
+            </div>
+          }
 
           @if (project()?.status === 'in_print') {
             <button

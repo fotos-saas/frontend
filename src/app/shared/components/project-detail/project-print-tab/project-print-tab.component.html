@@ -12,15 +12,18 @@
           <p>{{ project()!.printErrorMessage }}</p>
         }
       </div>
-      @if (!project()?.printErrorAcknowledgedAt) {
-        <button class="error-banner__btn" (click)="onAcknowledgeError()" [disabled]="acknowledgingError()">
-          {{ acknowledgingError() ? 'Feldolgozás...' : 'Tudomásul vettem' }}
-        </button>
-      } @else {
-        <span class="error-banner__ack">
-          <lucide-icon [name]="ICONS.CHECK" [size]="14" /> Tudomásul véve
-        </span>
-      }
+      <div class="error-banner__actions">
+        @if (!project()?.printErrorAcknowledgedAt) {
+          <button class="error-banner__btn" (click)="onAcknowledgeError()" [disabled]="acknowledgingError()">
+            {{ acknowledgingError() ? 'Feldolgozás...' : 'Tudomásul vettem' }}
+          </button>
+        } @else {
+          <button class="error-banner__resolve" (click)="onResolveError()" [disabled]="resolvingError()">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+            {{ resolvingError() ? 'Küldés...' : 'Javítva' }}
+          </button>
+        }
+      </div>
     </section>
   }
 

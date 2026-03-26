@@ -44,15 +44,27 @@
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
-  &__ack {
+  &__actions {
     flex-shrink: 0;
     margin-left: 16px;
+  }
+
+  &__resolve {
     display: inline-flex;
     align-items: center;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: get-color('slate', 500);
-    lucide-icon { margin-right: 4px; }
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #fff;
+    background: #22c55e;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    @include transition-fast;
+    lucide-icon { margin-right: 5px; }
+    &:hover:not(:disabled) { background: #16a34a; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
   &--acknowledged {

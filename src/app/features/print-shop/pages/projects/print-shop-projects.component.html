@@ -172,7 +172,7 @@
             <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">
               <span class="project-name__school">{{ project.schoolName ?? project.name }}</span><!--
               -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}<!--
-              -->@if (project.classYear) {<span class="project-name__year"> ({{ project.classYear }})</span>}
+              -->
             </a>
             <span class="project-badges"><!--
               -->@if (project.isUrgent) {<span class="inline-tag inline-tag--urgent"><lucide-icon [name]="ICONS.FLAME" [size]="10"></lucide-icon> Sürgős</span>}<!--

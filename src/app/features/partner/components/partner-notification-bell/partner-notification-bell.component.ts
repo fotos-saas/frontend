@@ -117,12 +117,17 @@ export class PartnerNotificationBellComponent implements OnInit {
   private safeNavigate(url: string): void {
     try {
       if (url.startsWith('/') && !url.startsWith('//')) {
-        // Fragment kezelés: ha # van, külön adjuk át hogy a route change triggerelődjön
         const hashIdx = url.indexOf('#');
         if (hashIdx > 0) {
           const path = url.substring(0, hashIdx);
           const fragment = url.substring(hashIdx + 1);
-          this.router.navigate([path], { fragment });
+          const currentPath = this.router.url.split('#')[0].split('?')[0];
+          if (currentPath === path) {
+            // Már ezen az oldalon vagyunk — URL frissítés + hashchange esemény
+            window.location.hash = fragment;
+          } else {
+            this.router.navigate([path], { fragment });
+          }
         } else {
           this.router.navigateByUrl(url);
         }

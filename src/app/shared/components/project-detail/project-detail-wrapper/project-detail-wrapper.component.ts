@@ -229,6 +229,16 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       }
     });
 
+    // Same-URL hashchange figyelése (notification kattintás ugyanazon az oldalon)
+    const onHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && (validTabs as readonly string[]).includes(hash)) {
+        this.activeTab.set(hash as ProjectDetailTab);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    this.destroyRef.onDestroy(() => window.removeEventListener('hashchange', onHashChange));
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {
       this.facade.loading.set(false);

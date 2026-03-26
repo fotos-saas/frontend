@@ -103,6 +103,20 @@ export class PrintMessagesComponent {
     return type !== 'message';
   }
 
+  /** Esemény típus → szín class */
+  getEventColor(type: string): string {
+    switch (type) {
+      case 'error': return 'red';
+      case 'error_resolved': return 'green';
+      case 'deadline_accepted': return 'green';
+      case 'deadline_rejected': return 'red';
+      case 'deadline_proposed': return 'amber';
+      case 'urgent_flag': return 'red';
+      case 'reprint_request': return 'amber';
+      default: return 'slate';
+    }
+  }
+
   /** Idő formázás — ma: óra:perc, tegnap: "Tegnap HH:MM", régebbi: hónap.nap. HH:MM */
   formatTime(dateStr: string): string {
     const date = new Date(dateStr);

@@ -20,20 +20,20 @@
     } @else {
       @for (msg of messages(); track msg.id) {
         @if (isSystemMessage(msg.type)) {
-          <!-- Rendszer üzenet: középre, halvány háttér, kis ikon -->
-          <div class="system-message" [class.system-message--detail]="msg.type === 'deadline_proposed'">
-            <lucide-icon [name]="getMessageIcon(msg.type)" [size]="14"></lucide-icon>
-            @if (msg.type === 'deadline_proposed' && msg.metadata?.['original_date']) {
-              <span class="system-text">
-                Határidő módosítás: {{ formatDate(msg.metadata!['original_date'] + '') }} → {{ formatDate(msg.metadata!['proposed_date'] + '') }}
+          <!-- Esemény sáv: teljes szélességű, típus alapú szín -->
+          <div class="event-bar" [class]="'event-bar event-bar--' + getEventColor(msg.type)">
+            <lucide-icon [name]="getMessageIcon(msg.type)" [size]="14" class="event-bar__icon"></lucide-icon>
+            <div class="event-bar__content">
+              @if (msg.type === 'deadline_proposed' && msg.metadata?.['original_date']) {
+                <span>Határidő módosítás: {{ formatDate(msg.metadata!['original_date'] + '') }} → {{ formatDate(msg.metadata!['proposed_date'] + '') }}</span>
                 @if (msg.message) {
-                  <span class="system-detail">„{{ msg.message }}"</span>
+                  <span class="event-bar__detail">„{{ msg.message }}"</span>
                 }
-              </span>
-            } @else {
-              <span class="system-text">{{ msg.message }}</span>
-            }
-            <span class="time" [matTooltip]="formatDate(msg.createdAt)">{{ formatTime(msg.createdAt) }}</span>
+              } @else {
+                <span>{{ msg.message }}</span>
+              }
+            </div>
+            <span class="event-bar__time">{{ formatTime(msg.createdAt) }}</span>
           </div>
         } @else {
           <!-- Normál üzenet: bal (másik fél) vagy jobb (saját) -->

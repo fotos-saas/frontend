@@ -160,57 +160,42 @@ $blue-700: get-color('primary', 700);
 }
 
 // ============================================================================
-// SYSTEM MESSAGE
+// EVENT BAR (rendszer üzenetek — teljes szélességű sáv)
 // ============================================================================
 
-.system-message {
+.event-bar {
   display: flex;
   align-items: center;
-  // Safari-kompatibilis gap alternatíva
-  margin-left: -3px;
-  margin-right: -3px;
-
-  & > * {
-    margin-left: 3px;
-    margin-right: 3px;
-  }
-
-  align-self: center;
-  padding: 0.375rem 0.75rem;
-  background: $gray-50;
-  border: 1px solid $gray-200;
-  border-radius: 1rem;
+  align-self: stretch;
+  padding: 0.5rem 1rem;
+  margin: 0 -1rem;
   font-size: 0.75rem;
-  color: $gray-500;
+  font-weight: 500;
   animation: msgFadeIn 0.2s ease-out;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
 
-  lucide-icon {
-    flex-shrink: 0;
-    opacity: 0.6;
+  &__icon { flex-shrink: 0; margin-right: 8px; opacity: 0.7; }
+
+  &__content {
+    flex: 1; min-width: 0; line-height: 1.4;
   }
 
-  .system-text {
-    flex: 1;
-    min-width: 0;
+  &__detail {
+    display: block; margin-top: 1px;
+    font-style: italic; opacity: 0.7; font-weight: 400;
   }
 
-  .system-detail {
-    display: block;
-    margin-top: 2px;
-    font-style: italic;
-    color: $gray-400;
+  &__time {
+    flex-shrink: 0; margin-left: 8px;
+    font-size: 0.625rem; opacity: 0.5;
   }
 
-  .time {
-    font-size: 0.625rem;
-    flex-shrink: 0;
-  }
-
-  &--detail {
-    align-items: flex-start;
-    padding: 0.5rem 0.875rem;
-    border-radius: 0.75rem;
-  }
+  // Szín variánsok
+  &--slate { background: $gray-50; color: $gray-600; border-color: $gray-100; }
+  &--green { background: #f0fdf4; color: #166534; border-color: #dcfce7; }
+  &--red { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+  &--amber { background: #fffbeb; color: #92400e; border-color: #fde68a; }
 }
 
 // ============================================================================

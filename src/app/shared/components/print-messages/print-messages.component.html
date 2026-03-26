@@ -25,7 +25,7 @@
             <lucide-icon [name]="getMessageIcon(msg.type)" [size]="14"></lucide-icon>
             @if (msg.type === 'deadline_proposed' && msg.metadata?.['original_date']) {
               <span class="system-text">
-                Határidő módosítás: {{ formatDate(msg.metadata['original_date'] + '') }} → {{ formatDate(msg.metadata['proposed_date'] + '') }}
+                Határidő módosítás: {{ formatDate(msg.metadata!['original_date'] + '') }} → {{ formatDate(msg.metadata!['proposed_date'] + '') }}
                 @if (msg.message) {
                   <span class="system-detail">„{{ msg.message }}"</span>
                 }

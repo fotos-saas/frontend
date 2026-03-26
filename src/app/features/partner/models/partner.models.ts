@@ -143,6 +143,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   unreadPrintMessagesCount?: number;
   hasPrintError?: boolean;
   printErrorMessage?: string | null;
+  printErrorAcknowledgedAt?: string | null;
   updatedAt: string;
 }
 

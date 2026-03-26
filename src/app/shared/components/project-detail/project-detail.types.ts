@@ -145,6 +145,7 @@ export interface ProjectDetailData {
   unreadPrintMessagesCount?: number;
   hasPrintError?: boolean;
   printErrorMessage?: string | null;
+  printErrorAcknowledgedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

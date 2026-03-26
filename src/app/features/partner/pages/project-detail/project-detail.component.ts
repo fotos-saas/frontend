@@ -89,6 +89,7 @@ export class PartnerProjectDetailComponent {
     unreadPrintMessagesCount: project.unreadPrintMessagesCount,
     hasPrintError: project.hasPrintError,
     printErrorMessage: project.printErrorMessage,
+    printErrorAcknowledgedAt: project.printErrorAcknowledgedAt,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

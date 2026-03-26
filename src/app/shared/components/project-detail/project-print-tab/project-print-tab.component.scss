@@ -43,6 +43,26 @@
     &:hover:not(:disabled) { background: #dc2626; }
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
+
+  &__ack {
+    flex-shrink: 0;
+    margin-left: 16px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: get-color('slate', 500);
+    lucide-icon { margin-right: 4px; }
+  }
+
+  &--acknowledged {
+    background: get-color('slate', 50);
+    border-color: get-color('slate', 200);
+    border-left-color: get-color('slate', 300);
+    .error-banner__icon { color: get-color('slate', 400); }
+    .error-banner__content strong { color: get-color('slate', 600); }
+    .error-banner__content p { color: get-color('slate', 500); }
+  }
 }
 
 /* Order Card */

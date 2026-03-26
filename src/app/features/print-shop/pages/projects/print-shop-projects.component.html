@@ -115,8 +115,6 @@
           matTooltip="Összes kijelölése"
         />
       </span>
-      <span class="th th-thumb"></span>
-      <span class="th th-name">Projekt</span>
       <span class="th th-studio">Partner</span>
       <span class="th th-size">Méret</span>
       <span class="th th-copies">Db</span>
@@ -135,8 +133,9 @@
              [class.list-row--reprint]="project.isReprint && !project.isUrgent"
              [style.animation-delay]="i * 0.03 + 's'"
              (click)="onRowClick(project, $event)">
-          <!-- Checkbox -->
-          <div class="cell-check">
+
+          <!-- 1. sor: Checkbox + Thumbnail + Projektnév + badge-ek -->
+          <div class="row-top">
             <input
               type="checkbox"
               class="row-checkbox"
@@ -145,32 +144,16 @@
               [matTooltip]="project.hasPrintFile ? '' : 'Nincs nyomdakész fájl'"
               (click)="project.hasPrintFile && toggleSelect(project, $event)"
             />
-          </div>
-
-          <!-- Thumbnail -->
-          <div class="cell-thumb">
-            @if (project.thumbnailUrl) {
-              <img
-                [src]="project.thumbnailUrl"
-                alt=""
-                class="thumb-img thumb-img--clickable"
-                loading="lazy"
-                (click)="openLightbox(project)"
-                matTooltip="Kép megtekintése"
-              />
-            } @else {
-              <div class="thumb-placeholder">
-                <lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon>
-              </div>
-            }
-          </div>
-
-          <!-- Projekt info -->
-          <div class="cell-name">
+            <div class="cell-thumb">
+              @if (project.thumbnailUrl) {
+                <img [src]="project.thumbnailUrl" alt="" class="thumb-img thumb-img--clickable" loading="lazy" (click)="openLightbox(project)" matTooltip="Kép megtekintése" />
+              } @else {
+                <div class="thumb-placeholder"><lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon></div>
+              }
+            </div>
             <span class="project-name project-name-link" (click)="onProjectLinkClick(project, $event)">
               <span class="project-name__school">{{ project.schoolName ?? project.name }}</span><!--
-              -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}<!--
-              -->
+              -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}
             </span>
             <span class="project-badges"><!--
               -->@if (project.isUrgent) {<span class="inline-tag inline-tag--urgent"><lucide-icon [name]="ICONS.FLAME" [size]="10"></lucide-icon> Sürgős</span>}<!--
@@ -181,79 +164,52 @@
               -->@if (project.printShopDownloadCount > 0) {<span class="inline-badge inline-badge--dl" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x'"><lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10"></lucide-icon> {{ project.printShopDownloadCount }}x</span>}</span>
           </div>
 
-
-          <!-- Partner -->
-          <div class="cell-studio">{{ project.studioName ?? '-' }}</div>
-
-          <!-- Méret -->
-          <div class="cell-size">
-            <span class="size-badge">{{ project.tabloSize ?? '-' }}</span>
-          </div>
-
-          <!-- Darabszám -->
-          <div class="cell-copies">
-            {{ project.printCopies }} db
-          </div>
-
-          <!-- Határidő -->
-          <div class="cell-deadline">
-            @if (project.printDeadline) {
-              <span class="deadline-text">{{ formatDate(project.printDeadline) }}</span>
-              @if (project.printDeadlineStatus === 'accepted') {
-                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" class="deadline-accepted"></lucide-icon>
-              } @else if (project.printDeadlineStatus === 'modified') {
-                <lucide-icon [name]="ICONS.CALENDAR" [size]="12" class="deadline-modified"></lucide-icon>
+          <!-- 2. sor: Partner + Méret + Db + Határidő + Státusz + Dátum + Műveletek -->
+          <div class="row-bottom">
+            <div class="cell-studio">{{ project.studioName ?? '-' }}</div>
+            <div class="cell-size"><span class="size-badge">{{ project.tabloSize ?? '-' }}</span></div>
+            <div class="cell-copies">{{ project.printCopies }} db</div>
+            <div class="cell-deadline">
+              @if (project.printDeadline) {
+                <span class="deadline-text">{{ formatDate(project.printDeadline) }}</span>
+                @if (project.printDeadlineStatus === 'accepted') {
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" class="deadline-accepted"></lucide-icon>
+                } @else if (project.printDeadlineStatus === 'modified') {
+                  <lucide-icon [name]="ICONS.CALENDAR" [size]="12" class="deadline-modified"></lucide-icon>
+                } @else {
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="deadline-pending"></lucide-icon>
+                }
               } @else {
-                <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="deadline-pending"></lucide-icon>
+                <span class="no-deadline">—</span>
               }
-            } @else {
-              <span class="no-deadline">—</span>
-            }
-          </div>
-
-          <!-- Státusz -->
-          <div class="cell-status">
-            <span class="status-badge" [class.status-badge--done]="project.status === 'done'" [class.status-badge--correction]="project.isCorrection">
-              {{ project.isCorrection ? 'Javítás' : project.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
-            </span>
-          </div>
-
-          <!-- Dátum -->
-          <div class="cell-date">
-            <span class="date-text">{{ formatDate(project.status === 'done' ? project.doneAt : project.inPrintAt) }}</span>
-          </div>
-
-          <!-- Műveletek (letisztult: letöltés + kész/visszaállítás) -->
-          <div class="cell-actions">
-            @if (project.hasPrintFile) {
-              <button class="action-btn" (click)="downloadFile(project)" matTooltip="Nyomdakész fájl letöltése">
-                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
-              </button>
-            } @else if (project.hasSample) {
-              <button class="action-btn" (click)="downloadSample(project)" matTooltip="Mintakép letöltése">
-                <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
-              </button>
-            }
-            @if (project.status === 'in_print') {
-              <button class="action-btn action-btn--success" [disabled]="markingDone() === project.id" (click)="requestMarkDone(project)" matTooltip="Készre állítás">
-                <lucide-icon [name]="markingDone() === project.id ? ICONS.LOADER : ICONS.CHECK_CIRCLE" [size]="16" [class.spin]="markingDone() === project.id"></lucide-icon>
-              </button>
-            }
-            @if (project.status === 'done' && !project.pickedUpAt) {
-              <button class="action-btn action-btn--pickup" [disabled]="pickingUp() === project.id" (click)="requestPickUp(project)" matTooltip="Megrendelő átvette">
-                <lucide-icon [name]="pickingUp() === project.id ? ICONS.LOADER : ICONS.PACKAGE_CHECK" [size]="16" [class.spin]="pickingUp() === project.id"></lucide-icon>
-              </button>
-            }
-            @if (project.status === 'done' && !project.pickedUpAt) {
-              <button class="action-btn action-btn--warning" [disabled]="reverting() === project.id" (click)="requestRevert(project)" matTooltip="Visszaállítás nyomdába">
-                <lucide-icon [name]="reverting() === project.id ? ICONS.LOADER : ICONS.UNDO" [size]="16" [class.spin]="reverting() === project.id"></lucide-icon>
-              </button>
-            }
-            @if (project.pickedUpAt) {
-              <span class="picked-up-badge" matTooltip="Átvéve">
-                <lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="14"></lucide-icon>
+            </div>
+            <div class="cell-status">
+              <span class="status-badge" [class.status-badge--done]="project.status === 'done'" [class.status-badge--correction]="project.isCorrection">
+                {{ project.isCorrection ? 'Javítás' : project.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
               </span>
-            }
+            </div>
+            <div class="cell-date">
+              <span class="date-text">{{ formatDate(project.status === 'done' ? project.doneAt : project.inPrintAt) }}</span>
+            </div>
+            <div class="cell-actions">
+              @if (project.hasPrintFile) {
+                <button class="action-btn" (click)="downloadFile(project)" matTooltip="Nyomdakész fájl letöltése"><lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon></button>
+              } @else if (project.hasSample) {
+                <button class="action-btn" (click)="downloadSample(project)" matTooltip="Mintakép letöltése"><lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon></button>
+              }
+              @if (project.status === 'in_print') {
+                <button class="action-btn action-btn--success" [disabled]="markingDone() === project.id" (click)="requestMarkDone(project)" matTooltip="Készre állítás"><lucide-icon [name]="markingDone() === project.id ? ICONS.LOADER : ICONS.CHECK_CIRCLE" [size]="16" [class.spin]="markingDone() === project.id"></lucide-icon></button>
+              }
+              @if (project.status === 'done' && !project.pickedUpAt) {
+                <button class="action-btn action-btn--pickup" [disabled]="pickingUp() === project.id" (click)="requestPickUp(project)" matTooltip="Megrendelő átvette"><lucide-icon [name]="pickingUp() === project.id ? ICONS.LOADER : ICONS.PACKAGE_CHECK" [size]="16" [class.spin]="pickingUp() === project.id"></lucide-icon></button>
+              }
+              @if (project.status === 'done' && !project.pickedUpAt) {
+                <button class="action-btn action-btn--warning" [disabled]="reverting() === project.id" (click)="requestRevert(project)" matTooltip="Visszaállítás nyomdába"><lucide-icon [name]="reverting() === project.id ? ICONS.LOADER : ICONS.UNDO" [size]="16" [class.spin]="reverting() === project.id"></lucide-icon></button>
+              }
+              @if (project.pickedUpAt) {
+                <span class="picked-up-badge" matTooltip="Átvéve"><lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="14"></lucide-icon></span>
+              }
+            </div>
           </div>
         </div>
       }

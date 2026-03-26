@@ -2,7 +2,7 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --table-cols: 32px 56px 1fr minmax(80px, 120px) 70px 46px 100px 90px 90px 80px;
+  --bottom-cols: 32px minmax(80px, 130px) 70px 46px 100px 90px 90px 1fr;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -108,6 +108,33 @@
   align-items: center;
   justify-content: center;
   color: get-color('slate', 400);
+}
+
+/* ============ 2-soros layout ============ */
+.list-row {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+}
+
+.row-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+
+.row-bottom {
+  display: grid;
+  grid-template-columns: var(--bottom-cols);
+  gap: 8px;
+  align-items: center;
+  padding-left: 32px;
+}
+
+.table-header {
+  grid-template-columns: var(--bottom-cols);
 }
 
 /* ============ Cells ============ */
@@ -233,32 +260,12 @@
   width: 32px; height: 32px; color: #22c55e;
 }
 
-.spin {
-  animation: spin 1s linear infinite;
-}
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ============ Utility ============ */
-.mt-4 {
-  margin-top: 16px;
-}
-
-/* ============ Checkbox ============ */
-.cell-check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.row-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary, #6d28d9);
-  cursor: pointer;
-}
+.mt-4 { margin-top: 16px; }
+.cell-check { display: flex; align-items: center; justify-content: center; }
+.row-checkbox { width: 16px; height: 16px; accent-color: var(--color-primary, #6d28d9); cursor: pointer; }
 
 .list-row--selected {
   background: rgba(109, 40, 217, 0.04);
@@ -452,18 +459,19 @@
   .cell-date, .th-date { display: none; }
 
   .print-shop-projects {
-    --table-cols: 32px 56px 1fr minmax(70px, 110px) 70px 46px 100px 90px 80px;
+    --bottom-cols: 32px minmax(70px, 120px) 70px 46px 100px 90px 1fr;
   }
 }
 
 @media (max-width: 768px) {
   .print-shop-projects {
-    --table-cols: 28px 40px 1fr 80px 80px 80px;
+    --bottom-cols: 1fr 60px 60px 60px;
   }
 
-  .cell-size, .cell-date, .cell-copies, .cell-deadline, .cell-studio,
-  .th-size, .th-date, .th-copies, .th-deadline, .th-studio { display: none; }
+  .cell-size, .cell-date, .cell-copies, .cell-deadline,
+  .th-size, .th-date, .th-copies, .th-deadline { display: none; }
 
+  .row-bottom { padding-left: 0; }
   .filters { flex-direction: column; align-items: stretch; }
   .search-box { min-width: auto; }
 }

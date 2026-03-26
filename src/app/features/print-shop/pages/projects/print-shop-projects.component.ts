@@ -134,10 +134,10 @@ export class PrintShopProjectsComponent {
     this.loadStudios();
     this.loadProjects();
 
-    // Fallback polling: 30s-ként újratölti a listát (ha WS nem él)
+    // Fallback polling: 30s-ként csendben frissíti a listát (ha WS nem él)
     interval(30_000).pipe(
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => this.loadProjects());
+    ).subscribe(() => this.loadProjects(true));
   }
 
   private applyQueryParams(params: Record<string, string>): void {
@@ -450,9 +450,11 @@ export class PrintShopProjectsComponent {
       .subscribe(data => this.studios.set(data.connected_studios));
   }
 
-  private loadProjects(): void {
-    this.loading.set(true);
-    this.clearSelection();
+  private loadProjects(silent = false): void {
+    if (!silent) {
+      this.loading.set(true);
+      this.clearSelection();
+    }
 
     this.service.getProjects({
       page: this.currentPage(),
@@ -469,10 +471,10 @@ export class PrintShopProjectsComponent {
           this.totalCount.set(res.total);
           this.currentPage.set(res.current_page);
           this.lastPage.set(res.last_page);
-          this.loading.set(false);
+          if (!silent) this.loading.set(false);
         },
         error: () => {
-          this.loading.set(false);
+          if (!silent) this.loading.set(false);
         }
       });
   }

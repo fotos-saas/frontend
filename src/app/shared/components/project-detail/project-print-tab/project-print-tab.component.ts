@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, DestroyRef, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval, switchMap, filter } from 'rxjs';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
 import { formatFileSize } from '@shared/utils/formatters.util';
@@ -65,6 +66,13 @@ export class ProjectPrintTabComponent {
         this.loadMessages(p.id);
       }
     });
+
+    // 15 másodperces polling az új üzenetekért
+    interval(15_000).pipe(
+      filter(() => this.showChat() && !!this.project()?.id),
+      switchMap(() => this.projectService.getPrintMessages(this.project()!.id)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(msgs => this.messages.set(msgs));
   }
 
   loadMessages(projectId: number): void {

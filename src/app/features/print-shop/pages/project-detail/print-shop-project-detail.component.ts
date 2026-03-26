@@ -7,6 +7,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval, switchMap, filter } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -57,6 +58,13 @@ export class PrintShopProjectDetailComponent implements OnInit {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.loadProject(id);
     this.loadMessages(id);
+
+    // 15 másodperces polling az új üzenetekért
+    interval(15_000).pipe(
+      filter(() => !!this.project()),
+      switchMap(() => this.service.getMessages(id)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(msgs => this.messages.set(msgs));
   }
 
   private loadProject(id: number): void {

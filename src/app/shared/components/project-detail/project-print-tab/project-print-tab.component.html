@@ -1,87 +1,89 @@
 <div class="print-tab">
 
-  <!-- 1. sor: Megrendelés adatok + Idővonal -->
+  <!-- ═══ MEGRENDELÉS KÁRTYA ═══ -->
   @if (project()?.inPrintAt) {
-    <section class="order-card">
-      <div class="order-grid">
-        <!-- Megrendelés info -->
-        <div class="order-info">
-          <h3 class="section-title">
-            <lucide-icon [name]="ICONS.CLIPBOARD_LIST" [size]="16" />
-            Megrendelés
-          </h3>
-          <div class="order-details">
-            <div class="order-item">
-              <span class="order-label">Példányszám</span>
-              <span class="order-value">{{ project()?.printCopies ?? 1 }} db</span>
-            </div>
-            @if (project()?.printDeadline) {
-              <div class="order-item">
-                <span class="order-label">Határidő</span>
-                <span class="order-value">
-                  {{ formatDate(project()?.printDeadline) }}
-                  @if (project()?.printDeadlineStatus === 'accepted') {
-                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" class="status-accepted" matTooltip="Elfogadva" />
-                  } @else if (project()?.printDeadlineStatus === 'modified') {
-                    <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="status-modified" matTooltip="Módosítást kért a nyomda" />
-                  } @else {
-                    <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="status-pending" matTooltip="Visszaigazolásra vár" />
-                  }
-                </span>
-              </div>
-            }
+    <section class="order-card" [class.order-card--urgent]="isUrgent()">
+      <div class="order-card__accent"></div>
+      <div class="order-card__body">
+        <!-- Bal: adatok -->
+        <div class="order-card__info">
+          <div class="order-card__header">
+            <lucide-icon [name]="ICONS.CLIPBOARD_LIST" [size]="18" />
+            <h3>Megrendelés</h3>
             @if (isUrgent()) {
-              <div class="order-item order-item--urgent">
-                <lucide-icon [name]="ICONS.FLAME" [size]="14" />
-                <span>Sürgős</span>
-              </div>
+              <span class="order-badge order-badge--urgent">
+                <lucide-icon [name]="ICONS.FLAME" [size]="11" />
+                Sürgős
+              </span>
             }
             @if (project()?.isReprint) {
-              <div class="order-item order-item--reprint">
-                <lucide-icon [name]="ICONS.REPEAT_2" [size]="14" />
-                <span>Újranyomtatás ({{ project()?.reprintCount }}.)</span>
+              <span class="order-badge order-badge--reprint">
+                <lucide-icon [name]="ICONS.REPEAT_2" [size]="11" />
+                Újranyomtatás ({{ project()?.reprintCount }}.)
+              </span>
+            }
+          </div>
+
+          <div class="order-grid-data">
+            <div class="order-stat">
+              <span class="order-stat__value">{{ project()?.printCopies ?? 1 }}</span>
+              <span class="order-stat__label">példány</span>
+            </div>
+            @if (project()?.printDeadline) {
+              <div class="order-stat">
+                <span class="order-stat__value order-stat__value--date">
+                  {{ formatDate(project()?.printDeadline) }}
+                  @if (project()?.printDeadlineStatus === 'accepted') {
+                    <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" class="dl-status dl-status--ok" matTooltip="Elfogadva" />
+                  } @else if (project()?.printDeadlineStatus === 'modified') {
+                    <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--mod" matTooltip="Módosítást kért a nyomda" />
+                  } @else {
+                    <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--wait" matTooltip="Visszaigazolásra vár" />
+                  }
+                </span>
+                <span class="order-stat__label">határidő</span>
               </div>
             }
           </div>
 
-          <!-- Sürgős jelölés toggle -->
           @if (project()?.status === 'in_print') {
             <button
-              class="urgent-toggle"
-              [class.urgent-toggle--active]="isUrgent()"
+              class="urgent-btn"
+              [class.urgent-btn--active]="isUrgent()"
               (click)="toggleUrgent()"
               [disabled]="togglingUrgent()"
             >
-              <lucide-icon [name]="ICONS.FLAME" [size]="14" />
+              <lucide-icon [name]="ICONS.FLAME" [size]="13" />
               {{ isUrgent() ? 'Sürgősség levétele' : 'Sürgősnek jelölés' }}
             </button>
           }
         </div>
 
-        <!-- Idővonal -->
-        <div class="order-timeline">
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-dot timeline-dot--purple"></div>
-              <div class="timeline-content">
-                <span class="timeline-label">Nyomdába adva</span>
-                <span class="timeline-date">{{ project()!.inPrintAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+        <!-- Jobb: idővonal -->
+        <div class="order-card__timeline">
+          <div class="tl">
+            <div class="tl__step">
+              <div class="tl__dot tl__dot--done"></div>
+              <div class="tl__line tl__line--done"></div>
+              <div class="tl__text">
+                <span class="tl__title">Nyomdába adva</span>
+                <span class="tl__date">{{ project()!.inPrintAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
               </div>
             </div>
             @if (project()?.doneAt) {
-              <div class="timeline-item">
-                <div class="timeline-dot timeline-dot--green"></div>
-                <div class="timeline-content">
-                  <span class="timeline-label">Kész</span>
-                  <span class="timeline-date">{{ project()!.doneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+              <div class="tl__step">
+                <div class="tl__dot tl__dot--done tl__dot--green"></div>
+                <div class="tl__text">
+                  <span class="tl__title">Kész</span>
+                  <span class="tl__date">{{ project()!.doneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
                 </div>
               </div>
             } @else {
-              <div class="timeline-item timeline-item--pending">
-                <div class="timeline-dot timeline-dot--gray"></div>
-                <div class="timeline-content">
-                  <span class="timeline-label">Kész</span>
-                  <span class="timeline-date timeline-date--pending">Folyamatban...</span>
+              <div class="tl__step tl__step--pending">
+                <div class="tl__dot tl__dot--pending"></div>
+                <div class="tl__text">
+                  <span class="tl__title">Kész</span>
+                  <span class="tl__date tl__date--pending">Folyamatban...</span>
                 </div>
               </div>
             }
@@ -101,110 +103,106 @@
     }
   }
 
-  <!-- 2. sor: Fájlok (kompakt, egymás mellett) -->
-  <section class="files-row">
-    <div class="file-col">
-      <h3 class="section-title section-title--sm">
-        <lucide-icon [name]="ICONS.IMAGE" [size]="14" />
-        Kistabló
-      </h3>
+  <!-- ═══ FÁJLOK ═══ -->
+  <section class="files">
+    <div class="file-card">
+      <div class="file-card__header">
+        <lucide-icon [name]="ICONS.IMAGE" [size]="15" />
+        <span>Kistabló</span>
+      </div>
       @if (project()?.printSmallTablo) {
-        <div class="file-card-compact">
-          <div class="file-info">
-            <lucide-icon [name]="state.smallTabloIcon()" [size]="22" class="file-type-icon" />
-            <div class="file-details">
-              <span class="file-name">{{ project()!.printSmallTablo!.fileName }}</span>
-              <span class="file-meta">{{ formatFileSize(project()!.printSmallTablo!.size) }}</span>
-            </div>
+        <div class="file-card__uploaded">
+          <lucide-icon [name]="state.smallTabloIcon()" [size]="24" class="file-card__type-icon" />
+          <div class="file-card__meta">
+            <span class="file-card__name">{{ project()!.printSmallTablo!.fileName }}</span>
+            <span class="file-card__size">{{ formatFileSize(project()!.printSmallTablo!.size) }}</span>
           </div>
-          <div class="file-actions-compact">
-            <button type="button" class="icon-btn" [disabled]="!!downloadingType()" (click)="downloadClick.emit({ type: 'small_tablo' })" matTooltip="Letöltés">
-              <lucide-icon [name]="downloadingType() === 'small_tablo' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="15" [class.spin]="downloadingType() === 'small_tablo'" />
+          <div class="file-card__actions">
+            <button type="button" class="file-action" [disabled]="!!downloadingType()" (click)="downloadClick.emit({ type: 'small_tablo' })" matTooltip="Letöltés">
+              <lucide-icon [name]="downloadingType() === 'small_tablo' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" [class.spin]="downloadingType() === 'small_tablo'" />
             </button>
-            <button type="button" class="icon-btn" (click)="smallTabloInput()?.nativeElement?.click()" matTooltip="Csere">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="15" />
+            <button type="button" class="file-action" (click)="smallTabloInput()?.nativeElement?.click()" matTooltip="Csere">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
             </button>
-            <button type="button" class="icon-btn icon-btn--danger" (click)="deleteClick.emit({ type: 'small_tablo' })" matTooltip="Törlés">
-              <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+            <button type="button" class="file-action file-action--del" (click)="deleteClick.emit({ type: 'small_tablo' })" matTooltip="Törlés">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
             </button>
           </div>
         </div>
       } @else {
         <div
-          class="drop-zone-compact"
-          [class.drop-zone-compact--drag]="state.draggingSmallTablo()"
+          class="file-card__drop"
+          [class.file-card__drop--active]="state.draggingSmallTablo()"
           (dragover)="onDragOver($event, 'small_tablo')"
           (dragleave)="onDragLeave($event, 'small_tablo')"
           (drop)="onDrop($event, 'small_tablo')"
           (click)="smallTabloInput()?.nativeElement?.click()"
         >
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="20" class="drop-icon" />
-          <p class="drop-text">Húzd ide vagy kattints</p>
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+          <span>Húzd ide vagy kattints</span>
         </div>
       }
-      <input #smallTabloInputRef type="file" accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png" class="hidden-input" (change)="onFileSelected($event, 'small_tablo')" />
+      <input #smallTabloInputRef type="file" accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png" class="sr-only" (change)="onFileSelected($event, 'small_tablo')" />
     </div>
 
-    <div class="file-col">
-      <h3 class="section-title section-title--sm">
-        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="14" />
-        Nyomdai flat
-      </h3>
+    <div class="file-card">
+      <div class="file-card__header">
+        <lucide-icon [name]="ICONS.FILE_TEXT" [size]="15" />
+        <span>Nyomdai flat</span>
+      </div>
       @if (project()?.printFlat) {
-        <div class="file-card-compact">
-          <div class="file-info">
-            <lucide-icon [name]="state.flatIcon()" [size]="22" class="file-type-icon" />
-            <div class="file-details">
-              <span class="file-name">{{ project()!.printFlat!.fileName }}</span>
-              <span class="file-meta">{{ formatFileSize(project()!.printFlat!.size) }}</span>
-            </div>
+        <div class="file-card__uploaded">
+          <lucide-icon [name]="state.flatIcon()" [size]="24" class="file-card__type-icon" />
+          <div class="file-card__meta">
+            <span class="file-card__name">{{ project()!.printFlat!.fileName }}</span>
+            <span class="file-card__size">{{ formatFileSize(project()!.printFlat!.size) }}</span>
           </div>
-          <div class="file-actions-compact">
-            <button type="button" class="icon-btn" [disabled]="!!downloadingType()" (click)="downloadClick.emit({ type: 'flat' })" matTooltip="Letöltés">
-              <lucide-icon [name]="downloadingType() === 'flat' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="15" [class.spin]="downloadingType() === 'flat'" />
+          <div class="file-card__actions">
+            <button type="button" class="file-action" [disabled]="!!downloadingType()" (click)="downloadClick.emit({ type: 'flat' })" matTooltip="Letöltés">
+              <lucide-icon [name]="downloadingType() === 'flat' ? ICONS.LOADER : ICONS.DOWNLOAD" [size]="14" [class.spin]="downloadingType() === 'flat'" />
             </button>
-            <button type="button" class="icon-btn" (click)="flatInput()?.nativeElement?.click()" matTooltip="Csere">
-              <lucide-icon [name]="ICONS.UPLOAD" [size]="15" />
+            <button type="button" class="file-action" (click)="flatInput()?.nativeElement?.click()" matTooltip="Csere">
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
             </button>
-            <button type="button" class="icon-btn icon-btn--danger" (click)="deleteClick.emit({ type: 'flat' })" matTooltip="Törlés">
-              <lucide-icon [name]="ICONS.DELETE" [size]="15" />
+            <button type="button" class="file-action file-action--del" (click)="deleteClick.emit({ type: 'flat' })" matTooltip="Törlés">
+              <lucide-icon [name]="ICONS.DELETE" [size]="14" />
             </button>
           </div>
         </div>
       } @else {
         <div
-          class="drop-zone-compact"
-          [class.drop-zone-compact--drag]="state.draggingFlat()"
+          class="file-card__drop"
+          [class.file-card__drop--active]="state.draggingFlat()"
           (dragover)="onDragOver($event, 'flat')"
           (dragleave)="onDragLeave($event, 'flat')"
           (drop)="onDrop($event, 'flat')"
           (click)="flatInput()?.nativeElement?.click()"
         >
-          <lucide-icon [name]="ICONS.UPLOAD" [size]="20" class="drop-icon" />
-          <p class="drop-text">Húzd ide vagy kattints</p>
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="18" />
+          <span>Húzd ide vagy kattints</span>
         </div>
       }
-      <input #flatInputRef type="file" accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png" class="hidden-input" (change)="onFileSelected($event, 'flat')" />
+      <input #flatInputRef type="file" accept=".pdf,.tiff,.tif,.psd,.jpg,.jpeg,.png" class="sr-only" (change)="onFileSelected($event, 'flat')" />
     </div>
   </section>
 
   @if (state.uploadError()) {
-    <p class="upload-error">{{ state.uploadError() }}</p>
+    <p class="upload-toast">{{ state.uploadError() }}</p>
   }
   @if (state.uploading()) {
-    <div class="upload-progress">
-      <div class="spinner"></div>
+    <div class="upload-bar">
+      <div class="upload-bar__spinner"></div>
       <span>Feltöltés folyamatban...</span>
     </div>
   }
 
-  <!-- 3. sor: Üzenetek -->
+  <!-- ═══ ÜZENETEK ═══ -->
   @if (showChat()) {
-    <section class="messages-section">
-      <h3 class="section-title">
+    <section class="chat-section">
+      <div class="chat-section__header">
         <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16" />
-        Üzenetek a nyomdával
-      </h3>
+        <h3>Üzenetek a nyomdával</h3>
+      </div>
       <app-print-messages
         [messages]="messages()"
         [loading]="loadingMessages()"

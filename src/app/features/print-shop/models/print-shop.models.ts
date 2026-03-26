@@ -37,6 +37,7 @@ export interface PrintShopProject {
   printDeadline: string | null;
   printDeadlineStatus: 'pending' | 'accepted' | 'modified' | null;
   printDeadlineProposed: string | null;
+  printDeadlineReason: string | null;
   isUrgent: boolean;
   isReprint: boolean;
   reprintCount: number;

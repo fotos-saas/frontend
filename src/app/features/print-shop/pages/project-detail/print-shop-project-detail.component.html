@@ -104,7 +104,12 @@
     @if (p.printDeadlineStatus === 'modified') {
       <div class="action-bar action-bar--info">
         <lucide-icon [name]="ICONS.CLOCK" [size]="14"></lucide-icon>
-        <span>Módosítás küldve: {{ formatDate(p.printDeadline) }} → <strong>{{ formatDate(p.printDeadlineProposed) }}</strong> — várakozás a fotós válaszára</span>
+        <div class="action-bar__text">
+          <span>Módosítás küldve: {{ formatDate(p.printDeadline) }} → <strong>{{ formatDate(p.printDeadlineProposed) }}</strong> — várakozás a fotós válaszára</span>
+          @if (p.printDeadlineReason) {
+            <span class="action-bar__reason">„{{ p.printDeadlineReason }}"</span>
+          }
+        </div>
       </div>
     }
 

@@ -97,6 +97,9 @@
     background: #eff6ff; border-color: #bfdbfe; color: #1e40af;
     lucide-icon { color: #3b82f6; margin-right: 6px; }
   }
+
+  &__text { display: flex; flex-direction: column; }
+  &__reason { font-style: italic; font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
 }
 
 // ── ERROR BANNER ──

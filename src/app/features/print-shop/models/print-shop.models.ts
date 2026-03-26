@@ -40,6 +40,8 @@ export interface PrintShopProject {
   isUrgent: boolean;
   isReprint: boolean;
   reprintCount: number;
+  hasPrintError: boolean;
+  printErrorMessage: string | null;
   unreadMessagesCount: number;
   totalMessagesCount: number;
 }

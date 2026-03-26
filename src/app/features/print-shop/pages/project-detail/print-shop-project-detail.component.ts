@@ -58,6 +58,12 @@ export class PrintShopProjectDetailComponent implements OnInit {
   proposedDate = signal('');
   deadlineMessage = signal('');
 
+  // Hiba jelzés
+  showErrorForm = signal(false);
+  errorMessage = signal('');
+  reportingError = signal(false);
+  resolvingError = signal(false);
+
   /** WebSocket csatorna neve (ha aktív) */
   private wsChannelName: string | null = null;
 
@@ -226,6 +232,41 @@ export class PrintShopProjectDetailComponent implements OnInit {
       month: '2-digit',
       day: '2-digit',
     });
+  }
+
+  reportError(): void {
+    const id = this.project()?.id;
+    const msg = this.errorMessage().trim();
+    if (!id || !msg) return;
+    this.reportingError.set(true);
+    this.service.reportError(id, msg)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.project.update(p => p ? { ...p, hasPrintError: true, printErrorMessage: msg } : p);
+          this.showErrorForm.set(false);
+          this.errorMessage.set('');
+          this.reportingError.set(false);
+          this.loadMessages(id);
+        },
+        error: () => this.reportingError.set(false),
+      });
+  }
+
+  resolveError(): void {
+    const id = this.project()?.id;
+    if (!id) return;
+    this.resolvingError.set(true);
+    this.service.resolveError(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.project.update(p => p ? { ...p, hasPrintError: false, printErrorMessage: null } : p);
+          this.resolvingError.set(false);
+          this.loadMessages(id);
+        },
+        error: () => this.resolvingError.set(false),
+      });
   }
 
   goBack(): void {

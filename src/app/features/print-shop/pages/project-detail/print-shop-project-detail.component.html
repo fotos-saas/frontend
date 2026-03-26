@@ -91,6 +91,45 @@
       </div>
     }
 
+    <!-- Hiba jelzés -->
+    <div class="error-section">
+      @if (project()?.hasPrintError) {
+        <div class="error-active">
+          <div class="error-active__header">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="18"></lucide-icon>
+            <strong>Hiba jelezve</strong>
+          </div>
+          <p class="error-active__message">{{ project()?.printErrorMessage }}</p>
+          <button class="btn btn--sm btn--secondary" (click)="resolveError()" [disabled]="resolvingError()">
+            <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon>
+            {{ resolvingError() ? 'Feldolgozás...' : 'Hiba visszavonása' }}
+          </button>
+        </div>
+      } @else {
+        @if (showErrorForm()) {
+          <div class="error-form">
+            <div class="form-row">
+              <label>Mi a hiba?</label>
+              <textarea rows="3" placeholder="Írd le a hiba okát..."
+                [ngModel]="errorMessage()" (ngModelChange)="errorMessage.set($event)"></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn--sm btn--secondary" (click)="showErrorForm.set(false)">Mégsem</button>
+              <button class="btn btn--sm btn--danger" (click)="reportError()" [disabled]="!errorMessage().trim() || reportingError()">
+                <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+                {{ reportingError() ? 'Küldés...' : 'Hiba jelzése' }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button class="btn btn--sm btn--outline-danger" (click)="showErrorForm.set(true)">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+            Hiba jelzése
+          </button>
+        }
+      }
+    </div>
+
     <!-- Üzenetek -->
     <div class="messages-section">
       <h3>

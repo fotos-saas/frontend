@@ -124,6 +124,14 @@ export class PrintShopService {
     );
   }
 
+  reportError(projectId: number, message: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/report-error`, { message });
+  }
+
+  resolveError(projectId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/resolve-error`, {});
+  }
+
   downloadFile(projectId: number, type: string = 'small_tablo'): Observable<{ blob: Blob; fileName: string }> {
     return this.http.get(`${this.baseUrl}/projects/${projectId}/download`, {
       params: { type },

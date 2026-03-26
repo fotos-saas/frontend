@@ -54,7 +54,6 @@ export class PrintShopProjectsComponent {
   readonly statusOptions: PsSelectOption[] = [{ id: '', label: 'Mind' }, { id: 'in_print', label: 'Nyomdában' }, { id: 'done', label: 'Kész' }];
   readonly classYearOptions = computed(() => this.availableYears().map(y => ({ id: y, label: y })));
   readonly studioOptions = computed(() => this.studios().map(s => ({ id: s.id, label: s.name })));
-  readonly multiStudio = computed(() => this.studios().length > 1);
 
   // Kijelölés
   selectedIds = signal<Set<number>>(new Set());

@@ -106,15 +106,13 @@
 
     <!-- Táblázat fejléc -->
     <div class="table-header">
-      <span class="th th-check">
-        <input
-          type="checkbox"
-          class="row-checkbox"
-          [checked]="allSelected()"
-          (change)="toggleSelectAll()"
-          matTooltip="Összes kijelölése"
-        />
-      </span>
+      <input
+        type="checkbox"
+        class="row-checkbox header-checkbox"
+        [checked]="allSelected()"
+        (change)="toggleSelectAll()"
+        matTooltip="Összes kijelölése"
+      />
       <span class="th th-studio">Partner</span>
       <span class="th th-size">Méret</span>
       <span class="th th-copies">Db</span>

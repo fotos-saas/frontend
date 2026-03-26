@@ -60,7 +60,7 @@ export class PrintShopProjectDetailComponent implements OnInit {
     this.loadMessages(id);
 
     // 15 másodperces polling az új üzenetekért
-    interval(15_000).pipe(
+    interval(5_000).pipe(
       filter(() => !!this.project()),
       switchMap(() => this.service.getMessages(id)),
       takeUntilDestroyed(this.destroyRef),

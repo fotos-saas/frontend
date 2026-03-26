@@ -68,7 +68,7 @@ export class ProjectPrintTabComponent {
     });
 
     // 15 másodperces polling az új üzenetekért
-    interval(15_000).pipe(
+    interval(5_000).pipe(
       filter(() => this.showChat() && !!this.project()?.id),
       switchMap(() => this.projectService.getPrintMessages(this.project()!.id)),
       takeUntilDestroyed(this.destroyRef),

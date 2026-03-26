@@ -137,14 +137,14 @@
              [style.animation-delay]="i * 0.03 + 's'">
           <!-- Checkbox -->
           <div class="cell-check">
-            @if (project.hasPrintFile) {
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                [checked]="selectedIds().has(project.id)"
-                (click)="toggleSelect(project, $event)"
-              />
-            }
+            <input
+              type="checkbox"
+              class="row-checkbox"
+              [checked]="selectedIds().has(project.id)"
+              [disabled]="!project.hasPrintFile"
+              [matTooltip]="project.hasPrintFile ? '' : 'Nincs nyomdakész fájl'"
+              (click)="project.hasPrintFile && toggleSelect(project, $event)"
+            />
           </div>
 
           <!-- Thumbnail -->

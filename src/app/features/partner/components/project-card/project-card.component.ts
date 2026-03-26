@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output, inject, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PartnerProjectListItem } from '../../services/partner.service';
@@ -17,7 +18,7 @@ import { BatchAddDropdownComponent } from '../batch-add-dropdown/batch-add-dropd
 @Component({
   selector: 'app-partner-project-card',
   standalone: true,
-  imports: [LucideAngularModule, DatePipe, MatTooltipModule, StatusDropdownComponent, BatchAddDropdownComponent],
+  imports: [LucideAngularModule, DatePipe, MatTooltipModule, RouterLink, StatusDropdownComponent, BatchAddDropdownComponent],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

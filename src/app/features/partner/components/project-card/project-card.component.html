@@ -83,9 +83,15 @@
         </span>
       }
       @if (project().printMessagesCount) {
-        <span class="print-badge print-badge--chat" [matTooltip]="project().printMessagesCount + ' nyomdai üzenet'">
+        <a
+          class="print-badge print-badge--chat"
+          [routerLink]="['/partner/projects', project().id]"
+          fragment="print"
+          [matTooltip]="project().printMessagesCount + ' nyomdai üzenet'"
+          (click)="$event.stopPropagation()"
+        >
           <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10" /> {{ project().printMessagesCount }}
-        </span>
+        </a>
       }
     </div>
     <span class="school-meta">{{ project().className ?? '-' }} @if (project().classYear) {({{ project().classYear }})}@if (project().contact) {<span class="school-contact-sep"> · </span><span class="school-contact">{{ project().contact!.name }}</span>}@if (project().lastActivityAt) {<span class="school-contact-sep"> · </span><span class="school-meta-date" [matTooltip]="'Utolsó módosítás: ' + (project().lastActivityAt! | date:'yyyy. MMM d. HH:mm':'':'hu-HU')"><lucide-icon [name]="ICONS.CLOCK" [size]="10" />{{ project().lastActivityAt! | date:'yyyy.MM.dd':'':'hu-HU' }}</span>}</span>

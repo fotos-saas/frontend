@@ -118,17 +118,15 @@ export class PartnerNotificationBellComponent implements OnInit {
     try {
       if (url.startsWith('/') && !url.startsWith('//')) {
         const hashIdx = url.indexOf('#');
-        if (hashIdx > 0) {
-          const path = url.substring(0, hashIdx);
-          const fragment = url.substring(hashIdx + 1);
-          const currentPath = this.router.url.split('#')[0].split('?')[0];
-          if (currentPath === path) {
-            // Már ezen az oldalon vagyunk — URL frissítés + hashchange esemény
-            window.location.hash = fragment;
-          } else {
-            this.router.navigate([path], { fragment });
-          }
+        const targetPath = hashIdx > 0 ? url.substring(0, hashIdx) : url;
+        const targetFragment = hashIdx > 0 ? url.substring(hashIdx + 1) : '';
+        const currentPath = this.router.url.split('#')[0].split('?')[0];
+
+        if (currentPath === targetPath && targetFragment) {
+          // Ugyanaz az oldal, csak tab váltás — hashchange event triggerel
+          window.location.hash = targetFragment;
         } else {
+          // Más oldal — normál navigáció
           this.router.navigateByUrl(url);
         }
         return;

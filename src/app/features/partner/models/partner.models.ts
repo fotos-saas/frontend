@@ -76,6 +76,7 @@ export interface PartnerProjectListItem {
   isUrgent?: boolean;
   isReprint?: boolean;
   inPrintAt?: string | null;
+  printMessagesCount?: number;
 }
 
 export interface QrCodeHistory {

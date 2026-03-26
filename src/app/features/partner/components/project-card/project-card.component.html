@@ -64,17 +64,6 @@
           {{ project().pendingTaskCount }}
         </span>
       }
-      @if (project().orderSubmittedAt && !isMarketer()) {
-        <button
-          type="button"
-          class="finalized-badge"
-          [matTooltip]="'Megrendelés leadva: ' + (project().orderSubmittedAt | date:'yyyy. MMM d.':'':'hu-HU')"
-          (click)="onOrderDataClick($event)"
-        >
-          <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10" />
-          <span class="finalized-badge__text">Leadva</span>
-        </button>
-      }
       @if (project().isUrgent) {
         <span class="print-badge print-badge--urgent" matTooltip="Sürgős nyomtatás">
           <lucide-icon [name]="ICONS.FLAME" [size]="10" /> Sürgős
@@ -91,6 +80,11 @@
       @if (project().printDeadline) {
         <span class="print-badge" [matTooltip]="'Nyomda határidő'">
           <lucide-icon [name]="ICONS.CALENDAR" [size]="10" /> {{ project().printDeadline! | date:'MM.dd.':'':'hu-HU' }}
+        </span>
+      }
+      @if (project().printMessagesCount) {
+        <span class="print-badge print-badge--chat" [matTooltip]="project().printMessagesCount + ' nyomdai üzenet'">
+          <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10" /> {{ project().printMessagesCount }}
         </span>
       }
     </div>

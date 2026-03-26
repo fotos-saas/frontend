@@ -315,6 +315,27 @@
   &--reprint { background: #fff7ed; color: #ea580c; border: 1px solid rgba(249, 115, 22, 0.2); }
 }
 
+.project-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.inline-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  margin-right: 8px;
+  lucide-icon { margin-right: 2px; }
+  &--msg { color: #3b82f6; cursor: pointer; &:hover { color: #2563eb; } }
+  &--msg-read { color: #94a3b8; cursor: pointer; &:hover { color: #64748b; } }
+  &--dl { color: #22c55e; }
+}
+
 .meta-badge {
   display: inline-flex;
   align-items: center;

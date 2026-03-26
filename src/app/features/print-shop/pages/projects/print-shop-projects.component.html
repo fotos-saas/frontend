@@ -228,6 +228,12 @@
 
           <!-- Műveletek -->
           <div class="cell-actions">
+            @if (project.unreadMessagesCount > 0) {
+              <a class="unread-badge" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek">
+                <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="14"></lucide-icon>
+                <span class="unread-count">{{ project.unreadMessagesCount }}</span>
+              </a>
+            }
             @if (project.isUrgent) {
               <span class="urgent-badge" matTooltip="Sürgős megrendelés">
                 <lucide-icon [name]="ICONS.FLAME" [size]="14"></lucide-icon>

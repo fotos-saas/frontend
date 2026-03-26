@@ -40,7 +40,7 @@ export interface PrintShopProject {
   isUrgent: boolean;
   isReprint: boolean;
   reprintCount: number;
-  unreadMessages: number;
+  unreadMessagesCount: number;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

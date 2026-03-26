@@ -1,4 +1,4 @@
-<div class="print-shop-projects page-card">
+<div class="print-shop-projects page-card" [class.has-multi-studio]="multiStudio()">
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
@@ -39,14 +39,16 @@
       (ngModelChange)="onClassYearChange($event)"
     />
 
-    <ps-select
-      class="filter-field"
-      [options]="studioOptions()"
-      emptyLabel="Minden stúdió"
-      size="sm"
-      [ngModel]="studioFilter() ?? ''"
-      (ngModelChange)="onStudioChange($event)"
-    />
+    @if (multiStudio()) {
+      <ps-select
+        class="filter-field"
+        [options]="studioOptions()"
+        emptyLabel="Minden stúdió"
+        size="sm"
+        [ngModel]="studioFilter() ?? ''"
+        (ngModelChange)="onStudioChange($event)"
+      />
+    }
 
     @if (hasFilters()) {
       <button class="clear-filters-btn" (click)="clearFilters()" matTooltip="Szűrők törlése">
@@ -117,7 +119,7 @@
       </span>
       <span class="th th-thumb"></span>
       <span class="th th-name">Projekt</span>
-      <span class="th th-studio">Partner</span>
+      @if (multiStudio()) { <span class="th th-studio">Partner</span> }
       <span class="th th-size">Méret</span>
       <span class="th th-copies">Db</span>
       <span class="th th-deadline">Határidő</span>
@@ -183,7 +185,7 @@
 
 
           <!-- Partner -->
-          <div class="cell-studio">{{ project.studioName ?? '-' }}</div>
+          @if (multiStudio()) { <div class="cell-studio">{{ project.studioName ?? '-' }}</div> }
 
           <!-- Méret -->
           <div class="cell-size">

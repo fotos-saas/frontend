@@ -2,7 +2,11 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --table-cols: 32px 56px 1fr 120px 80px 50px 110px 100px 100px 80px;
+  --table-cols: 32px 56px 1fr 80px 50px 110px 100px 100px 80px;
+
+  &.has-multi-studio {
+    --table-cols: 32px 56px 1fr 120px 80px 50px 110px 100px 100px 80px;
+  }
   padding-top: 24px;
   padding-bottom: 24px;
 }

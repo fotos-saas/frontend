@@ -79,6 +79,7 @@ export class PartnerProjectDetailComponent {
     printDeadline: project.printDeadline,
     printDeadlineStatus: project.printDeadlineStatus,
     printDeadlineProposed: project.printDeadlineProposed,
+    printDeadlineReason: project.printDeadlineReason,
     isUrgent: project.isUrgent,
     isReprint: project.isReprint,
     reprintCount: project.reprintCount,

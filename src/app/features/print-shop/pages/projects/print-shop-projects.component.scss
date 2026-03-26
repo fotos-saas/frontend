@@ -298,7 +298,7 @@
 }
 
 /* ============ Inline Tags (név mellett) ============ */
-.name-row { display: flex; align-items: center; flex-wrap: wrap; }
+.name-row { display: flex; align-items: center; min-width: 0; }
 
 .inline-tag {
   display: inline-flex;
@@ -315,8 +315,6 @@
   &--urgent { background: #fef2f2; color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
   &--reprint { background: #fff7ed; color: #ea580c; border: 1px solid rgba(249, 115, 22, 0.2); }
 }
-
-.meta-row { display: flex; align-items: center; flex-wrap: wrap; }
 
 .meta-badge {
   display: inline-flex;

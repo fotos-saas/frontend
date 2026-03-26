@@ -9,7 +9,7 @@ export interface PrintShopMessage {
   userId: number;
   userName: string;
   message: string;
-  type: 'message' | 'deadline_proposed' | 'deadline_accepted' | 'deadline_rejected' | 'reprint_request' | 'urgent_flag' | 'system';
+  type: 'message' | 'deadline_proposed' | 'deadline_accepted' | 'deadline_rejected' | 'reprint_request' | 'urgent_flag' | 'error' | 'error_resolved' | 'system';
   metadata: Record<string, unknown> | null;
   createdAt: string;
   isOwn: boolean;

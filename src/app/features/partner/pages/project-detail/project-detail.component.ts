@@ -87,6 +87,8 @@ export class PartnerProjectDetailComponent {
     pendingTaskCount: project.pendingTaskCount,
     printMessagesCount: project.printMessagesCount,
     unreadPrintMessagesCount: project.unreadPrintMessagesCount,
+    hasPrintError: project.hasPrintError,
+    printErrorMessage: project.printErrorMessage,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });

@@ -1,5 +1,23 @@
 <div class="print-tab">
 
+  <!-- ═══ HIBA BANNER ═══ -->
+  @if (project()?.hasPrintError) {
+    <section class="error-banner">
+      <div class="error-banner__icon">
+        <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="18" />
+      </div>
+      <div class="error-banner__content">
+        <strong>A nyomda hibát jelzett</strong>
+        @if (project()?.printErrorMessage) {
+          <p>{{ project()!.printErrorMessage }}</p>
+        }
+      </div>
+      <button class="error-banner__btn" (click)="onAcknowledgeError()" [disabled]="acknowledgingError()">
+        {{ acknowledgingError() ? 'Feldolgozás...' : 'Tudomásul vettem' }}
+      </button>
+    </section>
+  }
+
   <!-- ═══ MEGRENDELÉS KÁRTYA ═══ -->
   @if (project()?.inPrintAt) {
     <section class="order-card" [class.order-card--urgent]="isUrgent()">

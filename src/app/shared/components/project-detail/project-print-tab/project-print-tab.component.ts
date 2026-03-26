@@ -59,6 +59,8 @@ export class ProjectPrintTabComponent {
   readonly sendingMessage = signal(false);
   readonly showChat = signal(false);
 
+  readonly acknowledgingError = signal(false);
+  readonly errorAcknowledged = output<void>();
   readonly togglingUrgent = signal(false);
   readonly urgentState = signal<boolean | null>(null);
   readonly isUrgent = computed(() => this.urgentState() ?? this.project()?.isUrgent ?? false);
@@ -175,6 +177,18 @@ export class ProjectPrintTabComponent {
           this.showChat.set(true);
         },
         error: () => this.loadingMessages.set(false),
+      });
+  }
+
+  onAcknowledgeError(): void {
+    const id = this.project()?.id;
+    if (!id) return;
+    this.acknowledgingError.set(true);
+    this.projectService.acknowledgePrintError(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => { this.acknowledgingError.set(false); this.errorAcknowledged.emit(); },
+        error: () => this.acknowledgingError.set(false),
       });
   }
 

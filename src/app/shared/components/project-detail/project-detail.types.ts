@@ -143,6 +143,8 @@ export interface ProjectDetailData {
   pendingTaskCount?: number;
   printMessagesCount?: number;
   unreadPrintMessagesCount?: number;
+  hasPrintError?: boolean;
+  printErrorMessage?: string | null;
   createdAt: string;
   updatedAt: string;
 }

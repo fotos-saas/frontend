@@ -423,4 +423,8 @@ export class PartnerProjectService {
   updatePrintOrder(projectId: number, data: { print_copies?: number; print_deadline?: string | null }): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/projects/${projectId}/update-print-order`, data);
   }
+
+  acknowledgePrintError(projectId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/acknowledge-print-error`, {});
+  }
 }

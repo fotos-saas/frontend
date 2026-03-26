@@ -87,6 +87,10 @@ export class PrintMessagesComponent {
         return ICONS.REPEAT_2;
       case 'urgent_flag':
         return ICONS.ALERT_TRIANGLE;
+      case 'error':
+        return ICONS.ALERT_TRIANGLE;
+      case 'error_resolved':
+        return ICONS.CHECK_CIRCLE;
       case 'system':
         return ICONS.INFO;
       default:

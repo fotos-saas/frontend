@@ -1,4 +1,4 @@
-<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" role="button" tabindex="0" #rowEl (click)="cardClick.emit({ project: project(), event: $event })" (keydown.enter)="rowEl.click()" (keydown.space)="$event.preventDefault(); rowEl.click()">
+<div class="project-row" [class.project-row--finalized]="project().orderSubmittedAt" [class.project-row--preliminary]="project().isPreliminary" [class.project-row--selected]="selected()" [class.project-row--error]="project().hasPrintError" role="button" tabindex="0" #rowEl (click)="cardClick.emit({ project: project(), event: $event })" (keydown.enter)="rowEl.click()" (keydown.space)="$event.preventDefault(); rowEl.click()">
   <!-- Col 1: Minta kép -->
   <div
     class="col col-sample"

@@ -77,6 +77,7 @@ export interface PartnerProjectListItem {
   isReprint?: boolean;
   inPrintAt?: string | null;
   printMessagesCount?: number;
+  hasPrintError?: boolean;
 }
 
 export interface QrCodeHistory {
@@ -140,6 +141,8 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   reprintCount?: number;
   printMessagesCount?: number;
   unreadPrintMessagesCount?: number;
+  hasPrintError?: boolean;
+  printErrorMessage?: string | null;
   updatedAt: string;
 }
 

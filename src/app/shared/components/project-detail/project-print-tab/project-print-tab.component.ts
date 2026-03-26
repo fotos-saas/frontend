@@ -91,7 +91,7 @@ export class ProjectPrintTabComponent {
 
     effect(() => {
       const p = this.project();
-      if (p?.id && p.status === 'in_print') {
+      if (p?.id && (p.status === 'in_print' || p.status === 'done')) {
         this.loadMessages(p.id);
       }
     });
@@ -100,7 +100,7 @@ export class ProjectPrintTabComponent {
     effect(() => {
       const p = this.project();
       const userId = this.authService.currentUserSignal()?.id;
-      if (p?.id && p.status === 'in_print' && userId) {
+      if (p?.id && (p.status === 'in_print' || p.status === 'done') && userId) {
         this.setupWebSocketListener(userId, p.id);
       }
     });

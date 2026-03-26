@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ElectronService } from '../../../../core/services/electron.service';
@@ -218,7 +219,15 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
       reloadProject,
     });
 
-    initTabFromFragment(this.activeTab, this.location, ['overview', 'emails', 'users', 'samples', 'tasks', 'settings', 'print', 'activity'] as const, 'overview');
+    const validTabs = ['overview', 'emails', 'users', 'samples', 'tasks', 'settings', 'print', 'activity'] as const;
+    initTabFromFragment(this.activeTab, this.location, validTabs, 'overview');
+
+    // Fragment változás figyelése (pl. notification kattintás #print)
+    this.route.fragment.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(fragment => {
+      if (fragment && (validTabs as readonly string[]).includes(fragment)) {
+        this.activeTab.set(fragment as ProjectDetailTab);
+      }
+    });
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id || isNaN(id) || id < 1) {

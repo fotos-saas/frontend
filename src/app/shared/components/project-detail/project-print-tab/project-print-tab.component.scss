@@ -3,310 +3,44 @@
 
 .print-tab {
   display: flex;
-  gap: 32px;
-}
-
-.print-col--left {
-  flex: 0 0 280px;
-}
-
-.print-col--right {
-  flex: 1;
-  min-width: 0;
-  display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 8px;
   font-size: 0.9375rem;
   font-weight: 600;
   color: get-color('slate', 800);
-  margin: 0 0 16px;
-}
+  margin: 0 0 12px;
 
-/* Timeline */
-.timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding-left: 4px;
-}
+  lucide-icon { margin-right: 8px; }
 
-.timeline-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  position: relative;
-
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 7px;
-    top: 30px;
-    bottom: -6px;
-    width: 2px;
-    background: get-color('slate', 200);
+  &--sm {
+    font-size: 0.8125rem;
+    margin-bottom: 8px;
   }
 }
 
-.timeline-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 2px;
-
-  &--purple {
-    background: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-  }
-
-  &--green {
-    background: get-color('success', 500);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-  }
-
-  &--gray {
-    background: get-color('slate', 300);
-    border: 2px dashed get-color('slate', 400);
-    box-sizing: border-box;
-  }
-}
-
-.timeline-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.timeline-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: get-color('slate', 800);
-}
-
-.timeline-date {
-  font-size: 0.8125rem;
-  color: get-color('slate', 500);
-
-  &--pending {
-    color: get-color('slate', 400);
-    font-style: italic;
-  }
-}
-
-/* File Section */
-.file-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
+/* ============ 1. Megrendelés kártya ============ */
+.order-card {
   background: get-color('slate', 50);
   border: 1px solid get-color('slate', 200);
   border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
-.file-info {
+.order-grid {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
 
-.file-type-icon {
-  color: #8b5cf6;
-  flex-shrink: 0;
-}
-
-.file-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.file-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: get-color('slate', 800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.file-meta {
-  font-size: 0.75rem;
-  color: get-color('slate', 500);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.file-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.download-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: #10b981;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: #059669;
+  .order-info { flex: 1; }
+  .order-timeline {
+    flex: 0 0 220px;
+    border-left: 1px solid get-color('slate', 200);
+    padding-left: 20px;
+    margin-left: 20px;
   }
-
-  &--loading {
-    background: #6ee7b7;
-    cursor: wait;
-  }
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-.replace-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: get-color('slate', 100);
-  color: get-color('slate', 600);
-  border: 1px solid get-color('slate', 200);
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover {
-    background: get-color('slate', 200);
-    border-color: get-color('slate', 300);
-  }
-}
-
-.delete-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: get-color('error', 50);
-  color: get-color('error', 500);
-  border: 1px solid get-color('error', 200);
-  border-radius: 8px;
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover {
-    background: get-color('error', 100);
-    border-color: #fca5a5;
-  }
-}
-
-/* Drop zone */
-.drop-zone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 40px 24px;
-  background: get-color('slate', 50);
-  border: 2px dashed get-color('slate', 300);
-  border-radius: 10px;
-  text-align: center;
-  cursor: pointer;
-  @include transition-fast;
-
-  &:hover {
-    border-color: get-color('slate', 400);
-    background: get-color('slate', 100);
-  }
-
-  &--drag {
-    border-color: #8b5cf6;
-    background: rgba(139, 92, 246, 0.05);
-
-    .drop-icon {
-      color: #8b5cf6;
-    }
-  }
-}
-
-.drop-icon {
-  color: get-color('slate', 400);
-}
-
-.drop-text {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: get-color('slate', 600);
-}
-
-.drop-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: get-color('slate', 400);
-}
-
-.hidden-input {
-  display: none;
-}
-
-.upload-error {
-  margin: 8px 0 0;
-  font-size: 0.8125rem;
-  color: get-color('error', 500);
-}
-
-.upload-progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  font-size: 0.8125rem;
-  color: get-color('slate', 500);
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid get-color('slate', 200);
-  border-top-color: #8b5cf6;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Megrendelés adatok */
-.order-section {
-  margin-top: 24px;
 }
 
 .order-details {
@@ -318,17 +52,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 6px 0;
 
-  &:last-child {
-    border-bottom: none;
+  & + & {
+    border-top: 1px solid get-color('slate', 100);
   }
 }
 
 .order-label {
   font-size: 13px;
-  color: #64748b;
+  color: get-color('slate', 500);
 }
 
 .order-value {
@@ -336,23 +69,18 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  color: get-color('slate', 800);
 }
 
 .order-item--urgent {
   color: #ef4444;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-
+  font-weight: 600;
   span { margin-left: 6px; }
 }
 
 .order-item--reprint {
   color: #f97316;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-
+  font-weight: 600;
   span { margin-left: 6px; }
 }
 
@@ -360,50 +88,275 @@
 .status-modified { color: #3b82f6; margin-left: 6px; }
 .status-pending { color: #f59e0b; margin-left: 6px; }
 
+/* ============ Timeline (a kártyán belül) ============ */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  padding-left: 4px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  position: relative;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 26px;
+    bottom: -2px;
+    width: 2px;
+    background: get-color('slate', 200);
+  }
+}
+
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  margin-right: 10px;
+
+  &--purple {
+    background: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  }
+  &--green {
+    background: get-color('success', 500);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  }
+  &--gray {
+    background: get-color('slate', 300);
+    border: 2px dashed get-color('slate', 400);
+    box-sizing: border-box;
+  }
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: get-color('slate', 500);
+
+  &--pending {
+    color: get-color('slate', 400);
+    font-style: italic;
+  }
+}
+
+/* ============ 2. Fájlok (kompakt, egymás mellett) ============ */
+.files-row {
+  display: flex;
+  margin-bottom: 20px;
+
+  .file-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-col + .file-col {
+    margin-left: 16px;
+  }
+}
+
+.file-card-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: get-color('slate', 50);
+  border: 1px solid get-color('slate', 200);
+  border-radius: 8px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.file-type-icon {
+  color: #8b5cf6;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: get-color('slate', 800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta {
+  font-size: 0.6875rem;
+  color: get-color('slate', 500);
+}
+
+.file-actions-compact {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid get-color('slate', 200);
+  border-radius: 6px;
+  color: get-color('slate', 600);
+  cursor: pointer;
+  @include transition-fast;
+
+  & + & { margin-left: 4px; }
+
+  &:hover:not(:disabled) {
+    background: get-color('slate', 100);
+    border-color: get-color('slate', 300);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--danger {
+    color: get-color('error', 500);
+    border-color: get-color('error', 200);
+
+    &:hover {
+      background: get-color('error', 50);
+      border-color: get-color('error', 300);
+    }
+  }
+}
+
+.drop-zone-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: get-color('slate', 50);
+  border: 2px dashed get-color('slate', 300);
+  border-radius: 8px;
+  cursor: pointer;
+  @include transition-fast;
+
+  lucide-icon {
+    color: get-color('slate', 400);
+    margin-right: 8px;
+  }
+
+  .drop-text {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: get-color('slate', 500);
+  }
+
+  &:hover {
+    border-color: get-color('slate', 400);
+    background: get-color('slate', 100);
+  }
+
+  &--drag {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.05);
+
+    lucide-icon { color: #8b5cf6; }
+  }
+}
+
+.hidden-input { display: none; }
+
+.upload-error {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: get-color('error', 500);
+}
+
+.upload-progress {
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 0.8125rem;
+  color: get-color('slate', 500);
+
+  .spinner { margin-right: 8px; }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid get-color('slate', 200);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.spin { animation: spin 1s linear infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============ 3. Üzenetek ============ */
 .messages-section {
-  margin-top: 24px;
+  border-top: 1px solid get-color('slate', 200);
+  padding-top: 20px;
 
   app-print-messages {
-    max-height: 400px;
+    max-height: 350px;
   }
 }
 
+/* ============ Responsive ============ */
 @media (max-width: 768px) {
-  .print-tab {
+  .order-grid {
     flex-direction: column;
-    gap: 24px;
+
+    .order-timeline {
+      flex: none;
+      border-left: none;
+      border-top: 1px solid get-color('slate', 200);
+      padding-left: 0;
+      padding-top: 12px;
+      margin-left: 0;
+      margin-top: 12px;
+    }
   }
 
-  .print-col--left {
-    flex: none;
-  }
-
-  .file-card {
+  .files-row {
     flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
 
-  .file-actions {
-    justify-content: flex-start;
-  }
-
-  .download-btn,
-  .replace-btn {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .file-card {
-    padding: 12px;
-  }
-
-  .download-btn,
-  .replace-btn {
-    padding: 8px 12px;
-    font-size: 0.75rem;
+    .file-col + .file-col {
+      margin-left: 0;
+      margin-top: 12px;
+    }
   }
 }
 

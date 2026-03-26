@@ -39,16 +39,14 @@
       (ngModelChange)="onClassYearChange($event)"
     />
 
-    @if (studios().length > 1) {
-      <ps-select
-        class="filter-field"
-        [options]="studioOptions()"
-        emptyLabel="Minden stúdió"
-        size="sm"
-        [ngModel]="studioFilter() ?? ''"
-        (ngModelChange)="onStudioChange($event)"
-      />
-    }
+    <ps-select
+      class="filter-field"
+      [options]="studioOptions()"
+      emptyLabel="Minden stúdió"
+      size="sm"
+      [ngModel]="studioFilter() ?? ''"
+      (ngModelChange)="onStudioChange($event)"
+    />
 
     @if (hasFilters()) {
       <button class="clear-filters-btn" (click)="clearFilters()" matTooltip="Szűrők törlése">
@@ -119,6 +117,7 @@
       </span>
       <span class="th th-thumb"></span>
       <span class="th th-name">Projekt</span>
+      <span class="th th-studio">Partner</span>
       <span class="th th-size">Méret</span>
       <span class="th th-copies">Db</span>
       <span class="th th-deadline">Határidő</span>
@@ -182,6 +181,9 @@
               -->@if (project.printShopDownloadCount > 0) {<span class="inline-badge inline-badge--dl" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x'"><lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10"></lucide-icon> {{ project.printShopDownloadCount }}x</span>}</span>
           </div>
 
+
+          <!-- Partner -->
+          <div class="cell-studio">{{ project.studioName ?? '-' }}</div>
 
           <!-- Méret -->
           <div class="cell-size">

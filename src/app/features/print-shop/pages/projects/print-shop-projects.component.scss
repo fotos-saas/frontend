@@ -45,11 +45,15 @@
 /* ============ Filters ============ */
 .filters {
   display: flex;
-  gap: 12px;
+  margin: -6px;
   margin-bottom: 24px;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
+  & > * { margin: 6px; }
 }
+
+.filter-search { flex: 1; min-width: 200px; }
+.filter-field { flex-shrink: 0; }
 
 .clear-filters-btn {
   display: inline-flex;

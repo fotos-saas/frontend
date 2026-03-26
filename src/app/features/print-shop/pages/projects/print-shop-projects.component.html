@@ -13,42 +13,41 @@
 
   <!-- Szűrők -->
   <div class="filters">
-    <div class="search-box">
-      <lucide-icon class="search-icon" [name]="ICONS.SEARCH" [size]="18"></lucide-icon>
-      <input
-        class="search-input"
-        type="text"
-        placeholder="Keresés név, osztály, iskola..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="onSearchInput($event)"
-      />
-      @if (searchQuery()) {
-        <button class="clear-btn" (click)="onSearchInput('')" matTooltip="Keresés törlése">
-          <lucide-icon [name]="ICONS.X" [size]="16"></lucide-icon>
-        </button>
-      }
-    </div>
+    <ps-input
+      class="filter-search"
+      placeholder="Keresés név, osztály, iskola..."
+      size="full"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="onSearchInput($event)"
+    />
 
-    <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)">
-      <option value="">Minden státusz</option>
-      <option value="in_print">Nyomdában</option>
-      <option value="done">Kész</option>
-    </select>
+    <ps-select
+      class="filter-field"
+      [options]="statusOptions"
+      emptyLabel="Minden státusz"
+      size="sm"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="onStatusChange($event)"
+    />
 
-    <select class="filter-select" [ngModel]="classYearFilter()" (ngModelChange)="onClassYearChange($event)">
-      <option value="">Minden évfolyam</option>
-      @for (year of availableYears(); track year) {
-        <option [value]="year">{{ year }}</option>
-      }
-    </select>
+    <ps-select
+      class="filter-field"
+      [options]="classYearOptions()"
+      emptyLabel="Minden évfolyam"
+      size="sm"
+      [ngModel]="classYearFilter()"
+      (ngModelChange)="onClassYearChange($event)"
+    />
 
     @if (studios().length > 1) {
-      <select class="filter-select" [ngModel]="studioFilter() ?? ''" (ngModelChange)="onStudioChange($event)">
-        <option value="">Minden stúdió</option>
-        @for (studio of studios(); track studio.id) {
-          <option [value]="studio.id">{{ studio.name }}</option>
-        }
-      </select>
+      <ps-select
+        class="filter-field"
+        [options]="studioOptions()"
+        emptyLabel="Minden stúdió"
+        size="sm"
+        [ngModel]="studioFilter() ?? ''"
+        (ngModelChange)="onStudioChange($event)"
+      />
     }
 
     @if (hasFilters()) {

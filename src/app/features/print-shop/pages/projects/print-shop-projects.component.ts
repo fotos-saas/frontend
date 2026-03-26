@@ -12,12 +12,13 @@ import { WebsocketService } from '@core/services/websocket.service';
 import { AuthService } from '@core/services/auth.service';
 import { LoggerService } from '@core/services/logger.service';
 import { ICONS } from '@shared/constants/icons.constants';
+import { PsInputComponent, PsSelectComponent, PsSelectOption } from '@shared/components/form';
 import { Subject, debounceTime, distinctUntilChanged, interval } from 'rxjs';
 
 @Component({
   selector: 'app-print-shop-projects',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, MatTooltipModule, RouterModule, ConfirmDialogComponent, SamplesLightboxComponent],
+  imports: [LucideAngularModule, FormsModule, MatTooltipModule, RouterModule, ConfirmDialogComponent, SamplesLightboxComponent, PsInputComponent, PsSelectComponent],
   templateUrl: './print-shop-projects.component.html',
   styleUrls: ['./print-shop-projects.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,6 +50,10 @@ export class PrintShopProjectsComponent {
   projectIdFilter = signal<number | null>(null);
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
+
+  readonly statusOptions: PsSelectOption[] = [{ id: 'in_print', label: 'Nyomdában' }, { id: 'done', label: 'Kész' }];
+  readonly classYearOptions = computed(() => this.availableYears().map(y => ({ id: y, label: y })));
+  readonly studioOptions = computed(() => this.studios().map(s => ({ id: s.id, label: s.name })));
 
   // Kijelölés
   selectedIds = signal<Set<number>>(new Set());

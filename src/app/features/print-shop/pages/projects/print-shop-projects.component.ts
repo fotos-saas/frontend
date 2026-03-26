@@ -109,6 +109,7 @@ export class PrintShopProjectsComponent {
     ).subscribe(query => {
       this.searchQuery.set(query);
       this.currentPage.set(1);
+      this.updateUrl();
       this.loadProjects();
     });
 
@@ -123,6 +124,15 @@ export class PrintShopProjectsComponent {
     }
     if (params['class_year']) {
       this.classYearFilter.set(params['class_year']);
+    }
+    if (params['search']) {
+      this.searchQuery.set(params['search']);
+    }
+    if (params['studio_id']) {
+      this.studioFilter.set(Number(params['studio_id']));
+    }
+    if (params['page']) {
+      this.currentPage.set(Number(params['page']));
     }
     if (params['project_id']) {
       this.projectIdFilter.set(Number(params['project_id']));
@@ -145,6 +155,7 @@ export class PrintShopProjectsComponent {
   onStudioChange(studioId: string): void {
     this.studioFilter.set(studioId ? Number(studioId) : null);
     this.currentPage.set(1);
+    this.updateUrl();
     this.loadProjects();
   }
 
@@ -169,6 +180,7 @@ export class PrintShopProjectsComponent {
   goToPage(page: number): void {
     if (page < 1 || page > this.lastPage()) return;
     this.currentPage.set(page);
+    this.updateUrl();
     this.loadProjects();
   }
 
@@ -420,7 +432,10 @@ export class PrintShopProjectsComponent {
     const queryParams: Record<string, string | null> = {};
     queryParams['status'] = this.statusFilter() || null;
     queryParams['class_year'] = this.classYearFilter() || null;
-    this.router.navigate([], { queryParams, queryParamsHandling: 'merge' });
+    queryParams['search'] = this.searchQuery() || null;
+    queryParams['studio_id'] = this.studioFilter() ? String(this.studioFilter()) : null;
+    queryParams['page'] = this.currentPage() > 1 ? String(this.currentPage()) : null;
+    this.router.navigate([], { queryParams, replaceUrl: true });
   }
 
   private getRecentYears(): string[] {

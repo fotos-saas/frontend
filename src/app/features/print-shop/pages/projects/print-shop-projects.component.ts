@@ -429,19 +429,17 @@ export class PrintShopProjectsComponent {
   }
 
   private setupMessageListener(userId: number): void {
-    const channelName = `App.Models.User.${userId}`;
-    if (this.wsChannelName === channelName) return;
-    this.wsChannelName = channelName;
-    const channel = this.wsService.private(channelName);
+    const ch = `App.Models.User.${userId}`;
+    if (this.wsChannelName === ch) return;
+    this.wsChannelName = ch;
+    const channel = this.wsService.private(ch);
     if (!channel) return;
-    channel.listen('.print.message.created', (data: { projectId: number }) => {
-      this.projects.update(list =>
-        list.map(p => p.id === data.projectId
-          ? { ...p, unreadMessagesCount: p.unreadMessagesCount + 1, totalMessagesCount: p.totalMessagesCount + 1 }
-          : p
-        )
-      );
-    });
+    const update = (id: number, patch: Partial<PrintShopProject>) =>
+      this.projects.update(l => l.map(p => p.id === id ? { ...p, ...patch } : p));
+    channel.listen('.print.message.created', (d: { projectId: number }) =>
+      update(d.projectId, { unreadMessagesCount: (this.projects().find(p => p.id === d.projectId)?.unreadMessagesCount ?? 0) + 1, totalMessagesCount: (this.projects().find(p => p.id === d.projectId)?.totalMessagesCount ?? 0) + 1 }));
+    channel.listen('.print.order.updated', (d: { projectId: number; isUrgent: boolean; isReprint: boolean; reprintCount: number }) =>
+      update(d.projectId, { isUrgent: d.isUrgent, isReprint: d.isReprint, reprintCount: d.reprintCount }));
   }
 
   private loadStudios(): void {

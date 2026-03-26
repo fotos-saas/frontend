@@ -137,14 +137,11 @@
           <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16"></lucide-icon>
           <h3>Üzenetek</h3>
         </div>
-        @if (!p.hasPrintError) {
-          @if (showErrorForm()) {
-            <!-- Inline hiba form -->
-          } @else {
-            <button class="btn-error-report" (click)="showErrorForm.set(true)" matTooltip="Hiba jelzése a fotósnak">
-              <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
-            </button>
-          }
+        @if (!p.hasPrintError && !showErrorForm()) {
+          <button class="btn-error-report" (click)="showErrorForm.set(true)">
+            <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="14"></lucide-icon>
+            Hiba jelzése
+          </button>
         }
       </div>
 

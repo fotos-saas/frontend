@@ -121,7 +121,16 @@ export class PartnerNotificationBellComponent implements OnInit {
         if (hashIdx > 0) {
           const path = url.substring(0, hashIdx);
           const fragment = url.substring(hashIdx + 1);
-          this.router.navigate([path], { fragment, onSameUrlNavigation: 'reload' });
+          const currentPath = this.router.url.split('#')[0].split('?')[0];
+          if (currentPath === path) {
+            // Same page — manuális tab váltás
+            window.location.hash = fragment;
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          } else {
+            // Más oldal — tree-based navigáció fragment-tel
+            const tree = this.router.createUrlTree([path], { fragment });
+            this.router.navigateByUrl(tree);
+          }
         } else {
           this.router.navigateByUrl(url);
         }

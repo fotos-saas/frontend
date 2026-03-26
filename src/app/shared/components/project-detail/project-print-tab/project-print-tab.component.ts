@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, DestroyRef, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, DestroyRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, switchMap, filter } from 'rxjs';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
 import { formatFileSize } from '@shared/utils/formatters.util';
@@ -11,6 +10,9 @@ import { PartnerProjectService } from '@features/partner/services/partner-projec
 import { PrintShopMessage } from '@core/models/print-order.models';
 import { PrintMessagesComponent } from '@shared/components/print-messages/print-messages.component';
 import { DeadlineModificationBannerComponent } from '@features/partner/components/deadline-modification-banner/deadline-modification-banner.component';
+import { WebsocketService } from '@core/services/websocket.service';
+import { AuthService } from '@core/services/auth.service';
+import { LoggerService } from '@core/services/logger.service';
 import {
   ProjectPrintTabStateService,
   PrintFileType,
@@ -35,6 +37,9 @@ export class ProjectPrintTabComponent {
   readonly state = inject(ProjectPrintTabStateService);
   private readonly projectService = inject(PartnerProjectService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly wsService = inject(WebsocketService);
+  private readonly authService = inject(AuthService);
+  private readonly logger = inject(LoggerService);
 
   readonly project = input<ProjectDetailData | null>(null);
   readonly downloadingType = input<'small_tablo' | 'flat' | null>(null);
@@ -50,6 +55,9 @@ export class ProjectPrintTabComponent {
   readonly loadingMessages = signal(false);
   readonly sendingMessage = signal(false);
   readonly showChat = signal(false);
+
+  /** WebSocket csatorna neve (ha aktív) */
+  private wsChannelName: string | null = null;
 
   constructor() {
     effect(() => {
@@ -67,12 +75,67 @@ export class ProjectPrintTabComponent {
       }
     });
 
-    // 15 másodperces polling az új üzenetekért
-    interval(5_000).pipe(
-      filter(() => this.showChat() && !!this.project()?.id),
-      switchMap(() => this.projectService.getPrintMessages(this.project()!.id)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(msgs => this.messages.set(msgs));
+    // WebSocket listener az új üzenetekért (polling helyett)
+    effect(() => {
+      const p = this.project();
+      const userId = this.authService.currentUserSignal()?.id;
+      if (p?.id && p.status === 'in_print' && userId) {
+        this.setupWebSocketListener(userId, p.id);
+      }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      // WebSocket listener tisztítás nem szükséges —
+      // a csatornát a notification service kezeli, mi csak extra listener-t adtunk hozzá
+      this.wsChannelName = null;
+    });
+  }
+
+  /**
+   * WebSocket feliratkozás a nyomdai üzenetek csatornájára.
+   * A notification service MÁR feliratkozott erre a csatornára,
+   * csak egy extra listener-t adunk hozzá — ez additive, nem írja felül a meglévőt.
+   */
+  private setupWebSocketListener(userId: number, projectId: number): void {
+    const channelName = `App.Models.User.${userId}`;
+
+    // Ha már feliratkoztunk, ne csináljuk újra
+    if (this.wsChannelName === channelName) return;
+
+    this.wsChannelName = channelName;
+    const channel = this.wsService.private(channelName);
+    if (!channel) return;
+
+    channel.listen('.print.message.created', (data: {
+      projectId: number;
+      id: number;
+      userId: number;
+      userName: string;
+      message: string;
+      type: string;
+      metadata: Record<string, unknown> | null;
+      createdAt: string;
+    }) => {
+      // Csak ha ez a projekt üzenete
+      if (data.projectId !== projectId) return;
+
+      const currentUserId = this.authService.currentUserSignal()?.id;
+      const newMsg: PrintShopMessage = {
+        id: data.id,
+        userId: data.userId,
+        userName: data.userName,
+        message: data.message,
+        type: data.type as PrintShopMessage['type'],
+        metadata: data.metadata,
+        createdAt: data.createdAt,
+        isOwn: data.userId === currentUserId,
+      };
+
+      this.logger.info('[PrintTab] WebSocket: új nyomdai üzenet érkezett', data);
+      this.messages.update(list => [...list, newMsg]);
+    });
+
+    this.logger.info(`[PrintTab] WebSocket feliratkozva: ${channelName}`);
   }
 
   loadMessages(projectId: number): void {

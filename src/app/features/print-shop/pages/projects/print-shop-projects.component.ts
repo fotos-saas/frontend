@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, DestroyRef, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,9 @@ import { PrintShopService } from '../../services/print-shop.service';
 import { PrintShopProject, PrintShopStudio, PaginatedResponse } from '../../models/print-shop.models';
 import { ConfirmDialogComponent, ConfirmDialogResult } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { SamplesLightboxComponent, SampleLightboxItem } from '@shared/components/samples-lightbox';
+import { WebsocketService } from '@core/services/websocket.service';
+import { AuthService } from '@core/services/auth.service';
+import { LoggerService } from '@core/services/logger.service';
 import { ICONS } from '@shared/constants/icons.constants';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -24,6 +27,9 @@ export class PrintShopProjectsComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private wsService = inject(WebsocketService);
+  private authService = inject(AuthService);
+  private logger = inject(LoggerService);
 
   readonly ICONS = ICONS;
 
@@ -84,7 +90,18 @@ export class PrintShopProjectsComponent {
     this.projectIdFilter() !== null
   );
 
+  /** WebSocket csatorna neve (ha aktív) */
+  private wsChannelName: string | null = null;
+
   constructor() {
+    // WebSocket listener: új üzenet → badge frissítés
+    effect(() => {
+      const userId = this.authService.currentUserSignal()?.id;
+      if (userId) {
+        this.setupMessageListener(userId);
+      }
+    });
+
     // URL query params → filter state (snapshot az első betöltéshez)
     this.applyQueryParams(this.route.snapshot.queryParams);
 
@@ -408,6 +425,22 @@ export class PrintShopProjectsComponent {
 
   getStatusLabel(status: string): string {
     return status === 'in_print' ? 'Nyomdában' : 'Kész';
+  }
+
+  private setupMessageListener(userId: number): void {
+    const channelName = `App.Models.User.${userId}`;
+    if (this.wsChannelName === channelName) return;
+    this.wsChannelName = channelName;
+    const channel = this.wsService.private(channelName);
+    if (!channel) return;
+    channel.listen('.print.message.created', (data: { projectId: number }) => {
+      this.projects.update(list =>
+        list.map(p => p.id === data.projectId
+          ? { ...p, unreadMessagesCount: p.unreadMessagesCount + 1, totalMessagesCount: p.totalMessagesCount + 1 }
+          : p
+        )
+      );
+    });
   }
 
   private loadStudios(): void {

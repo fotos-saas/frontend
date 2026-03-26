@@ -7,7 +7,6 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, switchMap, filter } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,6 +15,9 @@ import { PrintShopService } from '../../services/print-shop.service';
 import { PrintShopProjectDetail } from '../../models/print-shop.models';
 import { PrintShopMessage } from '@core/models/print-order.models';
 import { PrintMessagesComponent } from '@shared/components/print-messages/print-messages.component';
+import { WebsocketService } from '@core/services/websocket.service';
+import { AuthService } from '@core/services/auth.service';
+import { LoggerService } from '@core/services/logger.service';
 import { ICONS } from '@shared/constants/icons.constants';
 
 @Component({
@@ -37,6 +39,9 @@ export class PrintShopProjectDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private wsService = inject(WebsocketService);
+  private authService = inject(AuthService);
+  private logger = inject(LoggerService);
 
   readonly ICONS = ICONS;
 
@@ -52,6 +57,9 @@ export class PrintShopProjectDetailComponent implements OnInit {
   proposedDate = signal('');
   deadlineMessage = signal('');
 
+  /** WebSocket csatorna neve (ha aktív) */
+  private wsChannelName: string | null = null;
+
   readonly today = new Date().toISOString().split('T')[0];
 
   ngOnInit(): void {
@@ -59,12 +67,58 @@ export class PrintShopProjectDetailComponent implements OnInit {
     this.loadProject(id);
     this.loadMessages(id);
 
-    // 15 másodperces polling az új üzenetekért
-    interval(5_000).pipe(
-      filter(() => !!this.project()),
-      switchMap(() => this.service.getMessages(id)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(msgs => this.messages.set(msgs));
+    // WebSocket listener az új üzenetekért (polling helyett)
+    const userId = this.authService.currentUserSignal()?.id;
+    if (userId) {
+      this.setupWebSocketListener(userId, id);
+    }
+
+    this.destroyRef.onDestroy(() => {
+      this.wsChannelName = null;
+    });
+  }
+
+  /**
+   * WebSocket feliratkozás a nyomdai üzenetek csatornájára.
+   */
+  private setupWebSocketListener(userId: number, projectId: number): void {
+    const channelName = `App.Models.User.${userId}`;
+
+    if (this.wsChannelName === channelName) return;
+
+    this.wsChannelName = channelName;
+    const channel = this.wsService.private(channelName);
+    if (!channel) return;
+
+    channel.listen('.print.message.created', (data: {
+      projectId: number;
+      id: number;
+      userId: number;
+      userName: string;
+      message: string;
+      type: string;
+      metadata: Record<string, unknown> | null;
+      createdAt: string;
+    }) => {
+      if (data.projectId !== projectId) return;
+
+      const currentUserId = this.authService.currentUserSignal()?.id;
+      const newMsg: PrintShopMessage = {
+        id: data.id,
+        userId: data.userId,
+        userName: data.userName,
+        message: data.message,
+        type: data.type as PrintShopMessage['type'],
+        metadata: data.metadata,
+        createdAt: data.createdAt,
+        isOwn: data.userId === currentUserId,
+      };
+
+      this.logger.info('[PrintShopDetail] WebSocket: új nyomdai üzenet érkezett', data);
+      this.messages.update(list => [...list, newMsg]);
+    });
+
+    this.logger.info(`[PrintShopDetail] WebSocket feliratkozva: ${channelName}`);
   }
 
   private loadProject(id: number): void {

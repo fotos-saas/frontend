@@ -308,47 +308,45 @@ export class PrintShopProjectsComponent {
 
   // === Kijelölés ===
 
+  /** Sor kattintás — Cmd/Ctrl/Shift: kijelölés */
+  onRowClick(project: PrintShopProject, event: MouseEvent): void {
+    if ((event.target as HTMLElement).closest('button, input, .thumb-img--clickable')) return;
+    if ((event.metaKey || event.ctrlKey || event.shiftKey) && project.hasPrintFile) {
+      event.preventDefault();
+      this.toggleSelect(project, event);
+    }
+  }
+
+  /** Projekt név kattintás — Cmd/Ctrl/Shift: kijelölés, sima: navigáció */
+  onProjectLinkClick(project: PrintShopProject, event: MouseEvent): void {
+    if ((event.metaKey || event.ctrlKey || event.shiftKey) && project.hasPrintFile) {
+      event.preventDefault();
+      this.toggleSelect(project, event);
+    } else {
+      this.router.navigate(['/print-shop/projects', project.id]);
+    }
+  }
+
   toggleSelect(project: PrintShopProject, event: MouseEvent): void {
     const projects = this.projects();
-    const clickedIndex = projects.findIndex(p => p.id === project.id);
-
+    const idx = projects.findIndex(p => p.id === project.id);
+    const newSet = new Set(this.selectedIds());
     if (event.shiftKey && this.lastClickedIndex() !== null) {
-      // Shift+klikk: tartomány kijelölés
-      const start = Math.min(this.lastClickedIndex()!, clickedIndex);
-      const end = Math.max(this.lastClickedIndex()!, clickedIndex);
-      const newSet = new Set(this.selectedIds());
-      for (let i = start; i <= end; i++) {
-        if (projects[i].hasPrintFile) {
-          newSet.add(projects[i].id);
-        }
-      }
-      this.selectedIds.set(newSet);
+      const [start, end] = [Math.min(this.lastClickedIndex()!, idx), Math.max(this.lastClickedIndex()!, idx)];
+      for (let i = start; i <= end; i++) { if (projects[i].hasPrintFile) newSet.add(projects[i].id); }
     } else {
-      // Sima klikk: toggle
-      const newSet = new Set(this.selectedIds());
-      if (newSet.has(project.id)) {
-        newSet.delete(project.id);
-      } else {
-        newSet.add(project.id);
-      }
-      this.selectedIds.set(newSet);
+      newSet.has(project.id) ? newSet.delete(project.id) : newSet.add(project.id);
     }
-    this.lastClickedIndex.set(clickedIndex);
+    this.selectedIds.set(newSet);
+    this.lastClickedIndex.set(idx);
   }
 
   toggleSelectAll(): void {
     const downloadable = this.projects().filter(p => p.hasPrintFile);
-    if (this.allSelected()) {
-      this.selectedIds.set(new Set());
-    } else {
-      this.selectedIds.set(new Set(downloadable.map(p => p.id)));
-    }
+    this.selectedIds.set(this.allSelected() ? new Set() : new Set(downloadable.map(p => p.id)));
   }
 
-  clearSelection(): void {
-    this.selectedIds.set(new Set());
-    this.lastClickedIndex.set(null);
-  }
+  clearSelection(): void { this.selectedIds.set(new Set()); this.lastClickedIndex.set(null); }
 
   batchDownload(): void {
     const ids = this.selectedDownloadable().map(p => p.id);

@@ -134,7 +134,8 @@
              [class.list-row--selected]="selectedIds().has(project.id)"
              [class.list-row--urgent]="project.isUrgent"
              [class.list-row--reprint]="project.isReprint && !project.isUrgent"
-             [style.animation-delay]="i * 0.03 + 's'">
+             [style.animation-delay]="i * 0.03 + 's'"
+             (click)="onRowClick(project, $event)"
           <!-- Checkbox -->
           <div class="cell-check">
             <input
@@ -167,17 +168,17 @@
 
           <!-- Projekt info -->
           <div class="cell-name">
-            <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">
+            <span class="project-name project-name-link" (click)="onProjectLinkClick(project, $event)">
               <span class="project-name__school">{{ project.schoolName ?? project.name }}</span><!--
               -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}<!--
               -->
-            </a>
+            </span>
             <span class="project-badges"><!--
               -->@if (project.isUrgent) {<span class="inline-tag inline-tag--urgent"><lucide-icon [name]="ICONS.FLAME" [size]="10"></lucide-icon> Sürgős</span>}<!--
               -->@if (project.isCorrection) {<span class="inline-tag inline-tag--correction"><lucide-icon [name]="ICONS.UPLOAD" [size]="10"></lucide-icon> Javítás</span>}<!--
               -->@if (project.isReprint) {<span class="inline-tag inline-tag--reprint"><lucide-icon [name]="ICONS.REPEAT_2" [size]="10"></lucide-icon> Újranyomtatás</span>}<!--
-              -->@if (project.unreadMessagesCount > 0) {<a class="inline-badge inline-badge--msg" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek"><lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon> {{ project.unreadMessagesCount }}</a>}<!--
-              -->@else if (project.totalMessagesCount > 0) {<a class="inline-badge inline-badge--msg-read" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Üzenetek"><lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon></a>}<!--
+              -->@if (project.unreadMessagesCount > 0) {<span class="inline-badge inline-badge--msg" matTooltip="Olvasatlan üzenetek" (click)="onProjectLinkClick(project, $event)"><lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon> {{ project.unreadMessagesCount }}</span>}<!--
+              -->@else if (project.totalMessagesCount > 0) {<span class="inline-badge inline-badge--msg-read" matTooltip="Üzenetek" (click)="onProjectLinkClick(project, $event)"><lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon></span>}<!--
               -->@if (project.printShopDownloadCount > 0) {<span class="inline-badge inline-badge--dl" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x'"><lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10"></lucide-icon> {{ project.printShopDownloadCount }}x</span>}</span>
           </div>
 

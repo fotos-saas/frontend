@@ -135,7 +135,8 @@
       <div class="messages-section__header">
         <div class="messages-section__title">
           <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16"></lucide-icon>
-          <h3>Üzenetek</h3>
+          <h3>Beszélgetés</h3>
+          <span class="messages-section__partner">{{ p.studioName }}</span>
         </div>
         @if (!p.hasPrintError && !showErrorForm()) {
           <button class="btn-error-report" (click)="showErrorForm.set(true)">

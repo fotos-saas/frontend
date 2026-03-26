@@ -126,19 +126,28 @@
 // ── MESSAGES SECTION ──
 
 .messages-section {
-  border: 1px solid get-color('slate', 200); border-radius: 10px;
+  border: 1px solid get-color('primary', 200); border-radius: 10px;
   background: #fff; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.06);
 
   &__header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
-    border-bottom: 1px solid get-color('slate', 100);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(139, 92, 246, 0.04));
+    border-bottom: 1px solid get-color('primary', 100);
   }
 
   &__title {
     display: flex; align-items: center;
-    lucide-icon { color: get-color('slate', 400); margin-right: 8px; }
+    lucide-icon { color: get-color('primary', 500); margin-right: 8px; }
     h3 { font-size: 0.9375rem; font-weight: 600; color: get-color('slate', 800); margin: 0; }
+  }
+
+  &__partner {
+    margin-left: 8px; padding: 2px 8px;
+    font-size: 0.6875rem; font-weight: 600;
+    background: get-color('primary', 100); color: get-color('primary', 700);
+    border-radius: 10px;
   }
 
   app-print-messages { display: flex; flex-direction: column; max-height: 420px; overflow: hidden; }

@@ -198,6 +198,24 @@
   flex-shrink: 0;
 }
 
+/* Print badges */
+.print-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  cursor: default;
+  flex-shrink: 0;
+  background: get-color('slate', 100);
+  color: get-color('slate', 600);
+  lucide-icon { margin-right: 2px; }
+  &--urgent { background: #fef2f2; color: #dc2626; }
+  &--reprint { background: #fff7ed; color: #ea580c; }
+}
+
 /* Preliminary badge */
 .preliminary-badge {
   display: inline-flex;

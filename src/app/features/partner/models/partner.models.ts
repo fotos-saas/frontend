@@ -71,6 +71,11 @@ export interface PartnerProjectListItem {
   emailMetrics: ProjectEmailMetrics | null;
   pendingTaskCount: number;
   tabloSize: string | null;
+  printCopies?: number;
+  printDeadline?: string | null;
+  isUrgent?: boolean;
+  isReprint?: boolean;
+  inPrintAt?: string | null;
 }
 
 export interface QrCodeHistory {

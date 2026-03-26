@@ -138,11 +138,12 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly isMarketer = this.authService.isMarketer;
   readonly showTabloEditorBtn = computed(() => this.electronService.isElectron && !this.isMarketer());
 
-  /** Tab badge-ek (pl. Feladatok tab-on a pending count) */
+  /** Tab badge-ek (pl. Feladatok tab-on a pending count, Nyomda tab-on olvasatlan üzenetek) */
   readonly tabBadges = computed<Partial<Record<ProjectDetailTab, number>>>(() => {
     const data = this.facade.projectData();
     const badges: Partial<Record<ProjectDetailTab, number>> = {};
     if (data?.pendingTaskCount) badges['tasks'] = data.pendingTaskCount;
+    if (data?.unreadPrintMessagesCount) badges['print'] = data.unreadPrintMessagesCount;
     return badges;
   });
 
@@ -153,6 +154,13 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     const status = this.facade.projectData()?.status;
     if (status !== 'in_print' && status !== 'done') hidden.push('print');
     return hidden;
+  });
+
+  /** Ha a projekt nyomdában van, a Nyomda tab legyen pinned (ne a Továbbiak-ban) */
+  extraPinnedTabs = computed<ProjectDetailTab[]>(() => {
+    const status = this.facade.projectData()?.status;
+    if (status === 'in_print' || status === 'done') return ['print'];
+    return [];
   });
 
   // Tab references
@@ -234,6 +242,12 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
 
   changeTab(tab: ProjectDetailTab): void {
     setTabFragment(this.activeTab, this.location, tab, 'overview');
+    if (tab === 'print') {
+      const current = this.facade.projectData();
+      if (current?.unreadPrintMessagesCount) {
+        this.facade.projectData.set({ ...current, unreadPrintMessagesCount: 0 });
+      }
+    }
   }
 
   // === MODAL DELEGATIONS (facade) ===

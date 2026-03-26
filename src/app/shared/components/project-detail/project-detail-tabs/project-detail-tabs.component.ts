@@ -231,21 +231,26 @@ export class ProjectDetailTabsComponent {
   tabChange = output<ProjectDetailTab>();
 
   hiddenTabs = input<ProjectDetailTab[]>([]);
+  extraPinnedTabs = input<ProjectDetailTab[]>([]);
   badges = input<Partial<Record<ProjectDetailTab, number>>>({});
 
   dropdownOpen = signal(false);
 
+  private allPinnedIds = computed(() => [...PINNED_TAB_IDS, ...this.extraPinnedTabs()]);
+
   pinnedTabs = computed(() => {
     const hidden = this.hiddenTabs();
+    const pinned = this.allPinnedIds();
     return PROJECT_DETAIL_TABS
-      .filter(tab => PINNED_TAB_IDS.includes(tab.id))
+      .filter(tab => pinned.includes(tab.id))
       .filter(tab => !hidden.includes(tab.id));
   });
 
   moreTabs = computed(() => {
     const hidden = this.hiddenTabs();
+    const pinned = this.allPinnedIds();
     return PROJECT_DETAIL_TABS
-      .filter(tab => !PINNED_TAB_IDS.includes(tab.id))
+      .filter(tab => !pinned.includes(tab.id))
       .filter(tab => !hidden.includes(tab.id));
   });
 

@@ -2,7 +2,7 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --table-cols: 32px 56px 1fr 140px 80px 50px 110px 100px 100px 110px;
+  --table-cols: 32px 56px 1fr 80px 50px 110px 100px 100px 80px;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -130,9 +130,6 @@
   text-overflow: ellipsis;
 }
 
-.cell-studio {
-  min-width: 0;
-}
 
 .studio-name {
   font-size: 0.8125rem;
@@ -423,15 +420,13 @@
 /* ============ Responsive ============ */
 @media (max-width: 768px) {
   .print-shop-projects {
-    --table-cols: 28px 40px 1fr 80px 80px;
+    --table-cols: 28px 40px 1fr 80px 80px 80px;
   }
 
-  .cell-studio,
   .cell-size,
   .cell-date,
   .cell-copies,
   .cell-deadline,
-  .th-studio,
   .th-size,
   .th-date,
   .th-copies,

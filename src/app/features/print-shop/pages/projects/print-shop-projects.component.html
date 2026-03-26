@@ -120,7 +120,6 @@
       </span>
       <span class="th th-thumb"></span>
       <span class="th th-name">Projekt</span>
-      <span class="th th-studio">Stúdió</span>
       <span class="th th-size">Méret</span>
       <span class="th th-copies">Db</span>
       <span class="th th-deadline">Határidő</span>
@@ -182,10 +181,6 @@
               -->@if (project.printShopDownloadCount > 0) {<span class="inline-badge inline-badge--dl" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x'"><lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10"></lucide-icon> {{ project.printShopDownloadCount }}x</span>}</span>
           </div>
 
-          <!-- Stúdió -->
-          <div class="cell-studio">
-            <span class="studio-name">{{ project.studioName ?? '-' }}</span>
-          </div>
 
           <!-- Méret -->
           <div class="cell-size">

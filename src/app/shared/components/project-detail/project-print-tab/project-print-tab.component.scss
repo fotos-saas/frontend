@@ -78,6 +78,33 @@
   span { margin-left: 6px; }
 }
 
+.urgent-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid get-color('slate', 300);
+  border-radius: 8px;
+  background: #fff;
+  color: get-color('slate', 600);
+  cursor: pointer;
+  @include transition-fast;
+
+  lucide-icon { margin-right: 6px; }
+
+  &:hover:not(:disabled) { border-color: #ef4444; color: #ef4444; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &--active {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #ef4444;
+    font-weight: 600;
+  }
+}
+
 .order-item--reprint {
   color: #f97316;
   font-weight: 600;

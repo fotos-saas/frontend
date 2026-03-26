@@ -45,6 +45,7 @@ export class ProjectPrintTabComponent {
   readonly project = input<ProjectDetailData | null>(null);
   readonly downloadingType = input<'small_tablo' | 'flat' | null>(null);
   readonly downloadClick = output<PrintFileDownloadEvent>();
+  readonly urgentChanged = output<boolean>();
   readonly uploadFile = output<PrintFileUploadEvent>();
   readonly deleteClick = output<PrintFileDeleteEvent>();
 
@@ -56,6 +57,8 @@ export class ProjectPrintTabComponent {
   readonly loadingMessages = signal(false);
   readonly sendingMessage = signal(false);
   readonly showChat = signal(false);
+
+  readonly togglingUrgent = signal(false);
 
   /** WebSocket csatorna neve (ha aktív) */
   private wsChannelName: string | null = null;
@@ -155,6 +158,18 @@ export class ProjectPrintTabComponent {
           this.showChat.set(true);
         },
         error: () => this.loadingMessages.set(false),
+      });
+  }
+
+  toggleUrgent(): void {
+    const id = this.project()?.id;
+    if (!id) return;
+    this.togglingUrgent.set(true);
+    this.projectService.toggleUrgent(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => { this.urgentChanged.emit(res.is_urgent); this.togglingUrgent.set(false); },
+        error: () => this.togglingUrgent.set(false),
       });
   }
 

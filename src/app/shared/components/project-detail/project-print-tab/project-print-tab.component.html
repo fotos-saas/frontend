@@ -43,6 +43,19 @@
               </div>
             }
           </div>
+
+          <!-- Sürgős jelölés toggle -->
+          @if (project()?.status === 'in_print') {
+            <button
+              class="urgent-toggle"
+              [class.urgent-toggle--active]="project()?.isUrgent"
+              (click)="toggleUrgent()"
+              [disabled]="togglingUrgent()"
+            >
+              <lucide-icon [name]="ICONS.FLAME" [size]="14" />
+              {{ project()?.isUrgent ? 'Sürgős megrendelés' : 'Sürgősnek jelölés' }}
+            </button>
+          }
         </div>
 
         <!-- Idővonal -->

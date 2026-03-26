@@ -413,4 +413,10 @@ export class PartnerProjectService {
       `${this.baseUrl}/projects/${projectId}/respond-deadline-modification`, { action },
     );
   }
+
+  toggleUrgent(projectId: number): Observable<{ is_urgent: boolean }> {
+    return this.http.patch<{ data: { is_urgent: boolean } }>(
+      `${this.baseUrl}/projects/${projectId}/toggle-urgent`, {},
+    ).pipe(map(res => res.data));
+  }
 }

@@ -138,13 +138,20 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
   readonly isMarketer = this.authService.isMarketer;
   readonly showTabloEditorBtn = computed(() => this.electronService.isElectron && !this.isMarketer());
 
-  /** Tab badge-ek (pl. Feladatok tab-on a pending count, Nyomda tab-on olvasatlan üzenetek) */
+  /** Tab badge-ek (pl. Feladatok tab-on a pending count, Nyomda tab-on üzenetek száma) */
   readonly tabBadges = computed<Partial<Record<ProjectDetailTab, number>>>(() => {
     const data = this.facade.projectData();
     const badges: Partial<Record<ProjectDetailTab, number>> = {};
     if (data?.pendingTaskCount) badges['tasks'] = data.pendingTaskCount;
-    if (data?.unreadPrintMessagesCount) badges['print'] = data.unreadPrintMessagesCount;
+    if (data?.printMessagesCount) badges['print'] = data.printMessagesCount;
     return badges;
+  });
+
+  /** Kiemelt badge-ek (olvasatlan üzenet → piros badge) */
+  readonly highlightedBadges = computed<ProjectDetailTab[]>(() => {
+    const data = this.facade.projectData();
+    if (data?.unreadPrintMessagesCount) return ['print'];
+    return [];
   });
 
   activeTab = signal<ProjectDetailTab>('overview');

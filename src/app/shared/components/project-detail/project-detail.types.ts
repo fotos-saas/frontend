@@ -141,6 +141,7 @@ export interface ProjectDetailData {
   reprintCount?: number;
   tags?: Array<{ id: number; name: string; color: string }>;
   pendingTaskCount?: number;
+  printMessagesCount?: number;
   unreadPrintMessagesCount?: number;
   createdAt: string;
   updatedAt: string;

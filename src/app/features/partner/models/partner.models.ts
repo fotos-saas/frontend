@@ -137,6 +137,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   isUrgent?: boolean;
   isReprint?: boolean;
   reprintCount?: number;
+  printMessagesCount?: number;
   unreadPrintMessagesCount?: number;
   updatedAt: string;
 }

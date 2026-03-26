@@ -85,6 +85,7 @@ export class PartnerProjectDetailComponent {
     reprintCount: project.reprintCount,
     tags: project.tags ?? [],
     pendingTaskCount: project.pendingTaskCount,
+    printMessagesCount: project.printMessagesCount,
     unreadPrintMessagesCount: project.unreadPrintMessagesCount,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,

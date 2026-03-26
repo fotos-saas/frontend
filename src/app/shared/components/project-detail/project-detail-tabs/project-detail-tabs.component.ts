@@ -39,7 +39,7 @@ const PINNED_TAB_IDS: ProjectDetailTab[] = ['overview', 'tasks'];
           <lucide-icon [name]="tab.icon" [size]="16" />
           <span>{{ tab.label }}</span>
           @if (getBadge(tab.id); as badge) {
-            <span class="tab-badge">{{ badge }}</span>
+            <span class="tab-badge" [class.tab-badge--highlight]="highlightedBadges().includes(tab.id)">{{ badge }}</span>
           }
         </button>
       }
@@ -67,7 +67,7 @@ const PINNED_TAB_IDS: ProjectDetailTab[] = ['overview', 'tasks'];
                   <lucide-icon [name]="tab.icon" [size]="16" />
                   <span>{{ tab.label }}</span>
                   @if (getBadge(tab.id); as badge) {
-                    <span class="tab-badge">{{ badge }}</span>
+                    <span class="tab-badge" [class.tab-badge--highlight]="highlightedBadges().includes(tab.id)">{{ badge }}</span>
                   }
                 </button>
               }
@@ -129,13 +129,25 @@ const PINNED_TAB_IDS: ProjectDetailTab[] = ['overview', 'tasks'];
       padding: 0 5px;
       font-size: 0.6875rem;
       font-weight: 700;
-      color: #b45309;
-      background: #fef3c7;
+      color: #64748b;
+      background: #f1f5f9;
       border-radius: 9px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       line-height: 1;
+
+      &--highlight {
+        color: #fff;
+        background: #ef4444;
+        animation: badgePulse 0.3s ease-out;
+      }
+    }
+
+    @keyframes badgePulse {
+      0% { transform: scale(0.5); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
     }
 
     .more-dropdown {
@@ -233,6 +245,7 @@ export class ProjectDetailTabsComponent {
   hiddenTabs = input<ProjectDetailTab[]>([]);
   extraPinnedTabs = input<ProjectDetailTab[]>([]);
   badges = input<Partial<Record<ProjectDetailTab, number>>>({});
+  highlightedBadges = input<ProjectDetailTab[]>([]);
 
   dropdownOpen = signal(false);
 

@@ -169,7 +169,7 @@
 
           <!-- Projekt info -->
           <div class="cell-name">
-            <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]" [matTooltip]="project.name">{{ project.name }}</a>
+            <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">{{ project.name }}</a>
             <span class="project-badges"><!--
               -->@if (project.isUrgent) {<span class="inline-tag inline-tag--urgent"><lucide-icon [name]="ICONS.FLAME" [size]="10"></lucide-icon> Sürgős</span>}<!--
               -->@if (project.isReprint) {<span class="inline-tag inline-tag--reprint"><lucide-icon [name]="ICONS.REPEAT_2" [size]="10"></lucide-icon> Újranyomtatás</span>}<!--

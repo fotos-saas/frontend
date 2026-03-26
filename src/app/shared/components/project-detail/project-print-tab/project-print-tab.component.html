@@ -105,7 +105,7 @@
               {{ isUrgent() ? 'Sürgősség levétele' : 'Sürgősnek jelölés' }}
             </button>
           }
-          @if (project()?.status === 'done' && !project()?.hasPrintError) {
+          @if (!project()?.hasPrintError) {
             <button
               class="correction-btn"
               (click)="onSendCorrection()"

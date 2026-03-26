@@ -51,7 +51,7 @@ export class PrintShopProjectsComponent {
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
 
-  readonly statusOptions: PsSelectOption[] = [{ id: 'in_print', label: 'Nyomdában' }, { id: 'done', label: 'Kész' }];
+  readonly statusOptions: PsSelectOption[] = [{ id: '', label: 'Mind' }, { id: 'in_print', label: 'Nyomdában' }, { id: 'done', label: 'Kész' }];
   readonly classYearOptions = computed(() => this.availableYears().map(y => ({ id: y, label: y })));
   readonly studioOptions = computed(() => this.studios().map(s => ({ id: s.id, label: s.name })));
 

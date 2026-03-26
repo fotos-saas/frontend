@@ -65,14 +65,15 @@ export class PrintShopProjectsComponent {
     this.projects().filter(p => this.selectedIds().has(p.id) && p.hasPrintFile)
   );
 
-  // Mark-done / revert state
+  // Mark-done / revert / picked-up state
   markingDone = signal<number | null>(null);
   reverting = signal<number | null>(null);
+  pickingUp = signal<number | null>(null);
 
   // Confirm dialog
   showConfirmDialog = signal(false);
   confirmProject = signal<PrintShopProject | null>(null);
-  confirmAction = signal<'mark_done' | 'revert'>('mark_done');
+  confirmAction = signal<'mark_done' | 'revert' | 'pick_up'>('mark_done');
 
   // Lightbox
   lightboxSamples = signal<SampleLightboxItem[]>([]);
@@ -233,6 +234,12 @@ export class PrintShopProjectsComponent {
     this.showConfirmDialog.set(true);
   }
 
+  requestPickUp(project: PrintShopProject): void {
+    this.confirmProject.set(project);
+    this.confirmAction.set('pick_up');
+    this.showConfirmDialog.set(true);
+  }
+
   onConfirmResult(result: ConfirmDialogResult): void {
     this.showConfirmDialog.set(false);
     if (result.action !== 'confirm') return;
@@ -242,6 +249,8 @@ export class PrintShopProjectsComponent {
 
     if (this.confirmAction() === 'mark_done') {
       this.executeMarkDone(project);
+    } else if (this.confirmAction() === 'pick_up') {
+      this.executePickUp(project);
     } else {
       this.executeRevert(project);
     }
@@ -249,44 +258,30 @@ export class PrintShopProjectsComponent {
 
   private executeMarkDone(project: PrintShopProject): void {
     this.markingDone.set(project.id);
-
-    this.service.markAsDone(project.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.projects.update(list =>
-            list.map(p => p.id === project.id
-              ? { ...p, status: 'done' as const, doneAt: new Date().toISOString() }
-              : p
-            )
-          );
-          this.markingDone.set(null);
-        },
-        error: () => {
-          this.markingDone.set(null);
-        }
-      });
+    this.service.markAsDone(project.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => { this.updateProject(project.id, { status: 'done' as const, doneAt: new Date().toISOString() }); this.markingDone.set(null); },
+      error: () => this.markingDone.set(null),
+    });
   }
 
   private executeRevert(project: PrintShopProject): void {
     this.reverting.set(project.id);
+    this.service.revertToPrint(project.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => { this.updateProject(project.id, { status: 'in_print' as const, doneAt: null }); this.reverting.set(null); },
+      error: () => this.reverting.set(null),
+    });
+  }
 
-    this.service.revertToPrint(project.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.projects.update(list =>
-            list.map(p => p.id === project.id
-              ? { ...p, status: 'in_print' as const, doneAt: null }
-              : p
-            )
-          );
-          this.reverting.set(null);
-        },
-        error: () => {
-          this.reverting.set(null);
-        }
-      });
+  private executePickUp(project: PrintShopProject): void {
+    this.pickingUp.set(project.id);
+    this.service.markAsPickedUp(project.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => { this.updateProject(project.id, { pickedUpAt: res.pickedUpAt }); this.pickingUp.set(null); },
+      error: () => this.pickingUp.set(null),
+    });
+  }
+
+  private updateProject(id: number, patch: Partial<PrintShopProject>): void {
+    this.projects.update(list => list.map(p => p.id === id ? { ...p, ...patch } : p));
   }
 
   openLightbox(project: PrintShopProject): void {

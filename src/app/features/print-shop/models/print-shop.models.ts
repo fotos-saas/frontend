@@ -26,6 +26,7 @@ export interface PrintShopProject {
   studioId: number;
   inPrintAt: string | null;
   doneAt: string | null;
+  pickedUpAt: string | null;
   hasPrintFile: boolean;
   printFileType: string | null;
   hasSample: boolean;

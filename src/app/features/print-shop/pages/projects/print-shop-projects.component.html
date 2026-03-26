@@ -236,10 +236,20 @@
                 <lucide-icon [name]="markingDone() === project.id ? ICONS.LOADER : ICONS.CHECK_CIRCLE" [size]="16" [class.spin]="markingDone() === project.id"></lucide-icon>
               </button>
             }
-            @if (project.status === 'done') {
+            @if (project.status === 'done' && !project.pickedUpAt) {
+              <button class="action-btn action-btn--pickup" [disabled]="pickingUp() === project.id" (click)="requestPickUp(project)" matTooltip="Megrendelő átvette">
+                <lucide-icon [name]="pickingUp() === project.id ? ICONS.LOADER : ICONS.PACKAGE_CHECK" [size]="16" [class.spin]="pickingUp() === project.id"></lucide-icon>
+              </button>
+            }
+            @if (project.status === 'done' && !project.pickedUpAt) {
               <button class="action-btn action-btn--warning" [disabled]="reverting() === project.id" (click)="requestRevert(project)" matTooltip="Visszaállítás nyomdába">
                 <lucide-icon [name]="reverting() === project.id ? ICONS.LOADER : ICONS.UNDO" [size]="16" [class.spin]="reverting() === project.id"></lucide-icon>
               </button>
+            }
+            @if (project.pickedUpAt) {
+              <span class="picked-up-badge" matTooltip="Átvéve">
+                <lucide-icon [name]="ICONS.PACKAGE_CHECK" [size]="14"></lucide-icon>
+              </span>
             }
           </div>
         </div>
@@ -277,13 +287,15 @@
 <!-- Confirm dialog — page-card-on kívül! -->
 @if (showConfirmDialog()) {
   <app-confirm-dialog
-    [title]="confirmAction() === 'mark_done' ? 'Készre állítás' : 'Visszaállítás nyomdába'"
+    [title]="confirmAction() === 'mark_done' ? 'Készre állítás' : confirmAction() === 'pick_up' ? 'Átvétel jelölés' : 'Visszaállítás nyomdába'"
     [message]="confirmAction() === 'mark_done'
       ? 'Biztosan készre állítod a projektet: ' + (confirmProject()?.name ?? '') + '?'
-      : 'Biztosan visszaállítod nyomdába a projektet: ' + (confirmProject()?.name ?? '') + '?'"
-    [confirmText]="confirmAction() === 'mark_done' ? 'Készre állítás' : 'Visszaállítás'"
-    [confirmType]="confirmAction() === 'mark_done' ? 'primary' : 'warning'"
-    [isSubmitting]="(markingDone() ?? reverting()) !== null"
+      : confirmAction() === 'pick_up'
+        ? 'A megrendelő átvette: ' + (confirmProject()?.name ?? '') + '?'
+        : 'Biztosan visszaállítod nyomdába a projektet: ' + (confirmProject()?.name ?? '') + '?'"
+    [confirmText]="confirmAction() === 'mark_done' ? 'Készre állítás' : confirmAction() === 'pick_up' ? 'Átvette' : 'Visszaállítás'"
+    [confirmType]="confirmAction() === 'mark_done' ? 'primary' : confirmAction() === 'pick_up' ? 'primary' : 'warning'"
+    [isSubmitting]="(markingDone() ?? reverting() ?? pickingUp()) !== null"
     (resultEvent)="onConfirmResult($event)"
   />
 }

@@ -132,6 +132,14 @@ export class PrintShopService {
     return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/resolve-error`, {});
   }
 
+  markAsPickedUp(projectId: number): Observable<{ pickedUpAt: string }> {
+    return this.http.post<{ data: { pickedUpAt: string } }>(`${this.baseUrl}/projects/${projectId}/mark-picked-up`, {}).pipe(map(res => res.data));
+  }
+
+  revertPickedUp(projectId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/revert-picked-up`, {});
+  }
+
   downloadFile(projectId: number, type: string = 'small_tablo'): Observable<{ blob: Blob; fileName: string }> {
     return this.http.get(`${this.baseUrl}/projects/${projectId}/download`, {
       params: { type },

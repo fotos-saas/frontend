@@ -135,7 +135,7 @@
              [class.list-row--urgent]="project.isUrgent"
              [class.list-row--reprint]="project.isReprint && !project.isUrgent"
              [style.animation-delay]="i * 0.03 + 's'"
-             (click)="onRowClick(project, $event)"
+             (click)="onRowClick(project, $event)">
           <!-- Checkbox -->
           <div class="cell-check">
             <input

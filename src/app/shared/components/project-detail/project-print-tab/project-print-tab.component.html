@@ -17,12 +17,11 @@
           <button class="error-banner__btn" (click)="onAcknowledgeError()" [disabled]="acknowledgingError()">
             {{ acknowledgingError() ? 'Feldolgozás...' : 'Tudomásul vettem' }}
           </button>
-        } @else {
-          <button class="error-banner__resolve" (click)="onResolveError()" [disabled]="resolvingError()">
-            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
-            {{ resolvingError() ? 'Küldés...' : 'Javítva' }}
-          </button>
         }
+        <button class="error-banner__resolve" (click)="onSendCorrection()" [disabled]="sendingCorrection()">
+          <lucide-icon [name]="ICONS.UPLOAD" [size]="14" />
+          {{ sendingCorrection() ? 'Küldés...' : 'Javítás küldése' }}
+        </button>
       </div>
     </section>
   }
@@ -102,6 +101,16 @@
             >
               <lucide-icon [name]="ICONS.FLAME" [size]="13" />
               {{ isUrgent() ? 'Sürgősség levétele' : 'Sürgősnek jelölés' }}
+            </button>
+          }
+          @if (project()?.status === 'done' && !project()?.hasPrintError) {
+            <button
+              class="correction-btn"
+              (click)="onSendCorrection()"
+              [disabled]="sendingCorrection()"
+            >
+              <lucide-icon [name]="ICONS.UPLOAD" [size]="13" />
+              {{ sendingCorrection() ? 'Küldés...' : 'Javítás küldése' }}
             </button>
           }
         </div>

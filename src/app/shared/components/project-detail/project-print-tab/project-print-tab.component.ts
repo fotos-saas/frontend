@@ -60,9 +60,9 @@ export class ProjectPrintTabComponent {
   readonly showChat = signal(false);
 
   readonly acknowledgingError = signal(false);
-  readonly resolvingError = signal(false);
+  readonly sendingCorrection = signal(false);
   readonly errorAcknowledged = output<void>();
-  readonly errorResolved = output<void>();
+  readonly correctionSent = output<void>();
   readonly togglingUrgent = signal(false);
   readonly urgentState = signal<boolean | null>(null);
   readonly isUrgent = computed(() => this.urgentState() ?? this.project()?.isUrgent ?? false);
@@ -194,15 +194,15 @@ export class ProjectPrintTabComponent {
       });
   }
 
-  onResolveError(): void {
+  onSendCorrection(): void {
     const id = this.project()?.id;
     if (!id) return;
-    this.resolvingError.set(true);
-    this.projectService.resolvePrintError(id)
+    this.sendingCorrection.set(true);
+    this.projectService.sendCorrection(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => { this.resolvingError.set(false); this.errorResolved.emit(); },
-        error: () => this.resolvingError.set(false),
+        next: () => { this.sendingCorrection.set(false); this.correctionSent.emit(); },
+        error: () => this.sendingCorrection.set(false),
       });
   }
 

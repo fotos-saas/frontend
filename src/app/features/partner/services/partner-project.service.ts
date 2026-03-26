@@ -428,7 +428,7 @@ export class PartnerProjectService {
     return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/acknowledge-print-error`, {});
   }
 
-  resolvePrintError(projectId: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/resolve-print-error`, {});
+  sendCorrection(projectId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/projects/${projectId}/send-correction`, {});
   }
 }

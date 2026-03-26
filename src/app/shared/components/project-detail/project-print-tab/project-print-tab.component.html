@@ -37,12 +37,12 @@
               </div>
               <div class="order-stat">
                 <span class="order-stat__value order-stat__value--date">
-                  {{ project()?.printDeadline ? formatDate(project()?.printDeadline) : '—' }}
+                  {{ deadlineDisplay() ? formatDate(deadlineDisplay()) : '—' }}
                   @if (project()?.printDeadlineStatus === 'accepted') {
                     <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" class="dl-status dl-status--ok" matTooltip="Elfogadva" />
                   } @else if (project()?.printDeadlineStatus === 'modified') {
                     <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--mod" matTooltip="Módosítást kért a nyomda" />
-                  } @else if (project()?.printDeadline) {
+                  } @else if (deadlineDisplay()) {
                     <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--wait" matTooltip="Visszaigazolásra vár" />
                   }
                 </span>

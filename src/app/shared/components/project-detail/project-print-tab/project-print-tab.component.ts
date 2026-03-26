@@ -68,7 +68,12 @@ export class ProjectPrintTabComponent {
   readonly editDeadlineValue = signal('');
   readonly savingOrder = signal(false);
   readonly copiesOverride = signal<number | null>(null);
+  readonly deadlineOverride = signal<string | null | undefined>(undefined);
   readonly copiesDisplay = computed(() => this.copiesOverride() ?? this.project()?.printCopies ?? 1);
+  readonly deadlineDisplay = computed(() => {
+    const ov = this.deadlineOverride();
+    return ov !== undefined ? ov : (this.project()?.printDeadline ?? null);
+  });
   readonly today = new Date().toISOString().split('T')[0];
 
   /** WebSocket csatorna neve (ha aktív) */
@@ -197,11 +202,12 @@ export class ProjectPrintTabComponent {
     const copies = Math.max(1, this.editCopiesValue());
     const deadline = this.editDeadlineValue() || null;
     this.copiesOverride.set(copies);
+    this.deadlineOverride.set(deadline);
     this.projectService.updatePrintOrder(id, { print_copies: copies, print_deadline: deadline })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => { this.editingOrder.set(false); this.savingOrder.set(false); },
-        error: () => { this.copiesOverride.set(null); this.savingOrder.set(false); },
+        error: () => { this.copiesOverride.set(null); this.deadlineOverride.set(undefined); this.savingOrder.set(false); },
       });
   }
 

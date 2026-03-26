@@ -326,3 +326,13 @@
     (synced)="onSyncCompleted()"
   />
 }
+
+<!-- Nyomdába küldés Dialógus -->
+@if (actions.showSendToPrintDialog()) {
+  <app-send-to-print-dialog
+    [projectName]="actions.sendToPrintProject()?.schoolName ?? ''"
+    [isSubmitting]="actions.isSendingToPrint()"
+    (submitOrder)="actions.onSendToPrint($event)"
+    (close)="actions.closeSendToPrintDialog()"
+  />
+}

@@ -32,6 +32,7 @@ import { OrderDataDialogComponent } from '../../components/order-data-dialog/ord
 import { ProjectListActionsService } from './project-list-actions.service';
 import { ExpandedTeacherViewComponent } from '../../components/expanded-teacher-view/expanded-teacher-view.component';
 import { SyncDialogComponent } from '../../components/sync-dialog/sync-dialog.component';
+import { SendToPrintDialogComponent } from '../../components/send-to-print-dialog/send-to-print-dialog.component';
 import { PaginationPreferencesService } from '@core/services/pagination-preferences.service';
 
 /**
@@ -59,6 +60,7 @@ import { PaginationPreferencesService } from '@core/services/pagination-preferen
     LinkPreliminaryDialogComponent,
     ExpandedTeacherViewComponent,
     SyncDialogComponent,
+    SendToPrintDialogComponent,
   ],
   providers: [ProjectListActionsService],
   templateUrl: './project-list.component.html',

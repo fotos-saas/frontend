@@ -4,7 +4,9 @@ import { Router } from '@angular/router';
 import { LoggerService } from '@core/services/logger.service';
 import { ToastService } from '@core/services/toast.service';
 import { PartnerService, PartnerProjectListItem, SampleItem, ProjectLimits } from '../../services/partner.service';
+import { PartnerProjectService } from '../../services/partner-project.service';
 import { PartnerPreliminaryService } from '../../services/partner-preliminary.service';
+import { SendToPrintPayload } from '@core/models/print-order.models';
 import { PartnerOrderSyncService } from '../../services/partner-order-sync.service';
 import { PsdStatusService } from '../../services/psd-status.service';
 import { BatchWorkspaceService } from '../../services/batch-workspace.service';
@@ -22,6 +24,7 @@ export class ProjectListActionsService {
   private readonly logger = inject(LoggerService);
   private readonly toast = inject(ToastService);
   private readonly partnerService = inject(PartnerService);
+  private readonly partnerProjectService = inject(PartnerProjectService);
   private readonly orderSyncService = inject(PartnerOrderSyncService);
   private readonly psdStatusService = inject(PsdStatusService);
   private readonly batchWorkspaceService = inject(BatchWorkspaceService);
@@ -48,6 +51,11 @@ export class ProjectListActionsService {
   readonly showCreatePreliminaryModal = signal(false);
   readonly showLinkDialog = signal(false);
   readonly linkingProject = signal<PartnerProjectListItem | null>(null);
+
+  // Send to Print Dialog
+  readonly showSendToPrintDialog = signal(false);
+  readonly sendToPrintProject = signal<PartnerProjectListItem | null>(null);
+  readonly isSendingToPrint = signal(false);
 
   // Samples Lightbox
   readonly samplesLightboxIndex = signal<number | null>(null);
@@ -222,6 +230,16 @@ export class ProjectListActionsService {
   // --- Status / Aware / Photos Uploaded ---
 
   onStatusChange(event: { projectId: number; status: string; label: string; color: string }): void {
+    // Nyomdába küldés → dialog megnyitása
+    if (event.status === 'in_print') {
+      const project = this.projectsRef?.().find(p => p.id === event.projectId);
+      if (project) {
+        this.sendToPrintProject.set(project);
+        this.showSendToPrintDialog.set(true);
+      }
+      return;
+    }
+
     this.partnerService.updateProject(event.projectId, { status: event.status })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -236,6 +254,40 @@ export class ProjectListActionsService {
         },
         error: (err) => this.logger.error('Failed to update status', err)
       });
+  }
+
+  onSendToPrint(payload: SendToPrintPayload): void {
+    const project = this.sendToPrintProject();
+    if (!project) return;
+
+    this.isSendingToPrint.set(true);
+    this.partnerProjectService.sendToPrint(project.id, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.projectsRef?.update(projects =>
+            projects.map(p =>
+              p.id === project.id
+                ? { ...p, status: 'in_print', statusLabel: 'Nyomdában', statusColor: 'orange' }
+                : p
+            )
+          );
+          this.showSendToPrintDialog.set(false);
+          this.sendToPrintProject.set(null);
+          this.isSendingToPrint.set(false);
+          this.toast.success('Nyomdába küldve', 'A projekt sikeresen nyomdába lett küldve');
+        },
+        error: (err) => {
+          this.isSendingToPrint.set(false);
+          this.logger.error('Failed to send to print', err);
+          this.toast.error('Hiba', 'Nem sikerült a nyomdába küldés');
+        }
+      });
+  }
+
+  closeSendToPrintDialog(): void {
+    this.showSendToPrintDialog.set(false);
+    this.sendToPrintProject.set(null);
   }
 
   toggleAware(project: PartnerProjectListItem): void {

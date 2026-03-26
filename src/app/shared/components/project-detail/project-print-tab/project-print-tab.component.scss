@@ -58,6 +58,7 @@
 .order-stat {
   display: flex;
   flex-direction: column;
+  &--editable .order-stat__value { cursor: pointer; &:hover { color: #8b5cf6; } }
   &__value {
     font-size: 1.5rem; font-weight: 700; color: get-color('slate', 900); line-height: 1.2;
     display: flex; align-items: center;
@@ -67,6 +68,13 @@
 }
 
 .dl-status { margin-left: 6px; &--ok { color: #22c55e; } &--mod { color: #3b82f6; } &--wait { color: #f59e0b; } }
+
+.inline-edit {
+  font-size: 1.5rem; font-weight: 700; color: get-color('slate', 900);
+  border: 1px solid #8b5cf6; border-radius: 6px; padding: 2px 8px;
+  outline: none; width: 80px; background: rgba(139, 92, 246, 0.04);
+  &--date { font-size: 0.875rem; font-weight: 600; width: 140px; }
+}
 
 .urgent-btn {
   display: inline-flex;

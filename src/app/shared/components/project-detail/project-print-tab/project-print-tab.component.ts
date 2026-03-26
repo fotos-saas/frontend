@@ -62,6 +62,15 @@ export class ProjectPrintTabComponent {
   readonly urgentState = signal<boolean | null>(null);
   readonly isUrgent = computed(() => this.urgentState() ?? this.project()?.isUrgent ?? false);
 
+  // Inline szerkesztés
+  readonly editingCopies = signal(false);
+  readonly editCopiesValue = signal(1);
+  readonly copiesOverride = signal<number | null>(null);
+  readonly copiesDisplay = computed(() => this.copiesOverride() ?? this.project()?.printCopies ?? 1);
+  readonly editingDeadline = signal(false);
+  readonly editDeadlineValue = signal('');
+  readonly today = new Date().toISOString().split('T')[0];
+
   /** WebSocket csatorna neve (ha aktív) */
   private wsChannelName: string | null = null;
 
@@ -173,6 +182,39 @@ export class ProjectPrintTabComponent {
         next: (res) => { this.urgentState.set(res.is_urgent); this.urgentChanged.emit(res.is_urgent); this.togglingUrgent.set(false); },
         error: () => this.togglingUrgent.set(false),
       });
+  }
+
+  startEditCopies(): void {
+    if (this.project()?.status !== 'in_print') return;
+    this.editCopiesValue.set(this.copiesDisplay());
+    this.editingCopies.set(true);
+  }
+
+  saveCopies(): void {
+    this.editingCopies.set(false);
+    const val = Math.max(1, this.editCopiesValue());
+    const id = this.project()?.id;
+    if (!id || val === this.copiesDisplay()) return;
+    this.copiesOverride.set(val);
+    this.projectService.updatePrintOrder(id, { print_copies: val })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => this.copiesOverride.set(null) });
+  }
+
+  startEditDeadline(): void {
+    if (this.project()?.status !== 'in_print') return;
+    this.editDeadlineValue.set(this.project()?.printDeadline?.split('T')[0] ?? '');
+    this.editingDeadline.set(true);
+  }
+
+  saveDeadline(): void {
+    this.editingDeadline.set(false);
+    const val = this.editDeadlineValue() || null;
+    const id = this.project()?.id;
+    if (!id) return;
+    this.projectService.updatePrintOrder(id, { print_deadline: val })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   onSendMessage(text: string): void {

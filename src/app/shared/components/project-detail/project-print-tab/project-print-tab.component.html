@@ -25,25 +25,40 @@
           </div>
 
           <div class="order-grid-data">
-            <div class="order-stat">
-              <span class="order-stat__value">{{ project()?.printCopies ?? 1 }}</span>
+            <div class="order-stat" [class.order-stat--editable]="project()?.status === 'in_print'">
+              @if (editingCopies()) {
+                <input type="number" class="inline-edit" min="1" max="9999"
+                  [value]="editCopiesValue()"
+                  (input)="editCopiesValue.set(+$any($event.target).value)"
+                  (blur)="saveCopies()"
+                  (keydown.enter)="$any($event.target).blur()"
+                  #copiesInput />
+              } @else {
+                <span class="order-stat__value" (click)="startEditCopies()">{{ copiesDisplay() }}</span>
+              }
               <span class="order-stat__label">példány</span>
             </div>
-            @if (project()?.printDeadline) {
-              <div class="order-stat">
-                <span class="order-stat__value order-stat__value--date">
-                  {{ formatDate(project()?.printDeadline) }}
+            <div class="order-stat" [class.order-stat--editable]="project()?.status === 'in_print'">
+              @if (editingDeadline()) {
+                <input type="date" class="inline-edit inline-edit--date" [min]="today"
+                  [value]="editDeadlineValue()"
+                  (input)="editDeadlineValue.set($any($event.target).value)"
+                  (blur)="saveDeadline()"
+                  (keydown.enter)="$any($event.target).blur()" />
+              } @else {
+                <span class="order-stat__value order-stat__value--date" (click)="startEditDeadline()">
+                  {{ project()?.printDeadline ? formatDate(project()?.printDeadline) : 'Nincs megadva' }}
                   @if (project()?.printDeadlineStatus === 'accepted') {
                     <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="13" class="dl-status dl-status--ok" matTooltip="Elfogadva" />
                   } @else if (project()?.printDeadlineStatus === 'modified') {
                     <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--mod" matTooltip="Módosítást kért a nyomda" />
-                  } @else {
+                  } @else if (project()?.printDeadline) {
                     <lucide-icon [name]="ICONS.CLOCK" [size]="13" class="dl-status dl-status--wait" matTooltip="Visszaigazolásra vár" />
                   }
                 </span>
-                <span class="order-stat__label">határidő</span>
-              </div>
-            }
+              }
+              <span class="order-stat__label">határidő</span>
+            </div>
           </div>
 
           @if (project()?.status === 'in_print') {

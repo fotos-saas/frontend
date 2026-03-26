@@ -419,4 +419,8 @@ export class PartnerProjectService {
       `${this.baseUrl}/projects/${projectId}/toggle-urgent`, {},
     ).pipe(map(res => res.data));
   }
+
+  updatePrintOrder(projectId: number, data: { print_copies?: number; print_deadline?: string | null }): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/projects/${projectId}/update-print-order`, data);
+  }
 }

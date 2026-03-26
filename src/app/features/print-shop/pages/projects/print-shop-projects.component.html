@@ -167,20 +167,38 @@
             }
           </div>
 
-          <!-- Projekt info -->
+          <!-- Projekt info + badge-ek -->
           <div class="cell-name">
-            <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">{{ project.name }}</a>
-            <span class="project-meta">
-              @if (project.schoolName) {
-                {{ project.schoolName }}
+            <div class="name-row">
+              <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">{{ project.name }}</a>
+              @if (project.isUrgent) {
+                <span class="inline-tag inline-tag--urgent"><lucide-icon [name]="ICONS.FLAME" [size]="10"></lucide-icon> Sürgős</span>
               }
-              @if (project.className) {
-                &middot; {{ project.className }}
+              @if (project.isReprint) {
+                <span class="inline-tag inline-tag--reprint"><lucide-icon [name]="ICONS.REPEAT_2" [size]="10"></lucide-icon> Újranyomtatás</span>
               }
-              @if (project.classYear) {
-                &middot; {{ project.classYear }}
+            </div>
+            <div class="meta-row">
+              <span class="project-meta">
+                @if (project.schoolName) { {{ project.schoolName }} }
+                @if (project.className) { &middot; {{ project.className }} }
+                @if (project.classYear) { &middot; {{ project.classYear }} }
+              </span>
+              @if (project.unreadMessagesCount > 0) {
+                <a class="meta-badge meta-badge--msg" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek">
+                  <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon> {{ project.unreadMessagesCount }}
+                </a>
+              } @else if (project.totalMessagesCount > 0) {
+                <a class="meta-badge meta-badge--msg-read" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Üzenetek">
+                  <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="10"></lucide-icon>
+                </a>
               }
-            </span>
+              @if (project.printShopDownloadCount > 0) {
+                <span class="meta-badge meta-badge--dl" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x'">
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="10"></lucide-icon> {{ project.printShopDownloadCount }}x
+                </span>
+              }
+            </div>
           </div>
 
           <!-- Stúdió -->
@@ -226,79 +244,25 @@
             <span class="date-text">{{ formatDate(project.status === 'done' ? project.doneAt : project.inPrintAt) }}</span>
           </div>
 
-          <!-- Műveletek -->
+          <!-- Műveletek (letisztult: letöltés + kész/visszaállítás) -->
           <div class="cell-actions">
-            @if (project.unreadMessagesCount > 0) {
-              <a class="message-badge message-badge--unread" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Olvasatlan üzenetek">
-                <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="14"></lucide-icon>
-                <span class="message-badge__count">{{ project.unreadMessagesCount }}</span>
-              </a>
-            } @else if (project.totalMessagesCount > 0) {
-              <a class="message-badge" [routerLink]="['/print-shop/projects', project.id]" matTooltip="Üzenetek">
-                <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="14"></lucide-icon>
-              </a>
-            }
-            @if (project.isUrgent) {
-              <span class="urgent-badge" matTooltip="Sürgős megrendelés">
-                <lucide-icon [name]="ICONS.FLAME" [size]="14"></lucide-icon>
-              </span>
-            }
-            @if (project.isReprint) {
-              <span class="reprint-badge" [matTooltip]="'Újranyomtatás (' + project.reprintCount + '.)'">
-                <lucide-icon [name]="ICONS.REPEAT_2" [size]="14"></lucide-icon>
-              </span>
-            }
-            @if (project.printShopDownloadCount > 0) {
-              <span class="downloaded-indicator" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x — utoljára: ' + formatDate(project.printShopDownloadedAt)">
-                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon>
-                <span class="download-count">{{ project.printShopDownloadCount }}</span>
-              </span>
-            }
             @if (project.hasPrintFile) {
-              <button
-                class="action-btn"
-                (click)="downloadFile(project)"
-                matTooltip="Nyomdakész fájl letöltése"
-              >
+              <button class="action-btn" (click)="downloadFile(project)" matTooltip="Nyomdakész fájl letöltése">
                 <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
               </button>
             } @else if (project.hasSample) {
-              <button
-                class="action-btn"
-                (click)="downloadSample(project)"
-                matTooltip="Mintakép letöltése"
-              >
+              <button class="action-btn" (click)="downloadSample(project)" matTooltip="Mintakép letöltése">
                 <lucide-icon [name]="ICONS.DOWNLOAD" [size]="16"></lucide-icon>
               </button>
             }
-
             @if (project.status === 'in_print') {
-              <button
-                class="action-btn action-btn--success"
-                [disabled]="markingDone() === project.id"
-                (click)="requestMarkDone(project)"
-                matTooltip="Készre állítás"
-              >
-                @if (markingDone() === project.id) {
-                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
-                } @else {
-                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="16"></lucide-icon>
-                }
+              <button class="action-btn action-btn--success" [disabled]="markingDone() === project.id" (click)="requestMarkDone(project)" matTooltip="Készre állítás">
+                <lucide-icon [name]="markingDone() === project.id ? ICONS.LOADER : ICONS.CHECK_CIRCLE" [size]="16" [class.spin]="markingDone() === project.id"></lucide-icon>
               </button>
             }
-
             @if (project.status === 'done') {
-              <button
-                class="action-btn action-btn--warning"
-                [disabled]="reverting() === project.id"
-                (click)="requestRevert(project)"
-                matTooltip="Visszaállítás nyomdába"
-              >
-                @if (reverting() === project.id) {
-                  <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
-                } @else {
-                  <lucide-icon [name]="ICONS.UNDO" [size]="16"></lucide-icon>
-                }
+              <button class="action-btn action-btn--warning" [disabled]="reverting() === project.id" (click)="requestRevert(project)" matTooltip="Visszaállítás nyomdába">
+                <lucide-icon [name]="reverting() === project.id ? ICONS.LOADER : ICONS.UNDO" [size]="16" [class.spin]="reverting() === project.id"></lucide-icon>
               </button>
             }
           </div>

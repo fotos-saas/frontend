@@ -297,50 +297,39 @@
   }
 }
 
-/* ============ Messages Badge ============ */
-.message-badge {
-  display: flex;
+/* ============ Inline Tags (név mellett) ============ */
+.name-row { display: flex; align-items: center; flex-wrap: wrap; }
+
+.inline-tag {
+  display: inline-flex;
   align-items: center;
-  padding: 2px 6px;
-  color: #94a3b8;
-  border-radius: 10px;
-  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.625rem;
   font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-left: 6px;
   lucide-icon { margin-right: 2px; }
-
-  &:hover {
-    color: #64748b;
-  }
-
-  &--unread {
-    background: #3b82f6;
-    color: #fff;
-
-    &:hover {
-      background: #2563eb;
-      color: #fff;
-    }
-  }
-
-  &__count {
-    line-height: 1;
-  }
+  &--urgent { background: #fef2f2; color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
+  &--reprint { background: #fff7ed; color: #ea580c; border: 1px solid rgba(249, 115, 22, 0.2); }
 }
 
-/* ============ Downloaded Indicator ============ */
-.downloaded-indicator {
-  display: flex;
-  align-items: center;
-  color: #22c55e;
+.meta-row { display: flex; align-items: center; flex-wrap: wrap; }
 
-  .download-count {
-    font-size: 11px;
-    font-weight: 600;
-    margin-left: 2px;
-  }
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  margin-left: 8px;
+  lucide-icon { margin-right: 2px; }
+  &--msg { color: #3b82f6; cursor: pointer; &:hover { color: #2563eb; } }
+  &--msg-read { color: #94a3b8; cursor: pointer; &:hover { color: #64748b; } }
+  &--dl { color: #22c55e; }
 }
 
 /* ============ Urgent / Reprint Row Highlight ============ */
@@ -354,17 +343,6 @@
   background: rgba(249, 115, 22, 0.03);
 }
 
-.urgent-badge {
-  color: #ef4444;
-  display: flex;
-  align-items: center;
-}
-
-.reprint-badge {
-  color: #f97316;
-  display: flex;
-  align-items: center;
-}
 
 /* ============ Copies / Deadline Cells ============ */
 .cell-copies {

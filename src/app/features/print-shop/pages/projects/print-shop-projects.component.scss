@@ -389,13 +389,35 @@
 
 /* ============ Project Name Link ============ */
 .project-name-link {
+  display: flex;
+  align-items: baseline;
   color: inherit;
   text-decoration: none;
+  min-width: 0;
 
-  &:hover {
-    color: #6366f1;
-    text-decoration: underline;
-  }
+  &:hover { color: #6366f1; text-decoration: underline; }
+}
+
+.project-name__school {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.project-name__class {
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.project-name__year {
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: get-color('slate', 500);
+  font-weight: 400;
+  font-size: 0.8125rem;
 }
 
 /* ============ Responsive ============ */

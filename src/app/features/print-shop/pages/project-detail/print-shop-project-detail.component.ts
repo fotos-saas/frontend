@@ -7,6 +7,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval, switchMap, filter } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -72,6 +73,13 @@ export class PrintShopProjectDetailComponent implements OnInit {
     if (userId) {
       this.setupWebSocketListener(userId, id);
     }
+
+    // Fallback polling: 30s-ként frissíti az üzeneteket (ha WS nem él)
+    interval(30_000).pipe(
+      filter(() => !!this.project()),
+      switchMap(() => this.service.getMessages(id)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(msgs => this.messages.set(msgs));
 
     this.destroyRef.onDestroy(() => {
       this.wsChannelName = null;

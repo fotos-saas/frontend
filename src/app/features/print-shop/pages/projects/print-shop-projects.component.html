@@ -217,7 +217,7 @@
           <!-- Státusz -->
           <div class="cell-status">
             <span class="status-badge" [class.status-badge--done]="project.status === 'done'">
-              {{ getStatusLabel(project.status) }}
+              {{ project.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
             </span>
           </div>
 

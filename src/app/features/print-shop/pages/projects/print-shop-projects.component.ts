@@ -12,7 +12,7 @@ import { WebsocketService } from '@core/services/websocket.service';
 import { AuthService } from '@core/services/auth.service';
 import { LoggerService } from '@core/services/logger.service';
 import { ICONS } from '@shared/constants/icons.constants';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, interval } from 'rxjs';
 
 @Component({
   selector: 'app-print-shop-projects',
@@ -133,6 +133,11 @@ export class PrintShopProjectsComponent {
     // Load studios + projects
     this.loadStudios();
     this.loadProjects();
+
+    // Fallback polling: 30s-ként újratölti a listát (ha WS nem él)
+    interval(30_000).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.loadProjects());
   }
 
   private applyQueryParams(params: Record<string, string>): void {
@@ -423,10 +428,6 @@ export class PrintShopProjectsComponent {
     });
   }
 
-  getStatusLabel(status: string): string {
-    return status === 'in_print' ? 'Nyomdában' : 'Kész';
-  }
-
   private setupMessageListener(userId: number): void {
     const channelName = `App.Models.User.${userId}`;
     if (this.wsChannelName === channelName) return;
@@ -490,11 +491,7 @@ export class PrintShopProjectsComponent {
   }
 
   private getRecentYears(): string[] {
-    const currentYear = new Date().getFullYear();
-    return [
-      currentYear.toString(),
-      (currentYear - 1).toString(),
-      (currentYear - 2).toString(),
-    ];
+    const y = new Date().getFullYear();
+    return [y.toString(), (y - 1).toString(), (y - 2).toString()];
   }
 }

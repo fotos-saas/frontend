@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval, filter, switchMap } from 'rxjs';
 import { ProjectDetailData } from '../project-detail.types';
 import { ICONS } from '../../../constants/icons.constants';
 import { formatFileSize } from '@shared/utils/formatters.util';
@@ -84,9 +85,14 @@ export class ProjectPrintTabComponent {
       }
     });
 
+    // Fallback polling: 30s-ként frissíti az üzeneteket (ha WS nem él)
+    interval(30_000).pipe(
+      filter(() => this.showChat() && !!this.project()?.id),
+      switchMap(() => this.projectService.getPrintMessages(this.project()!.id)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(msgs => this.messages.set(msgs));
+
     this.destroyRef.onDestroy(() => {
-      // WebSocket listener tisztítás nem szükséges —
-      // a csatornát a notification service kezeli, mi csak extra listener-t adtunk hozzá
       this.wsChannelName = null;
     });
   }

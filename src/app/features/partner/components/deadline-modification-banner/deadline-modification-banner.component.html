@@ -3,8 +3,10 @@
     <lucide-icon [name]="ICONS.CALENDAR" [size]="18" />
     <div class="banner-text">
       <strong>A nyomdász új határidőt javasolt:</strong>
-      <span>{{ formatDate(proposedDate()) }}</span>
-      <span class="original">Eredeti: {{ formatDate(originalDeadline()) }}</span>
+      <span class="dates">{{ formatDate(originalDeadline()) }} → <strong>{{ formatDate(proposedDate()) }}</strong></span>
+      @if (reason()) {
+        <span class="reason">„{{ reason() }}"</span>
+      }
     </div>
   </div>
   <div class="banner-actions">

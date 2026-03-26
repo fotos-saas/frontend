@@ -117,6 +117,7 @@
       <app-deadline-modification-banner
         [proposedDate]="project()!.printDeadlineProposed!"
         [originalDeadline]="project()!.printDeadline!"
+        [reason]="project()?.printDeadlineReason ?? null"
         (accept)="onAcceptDeadlineModification()"
         (reject)="onRejectDeadlineModification()"
       />

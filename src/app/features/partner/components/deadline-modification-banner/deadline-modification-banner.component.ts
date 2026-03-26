@@ -13,6 +13,7 @@ import { ICONS } from '@shared/constants/icons.constants';
 export class DeadlineModificationBannerComponent {
   readonly proposedDate = input.required<string>();
   readonly originalDeadline = input.required<string>();
+  readonly reason = input<string | null>(null);
 
   readonly accept = output<void>();
   readonly reject = output<void>();

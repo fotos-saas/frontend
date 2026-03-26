@@ -194,9 +194,22 @@ $blue-700: get-color('primary', 700);
     min-width: 0;
   }
 
+  .system-detail {
+    display: block;
+    margin-top: 2px;
+    font-style: italic;
+    color: $gray-400;
+  }
+
   .time {
     font-size: 0.625rem;
     flex-shrink: 0;
+  }
+
+  &--detail {
+    align-items: flex-start;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.75rem;
   }
 }
 

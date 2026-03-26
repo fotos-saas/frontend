@@ -2,7 +2,7 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --table-cols: 32px 56px 1fr 140px 80px 100px 100px 110px;
+  --table-cols: 32px 56px 1fr 140px 80px 50px 110px 100px 100px 110px;
   padding-top: 24px;
   padding-bottom: 24px;
 }
@@ -310,6 +310,65 @@
   }
 }
 
+/* ============ Urgent / Reprint Row Highlight ============ */
+.list-row--urgent {
+  border-left: 3px solid #ef4444;
+  background: rgba(239, 68, 68, 0.03);
+}
+
+.list-row--reprint {
+  border-left: 3px solid #f97316;
+  background: rgba(249, 115, 22, 0.03);
+}
+
+.urgent-badge {
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+}
+
+.reprint-badge {
+  color: #f97316;
+  display: flex;
+  align-items: center;
+}
+
+/* ============ Copies / Deadline Cells ============ */
+.cell-copies {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: get-color('slate', 700);
+}
+
+.cell-deadline {
+  display: flex;
+  align-items: center;
+}
+
+.deadline-text {
+  font-size: 0.8125rem;
+  color: get-color('slate', 600);
+}
+
+.deadline-accepted { color: #22c55e; margin-left: 4px; }
+.deadline-modified { color: #3b82f6; margin-left: 4px; }
+.deadline-pending { color: #f59e0b; margin-left: 4px; }
+
+.no-deadline {
+  color: get-color('slate', 400);
+}
+
+/* ============ Project Name Link ============ */
+.project-name-link {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: #6366f1;
+    text-decoration: underline;
+  }
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 768px) {
   .print-shop-projects {
@@ -319,9 +378,13 @@
   .cell-studio,
   .cell-size,
   .cell-date,
+  .cell-copies,
+  .cell-deadline,
   .th-studio,
   .th-size,
-  .th-date {
+  .th-date,
+  .th-copies,
+  .th-deadline {
     display: none;
   }
 

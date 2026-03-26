@@ -463,6 +463,11 @@ export const ICONS = {
   TRENDING_UP: 'trending-up',
   REFRESH_CW: 'refresh-cw',
 
+  // Nyomda megrendelés
+  REPEAT_2: 'repeat-2',
+  CALENDAR_X: 'calendar-x',
+  FLAME: 'flame',
+
 } as const;
 
 export type IconName = typeof ICONS[keyof typeof ICONS];

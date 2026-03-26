@@ -33,6 +33,14 @@ export interface PrintShopProject {
   previewUrl: string | null;
   printShopDownloadedAt: string | null;
   printShopDownloadCount: number;
+  printCopies: number;
+  printDeadline: string | null;
+  printDeadlineStatus: 'pending' | 'accepted' | 'modified' | null;
+  printDeadlineProposed: string | null;
+  isUrgent: boolean;
+  isReprint: boolean;
+  reprintCount: number;
+  unreadMessages: number;
 }
 
 export interface PrintShopProjectDetail extends PrintShopProject {

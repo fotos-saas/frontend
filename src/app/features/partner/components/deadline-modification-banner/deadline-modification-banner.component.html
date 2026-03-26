@@ -1,0 +1,14 @@
+<div class="deadline-banner">
+  <div class="banner-content">
+    <lucide-icon [name]="ICONS.CALENDAR" [size]="18" />
+    <div class="banner-text">
+      <strong>A nyomdász új határidőt javasolt:</strong>
+      <span>{{ formatDate(proposedDate()) }}</span>
+      <span class="original">Eredeti: {{ formatDate(originalDeadline()) }}</span>
+    </div>
+  </div>
+  <div class="banner-actions">
+    <button class="btn btn--sm btn--success" (click)="accept.emit()">Elfogadom</button>
+    <button class="btn btn--sm btn--danger" (click)="reject.emit()">Elutasítom</button>
+  </div>
+</div>

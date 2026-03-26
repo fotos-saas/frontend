@@ -13,6 +13,7 @@ import {
   PrintShopDashboardData,
   PaginatedResponse,
 } from '../models/print-shop.models';
+import { PrintShopMessage, DeadlineResponsePayload } from '@core/models/print-order.models';
 
 @Injectable({ providedIn: 'root' })
 export class PrintShopService {
@@ -102,6 +103,24 @@ export class PrintShopService {
         const fileName = disposition?.match(/filename="?([^"]+)"?/)?.[1] ?? 'nyomdakesz.zip';
         return { blob: response.body, fileName };
       })
+    );
+  }
+
+  getMessages(projectId: number): Observable<PrintShopMessage[]> {
+    return this.http.get<{ data: PrintShopMessage[] }>(
+      `${this.baseUrl}/projects/${projectId}/messages`
+    ).pipe(map(res => res.data));
+  }
+
+  sendMessage(projectId: number, message: string): Observable<PrintShopMessage> {
+    return this.http.post<{ data: PrintShopMessage }>(
+      `${this.baseUrl}/projects/${projectId}/messages`, { message }
+    ).pipe(map(res => res.data));
+  }
+
+  respondToDeadline(projectId: number, payload: DeadlineResponsePayload): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/projects/${projectId}/respond-deadline`, payload
     );
   }
 

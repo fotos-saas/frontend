@@ -264,6 +264,10 @@ import {
   // Értesítések oldal
   CheckCheck,
   Inbox,
+  // Nyomda megrendelés
+  Repeat2,
+  CalendarX,
+  Flame,
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS_MAP = {
@@ -525,4 +529,8 @@ export const LUCIDE_ICONS_MAP = {
   // Email Hub / AI
   Brain,
   TrendingUp,
+  // Nyomda megrendelés
+  Repeat2,
+  CalendarX,
+  Flame,
 };

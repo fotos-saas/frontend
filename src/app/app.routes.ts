@@ -148,6 +148,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/print-shop/pages/projects/print-shop-projects.component').then(m => m.PrintShopProjectsComponent)
       },
       {
+        path: 'projects/:id',
+        loadComponent: () => import('./features/print-shop/pages/project-detail/print-shop-project-detail.component').then(m => m.PrintShopProjectDetailComponent)
+      },
+      {
         path: 'connections',
         loadComponent: () => import('./features/print-shop/pages/connections/print-shop-connections.component').then(m => m.PrintShopConnectionsComponent),
         title: 'Kapcsolatok'

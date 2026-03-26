@@ -1,0 +1,108 @@
+<div class="print-shop-project-detail page-card">
+  <!-- Fejléc -->
+  <div class="detail-header">
+    <button class="back-btn" (click)="goBack()" matTooltip="Vissza a listához">
+      <lucide-icon [name]="ICONS.ARROW_LEFT" [size]="18"></lucide-icon>
+    </button>
+    <h1>{{ project()?.name }}</h1>
+    @if (project()?.isUrgent) {
+      <span class="urgent-tag">
+        <lucide-icon [name]="ICONS.FLAME" [size]="14"></lucide-icon> Sürgős
+      </span>
+    }
+    @if (project()?.isReprint) {
+      <span class="reprint-tag">
+        <lucide-icon [name]="ICONS.REPEAT_2" [size]="14"></lucide-icon> Újranyomtatás ({{ project()?.reprintCount }}.)
+      </span>
+    }
+  </div>
+
+  @if (loading()) {
+    <!-- Skeleton -->
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card skeleton-card--short"></div>
+  } @else if (project(); as p) {
+    <!-- Projekt info kártyák -->
+    <div class="info-grid">
+      <div class="info-card">
+        <span class="info-label">Stúdió</span>
+        <span class="info-value">{{ p.studioName }}</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label">Méret</span>
+        <span class="info-value">{{ p.tabloSize || '—' }}</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label">Példányszám</span>
+        <span class="info-value">{{ p.printCopies }} db</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label">Státusz</span>
+        <span class="info-value">{{ p.status === 'in_print' ? 'Nyomdában' : 'Kész' }}</span>
+      </div>
+    </div>
+
+    <!-- Határidő kezelés -->
+    @if (p.printDeadline) {
+      <div class="deadline-section">
+        <h3>
+          <lucide-icon [name]="ICONS.CALENDAR" [size]="18"></lucide-icon>
+          Határidő: {{ formatDate(p.printDeadline) }}
+        </h3>
+
+        @if (p.printDeadlineStatus === 'pending') {
+          <div class="deadline-actions">
+            <button class="btn btn--sm btn--success" (click)="acceptDeadline()" [disabled]="respondingDeadline()">
+              <lucide-icon [name]="ICONS.CHECK" [size]="14"></lucide-icon> Elfogadom
+            </button>
+            <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(true)" [disabled]="respondingDeadline()">
+              <lucide-icon [name]="ICONS.EDIT" [size]="14"></lucide-icon> Módosítom
+            </button>
+          </div>
+
+          @if (showDeadlineForm()) {
+            <div class="deadline-form">
+              <div class="form-row">
+                <label>Javasolt dátum</label>
+                <input type="date" [min]="today" [ngModel]="proposedDate()" (ngModelChange)="proposedDate.set($event)">
+              </div>
+              <div class="form-row">
+                <label>Indoklás (opcionális)</label>
+                <textarea rows="2" placeholder="Miért szükséges a módosítás?"
+                  [ngModel]="deadlineMessage()" (ngModelChange)="deadlineMessage.set($event)"></textarea>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn--sm btn--secondary" (click)="showDeadlineForm.set(false)">Mégsem</button>
+                <button class="btn btn--sm btn--primary" (click)="modifyDeadline()" [disabled]="!proposedDate() || respondingDeadline()">
+                  Javaslat küldése
+                </button>
+              </div>
+            </div>
+          }
+        } @else if (p.printDeadlineStatus === 'accepted') {
+          <span class="deadline-status deadline-status--accepted">
+            <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon> Elfogadva
+          </span>
+        } @else if (p.printDeadlineStatus === 'modified') {
+          <span class="deadline-status deadline-status--modified">
+            <lucide-icon [name]="ICONS.CLOCK" [size]="14"></lucide-icon> Módosítás küldve, várakozás a fotós válaszára
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Üzenetek -->
+    <div class="messages-section">
+      <h3>
+        <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="18"></lucide-icon>
+        Üzenetek
+      </h3>
+      <app-print-messages
+        [messages]="messages()"
+        [loading]="loadingMessages()"
+        [sending]="sendingMessage()"
+        (sendMessage)="onSendMessage($event)"
+      />
+    </div>
+  }
+</div>

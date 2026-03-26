@@ -122,6 +122,8 @@
       <span class="th th-name">Projekt</span>
       <span class="th th-studio">Stúdió</span>
       <span class="th th-size">Méret</span>
+      <span class="th th-copies">Db</span>
+      <span class="th th-deadline">Határidő</span>
       <span class="th th-status">Státusz</span>
       <span class="th th-date">Dátum</span>
       <span class="th th-actions">Műveletek</span>
@@ -132,7 +134,9 @@
       @for (project of projects(); track project.id; let i = $index) {
         <div class="list-row"
              [class.list-row--selected]="selectedIds().has(project.id)"
-             [style.animation-delay]="i * 0.03 + 's'">
+             [class.list-row--urgent]="project.isUrgent"
+             [class.list-row--reprint]="project.isReprint && !project.isUrgent"
+             [style.animation-delay]="i * 0.03 + 's'"
           <!-- Checkbox -->
           <div class="cell-check">
             @if (project.hasPrintFile) {
@@ -165,7 +169,7 @@
 
           <!-- Projekt info -->
           <div class="cell-name">
-            <span class="project-name">{{ project.name }}</span>
+            <a class="project-name project-name-link" [routerLink]="['/print-shop/projects', project.id]">{{ project.name }}</a>
             <span class="project-meta">
               @if (project.schoolName) {
                 {{ project.schoolName }}
@@ -189,6 +193,27 @@
             <span class="size-badge">{{ project.tabloSize ?? '-' }}</span>
           </div>
 
+          <!-- Darabszám -->
+          <div class="cell-copies">
+            {{ project.printCopies }} db
+          </div>
+
+          <!-- Határidő -->
+          <div class="cell-deadline">
+            @if (project.printDeadline) {
+              <span class="deadline-text">{{ formatDate(project.printDeadline) }}</span>
+              @if (project.printDeadlineStatus === 'accepted') {
+                <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" class="deadline-accepted"></lucide-icon>
+              } @else if (project.printDeadlineStatus === 'modified') {
+                <lucide-icon [name]="ICONS.CALENDAR" [size]="12" class="deadline-modified"></lucide-icon>
+              } @else {
+                <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="deadline-pending"></lucide-icon>
+              }
+            } @else {
+              <span class="no-deadline">—</span>
+            }
+          </div>
+
           <!-- Státusz -->
           <div class="cell-status">
             <span class="status-badge" [class.status-badge--done]="project.status === 'done'">
@@ -203,6 +228,16 @@
 
           <!-- Műveletek -->
           <div class="cell-actions">
+            @if (project.isUrgent) {
+              <span class="urgent-badge" matTooltip="Sürgős megrendelés">
+                <lucide-icon [name]="ICONS.FLAME" [size]="14"></lucide-icon>
+              </span>
+            }
+            @if (project.isReprint) {
+              <span class="reprint-badge" [matTooltip]="'Újranyomtatás (' + project.reprintCount + '.)'">
+                <lucide-icon [name]="ICONS.REPEAT_2" [size]="14"></lucide-icon>
+              </span>
+            }
             @if (project.printShopDownloadCount > 0) {
               <span class="downloaded-indicator" [matTooltip]="'Letöltve ' + project.printShopDownloadCount + 'x — utoljára: ' + formatDate(project.printShopDownloadedAt)">
                 <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14"></lucide-icon>

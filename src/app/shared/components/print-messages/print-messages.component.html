@@ -1,0 +1,65 @@
+<div class="print-messages">
+  <!-- Üzenetek -->
+  <div class="messages-container" #messagesContainer>
+    @if (loading()) {
+      <!-- Skeleton sorok -->
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton-message" [class.own]="i === 2">
+          <div class="skeleton-header">
+            <div class="skeleton-name"></div>
+            <div class="skeleton-time"></div>
+          </div>
+          <div class="skeleton-text"></div>
+        </div>
+      }
+    } @else if (messages().length === 0) {
+      <div class="empty-state">
+        <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="32"></lucide-icon>
+        <p>Még nincsen üzenet</p>
+      </div>
+    } @else {
+      @for (msg of messages(); track msg.id) {
+        @if (isSystemMessage(msg.type)) {
+          <!-- Rendszer üzenet: középre, halvány háttér, kis ikon -->
+          <div class="system-message">
+            <lucide-icon [name]="getMessageIcon(msg.type)" [size]="14"></lucide-icon>
+            <span class="system-text">{{ msg.message }}</span>
+            <span class="time" [matTooltip]="formatDate(msg.createdAt)">{{ formatTime(msg.createdAt) }}</span>
+          </div>
+        } @else {
+          <!-- Normál üzenet: bal (másik fél) vagy jobb (saját) -->
+          <div class="message-bubble" [class.own]="msg.isOwn">
+            <div class="message-header">
+              <span class="sender-name">{{ msg.userName }}</span>
+              <span class="time" [matTooltip]="formatDate(msg.createdAt)">{{ formatTime(msg.createdAt) }}</span>
+            </div>
+            <p class="message-text">{{ msg.message }}</p>
+          </div>
+        }
+      }
+    }
+  </div>
+
+  <!-- Üzenet küldés -->
+  <div class="message-input">
+    <textarea
+      [(ngModel)]="newMessageValue"
+      placeholder="Üzenet írása..."
+      (keydown.enter)="$event.preventDefault(); onSend()"
+      [disabled]="sending()"
+      rows="1"
+    ></textarea>
+    <button
+      class="send-btn"
+      (click)="onSend()"
+      [disabled]="!newMessage() || sending()"
+      matTooltip="Küldés"
+    >
+      @if (sending()) {
+        <lucide-icon [name]="ICONS.LOADER" [size]="16" class="spin"></lucide-icon>
+      } @else {
+        <lucide-icon [name]="ICONS.SEND" [size]="16"></lucide-icon>
+      }
+    </button>
+  </div>
+</div>

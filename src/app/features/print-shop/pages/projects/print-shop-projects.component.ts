@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,7 +14,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-print-shop-projects',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, MatTooltipModule, ConfirmDialogComponent, SamplesLightboxComponent],
+  imports: [LucideAngularModule, FormsModule, MatTooltipModule, RouterModule, ConfirmDialogComponent, SamplesLightboxComponent],
   templateUrl: './print-shop-projects.component.html',
   styleUrls: ['./print-shop-projects.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { buildHttpParams } from '@shared/utils/http-params.util';
+import { SendToPrintPayload, RequestReprintPayload, PrintShopMessage } from '@core/models/print-order.models';
 import {
   PartnerDashboardStats,
   PartnerProjectListItem,
@@ -376,5 +378,39 @@ export class PartnerProjectService {
     return this.http.put<{
       success: boolean; message: string;
     }>(`${this.baseUrl}/projects/${projectId}/wizard`, data);
+  }
+
+  // =========================================================================
+  // Nyomda megrendelés
+  // =========================================================================
+
+  sendToPrint(projectId: number, payload: SendToPrintPayload): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/send-to-print`, payload,
+    );
+  }
+
+  requestReprint(projectId: number, payload: RequestReprintPayload): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/projects/${projectId}/request-reprint`, payload,
+    );
+  }
+
+  getPrintMessages(projectId: number): Observable<PrintShopMessage[]> {
+    return this.http.get<{ data: PrintShopMessage[] }>(
+      `${this.baseUrl}/projects/${projectId}/print-messages`,
+    ).pipe(map(res => res.data));
+  }
+
+  sendPrintMessage(projectId: number, message: string): Observable<PrintShopMessage> {
+    return this.http.post<{ data: PrintShopMessage }>(
+      `${this.baseUrl}/projects/${projectId}/print-messages`, { message },
+    ).pipe(map(res => res.data));
+  }
+
+  respondToDeadlineModification(projectId: number, action: 'accept' | 'reject'): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/projects/${projectId}/respond-deadline-modification`, { action },
+    );
   }
 }

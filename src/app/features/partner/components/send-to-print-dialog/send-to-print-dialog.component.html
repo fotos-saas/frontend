@@ -1,0 +1,62 @@
+<app-dialog-wrapper
+  title="Nyomdába küldés"
+  [icon]="ICONS.PRINTER"
+  theme="purple"
+  size="md"
+  headerStyle="flat"
+  [isSubmitting]="isSubmitting()"
+  (closeEvent)="close.emit()"
+>
+  <div dialogBody>
+    <div class="form-group">
+      <label>Példányszám</label>
+      <input
+        type="number"
+        [min]="1"
+        [max]="9999"
+        [ngModel]="printCopies()"
+        (ngModelChange)="printCopies.set($event)"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Határidő <span class="optional">(opcionális)</span></label>
+      <input
+        type="date"
+        [min]="today"
+        [ngModel]="printDeadline()"
+        (ngModelChange)="printDeadline.set($event)"
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          [ngModel]="isUrgent()"
+          (ngModelChange)="isUrgent.set($event)"
+        />
+        <lucide-icon [name]="ICONS.FLAME" [size]="16" />
+        Sürgős megrendelés
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Megjegyzés <span class="optional">(opcionális)</span></label>
+      <textarea
+        rows="3"
+        placeholder="Pl. 300g-os kartonra kérem..."
+        [ngModel]="message()"
+        (ngModelChange)="message.set($event)"
+      ></textarea>
+    </div>
+  </div>
+
+  <div dialogFooter>
+    <button class="btn btn--secondary" (click)="close.emit()">Mégsem</button>
+    <button class="btn btn--primary" (click)="onSubmit()" [disabled]="isSubmitting()">
+      <lucide-icon [name]="ICONS.PRINTER" [size]="16" />
+      Küldés nyomdába
+    </button>
+  </div>
+</app-dialog-wrapper>

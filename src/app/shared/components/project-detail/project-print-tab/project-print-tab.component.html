@@ -35,6 +35,75 @@
         }
       </div>
     </section>
+
+    <!-- Megrendelés adatok -->
+    @if (project()?.inPrintAt) {
+      <section class="order-section">
+        <h3 class="section-title">
+          <lucide-icon [name]="ICONS.CLIPBOARD_LIST" [size]="16" />
+          Megrendelés adatok
+        </h3>
+        <div class="order-details">
+          <div class="order-item">
+            <span class="order-label">Példányszám</span>
+            <span class="order-value">{{ project()?.printCopies ?? 1 }} db</span>
+          </div>
+          @if (project()?.printDeadline) {
+            <div class="order-item">
+              <span class="order-label">Határidő</span>
+              <span class="order-value">
+                {{ formatDate(project()?.printDeadline) }}
+                @if (project()?.printDeadlineStatus === 'accepted') {
+                  <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="12" class="status-accepted" matTooltip="Elfogadva" />
+                } @else if (project()?.printDeadlineStatus === 'modified') {
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="status-modified" matTooltip="Módosítást kért a nyomda" />
+                } @else {
+                  <lucide-icon [name]="ICONS.CLOCK" [size]="12" class="status-pending" matTooltip="Visszaigazolásra vár" />
+                }
+              </span>
+            </div>
+          }
+          @if (project()?.isUrgent) {
+            <div class="order-item order-item--urgent">
+              <lucide-icon [name]="ICONS.FLAME" [size]="14" />
+              <span>Sürgős megrendelés</span>
+            </div>
+          }
+          @if (project()?.isReprint) {
+            <div class="order-item order-item--reprint">
+              <lucide-icon [name]="ICONS.REPEAT_2" [size]="14" />
+              <span>Újranyomtatás ({{ project()?.reprintCount }}.)</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Határidő módosítás banner -->
+      @if (project()?.printDeadlineStatus === 'modified' && project()?.printDeadlineProposed && project()?.printDeadline) {
+        <app-deadline-modification-banner
+          [proposedDate]="project()!.printDeadlineProposed!"
+          [originalDeadline]="project()!.printDeadline!"
+          (accept)="onAcceptDeadlineModification()"
+          (reject)="onRejectDeadlineModification()"
+        />
+      }
+
+      <!-- Üzenetek -->
+      @if (showChat()) {
+        <section class="messages-section">
+          <h3 class="section-title">
+            <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16" />
+            Üzenetek a nyomdával
+          </h3>
+          <app-print-messages
+            [messages]="messages()"
+            [loading]="loadingMessages()"
+            [sending]="sendingMessage()"
+            (sendMessage)="onSendMessage($event)"
+          />
+        </section>
+      }
+    }
   </div>
 
   <!-- Jobb oszlop: Fájlok -->

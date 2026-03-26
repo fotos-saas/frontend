@@ -124,6 +124,13 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   tabloSize: string | null;
   printSmallTablo?: PrintReadyFile | null;
   printFlat?: PrintReadyFile | null;
+  printCopies?: number;
+  printDeadline?: string | null;
+  printDeadlineStatus?: 'pending' | 'accepted' | 'modified' | null;
+  printDeadlineProposed?: string | null;
+  isUrgent?: boolean;
+  isReprint?: boolean;
+  reprintCount?: number;
   updatedAt: string;
 }
 

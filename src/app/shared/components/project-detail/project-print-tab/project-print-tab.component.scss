@@ -304,6 +304,70 @@
   to { transform: rotate(360deg); }
 }
 
+/* Megrendelés adatok */
+.order-section {
+  margin-top: 24px;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.order-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.order-value {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.order-item--urgent {
+  color: #ef4444;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+
+  span { margin-left: 6px; }
+}
+
+.order-item--reprint {
+  color: #f97316;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+
+  span { margin-left: 6px; }
+}
+
+.status-accepted { color: #22c55e; margin-left: 6px; }
+.status-modified { color: #3b82f6; margin-left: 6px; }
+.status-pending { color: #f59e0b; margin-left: 6px; }
+
+.messages-section {
+  margin-top: 24px;
+
+  app-print-messages {
+    max-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .print-tab {
     flex-direction: column;

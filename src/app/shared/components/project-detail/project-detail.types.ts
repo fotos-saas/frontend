@@ -131,6 +131,13 @@ export interface ProjectDetailData {
     mimeType: string;
     uploadedAt: string;
   } | null;
+  printCopies?: number;
+  printDeadline?: string | null;
+  printDeadlineStatus?: 'pending' | 'accepted' | 'modified' | null;
+  printDeadlineProposed?: string | null;
+  isUrgent?: boolean;
+  isReprint?: boolean;
+  reprintCount?: number;
   tags?: Array<{ id: number; name: string; color: string }>;
   pendingTaskCount?: number;
   createdAt: string;

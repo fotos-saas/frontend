@@ -136,7 +136,7 @@
              [class.list-row--selected]="selectedIds().has(project.id)"
              [class.list-row--urgent]="project.isUrgent"
              [class.list-row--reprint]="project.isReprint && !project.isUrgent"
-             [style.animation-delay]="i * 0.03 + 's'"
+             [style.animation-delay]="i * 0.03 + 's'">
           <!-- Checkbox -->
           <div class="cell-check">
             @if (project.hasPrintFile) {

@@ -30,7 +30,7 @@
                 </span>
               </div>
             }
-            @if (project()?.isUrgent) {
+            @if (isUrgent()) {
               <div class="order-item order-item--urgent">
                 <lucide-icon [name]="ICONS.FLAME" [size]="14" />
                 <span>Sürgős</span>
@@ -48,12 +48,12 @@
           @if (project()?.status === 'in_print') {
             <button
               class="urgent-toggle"
-              [class.urgent-toggle--active]="project()?.isUrgent"
+              [class.urgent-toggle--active]="isUrgent()"
               (click)="toggleUrgent()"
               [disabled]="togglingUrgent()"
             >
               <lucide-icon [name]="ICONS.FLAME" [size]="14" />
-              {{ project()?.isUrgent ? 'Sürgős megrendelés' : 'Sürgősnek jelölés' }}
+              {{ isUrgent() ? 'Sürgős megrendelés' : 'Sürgősnek jelölés' }}
             </button>
           }
         </div>

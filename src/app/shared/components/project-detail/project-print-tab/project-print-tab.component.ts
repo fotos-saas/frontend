@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, computed, DestroyRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -59,6 +59,8 @@ export class ProjectPrintTabComponent {
   readonly showChat = signal(false);
 
   readonly togglingUrgent = signal(false);
+  readonly urgentState = signal<boolean | null>(null);
+  readonly isUrgent = computed(() => this.urgentState() ?? this.project()?.isUrgent ?? false);
 
   /** WebSocket csatorna neve (ha aktív) */
   private wsChannelName: string | null = null;
@@ -168,7 +170,7 @@ export class ProjectPrintTabComponent {
     this.projectService.toggleUrgent(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => { this.urgentChanged.emit(res.is_urgent); this.togglingUrgent.set(false); },
+        next: (res) => { this.urgentState.set(res.is_urgent); this.urgentChanged.emit(res.is_urgent); this.togglingUrgent.set(false); },
         error: () => this.togglingUrgent.set(false),
       });
   }

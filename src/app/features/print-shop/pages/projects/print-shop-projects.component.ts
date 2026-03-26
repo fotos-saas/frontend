@@ -119,6 +119,21 @@ export class PrintShopProjectsComponent {
   }
 
   private applyQueryParams(params: Record<string, string>): void {
+    // Ha nincs URL query param, próbáljuk a sessionStorage-ból
+    const hasUrlParams = Object.keys(params).some(k => k !== 'project_id' && params[k]);
+    if (!hasUrlParams) {
+      try {
+        const saved = sessionStorage.getItem('printShopFilters');
+        if (saved) {
+          const restored = JSON.parse(saved) as Record<string, string | null>;
+          params = { ...params };
+          for (const [key, val] of Object.entries(restored)) {
+            if (val && !params[key]) params[key] = val;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
     if (params['status'] === 'in_print' || params['status'] === 'done' || params['status'] === '') {
       this.statusFilter.set(params['status'] || '');
     }
@@ -436,6 +451,9 @@ export class PrintShopProjectsComponent {
     queryParams['studio_id'] = this.studioFilter() ? String(this.studioFilter()) : null;
     queryParams['page'] = this.currentPage() > 1 ? String(this.currentPage()) : null;
     this.router.navigate([], { queryParams, replaceUrl: true });
+
+    // sessionStorage-ba is mentjük a szűrőket (visszanavigáláshoz)
+    sessionStorage.setItem('printShopFilters', JSON.stringify(queryParams));
   }
 
   private getRecentYears(): string[] {

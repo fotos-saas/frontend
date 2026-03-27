@@ -55,18 +55,22 @@ function getSelectedLayerInfo() {
   return layers;
 }
 
-// --- Bounds effektek nelkul ---
+// --- Bounds effektek nelkul — SELECT NELKUL, ID alapjan ---
 function getBoundsNoEffects(layerId) {
-  selectLayerById(layerId);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("boundsNoEffects"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   var desc = executeActionGet(ref);
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
     b = desc.getObjectValue(boundsKey);
   } else {
-    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+    var ref2 = new ActionReference();
+    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("bounds"));
+    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc2 = executeActionGet(ref2);
+    b = desc2.getObjectValue(stringIDToTypeID("bounds"));
   }
   return {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
@@ -135,25 +139,7 @@ function unlinkByName(doc, layerName) {
 
 // --- Tobb layer kijelolese ID alapjan ---
 function selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
+  selectMultipleLayersById(layerIds);
 }
 
 // --- Link action ---
@@ -183,23 +169,11 @@ function translateLayer(layerId, dx, dy) {
 // --- Eredeti kijeloles visszaallitasa ---
 function restoreSelection(selected) {
   if (selected.length === 0) return;
-  var selDesc = new ActionDescriptor();
-  var selRef = new ActionReference();
-  selRef.putIdentifier(charIDToTypeID("Lyr "), selected[0].id);
-  selDesc.putReference(charIDToTypeID("null"), selRef);
-  executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-  for (var k = 1; k < selected.length; k++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), selected[k].id);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  var ids = [];
+  for (var k = 0; k < selected.length; k++) {
+    ids.push(selected[k].id);
   }
+  selectMultipleLayersById(ids);
 }
 
 // Globalis eredmeny
@@ -207,9 +181,6 @@ var _centerResult = '{"error":"Nem futott le"}';
 
 function doCenterSelected() {
   var doc = app.activeDocument;
-  var oldRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
-
   try {
     // 1. Kijelolt layerek
     var selected = getSelectedLayerInfo();
@@ -294,7 +265,7 @@ function doCenterSelected() {
     _centerResult = '{"mode":"center","dx":' + dx + ',"count":' + imageLayers.length + '}';
 
   } finally {
-    app.preferences.rulerUnits = oldRulerUnits;
+    // no-op
   }
 }
 

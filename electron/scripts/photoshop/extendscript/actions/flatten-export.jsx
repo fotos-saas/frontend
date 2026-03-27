@@ -51,7 +51,9 @@ function _doFlattenExport() {
 
   log("[JSX] Flatten export indul: " + outputPath);
 
-  // 1. Aktiv dokumentum duplikatalasa
+  // 1. Aktiv dokumentum duplikatalasa (dialogus nelkul)
+  var _origDlg = app.displayDialogs;
+  app.displayDialogs = DialogModes.NO;
   var dupDoc = _doc.duplicate("_flatten_temp_", false);
   app.activeDocument = dupDoc;
 
@@ -74,6 +76,7 @@ function _doFlattenExport() {
 
   // 5. Duplikatum bezarasa (save nelkul)
   dupDoc.close(SaveOptions.DONOTSAVECHANGES);
+  app.displayDialogs = _origDlg;
   log("[JSX] Duplikatum bezarva");
 
   log("__FLATTEN_RESULT__OK:" + outputPath);

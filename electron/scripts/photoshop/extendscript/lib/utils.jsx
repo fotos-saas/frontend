@@ -173,91 +173,64 @@ function createSmartObjectPlaceholder(doc, container, options) {
 //   4. Mentes + Bezaras → visszakerul a fo PSD-be
 // photoPath: a lokalis kepfajl TELJES utvonala (a handler tolti le)
 function placePhotoInSmartObject(doc, layer, photoPath, syncBorder) {
-  // Layer aktiv legyen
+  var _origDialogs = app.displayDialogs;
+  app.displayDialogs = DialogModes.NO;
+
   doc.activeLayer = layer;
 
-  // 1. Smart Object megnyitasa szerkesztesre
-  //    ActionManager: editContents (dupla klikk az SO-ra)
+  // 1. SO megnyitas
   var descEdit = new ActionDescriptor();
   var refEdit = new ActionReference();
-  refEdit.putEnumerated(
-    stringIDToTypeID("smartObject"),
-    stringIDToTypeID("ordinal"),
-    stringIDToTypeID("targetEnum")
-  );
+  refEdit.putEnumerated(stringIDToTypeID("smartObject"), stringIDToTypeID("ordinal"), stringIDToTypeID("targetEnum"));
   descEdit.putReference(charIDToTypeID("null"), refEdit);
   executeAction(stringIDToTypeID("placedLayerEditContents"), descEdit, DialogModes.NO);
 
-  // Most az SO belso dokumentuma az aktiv
   var soDoc = app.activeDocument;
   var soWidth = soDoc.width.as("px");
   var soHeight = soDoc.height.as("px");
 
-  // 2. Kep behelyezese Place Embedded-del
+  // 2. Place Embedded
   var descPlace = new ActionDescriptor();
   descPlace.putPath(charIDToTypeID("null"), new File(photoPath));
-  descPlace.putEnumerated(
-    charIDToTypeID("FTcs"),
-    charIDToTypeID("QCSt"),
-    charIDToTypeID("Qcsa")  // Fit
-  );
-  // Offset nullazas (kozepre kerul)
+  descPlace.putEnumerated(charIDToTypeID("FTcs"), charIDToTypeID("QCSt"), charIDToTypeID("Qcsa"));
   descPlace.putUnitDouble(charIDToTypeID("Ofst"), charIDToTypeID("#Pxl"), 0);
   descPlace.putUnitDouble(charIDToTypeID("OfsY"), charIDToTypeID("#Pxl"), 0);
   executeAction(stringIDToTypeID("placeEvent"), descPlace, DialogModes.NO);
 
-  // A Place utan a kep meg transform modban van — commit-oljuk
-  // A behelyezett layer most az activeLayer
+  // 3. Cover resize + kozepre
   var placedLayer = soDoc.activeLayer;
+  var pb = placedLayer.bounds;
+  var pW = pb[2].as("px") - pb[0].as("px");
+  var pH = pb[3].as("px") - pb[1].as("px");
 
-  // 3. Cover logika: atmeretezni hogy kitoltse az SO-t (nincs ures terulet)
-  //    A Place "Fit" modban a kisebb oldalra illeszti, nekunk a nagyobbra kell
-  var placedBounds = placedLayer.bounds;
-  var placedW = placedBounds[2].as("px") - placedBounds[0].as("px");
-  var placedH = placedBounds[3].as("px") - placedBounds[1].as("px");
-
-  if (placedW > 0 && placedH > 0) {
-    var scaleX = (soWidth / placedW) * 100;
-    var scaleY = (soHeight / placedH) * 100;
-    var scaleFactor = Math.max(scaleX, scaleY); // cover = nagyobb skala
-
-    if (Math.abs(scaleFactor - 100) > 0.5) {
-      placedLayer.resize(scaleFactor, scaleFactor, AnchorPosition.MIDDLECENTER);
+  if (pW > 0 && pH > 0) {
+    var sf = Math.max((soWidth / pW) * 100, (soHeight / pH) * 100);
+    if (Math.abs(sf - 100) > 0.5) {
+      placedLayer.resize(sf, sf, AnchorPosition.MIDDLECENTER);
     }
-
-    // Kozepre igazitas
-    var newBounds = placedLayer.bounds;
-    var newW = newBounds[2].as("px") - newBounds[0].as("px");
-    var newH = newBounds[3].as("px") - newBounds[1].as("px");
-    var offsetX = (soWidth - newW) / 2 - newBounds[0].as("px");
-    var offsetY = (soHeight - newH) / 2 - newBounds[1].as("px");
-    placedLayer.translate(new UnitValue(offsetX, "px"), new UnitValue(offsetY, "px"));
+    var nb = placedLayer.bounds;
+    placedLayer.translate(
+      new UnitValue((soWidth - (nb[2].as("px") - nb[0].as("px"))) / 2 - nb[0].as("px"), "px"),
+      new UnitValue((soHeight - (nb[3].as("px") - nb[1].as("px"))) / 2 - nb[1].as("px"), "px")
+    );
   }
 
-  // 4. Keretezés — Photoshop Action futtatása az SO-n belül (flatten előtt)
+  // 4. Keretezes (opcionalis)
   if (syncBorder) {
     try {
-      // Ellenőrzés: az action set létezik-e (elkerüli a modal dialógust)
-      var _actionExists = false;
-      try {
-        var _aRef = new ActionReference();
-        _aRef.putName(stringIDToTypeID("actionSet"), "tablo_common");
-        executeActionGet(_aRef);
-        _actionExists = true;
-      } catch (ae) { /* action set nem létezik */ }
-
-      if (_actionExists) {
-        app.doAction("tker_without_save", "tablo_common");
-      }
-    } catch (e) { /* action hiba — folytatjuk */ }
+      var _aRef = new ActionReference();
+      _aRef.putName(stringIDToTypeID("actionSet"), "tablo_common");
+      executeActionGet(_aRef);
+      app.doAction("tker_without_save", "tablo_common");
+    } catch (e) {}
   }
 
-  // 5. Flatten (egyetlen layer legyen az SO-ban)
+  // 5. Flatten + Save + Close
   soDoc.flatten();
-
-  // 6. Mentes + Bezaras (Ctrl+S, Ctrl+W)
   soDoc.save();
-  soDoc.close(SaveOptions.DONOTSAVECHANGES); // mar mentettuk
+  soDoc.close(SaveOptions.DONOTSAVECHANGES);
+
+  app.displayDialogs = _origDialogs;
 }
 
 // --- Layer kivalasztasa ID alapjan (ActionManager) ---
@@ -269,6 +242,35 @@ function selectLayerById(layerId) {
   ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   desc.putReference(charIDToTypeID("null"), ref);
   executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+}
+
+// --- BATCH: Tobb layer kivalasztasa ---
+// Az elso layert select-tel, a tobbit addToSelectionnel jeloli ki.
+// layerIds: tomb (number[]) — a layer.id ertekek
+function selectMultipleLayersById(layerIds) {
+  if (!layerIds || layerIds.length === 0) return;
+  if (layerIds.length === 1) { selectLayerById(layerIds[0]); return; }
+
+  // Elso layer kivalasztasa
+  var desc = new ActionDescriptor();
+  var ref = new ActionReference();
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
+  desc.putReference(charIDToTypeID("null"), ref);
+  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+
+  // Tobbi hozzaadasa egyenkent
+  for (var i = 1; i < layerIds.length; i++) {
+    var addDesc = new ActionDescriptor();
+    var addRef = new ActionReference();
+    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
+    addDesc.putReference(charIDToTypeID("null"), addRef);
+    addDesc.putEnumerated(
+      stringIDToTypeID("selectionModifier"),
+      stringIDToTypeID("selectionModifierType"),
+      stringIDToTypeID("addToSelection")
+    );
+    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  }
 }
 
 // --- Csoport osszes artLayer-jenek atmeretezese ---

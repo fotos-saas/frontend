@@ -30,6 +30,9 @@ function log(msg) {
 var _doc, _data, _created = 0, _errors = 0;
 
 function _doAddGroupLayers() {
+  var _origDlg = app.displayDialogs;
+  app.displayDialogs = DialogModes.NO;
+
   // --- 1. Top-level csoport letrehozasa ---
   var topGroup = _doc.layerSets.add();
   topGroup.name = _data.groupName;
@@ -136,6 +139,7 @@ function _doAddGroupLayers() {
       }
     }
   }
+  app.displayDialogs = _origDlg;
 }
 
 (function () {

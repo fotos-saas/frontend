@@ -303,6 +303,11 @@
     padding: 5px 10px;
     gap: 5px;
   }
+
+  &--outline {
+    background: transparent;
+    border-style: dashed;
+  }
 }
 
 .qa-input {

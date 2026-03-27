@@ -307,11 +307,24 @@ function _processPerson(person) {
     try {
       var posBaselineOffset = _measureBaselineOffset(posContainer, posFontSize);
 
-      // Nev layer alja — ha nincs name layer, a kep alja + nameGap
+      // Nev layer alja — font meretbol szamolva (NEM bounds-bol!)
+      // Igy a pozicio layer helye NEM fugg a nev tartalmatol (ekezetek, lenyulo betuk).
       var nameBottom;
       if (nameLayer) {
-        var nameBounds = _getBoundsNoEffects(nameLayer);
-        nameBottom = nameBounds.bottom;
+        var nameBaselineOffset = _measureBaselineOffset(posContainer, CONFIG.FONT_SIZE || 25);
+        var nImgB = _getBoundsNoEffects(imageLayer);
+        var nameGapPx = _cm2px(nameGapCm);
+        var nameDesiredTop = nImgB.bottom + nameGapPx;
+        var nameFontSize = CONFIG.FONT_SIZE || 25;
+        var nameFontHeightPx = (nameFontSize / 72) * _doc.resolution;
+        var nameLineCount = 1;
+        try {
+          var nc = nameLayer.textItem.contents;
+          for (var nci = 0; nci < nc.length; nci++) {
+            if (nc.charAt(nci) === "\r") nameLineCount++;
+          }
+        } catch (e2) {}
+        nameBottom = nameDesiredTop + (nameFontHeightPx * nameLineCount * 1.2);
       } else {
         var imgB = _getBoundsNoEffects(imageLayer);
         nameBottom = imgB.bottom + _cm2px(nameGapCm);
@@ -384,12 +397,8 @@ function _doUpdatePositions() {
     }
 
     _dpi = _doc.resolution;
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
 
     _doc.suspendHistory("Poziciok frissitese", "_doUpdatePositions()");
-
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] KESZ: " + _created + " letrehozva, " + _updated + " frissitve, " + _deleted + " torolve, " + _errors + " hiba");
 

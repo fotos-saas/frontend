@@ -50,6 +50,20 @@ function _findLayerByName(container, targetName) {
   return null;
 }
 
+// --- Layer keresese CSAK az Images csoportban (Students + Teachers) ---
+// Nem a teljes doc-ban keres, igy nincs dupla SO problema.
+function _findImageLayer(doc, layerName) {
+  var groups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < groups.length; g++) {
+    var grp = getGroupByPath(doc, groups[g]);
+    if (!grp) continue;
+    for (var i = 0; i < grp.artLayers.length; i++) {
+      if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
+    }
+  }
+  return null;
+}
+
 function _doPlacePhotos() {
   var args = parseArgs();
   if (!args.dataFilePath) {
@@ -64,26 +78,12 @@ function _doPlacePhotos() {
 
   log("[JSX] Fotok behelyezese: " + data.layers.length + " layer");
 
-  // Images csoport keresese — ide kell a fotot behelyezni (nem a Names csoportba)
-  var imagesGroup = null;
-  try {
-    for (var g = 0; g < _doc.layerSets.length; g++) {
-      if (_doc.layerSets[g].name === "Images") {
-        imagesGroup = _doc.layerSets[g];
-        break;
-      }
-    }
-  } catch (e) { /* nincs layerSets */ }
-
   for (var i = 0; i < data.layers.length; i++) {
     var item = data.layers[i];
 
     try {
-      // Layer keresese: eloszor az Images csoportban, fallback teljes dokumentumra
-      var layer = imagesGroup ? _findLayerByName(imagesGroup, item.layerName) : null;
-      if (!layer) {
-        layer = _findLayerByName(_doc, item.layerName);
-      }
+      // Layer keresese CSAK az Images csoportban
+      var layer = _findImageLayer(_doc, item.layerName);
       if (!layer) {
         log("[JSX] WARN: Layer nem talalhato: " + item.layerName);
         _errors++;
@@ -94,27 +94,29 @@ function _doPlacePhotos() {
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
-      // SO megnyitas → kep Place → cover meretezes → mentes → bezaras
-      // Ez megnyitja az SO belso dokumentumat (aminek a merete az eredeti keret),
-      // belerakja a kepet cover modban, flatten, save, close.
-      // Igy az SO keret merete 100%-ban megmarad!
-      placePhotoInSmartObject(_doc, layer, item.photoPath, CONFIG.SYNC_BORDER === "true");
-
-      // Dokumentum ujra aktivalasa (az SO megnyitas/bezaras megvaltoztatja)
-      _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+      if (CONFIG.SYNC_BORDER === "true") {
+        // Keretezesnel SO open kell (az action belul fut)
+        placePhotoInSmartObject(_doc, layer, item.photoPath, true);
+        _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+      } else {
+        // GYORS: placedLayerReplaceContents — NEM nyit SO-t,
+        // 1 history lepes, es a suspendHistory osszevonja oket
+        var descReplace = new ActionDescriptor();
+        descReplace.putPath(charIDToTypeID("null"), new File(item.photoPath));
+        descReplace.putInteger(charIDToTypeID("PgNm"), 1);
+        executeAction(stringIDToTypeID("placedLayerReplaceContents"), descReplace, DialogModes.NO);
+      }
 
       _placed++;
 
     } catch (e) {
       log("[JSX] HIBA (" + item.layerName + "): " + e.message);
       _errors++;
-      // Ha az SO megnyitva maradt, probaljuk bezarni
       try {
         if (app.documents.length > 1) {
           app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
         }
       } catch (closeErr) { /* ignore */ }
-      // Dokumentum visszaallitasa hiba utan
       try {
         _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
       } catch (re) { /* ignore */ }
@@ -128,7 +130,7 @@ function _doPlacePhotos() {
   try {
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 
-    // Egyetlen Undo lepes
+    // Egyetlen Undo lepes az osszes kepcserere
     _doc.suspendHistory("Fotok behelyezese", "_doPlacePhotos()");
 
     log("[JSX] Fotok behelyezese kesz: " + _placed + " sikeres, " + _errors + " hiba");

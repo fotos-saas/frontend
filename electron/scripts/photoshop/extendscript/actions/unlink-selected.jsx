@@ -13,6 +13,7 @@
  */
 
 // #include "../lib/config.jsx"
+// #include "../lib/utils.jsx"
 
 var _logLines = [];
 function log(msg) { _logLines.push(msg); }
@@ -130,26 +131,6 @@ function doUnlinkAll() {
   try { imagesGroup = doc.layerSets.getByName("Images"); } catch (e) {}
   if (imagesGroup && unlinkedNames.length > 0) {
     var finalIds = [];
-    var selectLayersById = function(layerIds) {
-      if (layerIds.length === 0) return;
-      var d = new ActionDescriptor();
-      var r = new ActionReference();
-      r.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-      d.putReference(charIDToTypeID("null"), r);
-      executeAction(charIDToTypeID("slct"), d, DialogModes.NO);
-      for (var si = 1; si < layerIds.length; si++) {
-        var ad = new ActionDescriptor();
-        var ar = new ActionReference();
-        ar.putIdentifier(charIDToTypeID("Lyr "), layerIds[si]);
-        ad.putReference(charIDToTypeID("null"), ar);
-        ad.putEnumerated(
-          stringIDToTypeID("selectionModifier"),
-          stringIDToTypeID("selectionModifierType"),
-          stringIDToTypeID("addToSelection")
-        );
-        executeAction(charIDToTypeID("slct"), ad, DialogModes.NO);
-      }
-    };
     var collectImageIds = function(container) {
       try {
         for (var ci = 0; ci < container.artLayers.length; ci++) {
@@ -166,7 +147,7 @@ function doUnlinkAll() {
     };
     collectImageIds(imagesGroup);
     if (finalIds.length > 0) {
-      selectLayersById(finalIds);
+      selectMultipleLayersById(finalIds);
     }
   }
 

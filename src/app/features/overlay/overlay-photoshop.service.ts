@@ -1,5 +1,6 @@
-import { Injectable, inject, NgZone, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, NgZone, signal } from '@angular/core';
 import { LoggerService } from '../../core/services/logger.service';
+import { OverlayPollingService } from './overlay-polling.service';
 
 /**
  * Photoshop JSX futtatás és busy state kezelés.
@@ -9,9 +10,30 @@ import { LoggerService } from '../../core/services/logger.service';
 export class OverlayPhotoshopService {
   private readonly ngZone = inject(NgZone);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly polling = inject(OverlayPollingService);
 
   /** Melyik parancs fut éppen — busy spinner megjelenítéshez */
   readonly busyCommand = signal<string | null>(null);
+  private _busyDepth = 0;
+
+  /** Képcsere progress — null ha nem fut */
+  readonly placeProgress = signal<{ current: number; total: number } | null>(null);
+
+  constructor() {
+    if (window.electronAPI) {
+      const unsub = window.electronAPI.photoshop.onPlacePhotosProgress((data) => {
+        this.ngZone.run(() => {
+          if (data.done) {
+            this.placeProgress.set(null);
+          } else {
+            this.placeProgress.set({ current: data.current, total: data.total });
+          }
+        });
+      });
+      this.destroyRef.onDestroy(() => unsub());
+    }
+  }
 
   /**
    * JSX script futtatása busy state kezeléssel.
@@ -24,7 +46,7 @@ export class OverlayPhotoshopService {
     pollCallback?: () => void,
   ): Promise<any> {
     if (!window.electronAPI) return null;
-    this.busyCommand.set(commandId);
+    this._enterBusy(commandId);
     try {
       const result = await window.electronAPI.photoshop.runJsx({ scriptName, jsonData });
       this.logger.debug(`[JSX:${commandId}] result:`, result);
@@ -34,20 +56,36 @@ export class OverlayPhotoshopService {
       this.logger.error(`[JSX:${commandId}] error:`, err);
       return null;
     } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
+      this._leaveBusy();
     }
   }
 
   /**
    * Busy wrapper — tetszőleges async művelethez beállítja/reseteli a busyCommand-ot.
+   * Automatikusan szünetelteti a pollingot amíg a PS foglalt.
    */
   async withBusy<T>(commandId: string, op: () => Promise<T>): Promise<T> {
-    this.ngZone.run(() => this.busyCommand.set(commandId));
+    this._enterBusy(commandId);
     try {
       return await op();
     } finally {
-      this.ngZone.run(() => this.busyCommand.set(null));
+      this._leaveBusy();
     }
+  }
+
+  private _enterBusy(commandId: string): void {
+    this._busyDepth++;
+    this.polling.psBusy.set(true);
+    this.ngZone.run(() => this.busyCommand.set(commandId));
+  }
+
+  private _leaveBusy(): void {
+    this._busyDepth--;
+    if (this._busyDepth <= 0) {
+      this._busyDepth = 0;
+      this.polling.psBusy.set(false);
+    }
+    this.ngZone.run(() => this.busyCommand.set(null));
   }
 
   /**

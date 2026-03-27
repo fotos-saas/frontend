@@ -248,6 +248,10 @@ export class OverlayQuickActionsService {
   }
 
   private async getLayerNames(target: string): Promise<string[]> {
+    if (target === 'selected') {
+      const { names } = await this.ps.getFreshSelectedLayerNames();
+      return names;
+    }
     const data = await this.ps.getImageLayerData();
     if (target === 'teachers') return data.teachers;
     if (target === 'students') return data.students;
@@ -257,10 +261,12 @@ export class OverlayQuickActionsService {
   private targetLabel(target: string, fallback = 'összes'): string {
     if (target === 'teachers') return 'tanár';
     if (target === 'students') return 'diák';
+    if (target === 'selected') return 'kijelöltek';
     return fallback;
   }
 
   private targetGroup(target: string): string {
+    if (target === 'selected') return '';
     return target === 'teachers' || target === 'students' ? target : 'all';
   }
 

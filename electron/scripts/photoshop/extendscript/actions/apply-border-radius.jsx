@@ -185,9 +185,6 @@ function _makeLayerMaskFromSelection() {
 // --- Lekerekitett sarok mask alkalmazasa egy layerre ---
 // Logika: shape layer → select pixels → mask cel layer-re → shape torles
 function _applyBorderRadiusMask(doc, layer, radius) {
-  var originalRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
-
   var bounds = layer.bounds;
   var layerLeft = bounds[0].as("px");
   var layerTop = bounds[1].as("px");
@@ -198,7 +195,6 @@ function _applyBorderRadiusMask(doc, layer, radius) {
   var layerH = layerBottom - layerTop;
 
   if (layerW <= 0 || layerH <= 0) {
-    app.preferences.rulerUnits = originalRulerUnits;
     return false;
   }
 
@@ -225,7 +221,6 @@ function _applyBorderRadiusMask(doc, layer, radius) {
   // 6. Shape layer torlese
   shapeLayer.remove();
 
-  app.preferences.rulerUnits = originalRulerUnits;
   return true;
 }
 

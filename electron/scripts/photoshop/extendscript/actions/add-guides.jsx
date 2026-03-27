@@ -30,10 +30,6 @@ var _doc, _data;
 function _doAddGuides() {
   var marginCm = _data.marginCm;
 
-  // Ruler egyseg pixelre allitasa (guide-ok pixelben lesznek megadva)
-  var oldRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
-
   // Dokumentum DPI kiolvasasa
   var dpi = _doc.resolution; // px/inch
 
@@ -54,9 +50,6 @@ function _doAddGuides() {
   _doc.guides.add(Direction.VERTICAL, docWidthPx - marginPx);
   _doc.guides.add(Direction.HORIZONTAL, marginPx);
   _doc.guides.add(Direction.HORIZONTAL, docHeightPx - marginPx);
-
-  // Ruler visszaallitasa az eredeti egysegre
-  app.preferences.rulerUnits = oldRulerUnits;
 
   log("[JSX] 4 guide hozzaadva (" + marginCm + " cm = " + marginPx + " px margo)");
 }

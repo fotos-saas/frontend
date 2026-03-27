@@ -233,9 +233,19 @@ function _positionNameUnderImage(nameLayer, imageLayer, gapPx, textAlign, breakA
   // Position beallitasa — a baseline anchor pont
   textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
 
-  // Nev bounds lekeres (a position layer-nek kell a nameBottom)
-  var nameBounds = _getBoundsNoEffects(nameLayer);
-  return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
+  // nameBottom: NEM bounds-bol, hanem baseline + font meretbol
+  // Igy a pozicio layer helye NEM fugg a nev tartalmatol (ekezetektol, lenyulo betutol).
+  var fontSize = CONFIG.FONT_SIZE || 25;
+  var fontHeightPx = (fontSize / 72) * _doc.resolution;
+  var lineCount = 1;
+  try {
+    var content = textItem.contents;
+    for (var ci = 0; ci < content.length; ci++) {
+      if (content.charAt(ci) === "\r") lineCount++;
+    }
+  } catch (e) {}
+  var nameBottom = desiredBoundsTop + (fontHeightPx * lineCount * 1.2);
+  return { imgBounds: imgBounds, nameBottom: nameBottom };
 }
 
 // --- Pozicio (beosztás) layer pozicionalasa a nev ala ---
@@ -349,16 +359,11 @@ function _doArrangeNames() {
       return;
     }
 
-    // DPI kiolvasas + ruler PIXELS-re
+    // DPI kiolvasas
     _dpi = _doc.resolution;
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
 
     // Nevek rendezese — egyetlen history lepes
     _doc.suspendHistory("Nevek rendezese", "_doArrangeNames()");
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] KESZ: " + _moved + " nev mozgatva, " + _errors + " hiba");
 

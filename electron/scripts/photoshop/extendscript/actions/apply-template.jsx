@@ -188,15 +188,8 @@ function _doApplyMoves() {
     // Globalis valtozoba mentjuk — suspendHistory string-eval innen olvassa
     _movesData = readJsonFile(args.dataFilePath);
 
-    // Ruler PIXELS-re
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     // Egyetlen Undo lepes
     _doc.suspendHistory("Sablon alkalmazás", "_doApplyMoves()");
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] Sablon alkalmazas befejezve");
 

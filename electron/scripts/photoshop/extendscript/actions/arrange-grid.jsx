@@ -286,16 +286,11 @@ function _doArrangeGrid() {
       return;
     }
 
-    // DPI kiolvasas + ruler PIXELS-re (minden szamitas pixelben!)
+    // DPI kiolvasas (minden szamitas pixelben!)
     _dpi = _doc.resolution;
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
 
     // Grid elrendezes — egyetlen history lepes
     _doc.suspendHistory("Tablo grid elrendezes", "_doArrangeGrid()");
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] KESZ");
 

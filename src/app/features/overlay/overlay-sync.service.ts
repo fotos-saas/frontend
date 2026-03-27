@@ -67,7 +67,7 @@ export class OverlaySyncService {
     this.logger.debug('[SYNC] photosToSync:', photosToSync.length);
     if (photosToSync.length === 0) { this.logger.debug('[SYNC] ABORT: no photos to sync'); return; }
 
-    // Behelyezés a Photoshopba
+    // Behelyezés — a withBusy automatikusan szünetelteti a pollingot
     await this.ps.withBusy('sync-photos', async () => {
       await window.electronAPI!.photoshop.placePhotos({
         layers: photosToSync,

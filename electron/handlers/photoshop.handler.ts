@@ -1583,7 +1583,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const applyAppleScript = jsxRunner.buildFocusPreservingAppleScript(tempApplyJsxPath);
 
       const applyOutput = await new Promise<string>((resolve, reject) => {
-        execFile('osascript', ['-e', applyAppleScript], { timeout: 60000 }, (error, stdout, stderr) => {
+        execFile('osascript', ['-e', applyAppleScript], { timeout: 300000 }, (error, stdout, stderr) => {
           try { fs.unlinkSync(tempApplyJsxPath); } catch (_) { /* ignore */ }
           try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           if (error) {
@@ -1604,32 +1604,33 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
   });
 
   // Fotok behelyezese meglevo Smart Object layerekbe
-  // A kijelolt layerek fotoihoz letolti a kepeket es a JSX csereli az SO tartalmAt
+  // KEPENKENT kulon JSX hivas — a PS csak ~5-10 mp-re blokkolt kepenkent,
+  // kozben szabad (nem fagy 20 kepnel), es progress event-et kuld a frontendnek.
   ipcMain.handle('photoshop:place-photos', async (_event, params: {
     layers: Array<{ layerName: string; photoUrl: string }>;
     targetDocName?: string;
     psdFilePath?: string;
     syncBorder?: boolean;
   }) => {
-    let tempJsonPath: string | null = null;
-
     try {
       if (!params.layers || params.layers.length === 0) {
         return { success: false, error: 'Nincs layer adat' };
       }
 
-      log.info(`Place photos: ${params.layers.length} layer fotojanak letoltese...`);
+      const total = params.layers.length;
+      const dlStart = Date.now();
+      log.info(`Place photos: ${total} layer fotojanak letoltese...`);
 
-      // Fotok parhuzamos letoltese
+      // 1. Fotok PARHUZAMOS letoltese (PS-t meg nem bantjuk)
       const downloadResults = await Promise.all(
         params.layers.map(async (item) => {
           try {
             const ext = item.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
-            // URL hash a fájlnévben — ha a fotó URL megváltozik (pl. aktív fotó csere), a cache invalidálódik
             const urlHash = crypto.createHash('md5').update(item.photoUrl).digest('hex').substring(0, 8);
             const fileName = `${item.layerName}-${urlHash}.${ext}`;
+            // Eredeti meret — a PS SO-ban tortenik a cover resize az SO aranyaival
             const localPath = await jsxRunner.downloadPhoto(item.photoUrl, fileName);
-            return { layerName: item.layerName, photoPath: localPath };
+            return { layerName: item.layerName, photoPath: localPath, photoUrl: item.photoUrl };
           } catch (err) {
             log.warn(`Foto letoltes sikertelen (${item.layerName}):`, err);
             return null;
@@ -1637,22 +1638,34 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
         }),
       );
 
-      // Sikeres letoltesek szurese
       const validLayers = downloadResults.filter(
-        (r): r is { layerName: string; photoPath: string } => r !== null,
+        (r): r is { layerName: string; photoPath: string; photoUrl: string } => r !== null,
       );
 
       if (validLayers.length === 0) {
         return { success: false, error: 'Egy foto sem sikerult letolteni' };
       }
 
-      // JSON temp fajl irasa a JSX szamara
-      tempJsonPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.json`);
+      const dlMs = Date.now() - dlStart;
+      log.info(`Place photos: ${validLayers.length}/${total} foto letoltve ${dlMs}ms alatt, PS behelyezes indul...`);
+
+      // 2. Progress: letoltes kesz, PS indul
+      for (const win of BrowserWindow.getAllWindows()) {
+        try {
+          win.webContents.send('place-photos-progress', {
+            current: 0,
+            total: validLayers.length,
+            layerName: validLayers[0].layerName,
+          });
+        } catch (_) { /* ignore */ }
+      }
+
+      // 3. EGY JSX hivas az OSSZES keppel — 1 history bejegyzes
+      const tempJsonPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.json`);
       fs.writeFileSync(tempJsonPath, JSON.stringify({ layers: validLayers }), 'utf-8');
 
-      log.info(`Place photos JSON irva: ${tempJsonPath} (${validLayers.length}/${params.layers.length} fotoval)`);
+      log.info(`Place photos JSON irva: ${tempJsonPath} (${validLayers.length} kep)`);
 
-      // JSX futtatasa
       const extraConfig = params.syncBorder ? { SYNC_BORDER: 'true' } : undefined;
       const jsxCode = jsxRunner.buildJsxScript('actions/place-photos.jsx', tempJsonPath, params.targetDocName, params.psdFilePath, extraConfig);
       const tempJsxPath = path.join(app.getPath('temp'), `jsx-place-photos-${Date.now()}.jsx`);
@@ -1660,35 +1673,40 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
 
       const appleScript = jsxRunner.buildFocusPreservingAppleScript(tempJsxPath);
 
-      return new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
-        execFile('osascript', ['-e', appleScript], { timeout: 120000 }, (error, stdout, stderr) => {
-          // Temp fajlok torlese
+      const result = await new Promise<{ success: boolean; error?: string; output?: string }>((resolve) => {
+        execFile('osascript', ['-e', appleScript], { timeout: 600000 }, (error, stdout, stderr) => {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
-          if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-            try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
-          }
-
+          try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
           if (error) {
             log.error('Place photos JSX hiba:', error.message, stderr);
             resolve({ success: false, error: stderr || error.message });
-            return;
+          } else {
+            log.info('Place photos kesz:', stdout?.trim().slice(0, 500));
+            resolve({ success: true, output: stdout || '' });
           }
-          log.info('Place photos kesz:', stdout.trim().slice(0, 500));
-
-          // Placed photos JSON frissítése
-          try {
-            updatePlacedPhotosJson(params.psdFilePath, stdout, params.layers, !!params.syncBorder);
-          } catch (jsonErr) {
-            log.warn('Placed photos JSON frissites sikertelen:', jsonErr);
-          }
-
-          resolve({ success: true, output: stdout || '' });
         });
       });
-    } catch (error) {
-      if (tempJsonPath && fs.existsSync(tempJsonPath)) {
-        try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
+
+      // Placed photos JSON frissitese
+      try {
+        updatePlacedPhotosJson(params.psdFilePath, result.output, params.layers, !!params.syncBorder);
+      } catch (jsonErr) {
+        log.warn('Placed photos JSON frissites sikertelen:', jsonErr);
       }
+
+      // Progress vege
+      for (const win of BrowserWindow.getAllWindows()) {
+        try {
+          win.webContents.send('place-photos-progress', {
+            current: validLayers.length,
+            total: validLayers.length,
+            done: true,
+          });
+        } catch (_) { /* ignore */ }
+      }
+
+      return result;
+    } catch (error) {
       log.error('Place photos hiba:', error);
       const errMsg = error instanceof Error ? error.message : 'Ismeretlen hiba';
       return { success: false, error: errMsg };

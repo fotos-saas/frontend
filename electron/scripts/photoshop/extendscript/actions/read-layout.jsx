@@ -187,10 +187,6 @@ function _readAllLayers(container, pathSoFar, result) {
     // DPI kiolvasas
     var dpi = _doc.resolution;
 
-    // Ruler PIXELS-re (szamitasok pixelben)
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     // Dokumentum meretek pixelben
     var docWidthPx = Math.round(_doc.width.as("px"));
     var docHeightPx = Math.round(_doc.height.as("px"));
@@ -209,9 +205,6 @@ function _readAllLayers(container, pathSoFar, result) {
       },
       layers: allLayers
     };
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
 
     // Eredmeny JSON string-kent — specialis prefix a handler parse-olasahoz
     log("__LAYOUT_JSON__" + _jsonStringify(result));

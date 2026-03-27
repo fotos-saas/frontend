@@ -88,24 +88,22 @@ function getImageSelectionNames(doc, selected) {
   return names;
 }
 
-// --- Layer bounds EFFEKTEK NELKUL ---
+// --- Layer bounds EFFEKTEK NELKUL — SELECT NELKUL, ID alapjan ---
 function getBoundsNoEffects(layerId) {
-  var desc2 = new ActionDescriptor();
-  var ref2 = new ActionReference();
-  ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
-  desc2.putReference(charIDToTypeID("null"), ref2);
-  executeAction(charIDToTypeID("slct"), desc2, DialogModes.NO);
-
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("boundsNoEffects"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   var desc = executeActionGet(ref);
-
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
     b = desc.getObjectValue(boundsKey);
   } else {
-    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+    var ref2 = new ActionReference();
+    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("bounds"));
+    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc2 = executeActionGet(ref2);
+    b = desc2.getObjectValue(stringIDToTypeID("bounds"));
   }
   return {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
@@ -396,9 +394,24 @@ function positionNameUnderImage(doc, nameLayer, imageLayer, gapPx, textAlign, br
   // Position beallitasa — a baseline anchor pont
   textItem.position = [new UnitValue(Math.round(desiredX), "px"), new UnitValue(Math.round(desiredBaselineY), "px")];
 
-  // Nev bounds lekeres (a position layer-nek kell a nameBottom)
-  var nameBounds = getBoundsNoEffects(nameLayer.id);
-  return { imgBounds: imgBounds, nameBottom: nameBounds.bottom };
+  // nameBottom: NEM bounds-bol, hanem baseline + descent meretbol
+  // Igy a pozicio layer helye NEM fugg a nev tartalmatol (ekezetektol, lenyulo betutol).
+  // A descent a font magassag — baseline meresnel "Hg"-t hasznaltunk,
+  // a bounds.bottom - baseline tavolsag a descent.
+  var refBounds = getBoundsNoEffects(nameLayer.id);
+  // desiredBoundsTop + (font teljes magassag) = konzisztens nameBottom
+  var fontSize = typeof CONFIG !== "undefined" && CONFIG.FONT_SIZE ? CONFIG.FONT_SIZE : 25;
+  var fontHeightPx = (fontSize / 72) * doc.resolution; // pt → px
+  // Sortores eseten a teljes bounds magassagot hasznaljuk
+  var lineCount = 1;
+  try {
+    var content = textItem.contents;
+    for (var ci = 0; ci < content.length; ci++) {
+      if (content.charAt(ci) === "\r") lineCount++;
+    }
+  } catch (e) {}
+  var nameBottom = desiredBoundsTop + (fontHeightPx * lineCount * 1.2); // 1.2 = line-height faktor
+  return { imgBounds: imgBounds, nameBottom: nameBottom };
 }
 
 // --- Egyszeru JSON object parser (ES3, nincs JSON.parse) ---
@@ -450,8 +463,7 @@ function doArrangeNames() {
   }
 
   // Ruler pixelre
-  var oldRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
+  // Ruler units-ot NEM allitjuk — ActionManager pixelben dolgozik fuggetlenul a ruler-tol
 
   // TARGET_GROUP szures: "students", "teachers", vagy "all" (default)
   // toLowerCase: a hivo kod "Students"/"Teachers" nagybetut kuld, de itt kisbetut varunk
@@ -538,29 +550,11 @@ function doArrangeNames() {
     for (var s = 0; s < selected.length; s++) {
       selIds.push(selected[s].id);
     }
-    // Elso layer kivalasztasa
-    var selDesc = new ActionDescriptor();
-    var selRef = new ActionReference();
-    selRef.putIdentifier(charIDToTypeID("Lyr "), selIds[0]);
-    selDesc.putReference(charIDToTypeID("null"), selRef);
-    executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-    // Tobbi hozzaadasa
-    for (var k = 1; k < selIds.length; k++) {
-      var addDesc = new ActionDescriptor();
-      var addRef = new ActionReference();
-      addRef.putIdentifier(charIDToTypeID("Lyr "), selIds[k]);
-      addDesc.putReference(charIDToTypeID("null"), addRef);
-      addDesc.putEnumerated(
-        stringIDToTypeID("selectionModifier"),
-        stringIDToTypeID("selectionModifierType"),
-        stringIDToTypeID("addToSelection")
-      );
-      executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-    }
+    selectMultipleLayersById(selIds);
   }
 
   // Ruler visszaallitasa
-  app.preferences.rulerUnits = oldRulerUnits;
+  // Ruler nem kell visszaallitani
 
   _arrangeResult = '{"arranged":' + arranged + '}';
 }

@@ -17,6 +17,9 @@ export class OverlayPollingService {
   readonly isEnabled = signal(true);
   readonly activeDoc = signal<ActiveDocInfo>({ name: null, path: null, dir: null });
 
+  /** PS busy — ha true, a polling kihagyja a hívást */
+  readonly psBusy = signal(false);
+
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private turboTimeout: ReturnType<typeof setTimeout> | null = null;
   private isVisible = true;
@@ -110,14 +113,14 @@ export class OverlayPollingService {
     }
   }
 
-  private pausePolling(): void {
+  pausePolling(): void {
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
     }
   }
 
-  private resumePolling(): void {
+  resumePolling(): void {
     if (!this.isEnabled()) return;
     const interval = this.isTurbo() ? POLL_TURBO : this.lastPollInterval;
     this.executePoll();
@@ -125,7 +128,7 @@ export class OverlayPollingService {
   }
 
   private executePoll(): void {
-    if (!this.isEnabled() || !this.isVisible || !this.pollCallback) return;
+    if (!this.isEnabled() || !this.isVisible || !this.pollCallback || this.psBusy()) return;
     this.pollCallback();
   }
 }

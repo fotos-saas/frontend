@@ -62,18 +62,23 @@ function getSelectedLayerInfo() {
   return layers;
 }
 
-// --- Bounds effektek nelkul ---
+// --- Bounds effektek nelkul — SELECT NELKUL, kozvetlenul ID alapjan ---
 function getBoundsNoEffects(layerId) {
-  selectLayerById(layerId);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("boundsNoEffects"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   var desc = executeActionGet(ref);
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
     b = desc.getObjectValue(boundsKey);
   } else {
-    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+    // Fallback: bounds property-vel
+    var ref2 = new ActionReference();
+    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("bounds"));
+    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc2 = executeActionGet(ref2);
+    b = desc2.getObjectValue(stringIDToTypeID("bounds"));
   }
   return {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
@@ -146,22 +151,60 @@ function unlinkByName(doc, layerName) {
   }
 }
 
-// --- Batch unlink: tomb minden elemenek nevere ---
+// --- Batch unlink: EGYETLEN bejarassal osszegyujt, majd unlinkel ---
 function unlinkAll(doc, items) {
-  for (var i = 0; i < items.length; i++) {
-    unlinkByName(doc, items[i].name);
-  }
+  var nameSet = {};
+  for (var i = 0; i < items.length; i++) nameSet[items[i].name] = true;
+  var _unlinkWalk = function(container) {
+    try {
+      for (var a = 0; a < container.artLayers.length; a++) {
+        if (nameSet[container.artLayers[a].name]) {
+          try { container.artLayers[a].unlink(); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    try {
+      for (var s = 0; s < container.layerSets.length; s++) {
+        _unlinkWalk(container.layerSets[s]);
+      }
+    } catch (e) {}
+  };
+  _unlinkWalk(doc);
 }
 
-// --- Batch relink: szemelveneknt visszalinkel ---
+// --- Batch relink: EGYETLEN bejarassal osszegyujt, majd szemelveneknt linkel ---
 function relinkAll(doc, items) {
+  // 1. nameSet felepitese
+  var nameSet = {};
   for (var i = 0; i < items.length; i++) {
-    var sibs = [];
-    findAllLayersByName(doc, items[i].name, sibs);
-    if (sibs.length >= 2) {
+    nameSet[items[i].name] = true;
+  }
+  // 2. Egyetlen bejaras: minden relevanst osszegyujt
+  var resultMap = {};
+  var _collectForRelink = function(container) {
+    try {
+      for (var a = 0; a < container.artLayers.length; a++) {
+        var n = container.artLayers[a].name;
+        if (nameSet[n]) {
+          if (!resultMap[n]) resultMap[n] = [];
+          resultMap[n].push(container.artLayers[a]);
+        }
+      }
+    } catch (e) {}
+    try {
+      for (var s = 0; s < container.layerSets.length; s++) {
+        _collectForRelink(container.layerSets[s]);
+      }
+    } catch (e) {}
+  };
+  _collectForRelink(doc);
+  // 3. Szemelveneknt select + link (mar nincs ujabb bejaras)
+  for (var k = 0; k < items.length; k++) {
+    var sibs = resultMap[items[k].name];
+    if (sibs && sibs.length >= 2) {
       var ids = [];
       for (var j = 0; j < sibs.length; j++) ids.push(sibs[j].id);
-      selectLayersById(ids);
+      selectMultipleLayersById(ids);
       linkSelectedLayers();
     }
   }
@@ -184,24 +227,7 @@ function translateLayer(layerId, dx, dy) {
 
 // --- Tobb layer kijelolese ID alapjan ---
 function selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
+  selectMultipleLayersById(layerIds);
 }
 
 // --- Link action ---
@@ -252,23 +278,11 @@ function sortByTopLeft(items) {
 // --- Eredeti kijeloles visszaallitasa ---
 function restoreSelection(selected) {
   if (selected.length === 0) return;
-  var selDesc = new ActionDescriptor();
-  var selRef = new ActionReference();
-  selRef.putIdentifier(charIDToTypeID("Lyr "), selected[0].id);
-  selDesc.putReference(charIDToTypeID("null"), selRef);
-  executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-  for (var k = 1; k < selected.length; k++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), selected[k].id);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+  var ids = [];
+  for (var k = 0; k < selected.length; k++) {
+    ids.push(selected[k].id);
   }
+  selectMultipleLayersById(ids);
 }
 
 // Globalis eredmeny
@@ -277,7 +291,8 @@ var _eqResult = '{"error":"Nem futott le"}';
 function doEqualizeGrid() {
   var doc = app.activeDocument;
   var oldRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
+  // Ruler units-ot NEM allitjuk — a getBoundsNoEffects pixelben ad vissza
+  // fuggetlenul a ruler beallitastol (ActionManager UnitDouble mindig px)
 
   try {
   // Kijelolt layerek
@@ -459,6 +474,30 @@ function doEqualizeGrid() {
   // Unlink az erintett layerekrol (kulonben a linkelt nevek/poziciok duplán mozdulnak)
   unlinkAll(doc, items);
 
+  // Testver layerek elogyujtese EGYETLEN bejarassal (ha kell)
+  var siblingMap = {};
+  if (!imagesOnly) {
+    var nameSetExec = {};
+    for (var ns = 0; ns < items.length; ns++) nameSetExec[items[ns].name] = true;
+    var _collectSiblings = function(container) {
+      try {
+        for (var a = 0; a < container.artLayers.length; a++) {
+          var n = container.artLayers[a].name;
+          if (nameSetExec[n]) {
+            if (!siblingMap[n]) siblingMap[n] = [];
+            siblingMap[n].push(container.artLayers[a]);
+          }
+        }
+      } catch (e) {}
+      try {
+        for (var s = 0; s < container.layerSets.length; s++) {
+          _collectSiblings(container.layerSets[s]);
+        }
+      } catch (e) {}
+    };
+    _collectSiblings(doc);
+  }
+
   for (var e = 1; e < items.length; e++) {
     var prevRight = items[e - 1].bounds.right;
     var currLeft = items[e].bounds.left;
@@ -477,11 +516,9 @@ function doEqualizeGrid() {
     translateLayer(items[e].id, dx, dy);
 
     if (!imagesOnly) {
-      // MINDEN azonos nevu layer mozgatasa (Names, Positions, keretek, stb.)
-      var siblings = [];
-      findAllLayersByName(doc, items[e].name, siblings);
+      // Testver layerek mozgatasa az elogyujtott map-bol
+      var siblings = siblingMap[items[e].name] || [];
       for (var s = 0; s < siblings.length; s++) {
-        // A kepet mar mozgattuk, azt kihagyjuk
         if (siblings[s].id === items[e].id) continue;
         translateLayer(siblings[s].id, dx, dy);
       }
@@ -504,7 +541,7 @@ function doEqualizeGrid() {
   _eqResult = '{"mode":"execute","moved":' + moved + ',"imagesOnly":' + (imagesOnly ? 'true' : 'false') + '}';
 
   } finally {
-    app.preferences.rulerUnits = oldRulerUnits;
+    // Ruler nem kell visszaallitani — nem allitottuk at
   }
 }
 

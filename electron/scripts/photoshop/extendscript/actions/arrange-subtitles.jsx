@@ -152,12 +152,7 @@ function _getBoundsNoEffects(layer) {
       return;
     }
 
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     _doc.suspendHistory("Felirat pozicionalas", "_doArrangeSubtitles()");
-
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] KESZ");
 

@@ -81,6 +81,7 @@ export class OverlayComponent implements OnInit {
   readonly isTurbo = this.polling.isTurbo;
   readonly isPollingEnabled = this.polling.isEnabled;
   readonly busyCommand = this.ps.busyCommand;
+  readonly placeProgress = this.ps.placeProgress;
   readonly persons = this.projectService.persons;
   readonly isLoggedOut = this.projectService.isLoggedOut;
   readonly sorting = this.sortService.sorting;

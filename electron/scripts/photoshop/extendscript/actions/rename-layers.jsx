@@ -103,13 +103,9 @@ var __result = (function () {
 
     _renameResult = '{"renamed":0}';
 
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     // Egyetlen history lepes — Ctrl+Z-vel visszavonhato
     _doc.suspendHistory("Layer ID frissites", "_doRenameLayers()");
 
-    app.preferences.rulerUnits = oldRulerUnits;
     return _renameResult;
 
   } catch (e) {

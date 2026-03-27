@@ -42,6 +42,7 @@
           <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'all')">Mind</button>
           <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'teachers')">Tanárok</button>
           <button class="qa-btn qa-btn--blue" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--blue qa-btn--outline" [disabled]="qa.loading()" (click)="qa.onAction('refresh-labels', 'selected')">Kijelöltek</button>
         </div>
       </div>
     </div>
@@ -65,6 +66,7 @@
           <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'all')">Mind</button>
           <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'teachers')">Tanárok</button>
           <button class="qa-btn qa-btn--purple" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'students')">Diákok</button>
+          <button class="qa-btn qa-btn--purple qa-btn--outline" [disabled]="qa.loading()" (click)="qa.onAction('position-labels', 'selected')">Kijelöltek</button>
         </div>
       </div>
     </div>

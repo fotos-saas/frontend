@@ -27,6 +27,7 @@ export class PhotoLightboxComponent implements OnInit {
   readonly person = input<TabloPersonItem | null>(null);
   readonly personsWithPhotos = input<TabloPersonItem[]>([]);
   readonly projectId = input<number>(0);
+  readonly readonlyMode = input(false);
 
   readonly close = output<void>();
   readonly navigate = output<TabloPersonItem>();
@@ -58,6 +59,7 @@ export class PhotoLightboxComponent implements OnInit {
   });
 
   readonly showArchiveStrip = computed(() => {
+    if (this.readonlyMode()) return false;
     const p = this.person();
     return p && p.type === 'teacher' && p.archiveId && this.archivePhotos().length > 1;
   });

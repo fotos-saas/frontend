@@ -380,6 +380,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('jsx-debug-log', handler);
       return () => { ipcRenderer.removeListener('jsx-debug-log', handler); };
     },
+    onPlacePhotosProgress: (callback: (data: { current: number; total: number; layerName?: string; done?: boolean }) => void) => {
+      const handler = (_event: any, data: { current: number; total: number; layerName?: string; done?: boolean }) => callback(data);
+      ipcRenderer.on('place-photos-progress', handler);
+      return () => { ipcRenderer.removeListener('place-photos-progress', handler); };
+    },
     checkPsdExists: (params: { psdPath: string }) =>
       ipcRenderer.invoke('photoshop:check-psd-exists', params) as Promise<{ success: boolean; exists: boolean; hasLayouts: boolean; hasPlacedPhotos: boolean; placedPhotos: Record<string, number> | null }>,
     findProjectPsd: (params: { folderPath: string }) =>

@@ -37,24 +37,22 @@ function getSelectedLayerIds() {
   return layers;
 }
 
-// --- Layer bounds EFFEKTEK NELKUL ---
+// --- Layer bounds EFFEKTEK NELKUL — SELECT NELKUL, ID alapjan ---
 function getBoundsNoEffects(layerId) {
-  var desc2 = new ActionDescriptor();
-  var ref2 = new ActionReference();
-  ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
-  desc2.putReference(charIDToTypeID("null"), ref2);
-  executeAction(charIDToTypeID("slct"), desc2, DialogModes.NO);
-
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("boundsNoEffects"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   var desc = executeActionGet(ref);
-
   var boundsKey = stringIDToTypeID("boundsNoEffects");
   var b;
   if (desc.hasKey(boundsKey)) {
     b = desc.getObjectValue(boundsKey);
   } else {
-    b = desc.getObjectValue(stringIDToTypeID("bounds"));
+    var ref2 = new ActionReference();
+    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("bounds"));
+    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
+    var desc2 = executeActionGet(ref2);
+    b = desc2.getObjectValue(stringIDToTypeID("bounds"));
   }
   return {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
@@ -154,13 +152,8 @@ var _repositionResult = '{"moved":0}';
 function doReposition() {
   var doc = app.activeDocument;
 
-  // Ruler pixelre
-  var oldRulerUnits = app.preferences.rulerUnits;
-  app.preferences.rulerUnits = Units.PIXELS;
-
   var selected = getSelectedLayerIds();
   if (selected.length === 0) {
-    app.preferences.rulerUnits = oldRulerUnits;
     _repositionResult = '{"moved":0,"error":"Nincs kijelolt layer"}';
     return;
   }
@@ -249,23 +242,12 @@ function doReposition() {
 
   // Eredeti kijeloles visszaallitasa
   if (selected.length > 0) {
-    selectLayerById(selected[0].id);
-    for (var k = 1; k < selected.length; k++) {
-      var addDesc = new ActionDescriptor();
-      var addRef = new ActionReference();
-      addRef.putIdentifier(charIDToTypeID("Lyr "), selected[k].id);
-      addDesc.putReference(charIDToTypeID("null"), addRef);
-      addDesc.putEnumerated(
-        stringIDToTypeID("selectionModifier"),
-        stringIDToTypeID("selectionModifierType"),
-        stringIDToTypeID("addToSelection")
-      );
-      executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
+    var restoreIds = [];
+    for (var k = 0; k < selected.length; k++) {
+      restoreIds.push(selected[k].id);
     }
+    selectMultipleLayersById(restoreIds);
   }
-
-  // Ruler visszaallitasa
-  app.preferences.rulerUnits = oldRulerUnits;
 
   _repositionResult = '{"moved":' + moved + '}';
 }

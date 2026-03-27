@@ -69,26 +69,7 @@ function _findAllByNames(container, nameSet, result) {
 // ========== Tobb layer kijelolese ID alapjan (ActionManager) ==========
 
 function _selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
+  selectMultipleLayersById(layerIds);
 }
 
 // ========== Linkeles / Unlinkeles ==========
@@ -327,12 +308,8 @@ var __result = (function () {
     _groupFilter = typeof CONFIG !== "undefined" && CONFIG.GROUP ? CONFIG.GROUP : "All";
     _reorderResult = '{"reordered":0}';
 
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     _doc.suspendHistory("Layerek atrendezese", "_doReorderLayers()");
 
-    app.preferences.rulerUnits = oldRulerUnits;
     return _reorderResult;
 
   } catch (e) {

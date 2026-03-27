@@ -16,6 +16,7 @@
  */
 
 // #include "../lib/config.jsx"
+// #include "../lib/utils.jsx"
 
 // --- Kijelolt layerek ID + nev lekerdezese ---
 function getSelectedLayerInfo() {
@@ -93,24 +94,7 @@ function moveLayerById(layerId, dx, dy) {
 
 // --- Tobb layer kijelolese ID alapjan ---
 function selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
+  selectMultipleLayersById(layerIds);
 }
 
 // --- PS Align parancs ---

@@ -428,6 +428,43 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+// ============ Place Photos Progress ============
+.place-progress {
+  pointer-events: auto;
+  position: relative;
+  margin-top: 4px;
+  height: 20px;
+  min-width: 200px;
+  border-radius: 10px;
+  background: rgba(30, 30, 58, 0.9);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  overflow: hidden;
+
+  &__bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+  }
+
+  &__text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
 // ============ Upload Panel ============
 .upload-panel {
   pointer-events: auto;

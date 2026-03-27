@@ -417,4 +417,11 @@
   />
 }
 
+@if (placeProgress(); as progress) {
+  <div class="place-progress">
+    <div class="place-progress__bar" [style.width.%]="(progress.current / progress.total) * 100"></div>
+    <span class="place-progress__text">{{ progress.current }}/{{ progress.total }} kép</span>
+  </div>
+}
+
 </div><!-- /toolbar-wrap -->

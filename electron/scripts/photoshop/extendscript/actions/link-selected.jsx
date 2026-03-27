@@ -6,7 +6,6 @@
  * Mukodes:
  * 1. Image layer nevekbol kiszedi a ---ID reszt
  * 2. EGYETLEN bejarassal megkeresi az OSSZES azonos ID-ju layert (batch)
- *    Igy akkor is linkel ha a slug mas (pl. nev valtozas utan)
  * 3. SZEMELYENKENT: eloszor UNLINK (regi linkek feloldasa), aztan ujra LINK
  *    Igy tiszta allapotbol indul, nincs invalid/regi link csoport
  * 4. suspendHistory: egyetlen Undo lepes
@@ -15,6 +14,7 @@
  */
 
 // #include "../lib/config.jsx"
+// #include "../lib/utils.jsx"
 
 var _logLines = [];
 function log(msg) { _logLines.push(msg); }
@@ -77,29 +77,6 @@ function findLayersByIds(container, idToName, resultMap) {
   } catch (e) {}
 }
 
-// --- Tobb layer kijelolese ID alapjan ---
-function selectLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
-}
-
 // --- Link action ---
 function linkSelected() {
   var linkDesc = new ActionDescriptor();
@@ -155,7 +132,8 @@ function doLinkAll() {
   var resultMap = {};
   findLayersByIds(doc, idToName, resultMap);
 
-  // 4. SZEMELYENKENT: eloszor UNLINK (regi linkek feloldasa), aztan LINK ujra
+  // 5. SZEMELYENKENT: eloszor UNLINK (regi linkek feloldasa), aztan LINK ujra
+  //    OPTIMALIZALT: selectMultipleLayersById (1 executeAction) a regi N db addToSelection helyett
   var linkedNames = [];
   var skippedNames = [];
   var totalLinked = 0;
@@ -166,12 +144,12 @@ function doLinkAll() {
       for (var u = 0; u < found.length; u++) {
         try { found[u].unlink(); } catch (e) { /* nem volt linkelve */ }
       }
-      // Aztan link: szemely layereit KULON csoportba
+      // Aztan link: szemely layereit KULON csoportba — batch select
       var personIds = [];
       for (var f = 0; f < found.length; f++) {
         personIds.push(found[f].id);
       }
-      selectLayersById(personIds);
+      selectMultipleLayersById(personIds);
       linkSelected();
       totalLinked += personIds.length;
       linkedNames.push(uniqueNames[n]);
@@ -180,7 +158,7 @@ function doLinkAll() {
     }
   }
 
-  // 5. Vegso kijeles: CSAK Images csoport layerei maradjanak kijelelve
+  // 6. Vegso kijeles: CSAK Images csoport layerei maradjanak kijelelve — batch select
   var imagesGroup = null;
   try { imagesGroup = doc.layerSets.getByName("Images"); } catch (e) {}
   if (imagesGroup && linkedNames.length > 0) {
@@ -203,7 +181,7 @@ function doLinkAll() {
     };
     collectImageIds(imagesGroup);
     if (finalIds.length > 0) {
-      selectLayersById(finalIds);
+      selectMultipleLayersById(finalIds);
     }
   }
 

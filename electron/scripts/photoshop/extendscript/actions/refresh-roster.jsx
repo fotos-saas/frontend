@@ -297,26 +297,7 @@ function _doRefreshRoster() {
   // --- 4. Uj Image layerek kijelolese (a user igy rogton arrange-names-t nyomhat) ---
   if (_newImageLayerIds.length > 0) {
     try {
-      // Elso layer kivalasztasa
-      var selDesc = new ActionDescriptor();
-      var selRef = new ActionReference();
-      selRef.putIdentifier(charIDToTypeID("Lyr "), _newImageLayerIds[0]);
-      selDesc.putReference(charIDToTypeID("null"), selRef);
-      executeAction(charIDToTypeID("slct"), selDesc, DialogModes.NO);
-
-      // Tobbi hozzaadasa a kijeloleshez
-      for (var s = 1; s < _newImageLayerIds.length; s++) {
-        var addDesc = new ActionDescriptor();
-        var addRef = new ActionReference();
-        addRef.putIdentifier(charIDToTypeID("Lyr "), _newImageLayerIds[s]);
-        addDesc.putReference(charIDToTypeID("null"), addRef);
-        addDesc.putEnumerated(
-          stringIDToTypeID("selectionModifier"),
-          stringIDToTypeID("selectionModifierType"),
-          stringIDToTypeID("addToSelection")
-        );
-        executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-      }
+      selectMultipleLayersById(_newImageLayerIds);
       log("[JSX] " + _newImageLayerIds.length + " uj Image layer kijelolve");
     } catch (e) {
       log("[JSX] FIGYELEM: layer kijeloles sikertelen: " + e.message);

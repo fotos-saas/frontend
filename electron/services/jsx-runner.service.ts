@@ -342,7 +342,7 @@ export class JsxRunnerService {
   downloadPhoto(
     url: string,
     fileName: string,
-    targetSize?: { width: number; height: number },
+    _targetSize?: unknown,
     _redirectCount = 0,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -364,18 +364,7 @@ export class JsxRunnerService {
         fs.mkdirSync(tempDir, { recursive: true });
       }
 
-      const resizedDir = path.join(tempDir, 'resized');
       const rawPath = path.join(tempDir, safeName);
-      const finalPath = targetSize ? path.join(resizedDir, safeName) : rawPath;
-
-      if (fs.existsSync(finalPath)) {
-        const stats = fs.statSync(finalPath);
-        if (Date.now() - stats.mtimeMs < PHOTO_CACHE_TTL_MS && stats.size > 0) {
-          log.info(`Cached foto: ${fileName}`);
-          resolve(finalPath);
-          return;
-        }
-      }
 
       const protocol = url.startsWith('https') ? https : http;
       const file = fs.createWriteStream(rawPath);
@@ -392,7 +381,7 @@ export class JsxRunnerService {
               reject(new Error(`Túl sok átirányítás (max ${MAX_REDIRECTS})`));
               return;
             }
-            this.downloadPhoto(redirectUrl, safeName, targetSize, _redirectCount + 1).then(resolve).catch(reject);
+            this.downloadPhoto(redirectUrl, safeName, undefined, _redirectCount + 1).then(resolve).catch(reject);
             return;
           }
         }
@@ -408,29 +397,8 @@ export class JsxRunnerService {
 
         file.on('finish', () => {
           file.close();
-
-          if (!targetSize) {
-            log.info(`Foto letoltve: ${fileName}`);
-            resolve(rawPath);
-            return;
-          }
-
-          if (!fs.existsSync(resizedDir)) {
-            fs.mkdirSync(resizedDir, { recursive: true });
-          }
-
-          sharp(rawPath)
-            .resize(targetSize.width, targetSize.height, { fit: 'cover', position: 'centre' })
-            .jpeg({ quality: 95 })
-            .toFile(finalPath)
-            .then(() => {
-              log.info(`Foto meretezve: ${fileName} → ${targetSize.width}x${targetSize.height}`);
-              resolve(finalPath);
-            })
-            .catch((err: Error) => {
-              log.warn(`Sharp meretezes sikertelen (${fileName}), eredeti kep hasznalata:`, err.message);
-              resolve(rawPath);
-            });
+          log.info(`Foto letoltve: ${fileName}`);
+          resolve(rawPath);
         });
       }).on('error', (err) => {
         fs.unlink(rawPath, () => {});
@@ -549,6 +517,11 @@ export class JsxRunnerService {
       }
     }
 
+    // displayDialogs visszaallitasa a script vegen
+    if (scriptContent.indexOf('_savedDialogMode') !== -1) {
+      scriptContent += '\ntry { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n';
+    }
+
     return scriptContent;
   }
 
@@ -633,7 +606,7 @@ export class JsxRunnerService {
       const appleScript = this.buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<JsxRunResult>((resolve) => {
-        execFile('osascript', ['-e', appleScript], { timeout: 60000 }, (error, stdout, stderr) => {
+        execFile('osascript', ['-e', appleScript], { timeout: 300000 }, (error, stdout, stderr) => {
           try { fs.unlinkSync(tempJsxPath); } catch (_) { /* ignore */ }
           if (tempJsonPath && fs.existsSync(tempJsonPath)) {
             try { fs.unlinkSync(tempJsonPath); } catch (_) { /* ignore */ }
@@ -737,7 +710,7 @@ export class JsxRunnerService {
       const appleScript = this.buildFocusPreservingAppleScript(tempJsxPath);
 
       return new Promise<JsxRunResult>((resolve) => {
-        const child = spawn('osascript', ['-e', appleScript], { timeout: 60000 });
+        const child = spawn('osascript', ['-e', appleScript], { timeout: 300000 });
         let stderrBuf = '';
 
         child.stdout.on('data', (data: Buffer) => {

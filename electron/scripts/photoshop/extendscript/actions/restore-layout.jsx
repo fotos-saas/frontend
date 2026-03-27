@@ -252,24 +252,7 @@ function _findLayersByNames(container, targetNames, result) {
 
 // --- Tobb layer kijelolese ID alapjan (ActionManager) — relink-hez ---
 function _selectMultipleLayersById(layerIds) {
-  if (layerIds.length === 0) return;
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerIds[0]);
-  desc.putReference(charIDToTypeID("null"), ref);
-  executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-  for (var i = 1; i < layerIds.length; i++) {
-    var addDesc = new ActionDescriptor();
-    var addRef = new ActionReference();
-    addRef.putIdentifier(charIDToTypeID("Lyr "), layerIds[i]);
-    addDesc.putReference(charIDToTypeID("null"), addRef);
-    addDesc.putEnumerated(
-      stringIDToTypeID("selectionModifier"),
-      stringIDToTypeID("selectionModifierType"),
-      stringIDToTypeID("addToSelection")
-    );
-    executeAction(charIDToTypeID("slct"), addDesc, DialogModes.NO);
-  }
+  selectMultipleLayersById(layerIds);
 }
 
 // --- Linked layerek unlinkelese nev alapjan ---
@@ -541,16 +524,9 @@ function _doRestore() {
     // Globalis valtozoba mentjuk — suspendHistory string-eval innen olvassa
     _snapshotData = readJsonFile(args.dataFilePath);
 
-    // Ruler PIXELS-re
-    var oldRulerUnits = app.preferences.rulerUnits;
-    app.preferences.rulerUnits = Units.PIXELS;
-
     // Egyetlen Undo lepes — parameter nelkuli hivas (a tobbi JSX mintajara)
     var historyName = (_snapshotData && _snapshotData.historyName) ? _snapshotData.historyName : "Snapshot visszaállítás";
     _doc.suspendHistory(historyName, "_doRestore()");
-
-    // Ruler visszaallitasa
-    app.preferences.rulerUnits = oldRulerUnits;
 
     log("[JSX] Snapshot visszaallitas befejezve");
 

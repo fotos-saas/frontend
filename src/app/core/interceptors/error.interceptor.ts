@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
@@ -6,7 +6,6 @@ import { ToastService } from '../services/toast.service';
 import { LoggerService } from '../services/logger.service';
 import { SentryService } from '../services/sentry.service';
 import { ErrorBoundaryService } from '../services/error-boundary.service';
-import { AuthService } from '../services/auth.service';
 
 /**
  * Error Interceptor - Központosított HTTP hibakezelés
@@ -25,13 +24,14 @@ import { AuthService } from '../services/auth.service';
  * - 0: Hálózati hiba / Szerver elérhetetlen
  *
  * MEGJEGYZÉS: A 401 hibákat az AuthInterceptor kezeli (kijelentkeztetés)
+ * FONTOS: NEM inject-álhat AuthService-t közvetlenül (circular dependency NG0200)
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ToastService);
   const logger = inject(LoggerService);
   const sentryService = inject(SentryService);
   const errorBoundary = inject(ErrorBoundaryService);
-  const authService = inject(AuthService);
+  const injector = inject(Injector);
   const router = inject(Router);
 
   return next(req).pipe(
@@ -43,7 +43,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Árva partner fiók: nincs Partner rekord → kijelentkeztetés
       if (error.status === 403 && error.error?.code === 'no_partner') {
-        authService.logoutAdmin();
+        import('../services/auth/session.service').then(({ SessionService }) => {
+          injector.get(SessionService).logoutAdmin();
+        });
         router.navigate(['/login']);
         return throwError(() => error);
       }

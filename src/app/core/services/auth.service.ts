@@ -392,9 +392,21 @@ export class AuthService {
     if (result.success && result.user) {
       this._currentUser.set(result.user);
       this._isAuthenticated.set(true);
+      // Háttérben frissítjük a user adatokat a szerverről
+      this.refreshMarketerUser();
       return true;
     }
     return false;
+  }
+
+  private refreshMarketerUser(): void {
+    this.http.get<{ user: AuthUser }>(`${environment.apiUrl}/auth/refresh`).subscribe({
+      next: (res) => {
+        if (!res.user) return;
+        this._currentUser.set(res.user);
+        sessionStorage.setItem('marketer_user', JSON.stringify(res.user));
+      },
+    });
   }
 
   // ==========================================

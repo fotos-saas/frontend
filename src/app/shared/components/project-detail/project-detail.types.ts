@@ -116,6 +116,7 @@ export interface ProjectDetailData {
   personsPreview?: PersonPreviewItem[];
   extraNames?: { students: string; teachers: string };
   inPrintAt?: string | null;
+  partnerDoneAt?: string | null;
   doneAt?: string | null;
   printSmallTablo?: {
     id: number;

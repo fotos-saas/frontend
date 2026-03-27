@@ -127,6 +127,7 @@ export interface PartnerProjectDetails extends PartnerProjectListItem {
   pendingStudentPhotos?: number;
   pendingTeacherPhotos?: number;
   inPrintAt?: string | null;
+  partnerDoneAt?: string | null;
   doneAt?: string | null;
   tabloSize: string | null;
   printSmallTablo?: PrintReadyFile | null;
@@ -475,6 +476,8 @@ export interface FinalizationListItem {
   tabloSize: string | null;
   printSmallTablo: PrintReadyFile | null;
   printFlat: PrintReadyFile | null;
+  partnerDoneAt: string | null;
+  doneAt?: string | null;
   contact: { name: string } | null;
   createdAt: string;
 }

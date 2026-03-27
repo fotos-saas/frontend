@@ -54,6 +54,7 @@ export class ProjectDetailComponent {
     personsPreview: project.personsPreview,
     extraNames: project.extraNames ?? undefined,
     inPrintAt: (project as any).inPrintAt,
+    partnerDoneAt: (project as any).partnerDoneAt,
     doneAt: (project as any).doneAt,
     printSmallTablo: (project as any).printSmallTablo,
     printFlat: (project as any).printFlat,

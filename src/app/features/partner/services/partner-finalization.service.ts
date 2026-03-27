@@ -133,12 +133,12 @@ export class PartnerFinalizationService {
   markAsDone(projectId: number): Observable<{
     success: boolean;
     message: string;
-    data: { status: string };
+    data: { partnerDoneAt: string };
   }> {
     return this.http.patch<{
       success: boolean;
       message: string;
-      data: { status: string };
+      data: { partnerDoneAt: string };
     }>(`${this.baseUrl}/${projectId}/mark-done`, {});
   }
 }

@@ -239,13 +239,13 @@ export class FinalizationListComponent implements OnInit {
         this.finalizationService.markAsDone(item.id)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
-            next: () => {
+            next: (res) => {
               this.items.update(list =>
                 list.map(i =>
-                  i.id === item.id ? { ...i, status: 'done' } : i
+                  i.id === item.id ? { ...i, partnerDoneAt: res.data.partnerDoneAt } : i
                 )
               );
-              this.toast.success('Kész', 'Projekt készre állítva.');
+              this.toast.success('Kész', 'Projekt nyomdakésznek jelölve.');
             },
             error: (err) => {
               this.logger.error('Failed to mark as done', err);

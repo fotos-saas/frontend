@@ -48,16 +48,20 @@
 
   <!-- Col 5: Műveletek -->
   <div class="col col-actions" (click)="$event.stopPropagation()">
-    @if (item().status === 'in_print') {
+    @if (item().status === 'in_print' && !item().partnerDoneAt) {
       <button
         type="button"
         class="action-btn action-btn--done"
         (click)="onMarkDoneClick($event)"
-        matTooltip="Készre állítás"
+        matTooltip="Nyomdakésznek jelölés"
       >
         <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
         <span class="action-label">Kész</span>
       </button>
+    } @else if (item().partnerDoneAt && !item().doneAt) {
+      <span class="done-badge" matTooltip="Nyomdakész — nyomtatásra vár">
+        <lucide-icon [name]="ICONS.CHECK_CIRCLE" [size]="14" />
+      </span>
     }
     @if (item().printSmallTablo) {
       <button

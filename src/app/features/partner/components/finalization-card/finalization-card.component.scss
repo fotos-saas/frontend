@@ -188,6 +188,15 @@
   background: get-color('warning', 600);
 }
 
+.done-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #16a34a;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .finalization-row {

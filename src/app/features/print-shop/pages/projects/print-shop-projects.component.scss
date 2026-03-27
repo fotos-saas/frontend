@@ -232,6 +232,8 @@
   }
 }
 
+.partner-done-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(34, 197, 94, 0.15); color: #16a34a; margin-left: 4px; }
+
 /* ============ Date ============ */
 .cell-date {
   display: flex;
@@ -491,10 +493,7 @@
   }
 }
 
-/* ============ Reduced Motion ============ */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

@@ -185,6 +185,11 @@
               <span class="status-badge" [class.status-badge--done]="project.status === 'done'" [class.status-badge--correction]="project.isCorrection">
                 {{ project.isCorrection ? 'Javítás' : project.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
               </span>
+              @if (project.partnerDoneAt && project.status === 'in_print') {
+                <span class="partner-done-badge" matTooltip="Fotós késznek jelölte">
+                  <lucide-icon [name]="ICONS.CHECK" [size]="11" />
+                </span>
+              }
             </div>
             <div class="cell-date">
               <span class="date-text">{{ formatDate(project.status === 'done' ? project.doneAt : project.inPrintAt) }}</span>

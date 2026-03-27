@@ -120,19 +120,41 @@
         <!-- Jobb: idővonal -->
         <div class="order-card__timeline">
           <div class="tl">
+            <!-- 1. Nyomdába adva -->
             <div class="tl__step">
               <div class="tl__dot tl__dot--done"></div>
-              <div class="tl__line tl__line--done"></div>
+              <div class="tl__line" [class.tl__line--done]="project()?.partnerDoneAt"></div>
               <div class="tl__text">
                 <span class="tl__title">Nyomdába adva</span>
                 <span class="tl__date">{{ project()!.inPrintAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
               </div>
             </div>
+            <!-- 2. Fotós késznek jelölte -->
+            @if (project()?.partnerDoneAt) {
+              <div class="tl__step">
+                <div class="tl__dot tl__dot--done"></div>
+                <div class="tl__line" [class.tl__line--done]="project()?.doneAt"></div>
+                <div class="tl__text">
+                  <span class="tl__title">Nyomdakész</span>
+                  <span class="tl__date">{{ project()!.partnerDoneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="tl__step tl__step--pending">
+                <div class="tl__dot tl__dot--pending"></div>
+                <div class="tl__line"></div>
+                <div class="tl__text">
+                  <span class="tl__title">Nyomdakész</span>
+                  <span class="tl__date tl__date--pending">Várakozás...</span>
+                </div>
+              </div>
+            }
+            <!-- 3. Nyomda kinyomtatta -->
             @if (project()?.doneAt) {
               <div class="tl__step">
                 <div class="tl__dot tl__dot--done tl__dot--green"></div>
                 <div class="tl__text">
-                  <span class="tl__title">Kész</span>
+                  <span class="tl__title">Kinyomtatva</span>
                   <span class="tl__date">{{ project()!.doneAt | date:'yyyy. MMM d. HH:mm':'':'hu-HU' }}</span>
                 </div>
               </div>
@@ -140,7 +162,7 @@
               <div class="tl__step tl__step--pending">
                 <div class="tl__dot tl__dot--pending"></div>
                 <div class="tl__text">
-                  <span class="tl__title">Kész</span>
+                  <span class="tl__title">Kinyomtatva</span>
                   <span class="tl__date tl__date--pending">Folyamatban...</span>
                 </div>
               </div>

@@ -49,7 +49,7 @@ export class PrintShopProjectsComponent {
   perPage = signal(20);
 
   // Filters
-  statusFilter = signal<'in_print' | 'done' | ''>('in_print');
+  statusFilter = signal<'in_print' | 'done_pending' | 'picked_up' | ''>('in_print');
   classYearFilter = signal<string>(new Date().getFullYear().toString());
   studioFilter = signal<number | null>(null);
   searchQuery = signal('');
@@ -57,7 +57,7 @@ export class PrintShopProjectsComponent {
   studios = signal<PrintShopStudio[]>([]);
   availableYears = signal<string[]>(this.getRecentYears());
 
-  readonly statusOptions: PsSelectOption[] = [{ id: '', label: 'Mind' }, { id: 'in_print', label: 'Nyomdában' }, { id: 'done', label: 'Kész' }];
+  readonly statusOptions: PsSelectOption[] = [{ id: '', label: 'Mind' }, { id: 'in_print', label: 'Nyomtatásra vár' }, { id: 'done_pending', label: 'Átvételre vár' }, { id: 'picked_up', label: 'Átvéve' }];
   readonly classYearOptions = computed(() => this.availableYears().map(y => ({ id: y, label: y })));
   readonly studioOptions = computed(() => this.studios().map(s => ({ id: s.id, label: s.name })));
 
@@ -168,8 +168,9 @@ export class PrintShopProjectsComponent {
       } catch { /* ignore */ }
     }
 
-    if (params['status'] === 'in_print' || params['status'] === 'done' || params['status'] === '') {
-      this.statusFilter.set(params['status'] || '');
+    const validStatuses = ['in_print', 'done_pending', 'picked_up', ''];
+    if (validStatuses.includes(params['status'])) {
+      this.statusFilter.set((params['status'] || '') as 'in_print' | 'done_pending' | 'picked_up' | '');
     }
     if (params['class_year']) {
       this.classYearFilter.set(params['class_year']);
@@ -195,7 +196,7 @@ export class PrintShopProjectsComponent {
   }
 
   onStatusChange(status: string): void {
-    this.statusFilter.set(status as '' | 'in_print' | 'done');
+    this.statusFilter.set(status as '' | 'in_print' | 'done_pending' | 'picked_up');
     this.currentPage.set(1);
     this.updateUrl();
     this.loadProjects();

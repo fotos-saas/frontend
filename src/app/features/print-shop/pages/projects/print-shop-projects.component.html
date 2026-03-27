@@ -186,8 +186,11 @@
               }
             </div>
             <div class="cell-status">
-              <span class="status-badge" [class.status-badge--done]="project.status === 'done'" [class.status-badge--correction]="project.isCorrection">
-                {{ project.isCorrection ? 'Javítás' : project.status === 'in_print' ? 'Nyomdában' : 'Kész' }}
+              <span class="status-badge"
+                [class.status-badge--done]="project.status === 'done' && !project.pickedUpAt"
+                [class.status-badge--pickedup]="project.pickedUpAt"
+                [class.status-badge--correction]="project.isCorrection">
+                {{ project.isCorrection ? 'Javítás' : project.status === 'in_print' ? 'Nyomtatásra vár' : project.pickedUpAt ? 'Átvéve' : 'Átvételre vár' }}
               </span>
               @if (project.partnerDoneAt && project.status === 'in_print') {
                 <span class="partner-done-badge" matTooltip="Fotós késznek jelölte">

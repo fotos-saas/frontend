@@ -209,6 +209,11 @@
     color: #15803d;
   }
 
+  &--pickedup {
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+  }
+
   &--correction {
     background: rgba(99, 102, 241, 0.1);
     color: #4f46e5;

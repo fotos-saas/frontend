@@ -1,4 +1,4 @@
-import { inject, Injector } from '@angular/core';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
@@ -6,32 +6,22 @@ import { ToastService } from '../services/toast.service';
 import { LoggerService } from '../services/logger.service';
 import { SentryService } from '../services/sentry.service';
 import { ErrorBoundaryService } from '../services/error-boundary.service';
+import { TokenService } from '../services/token.service';
+import { TabloStorageService } from '../services/tablo-storage.service';
 
 /**
  * Error Interceptor - Központosított HTTP hibakezelés
  *
- * Felelősségek:
- * - HTTP hibák megfelelő Toast üzenetekkel való megjelenítése
- * - Hibák naplózása
- *
- * Kezelt hibakódok:
- * - 400: Érvénytelen kérés
- * - 403: Hozzáférés megtagadva
- * - 404: Nem található
- * - 422: Validációs hiba
- * - 429: Túl sok kérés
- * - 500+: Szerverhiba
- * - 0: Hálózati hiba / Szerver elérhetetlen
- *
  * MEGJEGYZÉS: A 401 hibákat az AuthInterceptor kezeli (kijelentkeztetés)
- * FONTOS: NEM inject-álhat AuthService-t közvetlenül (circular dependency NG0200)
+ * FONTOS: NEM inject-álhat AuthService-t vagy SessionService-t (circular dependency NG0200)
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ToastService);
   const logger = inject(LoggerService);
   const sentryService = inject(SentryService);
   const errorBoundary = inject(ErrorBoundaryService);
-  const injector = inject(Injector);
+  const tokenService = inject(TokenService);
+  const storage = inject(TabloStorageService);
   const router = inject(Router);
 
   return next(req).pipe(
@@ -43,9 +33,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Árva partner fiók: nincs Partner rekord → kijelentkeztetés
       if (error.status === 403 && error.error?.code === 'no_partner') {
-        import('../services/auth/session.service').then(({ SessionService }) => {
-          injector.get(SessionService).logoutAdmin();
-        });
+        sessionStorage.removeItem('marketer_token');
+        sessionStorage.removeItem('marketer_user');
+        tokenService.clearToken();
+        storage.clearActiveSession();
         router.navigate(['/login']);
         return throwError(() => error);
       }
@@ -180,7 +171,6 @@ function extractErrorMessage(error: HttpErrorResponse): string | null {
 
 /**
  * Laravel validációs hibák kinyerése
- * Formátum: { errors: { field: ['error1', 'error2'] } }
  */
 function extractValidationErrors(error: HttpErrorResponse): string | null {
   const errors = error.error?.errors;
@@ -188,7 +178,6 @@ function extractValidationErrors(error: HttpErrorResponse): string | null {
     return error.error?.message || null;
   }
 
-  // Első mező első hibája
   const firstField = Object.keys(errors)[0];
   if (firstField && Array.isArray(errors[firstField])) {
     return errors[firstField][0];

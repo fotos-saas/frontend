@@ -1,4 +1,4 @@
-import { inject, Injector } from '@angular/core';
+import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
@@ -9,8 +9,6 @@ import { GuestService } from '../services/guest.service';
 
 /**
  * Helper function to read cookie value by name
- * @param name Cookie name
- * @returns Cookie value or null
  */
 function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
@@ -22,17 +20,29 @@ function getCookie(name: string): string | null {
 }
 
 /**
+ * Interceptor-safe logout — NEM használ HttpClient-es service-eket.
+ * Csak sessionStorage + TokenService + TabloStorageService (nincs HttpClient).
+ */
+function interceptorLogoutAdmin(tokenService: TokenService, storage: TabloStorageService, router: Router): void {
+  sessionStorage.removeItem('marketer_token');
+  sessionStorage.removeItem('marketer_user');
+  tokenService.clearToken();
+  storage.clearActiveSession();
+  router.navigate(['/login']);
+}
+
+function interceptorClearAuth(tokenService: TokenService, storage: TabloStorageService, router: Router): void {
+  tokenService.clearToken();
+  storage.clearActiveSession();
+  router.navigate(['/login']);
+}
+
+/**
  * Auth Interceptor - Bearer token és CSRF védelem
  *
- * Felelősségek:
- * - Authorization header hozzáadása
- * - CSRF token (X-XSRF-TOKEN) hozzáadása
- * - withCredentials engedélyezése (Laravel Sanctum)
- * - 401 hibák kezelése (automatikus kijelentkezés)
- *
- * FONTOS: NEM inject-álhat AuthService-t vagy SessionService-t közvetlenül,
- * mert azok HttpClient-et használnak → circular dependency (NG0200).
- * Helyette: TokenService (nincs HttpClient) + sessionStorage közvetlen olvasás.
+ * FONTOS: NEM inject-álhat AuthService-t, SessionService-t, vagy bármi
+ * HttpClient-függő service-t — circular dependency (NG0200).
+ * Helyette: TokenService + sessionStorage közvetlen olvasás.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
@@ -40,7 +50,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const logger = inject(LoggerService);
   const guestService = inject(GuestService);
   const router = inject(Router);
-  const injector = inject(Injector);
 
   // Marketer token ellenőrzése először (sessionStorage-ból közvetlenül)
   const marketerToken = sessionStorage.getItem('marketer_token');
@@ -50,35 +59,28 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Headers összegyűjtése
   const headers: { [key: string]: string } = {};
 
-  // Bearer token hozzáadása
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // CSRF token hozzáadása (Laravel Sanctum)
   if (csrfToken) {
     headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken);
   }
 
-  // Guest session token hozzáadása (ha van)
   const guestSessionToken = guestService.getSessionToken();
   if (guestSessionToken) {
     headers['X-Guest-Session'] = guestSessionToken;
   }
 
-  // Request klónozás a headerekkel és withCredentials-szel
   const clonedReq = req.clone({
     setHeaders: headers,
-    withCredentials: true // Laravel Sanctum cookie kezeléshez
+    withCredentials: true
   });
 
   return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 401 Unauthorized - token érvénytelen, kijelentkeztetés
       if (error.status === 401) {
-        // Csak ha nem login kérés volt
         if (!req.url.includes('/auth/login')) {
-          // Share session esetén NE logout-oljunk, mert guest session-nel autentikál
           const activeSession = storage.getActiveSession();
           logger.warn('[AuthInterceptor] 401 hiba:', {
             url: req.url,
@@ -87,33 +89,22 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             errorMessage: error.error?.message
           });
 
-          // Overlay ablakban NE logout-oljon (nincs router navigate, overlay kezeli magának)
           const isOverlay = router.url.startsWith('/overlay');
-          // Aktuális marketer token ellenőrzés (a request indulása óta törölhették)
           const currentMarketerToken = sessionStorage.getItem('marketer_token');
           if (isOverlay) {
             logger.info('[AuthInterceptor] 401 ignorálva (overlay mód)');
           } else if (!currentMarketerToken && marketerToken) {
-            // A request marketer tokennel indult, de azóta kijelentkeztünk — ignoráljuk
             logger.info('[AuthInterceptor] 401 ignorálva (marketer session már törölve)');
           } else if (currentMarketerToken) {
-            // Partner/marketer/admin session — lazy import a circular dependency elkerülésére
             logger.warn('[AuthInterceptor] Partner/admin logout 401 miatt', { url: req.url });
-            import('../services/auth/session.service').then(({ SessionService }) => {
-              const sessionService = injector.get(SessionService);
-              sessionService.logoutAdmin();
-            });
+            interceptorLogoutAdmin(tokenService, storage, router);
           } else if (activeSession?.sessionType === 'share' ||
                      req.url.includes('/newsfeed') ||
                      req.url.includes('/gamification')) {
             logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
           } else {
-            // Tablo session logout — lazy import
             logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
-            import('../services/auth/session.service').then(({ SessionService }) => {
-              const sessionService = injector.get(SessionService);
-              sessionService.clearAuth();
-            });
+            interceptorClearAuth(tokenService, storage, router);
           }
         }
       }

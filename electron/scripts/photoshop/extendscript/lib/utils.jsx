@@ -123,17 +123,18 @@ function createTextLayer(container, displayText, options) {
 // Letrehoz egy ures layert, majd ActionManager-rel Smart Object-te alakitja.
 // container: LayerSet, options: {name, widthPx, heightPx}
 function createSmartObjectPlaceholder(doc, container, options) {
-  // Ures layer letrehozasa (a doc gyokeren — a move UTAN kerul a csoportba)
-  var layer = doc.artLayers.add();
+  // Layer KOZVETLENUL a cel csoportban hozzuk letre (container.artLayers.add())
+  // Ez elkeruli a move() problémát PS v27.2-ben ahol a newPlacedLayer kiejti a layert a csoportból.
+  // A container.artLayers.add() garantáltan a container-ben hoz letre layert.
+  var layer = container.artLayers.add();
   layer.name = options.name;
 
-  // Kitoltes szurke szinnel (placeholder kep — lathatova teszi a layert)
+  // Kitoltes szurke szinnel
   var fillColor = new SolidColor();
   fillColor.rgb.red = 200;
   fillColor.rgb.green = 200;
   fillColor.rgb.blue = 200;
 
-  // Szelekcioval toltjuk ki a megadott meretre (bal felso sarok)
   var selRegion = [
     [0, 0],
     [options.widthPx, 0],
@@ -144,13 +145,10 @@ function createSmartObjectPlaceholder(doc, container, options) {
   doc.selection.fill(fillColor);
   doc.selection.deselect();
 
-  // Biztositjuk hogy a layer aktiv legyen a Convert to SO elott
+  // Layer legyen aktiv a Convert to SO elott
   doc.activeLayer = layer;
 
-  // Smart Object-te alakitas ActionManager-rel
-  // FONTOS: ELOBB convert, UTANA move a csoportba!
-  // A PS v27.2 newPlacedLayer parancsa kiemelheti a layert a csoportbol,
-  // ezert a move()-ot UTANA hivjuk, nem elotte.
+  // Convert to Smart Object — ActionManager
   var desc = new ActionDescriptor();
   var ref = new ActionReference();
   ref.putClass(stringIDToTypeID("smartObject"));
@@ -160,11 +158,8 @@ function createSmartObjectPlaceholder(doc, container, options) {
   desc.putReference(charIDToTypeID("Usng"), refLayer);
   executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
 
-  // MOST rakjuk at a cel csoportba (a Convert to SO utan a layer stabil)
-  var soLayer = doc.activeLayer; // a newPlacedLayer utan ez az uj SO
-  soLayer.move(container, ElementPlacement.INSIDE);
-
-  return soLayer;
+  // doc.activeLayer az uj SO (a newPlacedLayer utan)
+  return doc.activeLayer;
 }
 
 // --- Smart Object megnyitasa, kep behelyezese, mentes + bezaras ---

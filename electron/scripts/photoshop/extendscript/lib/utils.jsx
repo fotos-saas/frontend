@@ -123,7 +123,7 @@ function createTextLayer(container, displayText, options) {
 // Letrehoz egy ures layert, majd ActionManager-rel Smart Object-te alakitja.
 // container: LayerSet, options: {name, widthPx, heightPx}
 function createSmartObjectPlaceholder(doc, container, options) {
-  // Ures layer letrehozasa
+  // Ures layer letrehozasa (a doc gyokeren — a move UTAN kerul a csoportba)
   var layer = doc.artLayers.add();
   layer.name = options.name;
 
@@ -144,15 +144,13 @@ function createSmartObjectPlaceholder(doc, container, options) {
   doc.selection.fill(fillColor);
   doc.selection.deselect();
 
-  // Layer atrakeasa a cel csoportba
-  layer.move(container, ElementPlacement.INSIDE);
-
   // Biztositjuk hogy a layer aktiv legyen a Convert to SO elott
-  // (a move() neha megvaltoztatja az aktiv layert)
   doc.activeLayer = layer;
 
   // Smart Object-te alakitas ActionManager-rel
-  // Ez a Photoshop belso "Convert to Smart Object" parancsa
+  // FONTOS: ELOBB convert, UTANA move a csoportba!
+  // A PS v27.2 newPlacedLayer parancsa kiemelheti a layert a csoportbol,
+  // ezert a move()-ot UTANA hivjuk, nem elotte.
   var desc = new ActionDescriptor();
   var ref = new ActionReference();
   ref.putClass(stringIDToTypeID("smartObject"));
@@ -162,7 +160,11 @@ function createSmartObjectPlaceholder(doc, container, options) {
   desc.putReference(charIDToTypeID("Usng"), refLayer);
   executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
 
-  return layer;
+  // MOST rakjuk at a cel csoportba (a Convert to SO utan a layer stabil)
+  var soLayer = doc.activeLayer; // a newPlacedLayer utan ez az uj SO
+  soLayer.move(container, ElementPlacement.INSIDE);
+
+  return soLayer;
 }
 
 // --- Smart Object megnyitasa, kep behelyezese, mentes + bezaras ---

@@ -1,19 +1,7 @@
 <div class="print-tab">
 
-  @if (!authService.hasPrintShop()) {
-    <div class="no-print-shop">
-      <lucide-icon [name]="ICONS.PRINTER" [size]="32" />
-      <h3>Nincs nyomda partner</h3>
-      <p>A nyomdai funkciók (sürgős jelölés, javítás küldése, határidő egyeztetés, üzenetek) csak akkor érhetők el, ha van aktív nyomda partner a csapatodban.</p>
-      <a routerLink="/partner/team" class="no-print-shop__link">
-        <lucide-icon [name]="ICONS.USERS" [size]="14" />
-        Nyomda hozzáadása a Csapatom oldalon
-      </a>
-    </div>
-  } @else {
-
   <!-- ═══ HIBA BANNER ═══ -->
-  @if (project()?.hasPrintError) {
+  @if (authService.hasPrintShop() && project()?.hasPrintError) {
     <section class="error-banner" [class.error-banner--acknowledged]="project()?.printErrorAcknowledgedAt">
       <div class="error-banner__icon">
         <lucide-icon [name]="ICONS.ALERT_TRIANGLE" [size]="18" />
@@ -40,8 +28,8 @@
     </section>
   }
 
-  <!-- ═══ MEGRENDELÉS KÁRTYA ═══ -->
-  @if (project()?.inPrintAt) {
+  <!-- ═══ MEGRENDELÉS KÁRTYA (csak nyomda partnerrel) ═══ -->
+  @if (authService.hasPrintShop() && project()?.inPrintAt) {
     <section class="order-card" [class.order-card--urgent]="isUrgent()">
       <div class="order-card__accent"></div>
       <div class="order-card__body">
@@ -174,7 +162,7 @@
     }
   }
 
-  <!-- ═══ FÁJLOK ═══ -->
+  <!-- ═══ FÁJLOK (mindig látszik) ═══ -->
   <section class="files">
     <div class="file-card">
       <div class="file-card__header">
@@ -267,8 +255,20 @@
     </div>
   }
 
-  <!-- ═══ ÜZENETEK ═══ -->
-  @if (showChat()) {
+  <!-- ═══ NINCS NYOMDA PARTNER INFO ═══ -->
+  @if (!authService.hasPrintShop()) {
+    <div class="no-print-shop">
+      <lucide-icon [name]="ICONS.PRINTER" [size]="28" />
+      <p>A nyomdai funkciók (sürgős jelölés, javítás küldése, határidő egyeztetés, üzenetek) csak akkor érhetők el, ha van aktív nyomda partner a csapatodban.</p>
+      <a routerLink="/partner/team" class="no-print-shop__link">
+        <lucide-icon [name]="ICONS.USERS" [size]="14" />
+        Nyomda hozzáadása a Csapatom oldalon
+      </a>
+    </div>
+  }
+
+  <!-- ═══ ÜZENETEK (csak nyomda partnerrel) ═══ -->
+  @if (authService.hasPrintShop() && showChat()) {
     <section class="chat-section">
       <div class="chat-section__header">
         <lucide-icon [name]="ICONS.MESSAGE_SQUARE" [size]="16" />
@@ -282,5 +282,4 @@
       />
     </section>
   }
-  } <!-- /@else hasPrintShop -->
 </div>

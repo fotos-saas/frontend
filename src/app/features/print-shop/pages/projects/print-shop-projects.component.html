@@ -150,7 +150,7 @@
               }
             </div>
             <span class="project-name project-name-link" (click)="onProjectLinkClick(project, $event)">
-              <span class="project-name__school">{{ project.schoolName ?? project.name }}</span><!--
+              <span class="project-name__school" [title]="project.schoolName ?? project.name">{{ truncateMiddle(project.schoolName ?? project.name) }}</span><!--
               -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}
             </span>
             <span class="project-badges"><!--

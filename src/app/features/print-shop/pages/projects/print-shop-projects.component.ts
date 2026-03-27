@@ -34,6 +34,12 @@ export class PrintShopProjectsComponent {
 
   readonly ICONS = ICONS;
 
+  truncateMiddle(text: string, maxLen = 30): string {
+    if (!text || text.length <= maxLen) return text;
+    const half = Math.floor(maxLen / 2);
+    return `${text.slice(0, half)}…${text.slice(-half)}`;
+  }
+
   // State
   projects = signal<PrintShopProject[]>([]);
   loading = signal(true);
@@ -483,13 +489,11 @@ export class PrintShopProjectsComponent {
     queryParams['studio_id'] = this.studioFilter() ? String(this.studioFilter()) : null;
     queryParams['page'] = this.currentPage() > 1 ? String(this.currentPage()) : null;
     this.router.navigate([], { queryParams, replaceUrl: true });
-
-    // sessionStorage-ba is mentjük a szűrőket (visszanavigáláshoz)
     sessionStorage.setItem('printShopFilters', JSON.stringify(queryParams));
   }
 
   private getRecentYears(): string[] {
     const y = new Date().getFullYear();
-    return [y.toString(), (y - 1).toString(), (y - 2).toString()];
+    return [y, y - 1, y - 2].map(String);
   }
 }

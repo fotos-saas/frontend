@@ -158,6 +158,8 @@ export interface AuthUser {
   partner_id?: number | null;
   /** Aktív partnerek száma (multi-partner csapattagoknál) */
   partners_count?: number;
+  /** Van-e aktív nyomda partner kapcsolat */
+  has_print_shop?: boolean;
 }
 
 /**

@@ -161,7 +161,8 @@ export class ProjectDetailWrapperComponent<T> implements OnInit {
     const hidden: ProjectDetailTab[] = [];
     if (this.isMarketer()) hidden.push('settings');
     const status = this.facade.projectData()?.status;
-    if (status !== 'in_print' && status !== 'done') hidden.push('print');
+    const hasPrintShop = this.authService.hasPrintShop();
+    if (!hasPrintShop || (status !== 'in_print' && status !== 'done')) hidden.push('print');
     return hidden;
   });
 

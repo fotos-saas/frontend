@@ -87,9 +87,9 @@
 }
 
 .thumb-img {
-  width: 40px;
-  height: 52px;
-  border-radius: 6px;
+  width: 36px;
+  height: 48px;
+  border-radius: 4px;
   object-fit: cover;
   border: 1px solid get-color('slate', 200);
 
@@ -105,9 +105,9 @@
 }
 
 .thumb-placeholder {
-  width: 40px;
-  height: 52px;
-  border-radius: 6px;
+  width: 36px;
+  height: 48px;
+  border-radius: 4px;
   background: get-color('slate', 100);
   display: flex;
   align-items: center;
@@ -119,7 +119,7 @@
 // checkbox(16) + gap(8) + thumb(40) + gap(8) = 72px
 .list-row {
   display: grid;
-  grid-template-columns: 16px 40px 1fr;
+  grid-template-columns: 16px 36px 1fr;
   grid-template-rows: auto auto;
   column-gap: 8px;
   row-gap: 2px;
@@ -157,8 +157,8 @@
 
 .table-header {
   grid-template-columns: var(--bottom-cols);
-  // 16px padding + checkbox(16) + gap(8) + thumb(40) + gap(8) = 88px
-  padding-left: 88px;
+  // 16px padding + checkbox(16) + gap(8) + thumb(36) + gap(8) = 84px
+  padding-left: 84px;
   position: relative;
 }
 

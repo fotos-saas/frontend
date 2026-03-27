@@ -517,8 +517,31 @@ export class JsxRunnerService {
       }
     }
 
-    // displayDialogs visszaallitasa a script vegen
-    if (scriptContent.indexOf('_savedDialogMode') !== -1) {
+    // Iro/modosito scripteknél: disablePSDCompression + displayDialogs NO injektálás
+    // Csak-olvasó scriptek (get-*) NEM kapják — azok nem mentenek, nem nyitnak SO-t
+    const isReadOnly = path.basename(scriptName).startsWith('get-');
+    if (!isReadOnly) {
+      const sideEffects = [
+        'var _savedDialogMode = app.displayDialogs;',
+        'app.displayDialogs = DialogModes.NO;',
+        'try {',
+        '  var _prefDesc = new ActionDescriptor();',
+        '  var _prefRef = new ActionReference();',
+        '  _prefRef.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("fileSavePrefs"));',
+        '  _prefRef.putEnumerated(charIDToTypeID("capp"), charIDToTypeID("OrDn"), charIDToTypeID("Trgt"));',
+        '  _prefDesc.putReference(charIDToTypeID("null"), _prefRef);',
+        '  var _savePrefs = new ActionDescriptor();',
+        '  _savePrefs.putBoolean(stringIDToTypeID("disablePSDCompression"), true);',
+        '  _prefDesc.putObject(stringIDToTypeID("T   "), stringIDToTypeID("fileSavePrefs"), _savePrefs);',
+        '  executeAction(charIDToTypeID("setd"), _prefDesc, DialogModes.NO);',
+        '} catch(_se) {}',
+      ].join('\n');
+
+      const configStart = scriptContent.indexOf('var CONFIG');
+      if (configStart > -1) {
+        scriptContent = scriptContent.slice(0, configStart) + sideEffects + '\n\n' + scriptContent.slice(configStart);
+      }
+
       scriptContent += '\ntry { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n';
     }
 

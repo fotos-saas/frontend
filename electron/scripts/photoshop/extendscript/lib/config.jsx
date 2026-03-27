@@ -3,29 +3,11 @@
  *
  * Font, meret, szin konfiguracio a text layer-ekhez.
  * Minden action script #include-olja ezt.
+ *
+ * FONTOS: Ez a fajl NEM tartalmaz side effect-eket (nincs PS-t modosito hivas)!
+ * A disablePSDCompression es displayDialogs beallitasokat a JSX runner
+ * injecteli be a scriptek elejere (csak iro/modosito scripteknél).
  */
-
-// PSD/PSB tomoritest kikapcsolasa — 10-20x gyorsabb save!
-// A PS alapbol tomoritve menti (egyetlen CPU mag vegzi), ami 277MB+ fajlnal
-// a fo bottleneck. Kikapcsolva a fajlmeret nagyobb, de a mentes pillanatok alatt megy.
-// Forras: https://community.adobe.com/t5/photoshop/photoshop-javascript-scripting-preferences-psd-psb-compression/m-p/10780202
-try {
-  var _prefDesc = new ActionDescriptor();
-  var _prefRef = new ActionReference();
-  _prefRef.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("fileSavePrefs"));
-  _prefRef.putEnumerated(charIDToTypeID("capp"), charIDToTypeID("OrDn"), charIDToTypeID("Trgt"));
-  _prefDesc.putReference(charIDToTypeID("null"), _prefRef);
-  var _savePrefs = new ActionDescriptor();
-  _savePrefs.putBoolean(stringIDToTypeID("disablePSDCompression"), true);
-  _prefDesc.putObject(stringIDToTypeID("T   "), stringIDToTypeID("fileSavePrefs"), _savePrefs);
-  executeAction(charIDToTypeID("setd"), _prefDesc, DialogModes.NO);
-} catch (e) { /* regi PS verzio nem tamogatja — nem baj */ }
-
-// Dialogusok elnyomasa a script futasa alatt — megakadalyozza a
-// "New Group", "Duplicate Image", stb. felugro ablakokat.
-// A JsxRunnerService a script VEGEN automatikusan visszaallitja.
-var _savedDialogMode = app.displayDialogs;
-app.displayDialogs = DialogModes.NO;
 
 var CONFIG = {
   // Szoveg layer alapertelmezes

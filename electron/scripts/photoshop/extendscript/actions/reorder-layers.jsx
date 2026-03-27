@@ -125,36 +125,38 @@ function _reorderStack(group, orderedNames) {
   var artLayers = group.artLayers;
   if (artLayers.length < 2) return;
 
-  // Name -> layer map
-  var nameToLayer = {};
+  // Name -> layer ID map
+  var nameToId = {};
   for (var i = 0; i < artLayers.length; i++) {
-    nameToLayer[artLayers[i].name] = artLayers[i];
+    nameToId[artLayers[i].name] = artLayers[i].id;
   }
 
-  // Matched layers az ordered sorrend alapjan
-  var matched = [];
+  // Matched layer ID-k az ordered sorrend alapjan
+  var matchedIds = [];
   for (var j = 0; j < orderedNames.length; j++) {
-    var layer = nameToLayer[orderedNames[j]];
-    if (layer) matched.push(layer);
+    var lid = nameToId[orderedNames[j]];
+    if (lid !== undefined) matchedIds.push(lid);
   }
 
-  if (matched.length < 2) return;
+  if (matchedIds.length < 2) return;
 
-  // Temp csoport trukk: stack sorrend csere
-  var tempGroup = group.layerSets.add();
-  tempGroup.name = "_TempReorder";
-
-  // Fordított sorrendben (utolso → elso) bemozgatjuk
-  for (var r = matched.length - 1; r >= 0; r--) {
-    matched[r].move(tempGroup, ElementPlacement.INSIDE);
+  // ActionManager-rel mozgatjuk a layereket (NEM clipboard, NEM DOM move)
+  // Minden layert a csoport aljara mozgatunk a helyes sorrendben
+  for (var m = matchedIds.length - 1; m >= 0; m--) {
+    // Layer kivalasztasa
+    selectLayerById(matchedIds[m]);
+    // Mozgatas a csoport aljara
+    var moveDesc = new ActionDescriptor();
+    var moveRef = new ActionReference();
+    moveRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    moveDesc.putReference(charIDToTypeID("null"), moveRef);
+    var destRef = new ActionReference();
+    destRef.putIndex(charIDToTypeID("Lyr "), 0);
+    moveDesc.putReference(charIDToTypeID("T   "), destRef);
+    try {
+      executeAction(charIDToTypeID("move"), moveDesc, DialogModes.NO);
+    } catch (e) { /* skip ha nem sikerul */ }
   }
-
-  // Visszamozgatjuk — most mar a helyes stack sorrendben
-  for (var k = tempGroup.artLayers.length - 1; k >= 0; k--) {
-    tempGroup.artLayers[k].move(group, ElementPlacement.PLACEATEND);
-  }
-
-  tempGroup.remove();
 }
 
 // ========== JSON parser ==========
@@ -271,7 +273,7 @@ function _doReorderLayers() {
       var siblings = layerGroupValues[grpIdx];
       for (var si = 0; si < siblings.length; si++) {
         try {
-          siblings[si].translate(dx, dy);
+          siblings[si].translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
         } catch (te) {
           // Layer mozgatas sikertelen — skip
         }

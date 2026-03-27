@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output, effect, inject, ElementRef, viewChild, signal, computed, DestroyRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -27,7 +28,7 @@ export { PrintFileType, PrintFileUploadEvent, PrintFileDeleteEvent, PrintFileDow
 @Component({
   selector: 'app-project-print-tab',
   standalone: true,
-  imports: [LucideAngularModule, DatePipe, MatTooltipModule, PrintMessagesComponent, DeadlineModificationBannerComponent],
+  imports: [LucideAngularModule, DatePipe, MatTooltipModule, PrintMessagesComponent, DeadlineModificationBannerComponent, RouterLink],
   providers: [ProjectPrintTabStateService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-print-tab.component.html',
@@ -39,7 +40,7 @@ export class ProjectPrintTabComponent {
   private readonly projectService = inject(PartnerProjectService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly wsService = inject(WebsocketService);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   private readonly logger = inject(LoggerService);
 
   readonly project = input<ProjectDetailData | null>(null);

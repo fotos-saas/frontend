@@ -1,5 +1,17 @@
 <div class="print-tab">
 
+  @if (!authService.hasPrintShop()) {
+    <div class="no-print-shop">
+      <lucide-icon [name]="ICONS.PRINTER" [size]="32" />
+      <h3>Nincs nyomda partner</h3>
+      <p>A nyomdai funkciók (sürgős jelölés, javítás küldése, határidő egyeztetés, üzenetek) csak akkor érhetők el, ha van aktív nyomda partner a csapatodban.</p>
+      <a routerLink="/partner/team" class="no-print-shop__link">
+        <lucide-icon [name]="ICONS.USERS" [size]="14" />
+        Nyomda hozzáadása a Csapatom oldalon
+      </a>
+    </div>
+  } @else {
+
   <!-- ═══ HIBA BANNER ═══ -->
   @if (project()?.hasPrintError) {
     <section class="error-banner" [class.error-banner--acknowledged]="project()?.printErrorAcknowledgedAt">
@@ -270,4 +282,5 @@
       />
     </section>
   }
+  } <!-- /@else hasPrintShop -->
 </div>

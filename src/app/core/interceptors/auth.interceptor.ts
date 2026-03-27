@@ -1,8 +1,8 @@
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { TokenService } from '../services/token.service';
 import { TabloStorageService } from '../services/tablo-storage.service';
 import { LoggerService } from '../services/logger.service';
 import { GuestService } from '../services/guest.service';
@@ -29,17 +29,22 @@ function getCookie(name: string): string | null {
  * - CSRF token (X-XSRF-TOKEN) hozzáadása
  * - withCredentials engedélyezése (Laravel Sanctum)
  * - 401 hibák kezelése (automatikus kijelentkezés)
+ *
+ * FONTOS: NEM inject-álhat AuthService-t vagy SessionService-t közvetlenül,
+ * mert azok HttpClient-et használnak → circular dependency (NG0200).
+ * Helyette: TokenService (nincs HttpClient) + sessionStorage közvetlen olvasás.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
+  const tokenService = inject(TokenService);
   const storage = inject(TabloStorageService);
   const logger = inject(LoggerService);
   const guestService = inject(GuestService);
   const router = inject(Router);
+  const injector = inject(Injector);
 
-  // Marketer token ellenőrzése először
-  const marketerToken = authService.getMarketerToken();
-  const token = marketerToken || authService.getToken();
+  // Marketer token ellenőrzése először (sessionStorage-ból közvetlenül)
+  const marketerToken = sessionStorage.getItem('marketer_token');
+  const token = marketerToken || tokenService.getToken();
   const csrfToken = getCookie('XSRF-TOKEN');
 
   // Headers összegyűjtése
@@ -85,24 +90,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           // Overlay ablakban NE logout-oljon (nincs router navigate, overlay kezeli magának)
           const isOverlay = router.url.startsWith('/overlay');
           // Aktuális marketer token ellenőrzés (a request indulása óta törölhették)
-          const currentMarketerToken = authService.getMarketerToken();
+          const currentMarketerToken = sessionStorage.getItem('marketer_token');
           if (isOverlay) {
             logger.info('[AuthInterceptor] 401 ignorálva (overlay mód)');
           } else if (!currentMarketerToken && marketerToken) {
             // A request marketer tokennel indult, de azóta kijelentkeztünk — ignoráljuk
             logger.info('[AuthInterceptor] 401 ignorálva (marketer session már törölve)');
           } else if (currentMarketerToken) {
-            // Partner/marketer/admin session — marketer token törlés + login redirect
+            // Partner/marketer/admin session — lazy import a circular dependency elkerülésére
             logger.warn('[AuthInterceptor] Partner/admin logout 401 miatt', { url: req.url });
-            authService.logoutMarketer();
+            import('../services/auth/session.service').then(({ SessionService }) => {
+              const sessionService = injector.get(SessionService);
+              sessionService.logoutAdmin();
+            });
           } else if (activeSession?.sessionType === 'share' ||
                      req.url.includes('/newsfeed') ||
                      req.url.includes('/gamification')) {
             logger.info('[AuthInterceptor] 401 ignorálva (share session, newsfeed vagy gamification)');
           } else {
-            // Tablo session logout
+            // Tablo session logout — lazy import
             logger.warn('[AuthInterceptor] Automatikus logout 401 miatt');
-            authService.clearAuth();
+            import('../services/auth/session.service').then(({ SessionService }) => {
+              const sessionService = injector.get(SessionService);
+              sessionService.clearAuth();
+            });
           }
         }
       }

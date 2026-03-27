@@ -25,6 +25,7 @@ export class OverlayPollingService {
   private isVisible = true;
   private lastPollInterval = POLL_NORMAL;
   private pollCallback: (() => Promise<void>) | null = null;
+  private psBusySince: number | null = null;
 
   /**
    * Polling indítása. A callback-et hívja meg minden poll ciklusban.
@@ -128,7 +129,21 @@ export class OverlayPollingService {
   }
 
   private executePoll(): void {
-    if (!this.isEnabled() || !this.isVisible || !this.pollCallback || this.psBusy()) return;
+    if (!this.isEnabled() || !this.isVisible || !this.pollCallback) return;
+
+    // psBusy safety: ha 60 mp-nél tovább ragadt busy-n, reseteljük
+    if (this.psBusy()) {
+      if (!this.psBusySince) {
+        this.psBusySince = Date.now();
+      } else if (Date.now() - this.psBusySince > 60_000) {
+        this.psBusy.set(false);
+        this.psBusySince = null;
+      }
+      if (this.psBusy()) return;
+    } else {
+      this.psBusySince = null;
+    }
+
     this.pollCallback();
   }
 }

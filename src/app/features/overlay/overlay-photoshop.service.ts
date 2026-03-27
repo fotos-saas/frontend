@@ -80,12 +80,11 @@ export class OverlayPhotoshopService {
   }
 
   private _leaveBusy(): void {
-    this._busyDepth--;
-    if (this._busyDepth <= 0) {
-      this._busyDepth = 0;
+    this._busyDepth = Math.max(0, this._busyDepth - 1);
+    if (this._busyDepth === 0) {
       this.polling.psBusy.set(false);
+      this.ngZone.run(() => this.busyCommand.set(null));
     }
-    this.ngZone.run(() => this.busyCommand.set(null));
   }
 
   /**

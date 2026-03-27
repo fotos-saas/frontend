@@ -64,8 +64,8 @@ function _getExistingLayerWidth(doc, groupPath) {
 }
 
 /**
- * Meglevo SO belso meretenek kiolvasasa: megnyitjuk editContents-szel,
- * kiolvassuk a width/height-et, majd bezarjuk mentes nelkul.
+ * Meglevo SO belso meretenek kiolvasasa ActionManager descriptor-on keresztul.
+ * NEM nyitja meg az SO-t szerkesztesre (editContents) — igy nem korruptalhatja a tartalmat.
  * Ha nincs meglevo SO, a doc DPI-bol szamolunk (9x13 cm arany).
  */
 function _getExistingSoInternalSize(doc) {
@@ -82,40 +82,47 @@ function _getExistingSoInternalSize(doc) {
     try {
       for (var si = 0; si < grp.artLayers.length; si++) {
         var soLayer = grp.artLayers[si];
-        // Csak SmartObject tipusu layerek
         if (soLayer.kind !== LayerKind.SMARTOBJECT) continue;
 
         try {
-          // SO megnyitasa szerkesztesre (editContents)
+          // SO belso meret kiolvasasa descriptor-bol — NEM nyitja meg az SO-t!
+          // A smartObject descriptor tartalmazza a size-ot editContents nelkul.
           doc.activeLayer = soLayer;
-          var descEdit = new ActionDescriptor();
-          var refEdit = new ActionReference();
-          refEdit.putEnumerated(
-            stringIDToTypeID("smartObject"),
-            stringIDToTypeID("ordinal"),
-            stringIDToTypeID("targetEnum")
-          );
-          descEdit.putReference(charIDToTypeID("null"), refEdit);
-          executeAction(stringIDToTypeID("placedLayerEditContents"), descEdit, DialogModes.NO);
+          var ref = new ActionReference();
+          ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+          var layerDesc = executeActionGet(ref);
 
-          // Belso meret kiolvasasa
-          var soDoc = app.activeDocument;
-          var w = Math.round(soDoc.width.as("px"));
-          var h = Math.round(soDoc.height.as("px"));
-
-          // Bezaras mentes nelkul
-          soDoc.close(SaveOptions.DONOTSAVECHANGES);
-
-          if (w > 10 && h > 10) {
-            return { widthPx: w, heightPx: h };
-          }
-        } catch (editErr) {
-          // Ha nem sikerult megnyitni, probaljuk a kovetkezot
-          try {
-            if (app.documents.length > 1) {
-              app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+          // smartObject key a layer descriptorban
+          if (layerDesc.hasKey(stringIDToTypeID("smartObject"))) {
+            var soDesc = layerDesc.getObjectValue(stringIDToTypeID("smartObject"));
+            // size key: {width, height} a belso meret
+            if (soDesc.hasKey(stringIDToTypeID("size"))) {
+              var sizeDesc = soDesc.getObjectValue(stringIDToTypeID("size"));
+              var w = 0;
+              var h = 0;
+              if (sizeDesc.hasKey(stringIDToTypeID("width"))) {
+                w = Math.round(sizeDesc.getUnitDoubleValue(stringIDToTypeID("width")));
+              }
+              if (sizeDesc.hasKey(stringIDToTypeID("height"))) {
+                h = Math.round(sizeDesc.getUnitDoubleValue(stringIDToTypeID("height")));
+              }
+              if (w > 10 && h > 10) {
+                return { widthPx: w, heightPx: h };
+              }
             }
-          } catch (ce) { /* ignore */ }
+          }
+
+          // Fallback: layer bounds-bol szamolunk aranyt, SO creation meret a bounds + DPI
+          var bounds = soLayer.bounds;
+          var visW = Math.round(bounds[2].as("px") - bounds[0].as("px"));
+          var visH = Math.round(bounds[3].as("px") - bounds[1].as("px"));
+          if (visW > 10 && visH > 10) {
+            // A vizualis meret es a belso meret aranya egyeznie kell
+            // Hasznaljuk a vizualis meretet mint belso meretet (legjobb becslés)
+            return { widthPx: visW, heightPx: visH };
+          }
+        } catch (descErr) {
+          // Ha a descriptor sem mukodik, probaljuk a kovetkezot
         }
       }
     } catch (e) { /* ignore */ }

@@ -132,23 +132,27 @@
              [style.animation-delay]="i * 0.03 + 's'"
              (click)="onRowClick(project, $event)">
 
-          <!-- 1. sor: Checkbox + Thumbnail + Projektnév + badge-ek -->
+          <!-- Checkbox (span 2 sor) -->
+          <input
+            type="checkbox"
+            class="row-checkbox row-checkbox--span"
+            [checked]="selectedIds().has(project.id)"
+            [disabled]="!project.hasPrintFile"
+            [matTooltip]="project.hasPrintFile ? '' : 'Nincs nyomdakész fájl'"
+            (click)="project.hasPrintFile && toggleSelect(project, $event)"
+          />
+
+          <!-- Thumbnail (span 2 sor) -->
+          <div class="cell-thumb cell-thumb--span">
+            @if (project.thumbnailUrl) {
+              <img [src]="project.thumbnailUrl" alt="" class="thumb-img thumb-img--clickable" loading="lazy" (click)="openLightbox(project)" matTooltip="Kép megtekintése" />
+            } @else {
+              <div class="thumb-placeholder"><lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon></div>
+            }
+          </div>
+
+          <!-- 1. sor: Projektnév + badge-ek -->
           <div class="row-top">
-            <input
-              type="checkbox"
-              class="row-checkbox"
-              [checked]="selectedIds().has(project.id)"
-              [disabled]="!project.hasPrintFile"
-              [matTooltip]="project.hasPrintFile ? '' : 'Nincs nyomdakész fájl'"
-              (click)="project.hasPrintFile && toggleSelect(project, $event)"
-            />
-            <div class="cell-thumb">
-              @if (project.thumbnailUrl) {
-                <img [src]="project.thumbnailUrl" alt="" class="thumb-img thumb-img--clickable" loading="lazy" (click)="openLightbox(project)" matTooltip="Kép megtekintése" />
-              } @else {
-                <div class="thumb-placeholder"><lucide-icon [name]="ICONS.IMAGE" [size]="18"></lucide-icon></div>
-              }
-            </div>
             <span class="project-name project-name-link" (click)="onProjectLinkClick(project, $event)">
               <span class="project-name__school" [title]="project.schoolName ?? project.name">{{ truncateMiddle(project.schoolName ?? project.name) }}</span><!--
               -->@if (project.className) {<span class="project-name__class"> · {{ project.className }}</span>}

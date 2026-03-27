@@ -2,7 +2,6 @@
 @use 'styles/colors' as *;
 
 .print-shop-projects {
-  --row-indent: 72px; // checkbox(16) + gap(8) + thumb(40) + gap(8)
   --bottom-cols: 1fr 66px 44px 106px 86px 86px 80px;
   padding-top: 24px;
   padding-bottom: 24px;
@@ -80,11 +79,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &--span {
+    align-self: stretch;
+    align-items: center;
+  }
 }
 
 .thumb-img {
   width: 40px;
-  height: 40px;
+  height: 52px;
   border-radius: 6px;
   object-fit: cover;
   border: 1px solid get-color('slate', 200);
@@ -102,7 +106,7 @@
 
 .thumb-placeholder {
   width: 40px;
-  height: 40px;
+  height: 52px;
   border-radius: 6px;
   background: get-color('slate', 100);
   display: flex;
@@ -112,13 +116,25 @@
 }
 
 /* ============ 2-soros layout ============ */
+// checkbox(16) + gap(8) + thumb(40) + gap(8) = 72px
 .list-row {
-  display: flex;
-  flex-direction: column;
-  grid-template-columns: none;
-  gap: 2px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 16px 40px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: center;
   overflow: hidden;
+}
+
+.row-checkbox--span {
+  grid-row: span 2;
+  align-self: center;
+}
+
+.cell-thumb--span {
+  grid-row: span 2;
+  align-self: center;
 }
 
 .row-top {
@@ -127,6 +143,7 @@
   gap: 8px;
   min-width: 0;
   overflow: hidden;
+  grid-column: 3;
 }
 
 .row-bottom {
@@ -134,14 +151,14 @@
   grid-template-columns: var(--bottom-cols);
   gap: 8px;
   align-items: center;
-  margin-left: var(--row-indent);
   font-size: 0.8125rem;
+  grid-column: 3;
 }
 
 .table-header {
   grid-template-columns: var(--bottom-cols);
-  // 16px padding + row-indent igazítás
-  padding-left: calc(16px + var(--row-indent));
+  // 16px padding + checkbox(16) + gap(8) + thumb(40) + gap(8) = 88px
+  padding-left: 88px;
   position: relative;
 }
 
@@ -153,45 +170,9 @@
 }
 
 /* ============ Cells ============ */
-.cell-name {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
+.cell-studio { font-size: 0.75rem; color: get-color('slate', 600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.cell-studio {
-  font-size: 0.75rem;
-  color: get-color('slate', 600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.project-name {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: get-color('slate', 800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.project-meta {
-  font-size: 0.75rem;
-  color: get-color('slate', 500);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-.studio-name {
-  font-size: 0.8125rem;
-  color: get-color('slate', 700);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.project-name { font-weight: 600; font-size: 0.875rem; color: get-color('slate', 800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .cell-size {
   text-align: center;
@@ -383,19 +364,6 @@
   &--dl { color: #22c55e; }
 }
 
-.meta-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-  margin-left: 8px;
-  lucide-icon { margin-right: 2px; }
-  &--msg { color: #3b82f6; cursor: pointer; &:hover { color: #2563eb; } }
-  &--msg-read { color: #94a3b8; cursor: pointer; &:hover { color: #64748b; } }
-  &--dl { color: #22c55e; }
-}
 
 /* ============ Urgent / Reprint Row Highlight ============ */
 .list-row--urgent {
@@ -473,7 +441,6 @@
   .print-shop-projects { --bottom-cols: 1fr 70px 70px; }
   .cell-size, .cell-date, .cell-copies, .cell-deadline,
   .th-size, .th-date, .th-copies, .th-deadline { display: none; }
-  .row-bottom { margin-left: 0; }
   .table-header { padding-left: 16px; }
   .header-checkbox { display: none; }
   .filters { flex-direction: column; align-items: stretch; }

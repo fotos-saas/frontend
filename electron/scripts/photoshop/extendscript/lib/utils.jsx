@@ -123,39 +123,11 @@ function createTextLayer(container, displayText, options) {
 // Letrehoz egy ures layert, majd ActionManager-rel Smart Object-te alakitja.
 // container: LayerSet, options: {name, widthPx, heightPx}
 function createSmartObjectPlaceholder(doc, container, options) {
-  // STRATEGIA: meglevo SO duplikálása + atnevezese.
-  // Ez teljesen elkeruli a newPlacedLayer-t, ami PS 27.x-ben
-  // kiejti a layert a csoportbol (ismert Adobe bug).
-
-  // 1. Keresunk egy meglevo SO-t a container-ben (duplikalhato referenciak)
-  var sourceLayer = null;
-  try {
-    for (var si = 0; si < container.artLayers.length; si++) {
-      if (container.artLayers[si].kind === LayerKind.SMARTOBJECT) {
-        sourceLayer = container.artLayers[si];
-        break;
-      }
-    }
-  } catch (e) { /* nincs artLayers */ }
-
-  if (sourceLayer) {
-    // 2a. Duplikálás — az uj layer ugyanabban a csoportban landol
-    doc.activeLayer = sourceLayer;
-    var dupDesc = new ActionDescriptor();
-    var dupRef = new ActionReference();
-    dupRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-    dupDesc.putReference(charIDToTypeID("null"), dupRef);
-    executeAction(charIDToTypeID("Dplc"), dupDesc, DialogModes.NO);
-    var dupLayer = doc.activeLayer;
-    dupLayer.name = options.name;
-    return dupLayer;
-  }
-
-  // 2b. Fallback: nincs meglevo SO → doc gyokeren hozzuk letre + move + convert
-  // (csak az ELSO layer eseten, utana mar mindig lesz sourceLayer)
+  // Layer letrehozasa a doc gyokeren
   var layer = doc.artLayers.add();
   layer.name = options.name;
 
+  // Kitoltes szurke szinnel
   var fillColor = new SolidColor();
   fillColor.rgb.red = 200;
   fillColor.rgb.green = 200;
@@ -170,26 +142,27 @@ function createSmartObjectPlaceholder(doc, container, options) {
   doc.selection.fill(fillColor);
   doc.selection.deselect();
 
+  // Atrakás a cel csoportba
   layer.move(container, ElementPlacement.INSIDE);
   doc.activeLayer = layer;
 
-  var desc = new ActionDescriptor();
-  var ref = new ActionReference();
-  ref.putClass(stringIDToTypeID("smartObject"));
-  desc.putReference(charIDToTypeID("null"), ref);
-  var refLayer = new ActionReference();
-  refLayer.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  desc.putReference(charIDToTypeID("Usng"), refLayer);
-  executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
-
-  // Ha kiesett a csoportbol, visszarakjuk
-  var newSo = doc.activeLayer;
+  // Convert to Smart Object — a newPlacedLayer erzekeny a displayDialogs allapotra.
+  // Ideiglenesen visszaallitjuk az eredeti dialogus modot (ahogy eredetileg mukodott),
+  // hogy a PS ne ejtse ki a layert a csoportbol.
+  var _prevDialogs = app.displayDialogs;
+  app.displayDialogs = DialogModes.ERROR;
   try {
-    var parent = newSo.parent;
-    if (parent && parent.name !== container.name) {
-      newSo.move(container, ElementPlacement.INSIDE);
-    }
-  } catch (pe) { /* ignore */ }
+    var desc = new ActionDescriptor();
+    var ref = new ActionReference();
+    ref.putClass(stringIDToTypeID("smartObject"));
+    desc.putReference(charIDToTypeID("null"), ref);
+    var refLayer = new ActionReference();
+    refLayer.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    desc.putReference(charIDToTypeID("Usng"), refLayer);
+    executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
+  } finally {
+    app.displayDialogs = _prevDialogs;
+  }
 
   return doc.activeLayer;
 }

@@ -433,13 +433,8 @@
 
 /* ============ Project Name Link ============ */
 .project-name-link {
-  display: flex;
-  align-items: baseline;
-  color: inherit;
-  text-decoration: none;
-  min-width: 0;
-  cursor: pointer;
-
+  display: flex; align-items: baseline; color: inherit; text-decoration: none;
+  min-width: 0; overflow: hidden; cursor: pointer; flex: 1;
   &:hover { color: #6366f1; text-decoration: underline; }
 }
 

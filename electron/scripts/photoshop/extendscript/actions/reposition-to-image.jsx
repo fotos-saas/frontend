@@ -71,70 +71,7 @@ function selectLayerById(layerId) {
   executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
 }
 
-// --- Csoport elerese eleresi ut alapjan ---
-function getGroupByPath(doc, pathArray) {
-  var current = doc;
-  for (var i = 0; i < pathArray.length; i++) {
-    var found = false;
-    try {
-      for (var j = 0; j < current.layerSets.length; j++) {
-        if (current.layerSets[j].name === pathArray[i]) {
-          current = current.layerSets[j];
-          found = true;
-          break;
-        }
-      }
-    } catch (e) {}
-    if (!found) return null;
-  }
-  return current;
-}
-
-// --- Image layer keresese nev alapjan (Images/Students + Images/Teachers) ---
-function findImageLayerByName(doc, layerName) {
-  var groups = [["Images", "Students"], ["Images", "Teachers"]];
-  for (var g = 0; g < groups.length; g++) {
-    var grp = getGroupByPath(doc, groups[g]);
-    if (!grp) continue;
-    try {
-      for (var i = 0; i < grp.artLayers.length; i++) {
-        if (grp.artLayers[i].name === layerName) {
-          return grp.artLayers[i];
-        }
-      }
-    } catch (e) {}
-  }
-  return null;
-}
-
-// --- ID kinyerese layer nevbol (pl. "nagy-janos---42" → "nagy-janos---42") ---
-// Visszaadja a teljes layer nevet, ami az Images-ben keresheto
-function extractLayerBaseName(name) {
-  // A layer neve megegyezik az Images-beli layer nevevel
-  // Pl: "nagy-janos---42" layerek a Names/Students es Images/Students csoportban is ugyanazt a nevet kapjak
-  return name;
-}
-
-// --- Baseline offset meres text layerekhez ---
-var _baselineOffset = null;
-
-function measureBaselineOffset(doc) {
-  var refLayer = doc.artLayers.add();
-  refLayer.kind = LayerKind.TEXT;
-  refLayer.name = "__ref_measure_repo__";
-  var ti = refLayer.textItem;
-  ti.contents = "Hg";
-  ti.font = "ArialMT";
-  ti.size = new UnitValue(12, "pt");
-  ti.justification = Justification.LEFT;
-
-  var posY = ti.position[1].as("px");
-  var b = getBoundsNoEffects(refLayer.id);
-  var offset = posY - b.top;
-
-  refLayer.remove();
-  return offset;
-}
+// --- getGroupByPath itt a utils.jsx-bol jon (#include) ---
 
 // --- JSON escape (ES3) ---
 function escapeJsonStr(s) {
@@ -158,82 +95,78 @@ function doReposition() {
     return;
   }
 
+  // 1. Images csoport nev→ID map (EGYETLEN bejaras)
+  var imageNameToId = {};
+  var groups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < groups.length; g++) {
+    var grp = getGroupByPath(doc, groups[g]);
+    if (!grp) continue;
+    try {
+      for (var a = 0; a < grp.artLayers.length; a++) {
+        imageNameToId[grp.artLayers[a].name] = grp.artLayers[a].id;
+      }
+    } catch (e) {}
+  }
+
   var moved = 0;
 
   for (var i = 0; i < selected.length; i++) {
     var sel = selected[i];
-    var layerName = sel.name;
 
-    // Gazda image layer keresese — azonos nev
-    var imgLayer = findImageLayerByName(doc, layerName);
-    if (!imgLayer) continue;
+    // Gazda image layer keresese map-bol (O(1))
+    var imgId = imageNameToId[sel.name];
+    if (!imgId) continue;
 
-    // Gazda image layer bounds
-    var targetBounds = getBoundsNoEffects(imgLayer.id);
-    var targetLeft = targetBounds.left;
-    var targetTop = targetBounds.top;
+    // Gazda image bounds
+    var targetBounds = getBoundsNoEffects(imgId);
 
-    // Kijelolt layer kivalasztasa es bounds lekerdezese
-    selectLayerById(sel.id);
-    doc.activeLayer = doc.activeLayer; // refresh
-
-    // Ellenorizzuk, hogy text layer-e
-    var isText = false;
+    // Kijelolt layer: bounds + kind egyetlen AM hivassal
+    var selBounds, isText = false;
     try {
       var lRef = new ActionReference();
       lRef.putIdentifier(charIDToTypeID("Lyr "), sel.id);
       var lDesc = executeActionGet(lRef);
+
+      // Kind check
       var kindKey = stringIDToTypeID("layerKind");
-      if (lDesc.hasKey(kindKey)) {
-        // layerKind: 3 = text layer
-        isText = (lDesc.getInteger(kindKey) === 3);
-      }
-    } catch (e) {}
+      if (lDesc.hasKey(kindKey)) isText = (lDesc.getInteger(kindKey) === 3);
+
+      // Bounds
+      var bKey = stringIDToTypeID("boundsNoEffects");
+      var b = lDesc.hasKey(bKey) ? lDesc.getObjectValue(bKey) : lDesc.getObjectValue(stringIDToTypeID("bounds"));
+      selBounds = {
+        left: b.getUnitDoubleValue(stringIDToTypeID("left")),
+        top: b.getUnitDoubleValue(stringIDToTypeID("top"))
+      };
+    } catch (e) { continue; }
 
     if (isText) {
-      // Text layer: textItem.position alapu mozgatas (baseline kompenzacio)
       try {
         selectLayerById(sel.id);
-        var textLayer = doc.activeLayer;
-        var ti = textLayer.textItem;
-
-        // Jelenlegi bounds
-        var currentBounds = getBoundsNoEffects(sel.id);
-        var currentLeft = currentBounds.left;
-        var currentTop = currentBounds.top;
-
-        // Baseline offset
-        var currentPosX = ti.position[0].as("px");
-        var currentPosY = ti.position[1].as("px");
-        var offsetX = currentPosX - currentLeft;
-        var offsetY = currentPosY - currentTop;
-
-        // Uj position: target top-left + offset
-        var newPosX = targetLeft + offsetX;
-        var newPosY = targetTop + offsetY;
-
-        ti.position = [new UnitValue(Math.round(newPosX), "px"), new UnitValue(Math.round(newPosY), "px")];
+        var ti = doc.activeLayer.textItem;
+        var posX = ti.position[0].as("px");
+        var posY = ti.position[1].as("px");
+        ti.position = [
+          new UnitValue(Math.round(targetBounds.left + (posX - selBounds.left)), "px"),
+          new UnitValue(Math.round(targetBounds.top + (posY - selBounds.top)), "px")
+        ];
         moved++;
       } catch (e) {
         // Fallback: translate
         try {
-          var fb = getBoundsNoEffects(sel.id);
-          var layer = doc.activeLayer;
-          layer.translate(
-            new UnitValue(targetLeft - fb.left, "px"),
-            new UnitValue(targetTop - fb.top, "px")
+          doc.activeLayer.translate(
+            new UnitValue(targetBounds.left - selBounds.left, "px"),
+            new UnitValue(targetBounds.top - selBounds.top, "px")
           );
           moved++;
         } catch (e2) {}
       }
     } else {
-      // Nem text layer: translate
-      var currentBounds2 = getBoundsNoEffects(sel.id);
       selectLayerById(sel.id);
       try {
         doc.activeLayer.translate(
-          new UnitValue(targetLeft - currentBounds2.left, "px"),
-          new UnitValue(targetTop - currentBounds2.top, "px")
+          new UnitValue(targetBounds.left - selBounds.left, "px"),
+          new UnitValue(targetBounds.top - selBounds.top, "px")
         );
         moved++;
       } catch (e) {}
@@ -243,9 +176,7 @@ function doReposition() {
   // Eredeti kijeloles visszaallitasa
   if (selected.length > 0) {
     var restoreIds = [];
-    for (var k = 0; k < selected.length; k++) {
-      restoreIds.push(selected[k].id);
-    }
+    for (var k = 0; k < selected.length; k++) restoreIds.push(selected[k].id);
     selectMultipleLayersById(restoreIds);
   }
 

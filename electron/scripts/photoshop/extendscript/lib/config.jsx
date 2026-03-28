@@ -4,10 +4,10 @@
  * Font, meret, szin konfiguracio a text layer-ekhez.
  * Minden action script #include-olja ezt.
  *
- * FONTOS: Ez a fajl NEM tartalmaz side effect-eket (nincs PS-t modosito hivas)!
- * A disablePSDCompression es displayDialogs beallitasokat a JSX runner
- * injecteli be a scriptek elejere (csak iro/modosito scripteknél).
+ * displayDialogs = NO: minden script dialog nelkul fut (New Layer, Save As, stb.)
+ * Ha egy script AKAR dialogot, explicit visszaallithatja.
  */
+app.displayDialogs = DialogModes.NO;
 
 var CONFIG = {
   // Szoveg layer alapertelmezes

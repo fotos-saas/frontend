@@ -517,46 +517,10 @@ export class JsxRunnerService {
       }
     }
 
-    // Iro/modosito scripteknél: disablePSDCompression + displayDialogs NO injektálás
-    // displayDialogs=NO + disablePSDCompression CSAK fájlmentő/SO-nyitó scripteknek kell.
-    // Whitelist: flatten-export, save-and-close, place-photos, add-image-layers,
-    //            add-group-layers, apply-template, apply-circle-mask, add-name-layers,
-    //            add-subtitle-layers, add-placeholder-texts, add-extra-names
-    const baseName = path.basename(scriptName);
-    const needsDialogSuppress = /^(flatten-|save-|place-|add-|apply-)/.test(baseName);
-    if (needsDialogSuppress) {
-      const sideEffects = [
-        'var _savedDialogMode = app.displayDialogs;',
-        'app.displayDialogs = DialogModes.NO;',
-        'try {',
-        '  var _prefDesc = new ActionDescriptor();',
-        '  var _prefRef = new ActionReference();',
-        '  _prefRef.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("fileSavePrefs"));',
-        '  _prefRef.putEnumerated(charIDToTypeID("capp"), charIDToTypeID("OrDn"), charIDToTypeID("Trgt"));',
-        '  _prefDesc.putReference(charIDToTypeID("null"), _prefRef);',
-        '  var _savePrefs = new ActionDescriptor();',
-        '  _savePrefs.putBoolean(stringIDToTypeID("disablePSDCompression"), true);',
-        '  _prefDesc.putObject(stringIDToTypeID("T   "), stringIDToTypeID("fileSavePrefs"), _savePrefs);',
-        '  executeAction(charIDToTypeID("setd"), _prefDesc, DialogModes.NO);',
-        '} catch(_se) {}',
-      ].join('\n');
-
-      const configStart = scriptContent.indexOf('var CONFIG');
-      if (configStart > -1) {
-        scriptContent = scriptContent.slice(0, configStart) + sideEffects + '\n\n' + scriptContent.slice(configStart);
-      }
-
-      // A restore-t az utolsó return-kifejezés ELÉ injektáljuk,
-      // hogy az maradjon az utolsó kiértékelt sor (osascript kimenet).
-      // Felismert minták: _logLines.join(...), _linkResult;, _unlinkResult;, stb.
-      const restoreCode = 'try { app.displayDialogs = _savedDialogMode; } catch(_e) {}';
-      const lastExprPattern = /((?:_logLines\.join\([^)]*\)|_\w+Result)\s*;?\s*)$/;
-      if (lastExprPattern.test(scriptContent)) {
-        scriptContent = scriptContent.replace(lastExprPattern, restoreCode + '\n$1');
-      } else {
-        scriptContent += '\n' + restoreCode + '\n';
-      }
-    }
+    // displayDialogs kezelés: MINDEN script saját maga kezeli a displayDialogs-t
+    // (flatten-export, add-group-layers, place-photos, stb. mind tartalmazzák).
+    // A runner NEM injektál displayDialogs/disablePSDCompression kódot,
+    // mert a rossz helyre kerülő restore kód elrontja a script kimenetét.
 
     return scriptContent;
   }

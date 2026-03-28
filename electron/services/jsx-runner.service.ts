@@ -518,11 +518,13 @@ export class JsxRunnerService {
     }
 
     // Iro/modosito scripteknél: disablePSDCompression + displayDialogs NO injektálás
-    // Scriptek amik NEM mentenek fájlt / NEM nyitnak SO-t: nem kapják az injektálást.
-    // get-* = readonly, link-*/unlink-* = csak layer select/link, align-* = pozícionálás
+    // displayDialogs=NO + disablePSDCompression CSAK fájlmentő/SO-nyitó scripteknek kell.
+    // Whitelist: flatten-export, save-and-close, place-photos, add-image-layers,
+    //            add-group-layers, apply-template, apply-circle-mask, add-name-layers,
+    //            add-subtitle-layers, add-placeholder-texts, add-extra-names
     const baseName = path.basename(scriptName);
-    const isNoSave = /^(get-|link-|unlink-|align-)/.test(baseName);
-    if (!isNoSave) {
+    const needsDialogSuppress = /^(flatten-|save-|place-|add-|apply-)/.test(baseName);
+    if (needsDialogSuppress) {
       const sideEffects = [
         'var _savedDialogMode = app.displayDialogs;',
         'app.displayDialogs = DialogModes.NO;',

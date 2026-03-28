@@ -42,24 +42,17 @@ function _findLayersByNames(container, nameSet, result) {
   } catch (e) { /* nincs layerSets */ }
 }
 
-function _hasUserMask(layerId) {
+// Egyetlen AM hivassal kerdezi le mindket mask tipust
+function _getMaskInfo(layerId) {
   try {
     var ref = new ActionReference();
-    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasUserMask"));
     ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
     var desc = executeActionGet(ref);
-    return desc.getBoolean(stringIDToTypeID("hasUserMask"));
-  } catch (e) { return false; }
-}
-
-function _hasVectorMask(layerId) {
-  try {
-    var ref = new ActionReference();
-    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasVectorMask"));
-    ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
-    var desc = executeActionGet(ref);
-    return desc.getBoolean(stringIDToTypeID("hasVectorMask"));
-  } catch (e) { return false; }
+    return {
+      user: desc.hasKey(stringIDToTypeID("hasUserMask")) && desc.getBoolean(stringIDToTypeID("hasUserMask")),
+      vector: desc.hasKey(stringIDToTypeID("hasVectorMask")) && desc.getBoolean(stringIDToTypeID("hasVectorMask"))
+    };
+  } catch (e) { return { user: false, vector: false }; }
 }
 
 function _deleteUserMask() {
@@ -79,7 +72,7 @@ function _deleteVectorMask() {
   executeAction(charIDToTypeID("Dlt "), desc, DialogModes.NO);
 }
 
-// --- PS-ben kijelolt layerek lekerese ---
+// --- PS-ben kijelolt layerek lekerese (1 bejaras, NEM N×DOM walk) ---
 function _getSelectedLayers(doc) {
   var layers = [];
   try {
@@ -87,14 +80,20 @@ function _getSelectedLayers(doc) {
     ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
     var docDesc = executeActionGet(ref);
     var idxList = docDesc.getList(stringIDToTypeID("targetLayers"));
+    var names = [];
     for (var i = 0; i < idxList.count; i++) {
       var idx = idxList.getReference(i).getIndex(charIDToTypeID("Lyr "));
       var layerRef = new ActionReference();
       layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
       var layerDesc = executeActionGet(layerRef);
-      var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
-      var found = _findArtLayerByName(doc, layerName);
-      if (found) layers.push(found);
+      names.push(layerDesc.getString(charIDToTypeID("Nm  ")));
+    }
+    var nameSet = {};
+    for (var n = 0; n < names.length; n++) nameSet[names[n]] = true;
+    var nameToLayer = {};
+    _buildLayerMap(doc, nameSet, nameToLayer);
+    for (var k = 0; k < names.length; k++) {
+      if (nameToLayer[names[k]]) layers.push(nameToLayer[names[k]]);
     }
   } catch (e) {
     log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);
@@ -102,19 +101,18 @@ function _getSelectedLayers(doc) {
   return layers;
 }
 
-function _findArtLayerByName(container, name) {
+function _buildLayerMap(container, nameSet, map) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
-      if (container.artLayers[i].name === name) return container.artLayers[i];
+      var n = container.artLayers[i].name;
+      if (nameSet[n] && !map[n]) map[n] = container.artLayers[i];
     }
-  } catch (e) { /* */ }
+  } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      var found = _findArtLayerByName(container.layerSets[j], name);
-      if (found) return found;
+      _buildLayerMap(container.layerSets[j], nameSet, map);
     }
-  } catch (e) { /* */ }
-  return null;
+  } catch (e) {}
 }
 
 function _doRemoveMasks() {
@@ -149,26 +147,15 @@ function _doRemoveMasks() {
   for (var i = 0; i < foundLayers.length; i++) {
     var layer = foundLayers[i];
     try {
-      var hadMask = false;
+      var masks = _getMaskInfo(layer.id);
+      if (!masks.user && !masks.vector) { _skipped++; continue; }
 
       selectLayerById(layer.id);
       doc.activeLayer = layer;
 
-      if (_hasUserMask(layer.id)) {
-        _deleteUserMask();
-        hadMask = true;
-      }
-
-      if (_hasVectorMask(layer.id)) {
-        _deleteVectorMask();
-        hadMask = true;
-      }
-
-      if (hadMask) {
-        _removed++;
-      } else {
-        _skipped++;
-      }
+      if (masks.user) _deleteUserMask();
+      if (masks.vector) _deleteVectorMask();
+      _removed++;
     } catch (e) {
       log("[JSX] HIBA (" + layer.name + "): " + e.message);
       _errors++;

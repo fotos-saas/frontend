@@ -91,45 +91,39 @@ function _doResizeLayers() {
 
   log("[JSX] Talalt layerek: " + foundLayers.length + "/" + layerNames.length);
 
-  // Atmeretezes
+  // Atmeretezes — bounds AM-mel, select csak resize-hoz
   for (var i = 0; i < foundLayers.length; i++) {
     var layer = foundLayers[i];
     try {
-      selectLayerById(layer.id);
-      doc.activeLayer = layer;
+      // Bounds ActionManager-rel (nincs select, nincs DOM .bounds hivas)
+      var bRef = new ActionReference();
+      bRef.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+      var bDesc = executeActionGet(bRef);
+      var bKey = stringIDToTypeID("boundsNoEffects");
+      var b = bDesc.hasKey(bKey) ? bDesc.getObjectValue(bKey) : bDesc.getObjectValue(stringIDToTypeID("bounds"));
+      var currentW = b.getUnitDoubleValue(stringIDToTypeID("right")) - b.getUnitDoubleValue(stringIDToTypeID("left"));
+      var currentH = b.getUnitDoubleValue(stringIDToTypeID("bottom")) - b.getUnitDoubleValue(stringIDToTypeID("top"));
 
-      var bounds = layer.bounds;
-      var currentW = bounds[2].as("px") - bounds[0].as("px");
-      var currentH = bounds[3].as("px") - bounds[1].as("px");
-
-      if (currentW <= 0 || currentH <= 0) {
-        log("[JSX] WARN: Layer merete 0: " + layer.name);
-        _errors++;
-        continue;
-      }
+      if (currentW <= 0 || currentH <= 0) { _errors++; continue; }
 
       var scaleW, scaleH;
-
       if (targetWPx !== null && targetHPx !== null) {
-        // Mindketto megadva → pontos meret
         scaleW = (targetWPx / currentW) * 100;
         scaleH = (targetHPx / currentH) * 100;
       } else if (targetWPx !== null) {
-        // Csak szelesseg → aranyos
         scaleW = (targetWPx / currentW) * 100;
         scaleH = scaleW;
       } else {
-        // Csak magassag → aranyos
         scaleH = (targetHPx / currentH) * 100;
         scaleW = scaleH;
       }
 
-      // Csak akkor resize-oljuk ha erdemi valtozas van (>0.5%)
       if (Math.abs(scaleW - 100) > 0.5 || Math.abs(scaleH - 100) > 0.5) {
+        selectLayerById(layer.id);
+        doc.activeLayer = layer;
         layer.resize(scaleW, scaleH, AnchorPosition.MIDDLECENTER);
         _resized++;
       }
-
     } catch (e) {
       log("[JSX] HIBA (" + layer.name + "): " + e.message);
       _errors++;

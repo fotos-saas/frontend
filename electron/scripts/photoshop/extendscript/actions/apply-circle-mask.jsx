@@ -28,6 +28,7 @@ var _skipped = 0;
 var _errors = 0;
 
 // --- PS-ben kijelolt layerek lekerese (ActionDescriptor, ES3) ---
+// Egyetlen nev→layer map epites, utana O(1) lookup (NEM N×DOM walk)
 function _getSelectedLayers(doc) {
   var layers = [];
   try {
@@ -35,16 +36,25 @@ function _getSelectedLayers(doc) {
     ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
     var docDesc = executeActionGet(ref);
     var idxList = docDesc.getList(stringIDToTypeID("targetLayers"));
+
+    // Osszegyujtjuk a neveket
+    var names = [];
     for (var i = 0; i < idxList.count; i++) {
       var idx = idxList.getReference(i).getIndex(charIDToTypeID("Lyr "));
-      // Photoshop index → layer reference (background offset)
       var layerRef = new ActionReference();
       layerRef.putIndex(charIDToTypeID("Lyr "), idx + 1);
       var layerDesc = executeActionGet(layerRef);
-      var layerName = layerDesc.getString(charIDToTypeID("Nm  "));
-      // artLayer keresés névvel (layerSets-et kihagyjuk)
-      var found = _findArtLayerByName(doc, layerName);
-      if (found) layers.push(found);
+      names.push(layerDesc.getString(charIDToTypeID("Nm  ")));
+    }
+
+    // Egyetlen bejaras → nev→layer map
+    var nameSet = {};
+    for (var n = 0; n < names.length; n++) nameSet[names[n]] = true;
+    var nameToLayer = {};
+    _buildLayerMap(doc, nameSet, nameToLayer);
+
+    for (var k = 0; k < names.length; k++) {
+      if (nameToLayer[names[k]]) layers.push(nameToLayer[names[k]]);
     }
   } catch (e) {
     log("[JSX] Kijelolt layerek lekeres hiba: " + e.message);
@@ -52,19 +62,18 @@ function _getSelectedLayers(doc) {
   return layers;
 }
 
-function _findArtLayerByName(container, name) {
+function _buildLayerMap(container, nameSet, map) {
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
-      if (container.artLayers[i].name === name) return container.artLayers[i];
+      var n = container.artLayers[i].name;
+      if (nameSet[n] && !map[n]) map[n] = container.artLayers[i];
     }
-  } catch (e) { /* */ }
+  } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
-      var found = _findArtLayerByName(container.layerSets[j], name);
-      if (found) return found;
+      _buildLayerMap(container.layerSets[j], nameSet, map);
     }
-  } catch (e) { /* */ }
-  return null;
+  } catch (e) {}
 }
 
 // --- Rekurziv layer kereses nev alapjan ---
@@ -89,18 +98,11 @@ function _findLayersByNames(container, nameSet, result) {
 function _hasMask(layerId) {
   try {
     var ref = new ActionReference();
-    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasUserMask"));
     ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
     var desc = executeActionGet(ref);
-    if (desc.getBoolean(stringIDToTypeID("hasUserMask"))) return true;
-  } catch (e) { /* */ }
-  try {
-    var ref2 = new ActionReference();
-    ref2.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("hasVectorMask"));
-    ref2.putIdentifier(charIDToTypeID("Lyr "), layerId);
-    var desc2 = executeActionGet(ref2);
-    if (desc2.getBoolean(stringIDToTypeID("hasVectorMask"))) return true;
-  } catch (e) { /* */ }
+    if (desc.hasKey(stringIDToTypeID("hasUserMask")) && desc.getBoolean(stringIDToTypeID("hasUserMask"))) return true;
+    if (desc.hasKey(stringIDToTypeID("hasVectorMask")) && desc.getBoolean(stringIDToTypeID("hasVectorMask"))) return true;
+  } catch (e) {}
   return false;
 }
 

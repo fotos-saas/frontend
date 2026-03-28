@@ -40,9 +40,8 @@ var _movesData = null;
 
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   var boundsKey = stringIDToTypeID("boundsNoEffects");

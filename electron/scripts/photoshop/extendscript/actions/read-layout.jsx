@@ -29,9 +29,8 @@ var _doc;
 // --- Layer descriptor kiolvasas (bounds + SO info) ---
 // Egyetlen executeActionGet hivassal kinyerjuk a bounds-ot es SO allapotot
 function _getLayerDescriptor(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   // Bounds (effekt nelkul ha elerheto)

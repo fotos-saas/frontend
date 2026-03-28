@@ -16,28 +16,26 @@
 var _doc, _renameMap, _renameResult;
 
 // --- Rekurziv atnevezes a teljes dokumentumban (barmelyik mappa melysegben) ---
+// Hash-alapu lookup: O(1) per layer (volt O(M) per layer)
+var _renameHash = {};
+
 function _renameRecursive(container) {
-  // artLayerek
   try {
     for (var i = 0; i < container.artLayers.length; i++) {
       var layer = container.artLayers[i];
       _renameChecked++;
-      for (var m = 0; m < _renameMap.length; m++) {
-        if (layer.name === _renameMap[m].old) {
-          layer.name = _renameMap[m]["new"];
-          _renameCount++;
-          break;
-        }
+      var newName = _renameHash[layer.name];
+      if (newName) {
+        layer.name = newName;
+        _renameCount++;
       }
     }
-  } catch (e) { /* nincs artLayers */ }
-
-  // LayerSet-ek rekurziv bejaras
+  } catch (e) {}
   try {
     for (var j = 0; j < container.layerSets.length; j++) {
       _renameRecursive(container.layerSets[j]);
     }
-  } catch (e) { /* nincs layerSets */ }
+  } catch (e) {}
 }
 
 var _renameCount = 0;
@@ -46,6 +44,11 @@ var _renameChecked = 0;
 function _doRenameLayers() {
   _renameCount = 0;
   _renameChecked = 0;
+  // Hash felepitese: old→new (O(1) lookup)
+  _renameHash = {};
+  for (var h = 0; h < _renameMap.length; h++) {
+    _renameHash[_renameMap[h].old] = _renameMap[h]["new"];
+  }
   _renameRecursive(_doc);
   _renameResult = '{"renamed":' + _renameCount + ',"checked":' + _renameChecked + '}';
 }

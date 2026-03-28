@@ -35,7 +35,6 @@ function _doArrangeSubtitles() {
     var layer = subtitlesGroup.artLayers[i];
     if (!layer.visible) continue;
 
-    selectLayerById(layer.id);
     var bnfe = _getBoundsNoEffects(layer);
     var h = Math.round(bnfe.bottom - bnfe.top);
     var w = Math.round(bnfe.right - bnfe.left);
@@ -114,9 +113,8 @@ function _doArrangeSubtitles() {
 
 // --- Layer bounds EFFEKTEK NELKUL (masolat az arrange-grid.jsx-bol) ---
 function _getBoundsNoEffects(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   var boundsKey = stringIDToTypeID("boundsNoEffects");

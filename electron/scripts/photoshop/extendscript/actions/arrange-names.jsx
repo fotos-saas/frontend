@@ -118,9 +118,8 @@ function _findImageLayer(nameLayerName) {
 
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   var boundsKey = stringIDToTypeID("boundsNoEffects");
@@ -297,12 +296,20 @@ function _arrangeNameGroup(nameGroupPath) {
   var textAlign = _data.textAlign || "center";
   var breakAfter = _data.nameBreakAfter || 0;
 
-  // Baseline offset meres (egyszer, az elso csoportnal)
-  // Ez a baseline es a bounds.top kozotti fix tavolsag adott font/merethez.
-  // Ezzel tudjuk kiszamolni a helyes baseline poziciot a kivant bounds.top-bol.
   if (_baselineOffset === null) {
     _baselineOffset = _measureBaselineOffset(grp);
     log("[JSX] Baseline offset (Hg): " + _baselineOffset + "px");
+  }
+
+  // Image layer map felepitese EGYSZER (nem N×DOM walk)
+  var imageLayerMap = {};
+  var imgGroups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var ig = 0; ig < imgGroups.length; ig++) {
+    var imgGrp = getGroupByPath(_doc, imgGroups[ig]);
+    if (!imgGrp) continue;
+    for (var ia = 0; ia < imgGrp.artLayers.length; ia++) {
+      imageLayerMap[imgGrp.artLayers[ia].name] = imgGrp.artLayers[ia];
+    }
   }
 
   log("[JSX] Csoport: " + nameGroupPath.join("/") + " (" + grp.artLayers.length + " layer, gap=" + gapPx + "px, align=" + textAlign + ", breakAfter=" + breakAfter + ")");
@@ -311,7 +318,7 @@ function _arrangeNameGroup(nameGroupPath) {
     var nameLayer = grp.artLayers[i];
 
     try {
-      var imageLayer = _findImageLayer(nameLayer.name);
+      var imageLayer = imageLayerMap[nameLayer.name];
       if (!imageLayer) {
         log("[JSX] WARN: Nincs par kep: " + nameLayer.name);
         _errors++;

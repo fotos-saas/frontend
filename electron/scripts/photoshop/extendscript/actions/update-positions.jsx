@@ -14,7 +14,6 @@
  *   "persons": [
  *     { "layerName": "kiss-janos---42", "displayText": "Kiss Janos", "position": "Igazgato", "group": "Students" }
  *   ],
- *   "nameBreakAfter": 1,
  *   "textAlign": "center",
  *   "nameGapCm": 0.5,
  *   "positionGapCm": 0.15,
@@ -35,50 +34,21 @@ function log(msg) {
 var _doc, _data, _dpi;
 var _updated = 0, _created = 0, _deleted = 0, _errors = 0;
 
-// --- Baseline offset cache: font meret → offset ---
-var _baselineOffsets = {};
-
-// --- Nev tordeles (breakAfter) — azonos az arrange-names.jsx-bol ---
-function _breakName(name, breakAfter) {
-  if (breakAfter <= 0) return name;
-  var words = name.split(" ");
-  if (words.length < 2) return name;
-  function isPrefix(w) { return w.replace(/\./g, "").length <= 2; }
-  var realCount = 0;
-  for (var c = 0; c < words.length; c++) {
-    if (!isPrefix(words[c])) realCount++;
-  }
-  if (realCount < 3) return name;
-  var hyphenIndex = -1;
-  for (var h = 0; h < words.length; h++) {
-    if (words[h].indexOf("-") !== -1) { hyphenIndex = h; break; }
-  }
-  if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
-    return words.slice(0, hyphenIndex + 1).join(" ") + "\r" + words.slice(hyphenIndex + 1).join(" ");
-  }
-  var realWordCount = 0;
-  var breakIndex = -1;
-  for (var i = 0; i < words.length; i++) {
-    if (!isPrefix(words[i])) realWordCount++;
-    if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
-  }
-  if (breakIndex === -1) return name;
-  return words.slice(0, breakIndex).join(" ") + "\r" + words.slice(breakIndex).join(" ");
-}
-
-// --- Nev kiolvasasa a text layer-bol (sortoresek nelkul) ---
-function _getPlainName(textItem) {
-  var raw = textItem.contents;
-  return raw.replace(/[\r\n]/g, " ").replace(/  +/g, " ");
-}
+// --- Cache-ek (teljesitmeny) ---
+var _baselineOffsets = {};  // font meret → offset
+var _boundsCache = {};      // layer id → { left, top, right, bottom }
+var _groupCache = {};       // path string → group ref
 
 // --- cm → px konverzio ---
 function _cm2px(cm) {
   return Math.round((cm / 2.54) * _dpi);
 }
 
-// --- Layer bounds EFFEKTEK NELKUL ---
+// --- Layer bounds EFFEKTEK NELKUL (CACHE-ELT) ---
 function _getBoundsNoEffects(layer) {
+  var cacheKey = String(layer.id);
+  if (_boundsCache[cacheKey]) return _boundsCache[cacheKey];
+
   selectLayerById(layer.id);
   var ref = new ActionReference();
   ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
@@ -92,12 +62,23 @@ function _getBoundsNoEffects(layer) {
     b = desc.getObjectValue(stringIDToTypeID("bounds"));
   }
 
-  return {
+  var result = {
     left: b.getUnitDoubleValue(stringIDToTypeID("left")),
     top: b.getUnitDoubleValue(stringIDToTypeID("top")),
     right: b.getUnitDoubleValue(stringIDToTypeID("right")),
     bottom: b.getUnitDoubleValue(stringIDToTypeID("bottom"))
   };
+  _boundsCache[cacheKey] = result;
+  return result;
+}
+
+// --- Group keresese (CACHE-ELT) ---
+function _getGroup(pathArray) {
+  var key = pathArray.join("/");
+  if (_groupCache[key] !== undefined) return _groupCache[key];
+  var grp = getGroupByPath(_doc, pathArray);
+  _groupCache[key] = grp || null;
+  return _groupCache[key];
 }
 
 // --- Baseline offset meres adott font merethez ---
@@ -119,62 +100,59 @@ function _measureBaselineOffset(container, fontSize) {
   var b = _getBoundsNoEffects(refLayer);
   var offset = posY - b.top;
 
+  // Meres utan toroljuk — ne maradjon a cache-ben sem
+  delete _boundsCache[String(refLayer.id)];
   refLayer.remove();
   _baselineOffsets[key] = offset;
   log("[JSX] Baseline offset (" + fontSize + "pt): " + offset + "px");
   return offset;
 }
 
-// --- Kep layer keresese nev alapjan ---
+// --- Layer keresese nev+csoport alapjan (cache-elt group-pal) ---
 function _findImageLayer(layerName) {
-  var groups = [["Images", "Students"], ["Images", "Teachers"]];
-  for (var g = 0; g < groups.length; g++) {
-    var grp = getGroupByPath(_doc, groups[g]);
+  var paths = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < paths.length; g++) {
+    var grp = _getGroup(paths[g]);
     if (!grp) continue;
     for (var i = 0; i < grp.artLayers.length; i++) {
-      if (grp.artLayers[i].name === layerName) {
-        return grp.artLayers[i];
-      }
+      if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
     }
   }
   return null;
 }
 
-// --- Nev layer keresese ---
 function _findNameLayer(layerName, group) {
-  var grp = getGroupByPath(_doc, ["Names", group]);
+  var grp = _getGroup(["Names", group]);
   if (!grp) return null;
   for (var i = 0; i < grp.artLayers.length; i++) {
-    if (grp.artLayers[i].name === layerName) {
-      return grp.artLayers[i];
-    }
+    if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
   }
   return null;
 }
 
-// --- Pozicio layer keresese ---
 function _findPositionLayer(layerName, group) {
-  var grp = getGroupByPath(_doc, ["Positions", group]);
+  var grp = _getGroup(["Positions", group]);
   if (!grp) return null;
   for (var i = 0; i < grp.artLayers.length; i++) {
-    if (grp.artLayers[i].name === layerName) {
-      return grp.artLayers[i];
-    }
+    if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
   }
   return null;
 }
 
 // --- Positions csoport biztositasa (letrehozas ha nincs) ---
 function _ensurePositionsGroup(group) {
-  // Fo Positions csoport
-  var posRoot = getGroupByPath(_doc, ["Positions"]);
+  var posRoot = _getGroup(["Positions"]);
   if (!posRoot) {
     posRoot = _doc.layerSets.add();
     posRoot.name = "Positions";
+    _groupCache["Positions"] = posRoot;
     log("[JSX] Positions csoport letrehozva");
   }
 
   // Al-csoport (Students/Teachers)
+  var subKey = "Positions/" + group;
+  if (_groupCache[subKey]) return _groupCache[subKey];
+
   var subGrp = null;
   try {
     for (var i = 0; i < posRoot.layerSets.length; i++) {
@@ -191,14 +169,14 @@ function _ensurePositionsGroup(group) {
     log("[JSX] Positions/" + group + " csoport letrehozva");
   }
 
+  _groupCache[subKey] = subGrp;
   return subGrp;
 }
 
 // --- Egy szemely feldolgozasa ---
 function _processPerson(person) {
   var layerName = person.layerName;
-  var group = person.group; // "Students" vagy "Teachers"
-  var displayText = person.displayText;
+  var group = person.group;
   var positionText = person.position || null;
 
   var textAlign = _data.textAlign || "center";
@@ -206,10 +184,7 @@ function _processPerson(person) {
   var posGapCm = _data.positionGapCm || CONFIG.POSITION_GAP_CM;
   var posFontSize = _data.positionFontSize || CONFIG.POSITION_FONT_SIZE;
 
-  // 1. Nev layer keresese
-  var nameLayer = _findNameLayer(layerName, group);
-
-  // 2. Kep layer keresese (pozicionalashoz)
+  // 1. Kep layer keresese
   var imageLayer = _findImageLayer(layerName);
   if (!imageLayer) {
     log("[JSX] WARN: Nincs kep layer: " + layerName);
@@ -217,13 +192,10 @@ function _processPerson(person) {
     return;
   }
 
-  // 3. Nev layert NEM bantjuk — csak referenciakent hasznaljuk a pozicio elhelyezesehez
-
-  // 4. Pozicio layer kezelese
+  // 2. Pozicio layer kezelese
   var posLayer = _findPositionLayer(layerName, group);
 
   if (positionText) {
-    // Van pozicio szoveg
     var posContainer = _ensurePositionsGroup(group);
 
     if (posLayer) {
@@ -232,6 +204,8 @@ function _processPerson(person) {
         var posTextItem = posLayer.textItem;
         if (posTextItem.contents !== positionText) {
           posTextItem.contents = positionText;
+          // Bounds cache invalidalas mert a szoveg valtozott
+          delete _boundsCache[String(posLayer.id)];
         }
         var posAlignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
         if (posAlignMap[textAlign]) {
@@ -261,38 +235,36 @@ function _processPerson(person) {
       }
     }
 
-    // Pozicio layer pozicionalasa: nev alja + gap (vagy kep alja + nameGap + nevMagassag + posGap)
+    // 3. Pozicio layer pozicionalasa
     try {
       var posBaselineOffset = _measureBaselineOffset(posContainer, posFontSize);
 
-      // Nev layer alja — a nev layer TENYLEGES bounds-jabol (nem szamolva)
-      // Igy nem bantjuk a nev poziciojat, csak referenciat kapunk
+      // Nev layer alja — TENYLEGES bounds-bol (nev layert NEM modositjuk)
+      var nameLayer = _findNameLayer(layerName, group);
       var nameBottom;
+      var imgBounds = _getBoundsNoEffects(imageLayer); // 1x lekerdezve, cache-elve
       if (nameLayer) {
         var nameBounds = _getBoundsNoEffects(nameLayer);
         nameBottom = nameBounds.bottom;
       } else {
-        var imgB = _getBoundsNoEffects(imageLayer);
-        nameBottom = imgB.bottom + _cm2px(nameGapCm);
+        nameBottom = imgBounds.bottom + _cm2px(nameGapCm);
       }
 
       var posGapPx = _cm2px(posGapCm);
       var posBoundsTop = nameBottom + posGapPx;
       var posBaselineY = posBoundsTop + posBaselineOffset;
 
-      // Vizszintes: kep kozepetol (ugyanugy mint a nev)
-      var imgB2 = _getBoundsNoEffects(imageLayer);
+      // Vizszintes: kep kozepetol (imgBounds mar cache-bol jon)
       var posX;
       if (textAlign === "left") {
-        posX = imgB2.left;
+        posX = imgBounds.left;
       } else if (textAlign === "right") {
-        posX = imgB2.right;
+        posX = imgBounds.right;
       } else {
-        posX = (imgB2.left + imgB2.right) / 2;
+        posX = (imgBounds.left + imgBounds.right) / 2;
       }
 
       selectLayerById(posLayer.id);
-      _doc.activeLayer = posLayer;
       posLayer.textItem.position = [
         new UnitValue(Math.round(posX), "px"),
         new UnitValue(Math.round(posBaselineY), "px")

@@ -125,36 +125,18 @@ function _reorderStack(group, orderedNames) {
   var artLayers = group.artLayers;
   if (artLayers.length < 2) return;
 
-  // Name -> layer ID map
-  var nameToId = {};
+  // Name -> layer map
+  var nameToLayer = {};
   for (var i = 0; i < artLayers.length; i++) {
-    nameToId[artLayers[i].name] = artLayers[i].id;
+    nameToLayer[artLayers[i].name] = artLayers[i];
   }
 
-  // Matched layer ID-k az ordered sorrend alapjan
-  var matchedIds = [];
-  for (var j = 0; j < orderedNames.length; j++) {
-    var lid = nameToId[orderedNames[j]];
-    if (lid !== undefined) matchedIds.push(lid);
-  }
-
-  if (matchedIds.length < 2) return;
-
-  // ActionManager-rel mozgatjuk a layereket (NEM clipboard, NEM DOM move)
-  // Minden layert a csoport aljara mozgatunk a helyes sorrendben
-  for (var m = matchedIds.length - 1; m >= 0; m--) {
-    // Layer kivalasztasa
-    selectLayerById(matchedIds[m]);
-    // Mozgatas a csoport aljara
-    var moveDesc = new ActionDescriptor();
-    var moveRef = new ActionReference();
-    moveRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-    moveDesc.putReference(charIDToTypeID("null"), moveRef);
-    var destRef = new ActionReference();
-    destRef.putIndex(charIDToTypeID("Lyr "), 0);
-    moveDesc.putReference(charIDToTypeID("T   "), destRef);
+  // Fordított sorrendben a csoport TETEJÉRE rakjuk egyenként (DOM move — csoporton belül marad!)
+  for (var m = orderedNames.length - 1; m >= 0; m--) {
+    var layer = nameToLayer[orderedNames[m]];
+    if (!layer) continue;
     try {
-      executeAction(charIDToTypeID("move"), moveDesc, DialogModes.NO);
+      layer.move(group, ElementPlacement.PLACEATBEGINNING);
     } catch (e) { /* skip ha nem sikerul */ }
   }
 }

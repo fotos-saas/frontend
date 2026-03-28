@@ -542,7 +542,15 @@ export class JsxRunnerService {
         scriptContent = scriptContent.slice(0, configStart) + sideEffects + '\n\n' + scriptContent.slice(configStart);
       }
 
-      scriptContent += '\ntry { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n';
+      // A restore-t a _logLines.join ELÉ injektáljuk, hogy az maradjon az utolsó kifejezés
+      scriptContent = scriptContent.replace(
+        /(_logLines\.join\([^)]*\));?\s*$/,
+        'try { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n$1;',
+      );
+      // Ha nincs _logLines.join, fallback: a végére rakjuk (régi viselkedés)
+      if (!scriptContent.includes('_savedDialogMode; } catch(_e) {}')) {
+        scriptContent += '\ntry { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n';
+      }
     }
 
     return scriptContent;

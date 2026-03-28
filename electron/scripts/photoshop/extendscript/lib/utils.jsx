@@ -243,6 +243,7 @@ function selectLayerById(layerId) {
   var ref = new ActionReference();
   ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   desc.putReference(charIDToTypeID("null"), ref);
+  desc.putBoolean(charIDToTypeID("MkVs"), false); // NE scrollozzon a Layers panelen → gyorsabb
   executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
 }
 

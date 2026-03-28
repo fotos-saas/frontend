@@ -358,6 +358,7 @@ var _arrangeResult = '{"arranged":0}';
 function doArrangeNames() {
   var doc = app.activeDocument;
 
+
   var textAlign = typeof CONFIG !== "undefined" && CONFIG.TEXT_ALIGN ? CONFIG.TEXT_ALIGN : "center";
   var breakAfter = typeof CONFIG !== "undefined" && CONFIG.BREAK_AFTER ? parseInt(CONFIG.BREAK_AFTER, 10) : 0;
 

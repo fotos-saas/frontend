@@ -94,18 +94,11 @@ function _doPlacePhotos() {
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
-      if (CONFIG.SYNC_BORDER === "true") {
-        // Keretezesnel SO open kell (az action belul fut)
-        placePhotoInSmartObject(_doc, layer, item.photoPath, true);
-        _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
-      } else {
-        // GYORS: placedLayerReplaceContents — NEM nyit SO-t,
-        // 1 history lepes, es a suspendHistory osszevonja oket
-        var descReplace = new ActionDescriptor();
-        descReplace.putPath(charIDToTypeID("null"), new File(item.photoPath));
-        descReplace.putInteger(charIDToTypeID("PgNm"), 1);
-        executeAction(stringIDToTypeID("placedLayerReplaceContents"), descReplace, DialogModes.NO);
-      }
+      // SO megnyitas → cover resize → (keretezés ha kell) → flatten+save+close
+      // A placedLayerReplaceContents NEM cover-ezi a kepet, ezert mindig SO uton megyunk.
+      var doBorder = (CONFIG.SYNC_BORDER === "true");
+      placePhotoInSmartObject(_doc, layer, item.photoPath, doBorder);
+      _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 
       _placed++;
 

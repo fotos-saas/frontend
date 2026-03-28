@@ -94,11 +94,52 @@ function _doPlacePhotos() {
       selectLayerById(layer.id);
       _doc.activeLayer = layer;
 
-      // SO megnyitas → cover resize → (keretezés ha kell) → flatten+save+close
-      // A placedLayerReplaceContents NEM cover-ezi a kepet, ezert mindig SO uton megyunk.
-      var doBorder = (CONFIG.SYNC_BORDER === "true");
-      placePhotoInSmartObject(_doc, layer, item.photoPath, doBorder);
-      _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+      if (CONFIG.SYNC_BORDER === "true") {
+        // Keretezesnel: SO open → place → cover → border action → save → close
+        placePhotoInSmartObject(_doc, layer, item.photoPath, true);
+        _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+      } else {
+        // GYORS: replaceContents + SO cover resize (nem kell place event + flatten)
+        var descReplace = new ActionDescriptor();
+        descReplace.putPath(charIDToTypeID("null"), new File(item.photoPath));
+        descReplace.putInteger(charIDToTypeID("PgNm"), 1);
+        executeAction(stringIDToTypeID("placedLayerReplaceContents"), descReplace, DialogModes.NO);
+
+        // SO megnyitas → cover resize → save → close
+        var descEdit = new ActionDescriptor();
+        var refEdit = new ActionReference();
+        refEdit.putEnumerated(stringIDToTypeID("smartObject"), stringIDToTypeID("ordinal"), stringIDToTypeID("targetEnum"));
+        descEdit.putReference(charIDToTypeID("null"), refEdit);
+        executeAction(stringIDToTypeID("placedLayerEditContents"), descEdit, DialogModes.NO);
+
+        var soDoc = app.activeDocument;
+        var soW = soDoc.width.as("px");
+        var soH = soDoc.height.as("px");
+
+        // Az SO-ban a hatteret es a replaced content layert flatten-eljuk
+        if (soDoc.artLayers.length > 1) soDoc.flatten();
+        var contentLayer = soDoc.activeLayer;
+        var cb = contentLayer.bounds;
+        var cW = cb[2].as("px") - cb[0].as("px");
+        var cH = cb[3].as("px") - cb[1].as("px");
+
+        if (cW > 0 && cH > 0) {
+          var sf = Math.max((soW / cW) * 100, (soH / cH) * 100);
+          if (Math.abs(sf - 100) > 0.5) {
+            contentLayer.resize(sf, sf, AnchorPosition.MIDDLECENTER);
+          }
+          var nb = contentLayer.bounds;
+          contentLayer.translate(
+            new UnitValue((soW - (nb[2].as("px") - nb[0].as("px"))) / 2 - nb[0].as("px"), "px"),
+            new UnitValue((soH - (nb[3].as("px") - nb[1].as("px"))) / 2 - nb[1].as("px"), "px")
+          );
+        }
+
+        soDoc.flatten();
+        soDoc.save();
+        soDoc.close(SaveOptions.DONOTSAVECHANGES);
+        _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
+      }
 
       _placed++;
 
@@ -123,8 +164,10 @@ function _doPlacePhotos() {
   try {
     _doc = activateDocByName(CONFIG.TARGET_DOC_NAME);
 
-    // Egyetlen Undo lepes az osszes kepcserere
-    _doc.suspendHistory("Fotok behelyezese", "_doPlacePhotos()");
+    // NEM hasznalunk suspendHistory-t: SO open/save/close nem kompatibilis vele
+    // (az aktiv dokumentum valt SO editContent-kor).
+    // Minden kepcsere kulon history lepes — igy egyesevel is visszavonhato.
+    _doPlacePhotos();
 
     log("[JSX] Fotok behelyezese kesz: " + _placed + " sikeres, " + _errors + " hiba");
 

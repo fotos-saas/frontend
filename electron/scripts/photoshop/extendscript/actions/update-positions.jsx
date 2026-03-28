@@ -1,12 +1,13 @@
 /**
  * update-positions.jsx — Pozicio (beosztás) layerek frissitese/letrehozasa/torlese
  *
+ * FONTOS: A nev layereket NEM modositja! Csak referenciaként olvassa ki a poziciojukat.
+ *
  * Minden szemelyre:
- * 1. Nev layer szovegenek frissitese (tordeles szabalyok szerint)
- * 2. Pozicio layer kezelese:
+ * 1. Pozicio layer kezelese:
  *    - Ha van pozicio szoveg → letrehozas vagy frissites
  *    - Ha nincs pozicio → layer torlese (ha letezik)
- * 3. Pozicio layer pozicionalasa: nev layer alja + gap
+ * 2. Pozicio layer pozicionalasa: nev layer alja + gap
  *
  * JSON formatum (Electron handler kesziti):
  * {
@@ -201,7 +202,6 @@ function _processPerson(person) {
   var positionText = person.position || null;
 
   var textAlign = _data.textAlign || "center";
-  var breakAfter = _data.nameBreakAfter || 0;
   var nameGapCm = _data.nameGapCm || 0.5;
   var posGapCm = _data.positionGapCm || CONFIG.POSITION_GAP_CM;
   var posFontSize = _data.positionFontSize || CONFIG.POSITION_FONT_SIZE;
@@ -217,49 +217,7 @@ function _processPerson(person) {
     return;
   }
 
-  // 3. Nev szoveg frissitese (ha van name layer)
-  if (nameLayer) {
-    try {
-      var textItem = nameLayer.textItem;
-      var alignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
-      if (alignMap[textAlign]) {
-        textItem.justification = alignMap[textAlign];
-      }
-      var plainName = _getPlainName(textItem);
-      var newText = _breakName(plainName, breakAfter);
-      if (textItem.contents !== newText) {
-        textItem.contents = newText;
-      }
-
-      // Nev pozicionalas a kep ala
-      var nameBaselineOffset = _measureBaselineOffset(
-        getGroupByPath(_doc, ["Names", group]) || _doc,
-        CONFIG.FONT_SIZE
-      );
-      var imgBounds = _getBoundsNoEffects(imageLayer);
-      var gapPx = _cm2px(nameGapCm);
-      var desiredBoundsTop = imgBounds.bottom + gapPx;
-      var desiredBaselineY = desiredBoundsTop + nameBaselineOffset;
-
-      var imgCenterX = (imgBounds.left + imgBounds.right) / 2;
-      var desiredX;
-      if (textAlign === "left") {
-        desiredX = imgBounds.left;
-      } else if (textAlign === "right") {
-        desiredX = imgBounds.right;
-      } else {
-        desiredX = imgCenterX;
-      }
-
-      textItem.position = [
-        new UnitValue(Math.round(desiredX), "px"),
-        new UnitValue(Math.round(desiredBaselineY), "px")
-      ];
-    } catch (e) {
-      log("[JSX] WARN: Nev frissites sikertelen (" + layerName + "): " + e.message);
-      _errors++;
-    }
-  }
+  // 3. Nev layert NEM bantjuk — csak referenciakent hasznaljuk a pozicio elhelyezesehez
 
   // 4. Pozicio layer kezelese
   var posLayer = _findPositionLayer(layerName, group);
@@ -307,24 +265,12 @@ function _processPerson(person) {
     try {
       var posBaselineOffset = _measureBaselineOffset(posContainer, posFontSize);
 
-      // Nev layer alja — font meretbol szamolva (NEM bounds-bol!)
-      // Igy a pozicio layer helye NEM fugg a nev tartalmatol (ekezetek, lenyulo betuk).
+      // Nev layer alja — a nev layer TENYLEGES bounds-jabol (nem szamolva)
+      // Igy nem bantjuk a nev poziciojat, csak referenciat kapunk
       var nameBottom;
       if (nameLayer) {
-        var nameBaselineOffset = _measureBaselineOffset(posContainer, CONFIG.FONT_SIZE || 25);
-        var nImgB = _getBoundsNoEffects(imageLayer);
-        var nameGapPx = _cm2px(nameGapCm);
-        var nameDesiredTop = nImgB.bottom + nameGapPx;
-        var nameFontSize = CONFIG.FONT_SIZE || 25;
-        var nameFontHeightPx = (nameFontSize / 72) * _doc.resolution;
-        var nameLineCount = 1;
-        try {
-          var nc = nameLayer.textItem.contents;
-          for (var nci = 0; nci < nc.length; nci++) {
-            if (nc.charAt(nci) === "\r") nameLineCount++;
-          }
-        } catch (e2) {}
-        nameBottom = nameDesiredTop + (nameFontHeightPx * nameLineCount * 1.2);
+        var nameBounds = _getBoundsNoEffects(nameLayer);
+        nameBottom = nameBounds.bottom;
       } else {
         var imgB = _getBoundsNoEffects(imageLayer);
         nameBottom = imgB.bottom + _cm2px(nameGapCm);

@@ -71,7 +71,7 @@ export interface PrintShopContact {
 export interface PrintShopProjectListParams {
   per_page?: number;
   page?: number;
-  status?: 'in_print' | 'done' | null;
+  status?: 'in_print' | 'done' | 'done_pending' | 'picked_up' | null;
   search?: string;
   studio_id?: number | null;
   class_year?: string;

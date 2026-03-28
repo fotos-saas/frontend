@@ -542,14 +542,15 @@ export class JsxRunnerService {
         scriptContent = scriptContent.slice(0, configStart) + sideEffects + '\n\n' + scriptContent.slice(configStart);
       }
 
-      // A restore-t a _logLines.join ELÉ injektáljuk, hogy az maradjon az utolsó kifejezés
-      scriptContent = scriptContent.replace(
-        /(_logLines\.join\([^)]*\));?\s*$/,
-        'try { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n$1;',
-      );
-      // Ha nincs _logLines.join, fallback: a végére rakjuk (régi viselkedés)
-      if (!scriptContent.includes('_savedDialogMode; } catch(_e) {}')) {
-        scriptContent += '\ntry { app.displayDialogs = _savedDialogMode; } catch(_e) {}\n';
+      // A restore-t az utolsó return-kifejezés ELÉ injektáljuk,
+      // hogy az maradjon az utolsó kiértékelt sor (osascript kimenet).
+      // Felismert minták: _logLines.join(...), _linkResult;, _unlinkResult;, stb.
+      const restoreCode = 'try { app.displayDialogs = _savedDialogMode; } catch(_e) {}';
+      const lastExprPattern = /((?:_logLines\.join\([^)]*\)|_\w+Result)\s*;?\s*)$/;
+      if (lastExprPattern.test(scriptContent)) {
+        scriptContent = scriptContent.replace(lastExprPattern, restoreCode + '\n$1');
+      } else {
+        scriptContent += '\n' + restoreCode + '\n';
       }
     }
 

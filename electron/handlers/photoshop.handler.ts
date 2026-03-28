@@ -1623,96 +1623,102 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       const dlStart = Date.now();
       log.info(`Place photos: ${total} layer fotojanak letoltese...`);
 
-      // Pre-cover: ha nincs keretezes, lekerjuk az SO meretet es sharp-pal cover-ezunk
-      // Az SO meretet az elso image layer boundsNoEffects-bol olvassuk ki (1 gyors JSX, nincs SO open)
+      // SO meret lekeres es foto letoltes PARHUZAMOSAN
       let soWidthPx = params.soWidthPx || 0;
       let soHeightPx = params.soHeightPx || 0;
 
-      if (!params.syncBorder && soWidthPx <= 0 && validLayers.length > 0) {
-        try {
-          const sizeJsx = jsxRunner.buildJsxScript('actions/get-image-names.jsx', undefined, params.targetDocName, params.psdFilePath);
-          // Gyors alternativa: boundsNoEffects az elso image layerbol
-          const sizeScript = `
-            var _soSize = '';
-            try {
-              var _doc = app.activeDocument;
-              var _grps = [["Images","Students"],["Images","Teachers"]];
-              for (var _g = 0; _g < _grps.length; _g++) {
-                var _cur = _doc;
-                for (var _p = 0; _p < _grps[_g].length; _p++) {
-                  var _found = false;
-                  try { for (var _j = 0; _j < _cur.layerSets.length; _j++) { if (_cur.layerSets[_j].name === _grps[_g][_p]) { _cur = _cur.layerSets[_j]; _found = true; break; } } } catch(e){}
-                  if (!_found) { _cur = null; break; }
+      // SO meret: 1 gyors JSX (boundsNoEffects, nincs SO open)
+      const soSizePromise = (!params.syncBorder && soWidthPx <= 0 && params.layers.length > 0)
+        ? (async () => {
+          try {
+            const sizeScript = `
+              var _soSize = '';
+              try {
+                var _doc = app.activeDocument;
+                var _grps = [["Images","Students"],["Images","Teachers"]];
+                for (var _g = 0; _g < _grps.length; _g++) {
+                  var _cur = _doc;
+                  for (var _p = 0; _p < _grps[_g].length; _p++) {
+                    var _found = false;
+                    try { for (var _j = 0; _j < _cur.layerSets.length; _j++) { if (_cur.layerSets[_j].name === _grps[_g][_p]) { _cur = _cur.layerSets[_j]; _found = true; break; } } } catch(e){}
+                    if (!_found) { _cur = null; break; }
+                  }
+                  if (_cur && _cur.artLayers && _cur.artLayers.length > 0) {
+                    var _ref = new ActionReference();
+                    _ref.putIdentifier(charIDToTypeID("Lyr "), _cur.artLayers[0].id);
+                    var _desc = executeActionGet(_ref);
+                    var _bk = stringIDToTypeID("boundsNoEffects");
+                    var _b = _desc.hasKey(_bk) ? _desc.getObjectValue(_bk) : _desc.getObjectValue(stringIDToTypeID("bounds"));
+                    _soSize = '{"w":' + Math.round(_b.getUnitDoubleValue(stringIDToTypeID("right")) - _b.getUnitDoubleValue(stringIDToTypeID("left")))
+                      + ',"h":' + Math.round(_b.getUnitDoubleValue(stringIDToTypeID("bottom")) - _b.getUnitDoubleValue(stringIDToTypeID("top"))) + '}';
+                    break;
+                  }
                 }
-                if (_cur && _cur.artLayers && _cur.artLayers.length > 0) {
-                  var _ref = new ActionReference();
-                  _ref.putIdentifier(charIDToTypeID("Lyr "), _cur.artLayers[0].id);
-                  var _desc = executeActionGet(_ref);
-                  var _bk = stringIDToTypeID("boundsNoEffects");
-                  var _b = _desc.hasKey(_bk) ? _desc.getObjectValue(_bk) : _desc.getObjectValue(stringIDToTypeID("bounds"));
-                  var _w = Math.round(_b.getUnitDoubleValue(stringIDToTypeID("right")) - _b.getUnitDoubleValue(stringIDToTypeID("left")));
-                  var _h = Math.round(_b.getUnitDoubleValue(stringIDToTypeID("bottom")) - _b.getUnitDoubleValue(stringIDToTypeID("top")));
-                  _soSize = '{"w":' + _w + ',"h":' + _h + '}';
-                  break;
-                }
-              }
-            } catch(e) {}
-            _soSize;
-          `;
-          const sizeJsxPath = path.join(app.getPath('temp'), `jsx-sosize-${Date.now()}.jsx`);
-          fs.writeFileSync(sizeJsxPath, sizeScript, 'utf-8');
-          const sizeAs = jsxRunner.buildFocusPreservingAppleScript(sizeJsxPath);
-          const sizeResult = await new Promise<string>((resolve) => {
-            execFile('osascript', ['-e', sizeAs], { timeout: 10000 }, (_err, stdout) => {
-              try { fs.unlinkSync(sizeJsxPath); } catch (_) {}
-              resolve(stdout?.trim() || '');
+              } catch(e) {}
+              _soSize;
+            `;
+            const sizeJsxPath = path.join(app.getPath('temp'), `jsx-sosize-${Date.now()}.jsx`);
+            fs.writeFileSync(sizeJsxPath, sizeScript, 'utf-8');
+            const sizeAs = jsxRunner.buildFocusPreservingAppleScript(sizeJsxPath);
+            const sizeResult = await new Promise<string>((resolve) => {
+              execFile('osascript', ['-e', sizeAs], { timeout: 10000 }, (_err, stdout) => {
+                try { fs.unlinkSync(sizeJsxPath); } catch (_) {}
+                resolve(stdout?.trim() || '');
+              });
             });
-          });
-          if (sizeResult.startsWith('{')) {
-            const parsed = JSON.parse(sizeResult);
-            soWidthPx = parsed.w || 0;
-            soHeightPx = parsed.h || 0;
-            log.info(`SO size detected: ${soWidthPx}x${soHeightPx}px`);
+            if (sizeResult.startsWith('{')) {
+              const parsed = JSON.parse(sizeResult);
+              soWidthPx = parsed.w || 0;
+              soHeightPx = parsed.h || 0;
+              log.info(`SO size detected: ${soWidthPx}x${soHeightPx}px`);
+            }
+          } catch (sizeErr) {
+            log.warn('SO meret lekeres sikertelen, fallback PS cover:', sizeErr);
           }
-        } catch (sizeErr) {
-          log.warn('SO meret lekeres sikertelen, fallback PS cover:', sizeErr);
-        }
-      }
+        })()
+        : Promise.resolve();
 
-      const canPreCover = !params.syncBorder && soWidthPx > 0 && soHeightPx > 0;
-      if (canPreCover) {
-        log.info(`Pre-cover enabled: ${soWidthPx}x${soHeightPx}px (sharp)`);
-      }
-
-      // 1. Fotok PARHUZAMOS letoltese + opcionalis pre-cover (PS-t meg nem bantjuk)
-      const downloadResults = await Promise.all(
-        params.layers.map(async (item) => {
+      // Fotok letoltese PARHUZAMOSAN az SO meret lekeressel
+      const rawDownloads = await Promise.all([
+        soSizePromise,
+        ...params.layers.map(async (item) => {
           try {
             const ext = item.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
             const urlHash = crypto.createHash('md5').update(item.photoUrl).digest('hex').substring(0, 8);
             const fileName = `${item.layerName}-${urlHash}.${ext}`;
             const localPath = await jsxRunner.downloadPhoto(item.photoUrl, fileName);
-
-            // Pre-cover: sharp-pal az SO meretere cover crop + resize
-            if (canPreCover) {
-              try {
-                const sharp = require('sharp');
-                const coveredPath = localPath.replace(/\.[^.]+$/, '_covered.jpg');
-                await sharp(localPath)
-                  .resize(params.soWidthPx!, params.soHeightPx!, { fit: 'cover', position: 'centre' })
-                  .jpeg({ quality: 98 })
-                  .toFile(coveredPath);
-                return { layerName: item.layerName, photoPath: coveredPath, photoUrl: item.photoUrl, preCovered: true };
-              } catch (sharpErr) {
-                log.warn(`Sharp pre-cover sikertelen (${item.layerName}), fallback SO cover:`, sharpErr);
-                return { layerName: item.layerName, photoPath: localPath, photoUrl: item.photoUrl, preCovered: false };
-              }
-            }
-
-            return { layerName: item.layerName, photoPath: localPath, photoUrl: item.photoUrl, preCovered: false };
+            return { layerName: item.layerName, photoPath: localPath, photoUrl: item.photoUrl };
           } catch (err) {
             log.warn(`Foto letoltes sikertelen (${item.layerName}):`, err);
             return null;
+          }
+        }),
+      ]);
+
+      // rawDownloads[0] = soSizePromise (void), rawDownloads[1..N] = letoltesek
+      const rawLayers = rawDownloads.slice(1) as Array<{ layerName: string; photoPath: string; photoUrl: string } | null>;
+
+      const canPreCover = !params.syncBorder && soWidthPx > 0 && soHeightPx > 0;
+      if (canPreCover) {
+        log.info(`Pre-cover: ${soWidthPx}x${soHeightPx}px (sharp, ${rawLayers.filter(Boolean).length} kep)`);
+      }
+
+      // Sharp pre-cover PARHUZAMOSAN (minden kep egyszerrei)
+      const downloadResults = await Promise.all(
+        rawLayers.map(async (item) => {
+          if (!item) return null;
+          if (!canPreCover) return { ...item, preCovered: false };
+          try {
+            const sharp = require('sharp');
+            const coveredPath = item.photoPath.replace(/\.[^.]+$/, '_covered.jpg');
+            await sharp(item.photoPath)
+              .resize(soWidthPx, soHeightPx, { fit: 'cover', position: 'centre' })
+              .jpeg({ quality: 98 })
+              .toFile(coveredPath);
+            return { layerName: item.layerName, photoPath: coveredPath, photoUrl: item.photoUrl, preCovered: true };
+          } catch (sharpErr) {
+            log.warn(`Sharp pre-cover sikertelen (${item.layerName}), fallback:`, sharpErr);
+            return { ...item, preCovered: false };
           }
         }),
       );

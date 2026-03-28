@@ -78,12 +78,23 @@ function _doPlacePhotos() {
 
   log("[JSX] Fotok behelyezese: " + data.layers.length + " layer");
 
+  // Layer map felepitese EGYSZER (nem N×DOM walk)
+  var _imageLayerMap = {};
+  var _imgGroups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var ig = 0; ig < _imgGroups.length; ig++) {
+    var imgGrp = getGroupByPath(_doc, _imgGroups[ig]);
+    if (!imgGrp) continue;
+    for (var ia = 0; ia < imgGrp.artLayers.length; ia++) {
+      _imageLayerMap[imgGrp.artLayers[ia].name] = imgGrp.artLayers[ia];
+    }
+  }
+
   for (var i = 0; i < data.layers.length; i++) {
     var item = data.layers[i];
 
     try {
-      // Layer keresese CSAK az Images csoportban
-      var layer = _findImageLayer(_doc, item.layerName);
+      // Layer keresese map-bol (O(1))
+      var layer = _imageLayerMap[item.layerName];
       if (!layer) {
         log("[JSX] WARN: Layer nem talalhato: " + item.layerName);
         _errors++;

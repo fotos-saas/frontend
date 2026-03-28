@@ -3,11 +3,11 @@
  *
  * FONTOS: A nev layereket NEM modositja! Csak referenciaként olvassa ki a poziciojukat.
  *
- * Minden szemelyre:
- * 1. Pozicio layer kezelese:
- *    - Ha van pozicio szoveg → letrehozas vagy frissites
- *    - Ha nincs pozicio → layer torlese (ha letezik)
- * 2. Pozicio layer pozicionalasa: nev layer alja + gap
+ * Optimalizaciok:
+ * - Layer lookup map: egyszer epitjuk fel, O(1) kereses szemelynkent
+ * - Bounds cache: layer ID alapjan, nincs dupla lekerdezes
+ * - Nincs selectLayerById bounds lekerdesnel — kozvetlenul ID-val executeActionGet
+ * - Group cache: getGroupByPath eredmenyek cache-elve
  *
  * JSON formatum (Electron handler kesziti):
  * {
@@ -34,24 +34,29 @@ function log(msg) {
 var _doc, _data, _dpi;
 var _updated = 0, _created = 0, _deleted = 0, _errors = 0;
 
-// --- Cache-ek (teljesitmeny) ---
-var _baselineOffsets = {};  // font meret → offset
-var _boundsCache = {};      // layer id → { left, top, right, bottom }
-var _groupCache = {};       // path string → group ref
+// --- Cache-ek ---
+var _baselineOffsets = {};
+var _boundsCache = {};
+var _groupCache = {};
+
+// --- Layer lookup map-ek (egyszer epulnek fel) ---
+var _imageLayerMap = {};  // layerName → layer ref
+var _nameLayerMap = {};   // "group/layerName" → layer ref
+var _posLayerMap = {};    // "group/layerName" → layer ref
 
 // --- cm → px konverzio ---
 function _cm2px(cm) {
   return Math.round((cm / 2.54) * _dpi);
 }
 
-// --- Layer bounds EFFEKTEK NELKUL (CACHE-ELT) ---
+// --- Layer bounds EFFEKTEK NELKUL (CACHE-ELT, SELECT NELKUL) ---
 function _getBoundsNoEffects(layer) {
   var cacheKey = String(layer.id);
   if (_boundsCache[cacheKey]) return _boundsCache[cacheKey];
 
-  selectLayerById(layer.id);
+  // Kozvetlenul layer ID alapjan — NEM selectalja, nincs PS redraw
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   var boundsKey = stringIDToTypeID("boundsNoEffects");
@@ -81,7 +86,7 @@ function _getGroup(pathArray) {
   return _groupCache[key];
 }
 
-// --- Baseline offset meres adott font merethez ---
+// --- Baseline offset meres (cache-elt, 1x fut font meretenként) ---
 function _measureBaselineOffset(container, fontSize) {
   var key = String(fontSize);
   if (_baselineOffsets[key] !== undefined) return _baselineOffsets[key];
@@ -100,7 +105,6 @@ function _measureBaselineOffset(container, fontSize) {
   var b = _getBoundsNoEffects(refLayer);
   var offset = posY - b.top;
 
-  // Meres utan toroljuk — ne maradjon a cache-ben sem
   delete _boundsCache[String(refLayer.id)];
   refLayer.remove();
   _baselineOffsets[key] = offset;
@@ -108,38 +112,52 @@ function _measureBaselineOffset(container, fontSize) {
   return offset;
 }
 
-// --- Layer keresese nev+csoport alapjan (cache-elt group-pal) ---
-function _findImageLayer(layerName) {
-  var paths = [["Images", "Students"], ["Images", "Teachers"]];
-  for (var g = 0; g < paths.length; g++) {
-    var grp = _getGroup(paths[g]);
+// --- Layer lookup map-ek felepitese (1x, O(N)) ---
+function _buildLayerMaps() {
+  // Images — Students + Teachers
+  var imgPaths = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < imgPaths.length; g++) {
+    var grp = _getGroup(imgPaths[g]);
     if (!grp) continue;
     for (var i = 0; i < grp.artLayers.length; i++) {
-      if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
+      _imageLayerMap[grp.artLayers[i].name] = grp.artLayers[i];
     }
   }
-  return null;
-}
 
-function _findNameLayer(layerName, group) {
-  var grp = _getGroup(["Names", group]);
-  if (!grp) return null;
-  for (var i = 0; i < grp.artLayers.length; i++) {
-    if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
+  // Names — Students + Teachers
+  var namePaths = [["Names", "Students"], ["Names", "Teachers"]];
+  for (var g2 = 0; g2 < namePaths.length; g2++) {
+    var nGrp = _getGroup(namePaths[g2]);
+    if (!nGrp) continue;
+    var groupName = namePaths[g2][1];
+    for (var j = 0; j < nGrp.artLayers.length; j++) {
+      _nameLayerMap[groupName + "/" + nGrp.artLayers[j].name] = nGrp.artLayers[j];
+    }
   }
-  return null;
-}
 
-function _findPositionLayer(layerName, group) {
-  var grp = _getGroup(["Positions", group]);
-  if (!grp) return null;
-  for (var i = 0; i < grp.artLayers.length; i++) {
-    if (grp.artLayers[i].name === layerName) return grp.artLayers[i];
+  // Positions — Students + Teachers
+  var posPaths = [["Positions", "Students"], ["Positions", "Teachers"]];
+  for (var g3 = 0; g3 < posPaths.length; g3++) {
+    var pGrp = _getGroup(posPaths[g3]);
+    if (!pGrp) continue;
+    var pGroupName = posPaths[g3][1];
+    for (var k = 0; k < pGrp.artLayers.length; k++) {
+      _posLayerMap[pGroupName + "/" + pGrp.artLayers[k].name] = pGrp.artLayers[k];
+    }
   }
-  return null;
+
+  log("[JSX] Layer map: " + _countKeys(_imageLayerMap) + " image, "
+    + _countKeys(_nameLayerMap) + " name, "
+    + _countKeys(_posLayerMap) + " position");
 }
 
-// --- Positions csoport biztositasa (letrehozas ha nincs) ---
+function _countKeys(obj) {
+  var c = 0;
+  for (var k in obj) { if (obj.hasOwnProperty(k)) c++; }
+  return c;
+}
+
+// --- Positions csoport biztositasa ---
 function _ensurePositionsGroup(group) {
   var posRoot = _getGroup(["Positions"]);
   if (!posRoot) {
@@ -149,7 +167,6 @@ function _ensurePositionsGroup(group) {
     log("[JSX] Positions csoport letrehozva");
   }
 
-  // Al-csoport (Students/Teachers)
   var subKey = "Positions/" + group;
   if (_groupCache[subKey]) return _groupCache[subKey];
 
@@ -184,27 +201,24 @@ function _processPerson(person) {
   var posGapCm = _data.positionGapCm || CONFIG.POSITION_GAP_CM;
   var posFontSize = _data.positionFontSize || CONFIG.POSITION_FONT_SIZE;
 
-  // 1. Kep layer keresese
-  var imageLayer = _findImageLayer(layerName);
+  // O(1) layer kereses a map-bol
+  var imageLayer = _imageLayerMap[layerName] || null;
   if (!imageLayer) {
     log("[JSX] WARN: Nincs kep layer: " + layerName);
     _errors++;
     return;
   }
 
-  // 2. Pozicio layer kezelese
-  var posLayer = _findPositionLayer(layerName, group);
+  var posLayer = _posLayerMap[group + "/" + layerName] || null;
 
   if (positionText) {
     var posContainer = _ensurePositionsGroup(group);
 
     if (posLayer) {
-      // Letezo pozicio layer → szoveg frissites
       try {
         var posTextItem = posLayer.textItem;
         if (posTextItem.contents !== positionText) {
           posTextItem.contents = positionText;
-          // Bounds cache invalidalas mert a szoveg valtozott
           delete _boundsCache[String(posLayer.id)];
         }
         var posAlignMap = { left: Justification.LEFT, center: Justification.CENTER, right: Justification.RIGHT };
@@ -218,7 +232,6 @@ function _processPerson(person) {
         return;
       }
     } else {
-      // Uj pozicio layer letrehozasa
       try {
         posLayer = createTextLayer(posContainer, positionText, {
           name: layerName,
@@ -227,6 +240,8 @@ function _processPerson(person) {
           color: CONFIG.TEXT_COLOR,
           alignment: textAlign
         });
+        // Uj layer hozzaadasa a map-hoz
+        _posLayerMap[group + "/" + layerName] = posLayer;
         _created++;
       } catch (e) {
         log("[JSX] WARN: Pozicio layer letrehozas sikertelen (" + layerName + "): " + e.message);
@@ -235,14 +250,14 @@ function _processPerson(person) {
       }
     }
 
-    // 3. Pozicio layer pozicionalasa
+    // Pozicio layer pozicionalasa
     try {
       var posBaselineOffset = _measureBaselineOffset(posContainer, posFontSize);
 
-      // Nev layer alja — TENYLEGES bounds-bol (nev layert NEM modositjuk)
-      var nameLayer = _findNameLayer(layerName, group);
+      // Nev layer alja — TENYLEGES bounds-bol
+      var nameLayer = _nameLayerMap[group + "/" + layerName] || null;
+      var imgBounds = _getBoundsNoEffects(imageLayer);
       var nameBottom;
-      var imgBounds = _getBoundsNoEffects(imageLayer); // 1x lekerdezve, cache-elve
       if (nameLayer) {
         var nameBounds = _getBoundsNoEffects(nameLayer);
         nameBottom = nameBounds.bottom;
@@ -254,7 +269,7 @@ function _processPerson(person) {
       var posBoundsTop = nameBottom + posGapPx;
       var posBaselineY = posBoundsTop + posBaselineOffset;
 
-      // Vizszintes: kep kozepetol (imgBounds mar cache-bol jon)
+      // Vizszintes: kep kozepetol (imgBounds cache-bol)
       var posX;
       if (textAlign === "left") {
         posX = imgBounds.left;
@@ -279,6 +294,7 @@ function _processPerson(person) {
     if (posLayer) {
       try {
         posLayer.remove();
+        delete _posLayerMap[group + "/" + layerName];
         _deleted++;
       } catch (e) {
         log("[JSX] WARN: Pozicio torles sikertelen (" + layerName + "): " + e.message);
@@ -290,6 +306,15 @@ function _processPerson(person) {
 
 // --- Fo fuggveny ---
 function _doUpdatePositions() {
+  // 1. Layer map-ek felepitese (1x, O(N))
+  _buildLayerMaps();
+
+  // 2. Baseline offset elomeres (1x fut)
+  var posFontSize = _data.positionFontSize || CONFIG.POSITION_FONT_SIZE;
+  var posContainer = _ensurePositionsGroup("Teachers");
+  _measureBaselineOffset(posContainer, posFontSize);
+
+  // 3. Szemelyek feldolgozasa
   var persons = _data.persons || [];
   log("[JSX] Szemelyek szama: " + persons.length);
 

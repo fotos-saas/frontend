@@ -44,9 +44,8 @@ function _cm2px(cm) {
 // effekt nelkuli meretet (boundsNoEffects), es ABBOL szamolunk.
 // Visszaad: { left, top, right, bottom } pixelben
 function _getBoundsNoEffects(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   // boundsNoEffects — effekt nelkuli bounds

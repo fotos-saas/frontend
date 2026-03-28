@@ -339,13 +339,35 @@ function doEqualizeGrid() {
     if (isNaN(gridGapV)) gridGapV = 0;
     if (isNaN(gridMaxRows) || gridMaxRows < 0) gridMaxRows = 0;
 
-    // Ha sorok megadva, csak annyi kepet rendezunk
     var maxItems = gridMaxRows > 0 ? Math.min(items.length, gridCols * gridMaxRows) : items.length;
 
-    // Unlink hogy a mozgatas izolalt legyen
+    // Unlink
     unlinkAll(doc, items);
 
-    // 3. Grid pozicio szamitas es eltolas
+    // Testver layerek EGYETLEN bejarassal elogyujtese (NEM N kulon bejaras!)
+    var gridSibMap = {};
+    if (!imagesOnly) {
+      var gridNameSet = {};
+      for (var gns = 0; gns < items.length; gns++) gridNameSet[items[gns].name] = true;
+      var _collectGridSibs = function(container) {
+        try {
+          for (var a = 0; a < container.artLayers.length; a++) {
+            var n = container.artLayers[a].name;
+            if (gridNameSet[n]) {
+              if (!gridSibMap[n]) gridSibMap[n] = [];
+              gridSibMap[n].push(container.artLayers[a]);
+            }
+          }
+        } catch (e) {}
+        try {
+          for (var s = 0; s < container.layerSets.length; s++) {
+            _collectGridSibs(container.layerSets[s]);
+          }
+        } catch (e) {}
+      };
+      _collectGridSibs(doc);
+    }
+
     var startLeft = items[0].bounds.left;
     var startTop = items[0].bounds.top;
     var photoW = items[0].bounds.right - items[0].bounds.left;
@@ -360,7 +382,6 @@ function doEqualizeGrid() {
       var targetLeft = startLeft + col * (photoW + gridGapH);
       var targetTop = startTop + row * (photoH + gridGapV);
 
-      // Utolso (nem teli) sor igazitasa
       var isLastRow = (row === totalRows - 1);
       var itemsInLastRow = maxItems - row * gridCols;
       if (isLastRow && itemsInLastRow < gridCols && gridAlign !== "left") {
@@ -377,20 +398,16 @@ function doEqualizeGrid() {
 
       if (gdx === 0 && gdy === 0) { placed++; continue; }
 
-      // Kep mozgatasa
       translateLayer(items[gi].id, gdx, gdy);
 
       if (!imagesOnly) {
-        // Testver layerek mozgatasa ugyanazzal a delta-val
-        var gridSibs = [];
-        findAllLayersByName(doc, items[gi].name, gridSibs);
+        var gridSibs = gridSibMap[items[gi].name] || [];
         for (var gs2 = 0; gs2 < gridSibs.length; gs2++) {
           if (gridSibs[gs2].id === items[gi].id) continue;
           translateLayer(gridSibs[gs2].id, gdx, gdy);
         }
       }
 
-      // Bounds frissitese a kovetkezo iteraciohoz
       items[gi].bounds.left += gdx;
       items[gi].bounds.right += gdx;
       items[gi].bounds.top += gdy;
@@ -399,7 +416,6 @@ function doEqualizeGrid() {
       placed++;
     }
 
-    // Relink: visszalinkeljuk a szemelyek layereit
     relinkAll(doc, items);
 
     restoreSelection(selected);
@@ -414,6 +430,30 @@ function doEqualizeGrid() {
 
     unlinkAll(doc, items);
 
+    // Testver layerek egyetlen bejarassal
+    var alignSibMap = {};
+    if (!imagesOnly) {
+      var alignNameSet = {};
+      for (var ans = 0; ans < items.length; ans++) alignNameSet[items[ans].name] = true;
+      var _collectAlignSibs = function(container) {
+        try {
+          for (var a = 0; a < container.artLayers.length; a++) {
+            var n = container.artLayers[a].name;
+            if (alignNameSet[n]) {
+              if (!alignSibMap[n]) alignSibMap[n] = [];
+              alignSibMap[n].push(container.artLayers[a]);
+            }
+          }
+        } catch (e) {}
+        try {
+          for (var s = 0; s < container.layerSets.length; s++) {
+            _collectAlignSibs(container.layerSets[s]);
+          }
+        } catch (e) {}
+      };
+      _collectAlignSibs(doc);
+    }
+
     for (var t = 1; t < items.length; t++) {
       var dy2 = refTop - items[t].bounds.top;
       if (dy2 === 0) continue;
@@ -421,8 +461,7 @@ function doEqualizeGrid() {
       translateLayer(items[t].id, 0, dy2);
 
       if (!imagesOnly) {
-        var sibs = [];
-        findAllLayersByName(doc, items[t].name, sibs);
+        var sibs = alignSibMap[items[t].name] || [];
         for (var sb = 0; sb < sibs.length; sb++) {
           if (sibs[sb].id === items[t].id) continue;
           translateLayer(sibs[sb].id, 0, dy2);
@@ -431,7 +470,6 @@ function doEqualizeGrid() {
       aligned++;
     }
 
-    // Relink
     relinkAll(doc, items);
 
     restoreSelection(selected);

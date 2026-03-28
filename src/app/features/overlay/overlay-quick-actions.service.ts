@@ -4,6 +4,7 @@ import { OverlayProjectService, PersonItem } from './overlay-project.service';
 import { OverlaySettingsService } from './overlay-settings.service';
 import { OverlaySortService } from './overlay-sort.service';
 import { OverlayEffectsService } from './overlay-effects.service';
+import { LoggerService } from '../../core/services/logger.service';
 
 type QaTarget = 'all' | 'students' | 'teachers';
 
@@ -33,6 +34,7 @@ export class OverlayQuickActionsService {
   private readonly settings = inject(OverlaySettingsService);
   private readonly sortService = inject(OverlaySortService);
   private readonly ngZone = inject(NgZone);
+  private readonly logger = inject(LoggerService);
   readonly effects = inject(OverlayEffectsService);
 
   readonly panelOpen = signal(false);
@@ -126,8 +128,10 @@ export class OverlayQuickActionsService {
     try {
       if (!result?.output) { this.effects.setResult(false, 'Nincs válasz a Photoshoptól'); return; }
       const cleaned = result.output.trim();
-      if (!cleaned.startsWith('{')) { this.effects.setResult(false, 'Érvénytelen válasz'); return; }
-      const data: JsxLinkData = JSON.parse(cleaned);
+      this.logger.debug(`[LINK] raw output: "${cleaned.slice(0, 300)}"`);
+      const jsonStr = this.extractJson(cleaned);
+      if (!jsonStr) { this.effects.setResult(false, `Érvénytelen válasz: ${cleaned.slice(0, 80)}`); return; }
+      const data: JsxLinkData = JSON.parse(jsonStr);
       if (data.error) { this.effects.setResult(false, data.error); return; }
       const count = type === 'link' ? data.linked : data.unlinked;
       const verb = type === 'link' ? 'linkelve' : 'szétlinkelve';
@@ -135,6 +139,18 @@ export class OverlayQuickActionsService {
       if (count === 0) { this.effects.setResult(false, 'Nem találtam linkelhető layereket'); return; }
       this.effects.setResult(true, `${count} layer ${verb} (${nameCount} név)`);
     } catch { this.effects.setResult(false, 'Hiba a válasz feldolgozásában'); }
+  }
+
+  /** Kinyeri az első JSON objektumot a szövegből (osascript extra szöveget tehet elé/mögé). */
+  private extractJson(text: string): string | null {
+    const start = text.indexOf('{');
+    if (start === -1) return null;
+    let depth = 0;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      else if (text[i] === '}') { depth--; if (depth === 0) return text.substring(start, i + 1); }
+    }
+    return null;
   }
 
   // Delegált effekt metódusok
@@ -303,7 +319,8 @@ export class OverlayQuickActionsService {
   ): void {
     try {
       if (result?.output) {
-        const data: Record<string, unknown> = JSON.parse(result.output.trim());
+        const jsonStr = this.extractJson(result.output.trim()) || result.output.trim();
+        const data: Record<string, unknown> = JSON.parse(jsonStr);
         if (data['error']) { this.effects.setResult(false, String(data['error'])); return; }
         this.effects.setResult(true, formatSuccess(data));
       } else { this.effects.setResult(true, fallbackMessage); }

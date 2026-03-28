@@ -111,16 +111,27 @@ function findImageLayerByName(doc, layerName) {
 }
 
 // --- Image layer szures: csak Images/ csoportbeliek ---
+// Egyetlen bejarassal map-et epit az Images csoportokbol, utana lookup
 function filterImageLayers(doc, selected) {
+  // 1. Images csoport layer ID-k osszegyujtese (1 bejaras)
+  var imageIdSet = {};
+  var groups = [["Images", "Students"], ["Images", "Teachers"]];
+  for (var g = 0; g < groups.length; g++) {
+    var grp = getGroupByPath(doc, groups[g]);
+    if (!grp) continue;
+    for (var a = 0; a < grp.artLayers.length; a++) {
+      imageIdSet[grp.artLayers[a].id] = true;
+    }
+  }
+  // 2. Kijeloltek szurese a map alapjan
   var result = [];
   var processed = {};
   for (var i = 0; i < selected.length; i++) {
     var n = selected[i].name;
     if (processed[n]) continue;
-    var imgLayer = findImageLayerByName(doc, n);
-    if (imgLayer && imgLayer.id === selected[i].id) {
+    if (imageIdSet[selected[i].id]) {
       processed[n] = true;
-      result.push({ id: imgLayer.id, name: n });
+      result.push({ id: selected[i].id, name: n });
     }
   }
   return result;
@@ -239,39 +250,23 @@ function linkSelectedLayers() {
   executeAction(stringIDToTypeID("linkSelectedLayers"), linkDesc, DialogModes.NO);
 }
 
-// --- Buborekrendezes left coord alapjan ---
+// --- Rendezes left coord alapjan ---
 function sortByLeft(items) {
-  for (var i = 0; i < items.length - 1; i++) {
-    for (var j = i + 1; j < items.length; j++) {
-      if (items[j].bounds.left < items[i].bounds.left) {
-        var tmp = items[i];
-        items[i] = items[j];
-        items[j] = tmp;
-      }
-    }
-  }
+  items.sort(function(a, b) { return a.bounds.left - b.bounds.left; });
   return items;
 }
 
 // --- Rendezes top majd left alapjan (soronkent, azon belul balrol jobbra) ---
 function sortByTopLeft(items) {
-  // Elso pass: meghatarozza a sorok kuszoberteket (felmeret tolerancia)
-  // Ha ket kep top erteke kozel van (< fele magassag), ugyanabban a sorban vannak
   var rowThreshold = 10;
   if (items.length > 0) {
     rowThreshold = (items[0].bounds.bottom - items[0].bounds.top) / 2;
   }
-  for (var i = 0; i < items.length - 1; i++) {
-    for (var j = i + 1; j < items.length; j++) {
-      var topDiff = items[j].bounds.top - items[i].bounds.top;
-      var sameRow = (topDiff > -rowThreshold && topDiff < rowThreshold);
-      if (!sameRow && items[j].bounds.top < items[i].bounds.top) {
-        var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
-      } else if (sameRow && items[j].bounds.left < items[i].bounds.left) {
-        var tmp2 = items[i]; items[i] = items[j]; items[j] = tmp2;
-      }
-    }
-  }
+  items.sort(function(a, b) {
+    var topDiff = a.bounds.top - b.bounds.top;
+    if (topDiff > -rowThreshold && topDiff < rowThreshold) return a.bounds.left - b.bounds.left;
+    return topDiff;
+  });
   return items;
 }
 

@@ -518,9 +518,11 @@ export class JsxRunnerService {
     }
 
     // Iro/modosito scripteknél: disablePSDCompression + displayDialogs NO injektálás
-    // Csak-olvasó scriptek (get-*) NEM kapják — azok nem mentenek, nem nyitnak SO-t
-    const isReadOnly = path.basename(scriptName).startsWith('get-');
-    if (!isReadOnly) {
+    // Scriptek amik NEM mentenek fájlt / NEM nyitnak SO-t: nem kapják az injektálást.
+    // get-* = readonly, link-*/unlink-* = csak layer select/link, align-* = pozícionálás
+    const baseName = path.basename(scriptName);
+    const isNoSave = /^(get-|link-|unlink-|align-)/.test(baseName);
+    if (!isNoSave) {
       const sideEffects = [
         'var _savedDialogMode = app.displayDialogs;',
         'app.displayDialogs = DialogModes.NO;',

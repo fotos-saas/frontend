@@ -1724,7 +1724,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
       );
 
       const validLayers = downloadResults.filter(
-        (r): r is { layerName: string; photoPath: string; photoUrl: string } => r !== null,
+        (r): r is { layerName: string; photoPath: string; photoUrl: string; preCovered: boolean } => r !== null,
       );
 
       if (validLayers.length === 0) {
@@ -1740,7 +1740,7 @@ export function registerPhotoshopHandlers(_mainWindow: BrowserWindow): void {
           win.webContents.send('place-photos-progress', {
             current: 0,
             total: validLayers.length,
-            layerName: validLayers[0].layerName,
+            layerName: validLayers[0]?.layerName,
           });
         } catch (_) { /* ignore */ }
       }

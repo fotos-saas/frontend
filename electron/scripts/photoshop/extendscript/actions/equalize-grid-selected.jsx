@@ -221,13 +221,20 @@ function relinkAll(doc, items) {
   }
 }
 
-// --- Layer translate (dx, dy) ActionManager-rel — SELECT NELKUL ---
-// Layer ID-vel kozvetlenul mozgat, nincs selectLayerById overhead
+// --- Layer translate (dx, dy) ActionManager-rel ---
 function translateLayer(layerId, dx, dy) {
   if (dx === 0 && dy === 0) return;
+  // Select with MkVs=false (no Layers panel scroll)
+  var slDesc = new ActionDescriptor();
+  var slRef = new ActionReference();
+  slRef.putIdentifier(charIDToTypeID("Lyr "), layerId);
+  slDesc.putReference(charIDToTypeID("null"), slRef);
+  slDesc.putBoolean(charIDToTypeID("MkVs"), false);
+  executeAction(charIDToTypeID("slct"), slDesc, DialogModes.NO);
+  // Move the selected layer
   var desc = new ActionDescriptor();
   var ref = new ActionReference();
-  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
+  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
   desc.putReference(charIDToTypeID("null"), ref);
   var offset = new ActionDescriptor();
   offset.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);

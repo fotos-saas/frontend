@@ -93,9 +93,17 @@ function _doArrangeSubtitles() {
       var dy = targetY - curBounds.top;
 
       if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        // Select with MkVs=false (no Layers panel scroll)
+        var slDesc = new ActionDescriptor();
+        var slRef = new ActionReference();
+        slRef.putIdentifier(charIDToTypeID("Lyr "), lyr.id);
+        slDesc.putReference(charIDToTypeID("null"), slRef);
+        slDesc.putBoolean(charIDToTypeID("MkVs"), false);
+        executeAction(charIDToTypeID("slct"), slDesc, DialogModes.NO);
+        // Move the selected layer
         var mvDesc = new ActionDescriptor();
         var mvRef = new ActionReference();
-        mvRef.putIdentifier(charIDToTypeID("Lyr "), lyr.id);
+        mvRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
         mvDesc.putReference(charIDToTypeID("null"), mvRef);
         var mvOfs = new ActionDescriptor();
         mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);

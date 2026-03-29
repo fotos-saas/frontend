@@ -73,9 +73,17 @@ function _restoreLayerPosition(layer, targetX, targetY) {
   var dy = targetY - Math.round(bnfe.top);
 
   if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+    // Select with MkVs=false (no Layers panel scroll)
+    var slDesc = new ActionDescriptor();
+    var slRef = new ActionReference();
+    slRef.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+    slDesc.putReference(charIDToTypeID("null"), slRef);
+    slDesc.putBoolean(charIDToTypeID("MkVs"), false);
+    executeAction(charIDToTypeID("slct"), slDesc, DialogModes.NO);
+    // Move the selected layer
     var mvDesc = new ActionDescriptor();
     var mvRef = new ActionReference();
-    mvRef.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+    mvRef.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
     mvDesc.putReference(charIDToTypeID("null"), mvRef);
     var mvOfs = new ActionDescriptor();
     mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);

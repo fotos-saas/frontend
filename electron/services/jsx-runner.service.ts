@@ -1,23 +1,50 @@
 /**
  * JsxRunnerService — Photoshop JSX futtatás infrastruktúra
  *
- * A photoshop.handler.ts-ből kiemelt JSX kezelő logika:
- * - Photoshop telepítés keresés
- * - JSX script deploy, feloldás, összeállítás
- * - osascript futtatás (szinkron + streaming)
- * - Fotó letöltés + sharp resize
- * - Személy/kép adat előkészítés JSX-hez
+ * Modulok: script-escape.util, photoshop-detector.service,
+ * photo-download.service, jsx-data-preparer.service
  */
 
-import { execFile, spawn, ChildProcess } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as https from 'https';
-import * as http from 'http';
 import { app } from 'electron';
 import Store from 'electron-store';
 import log from 'electron-log/main';
-import sharp from 'sharp';
+
+// Extracted modules
+import { appleScriptEscape, jsxStringEscape } from './script-escape.util';
+import {
+  isValidPhotoshopPath as _isValidPhotoshopPath,
+  findPhotoshopInstallation as _findPhotoshopInstallation,
+  isPhotoshopRunning as _isPhotoshopRunning,
+} from './photoshop-detector.service';
+import { downloadPhoto as _downloadPhoto } from './photo-download.service';
+import {
+  sanitizeNameForLayer as _sanitizeNameForLayer,
+  breakName as _breakName,
+  preparePersonsForJsx as _preparePersonsForJsx,
+  prepareImageLayersForJsx as _prepareImageLayersForJsx,
+} from './jsx-data-preparer.service';
+import type {
+  PersonData,
+  PersonWithPhoto,
+  ImageSizeConfig,
+  PreparedPersons,
+  PreparedImageLayers,
+} from './jsx-data-preparer.service';
+
+// Re-export types so callers don't need to change their imports
+export type {
+  PersonData,
+  PersonWithPhoto,
+  ImageSizeConfig,
+  PreparedPersons,
+  PreparedImageLayers,
+} from './jsx-data-preparer.service';
+
+// Re-export standalone functions for callers that import them directly
+export { appleScriptEscape, jsxStringEscape } from './script-escape.util';
 
 // ============ Types ============
 
@@ -37,139 +64,28 @@ export interface PhotoshopSchema {
   tabloPositionFontSize: number;
 }
 
-export interface PersonData {
-  id: number;
-  name: string;
-  type: string;
-}
-
-export interface PersonWithPhoto extends PersonData {
-  photoUrl?: string | null;
-}
-
-export interface ImageSizeConfig {
-  widthCm: number;
-  heightCm: number;
-  dpi: number;
-  studentSizeCm?: number;
-  teacherSizeCm?: number;
-}
-
-export interface PreparedPersons {
-  layers: Array<{ layerName: string; displayText: string; group: string }>;
-  textAlign: string;
-  stats: { students: number; teachers: number; total: number };
-}
-
-export interface PreparedImageLayers {
-  layers: Array<{ layerName: string; group: string; widthPx: number; heightPx: number; photoPath: string | null }>;
-  stats: { students: number; teachers: number; total: number; withPhoto: number };
-  imageSizeCm: ImageSizeConfig;
-  studentSizeCm: number;
-  teacherSizeCm: number;
-}
-
 export interface JsxRunResult {
   success: boolean;
   error?: string;
   output?: string;
 }
 
-// ============ Constants ============
-
-const DEFAULT_PS_PATHS_MAC = [
-  '/Applications/Adobe Photoshop 2026/Adobe Photoshop 2026.app',
-  '/Applications/Adobe Photoshop 2025/Adobe Photoshop 2025.app',
-  '/Applications/Adobe Photoshop 2024/Adobe Photoshop 2024.app',
-  '/Applications/Adobe Photoshop CC 2024/Adobe Photoshop CC 2024.app',
-];
-
-const DEFAULT_PS_PATHS_WIN = [
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop 2024\\Photoshop.exe',
-  'C:\\Program Files\\Adobe\\Adobe Photoshop CC 2024\\Photoshop.exe',
-];
-
-const PHOTO_CACHE_TTL_MS = 5 * 60 * 1000; // 5 perc
-
-// ============ Helpers ============
-
-/** AppleScript string escape — megakadályozza az injection-t */
-export function appleScriptEscape(str: string): string {
-  return str
-    .replace(/\0/g, '')     // null byte eltávolítás
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
-}
-
-/** JSX (ExtendScript) string escape — külön kontextus az AppleScript-től */
-export function jsxStringEscape(str: string): string {
-  return str
-    .replace(/\0/g, '')     // null byte eltávolítás
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r');
-}
-
-/** Allowed domains for photo downloads (SSRF protection) */
-const PRODUCTION_DOWNLOAD_DOMAINS = [
-  'api.tablostudio.hu',
-  'cdn.tablostudio.hu',
-  'storage.tablostudio.hu',
-  'tablostudio.hu',
-];
-
-/** Localhost csak dev módban engedélyezett */
-const DEV_DOWNLOAD_DOMAINS = [
-  ...PRODUCTION_DOWNLOAD_DOMAINS,
-  'localhost',
-  '127.0.0.1',
-];
-
-const MAX_REDIRECTS = 3;
-
 // ============ JsxRunnerService ============
 
 export class JsxRunnerService {
   constructor(private readonly psStore: Store<PhotoshopSchema>) {}
 
-  // ---- Photoshop telepítés ----
-
   isValidPhotoshopPath(psPath: string): boolean {
-    if (!fs.existsSync(psPath)) return false;
-    if (process.platform === 'darwin') {
-      return psPath.endsWith('.app') && fs.statSync(psPath).isDirectory();
-    }
-    return psPath.endsWith('.exe') && fs.statSync(psPath).isFile();
+    return _isValidPhotoshopPath(psPath);
   }
 
   findPhotoshopInstallation(): string | null {
-    const paths = process.platform === 'darwin' ? DEFAULT_PS_PATHS_MAC : DEFAULT_PS_PATHS_WIN;
-    for (const psPath of paths) {
-      if (this.isValidPhotoshopPath(psPath)) return psPath;
-    }
-    return null;
+    return _findPhotoshopInstallation();
   }
 
   isPhotoshopRunning(): Promise<boolean> {
-    return new Promise((resolve) => {
-      if (process.platform !== 'darwin') {
-        resolve(false);
-        return;
-      }
-      execFile('pgrep', ['-x', 'Adobe Photoshop'], (error) => {
-        resolve(!error);
-      });
-    });
+    return _isPhotoshopRunning();
   }
-
-  // ---- JSX script deploy ----
 
   deployJsxScripts(workDir: string): void {
     const sourceBase = app.isPackaged
@@ -211,70 +127,16 @@ export class JsxRunnerService {
     }
   }
 
-  // ---- Név kezelés ----
-
   sanitizeNameForLayer(text: string, personId?: number): string {
-    let result = text
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\u0150/g, 'O').replace(/\u0151/g, 'o')
-      .replace(/\u0170/g, 'U').replace(/\u0171/g, 'u')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '');
-    if (personId !== undefined) {
-      result += `---${personId}`;
-    }
-    return result;
+    return _sanitizeNameForLayer(text, personId);
   }
 
   breakName(name: string, breakAfter: number): string {
-    if (breakAfter <= 0) return name;
-    const words = name.split(' ');
-    if (words.length < 2) return name;
-    const isPrefix = (w: string) => w.replace(/\./g, '').length <= 2;
-    const realCount = words.filter(w => !isPrefix(w)).length;
-    if (realCount < 3) return name;
-    const hyphenIndex = words.findIndex(w => w.indexOf('-') !== -1);
-    if (hyphenIndex !== -1 && hyphenIndex < words.length - 1) {
-      return words.slice(0, hyphenIndex + 1).join(' ') + '\r' + words.slice(hyphenIndex + 1).join(' ');
-    }
-    let realWordCount = 0;
-    let breakIndex = -1;
-    for (let i = 0; i < words.length; i++) {
-      if (!isPrefix(words[i])) realWordCount++;
-      if (realWordCount > breakAfter && breakIndex === -1) breakIndex = i;
-    }
-    if (breakIndex === -1) return name;
-    return words.slice(0, breakIndex).join(' ') + '\r' + words.slice(breakIndex).join(' ');
+    return _breakName(name, breakAfter);
   }
 
-  // ---- Adat előkészítés ----
-
   preparePersonsForJsx(personsData: PersonData[]): PreparedPersons {
-    const breakAfter = this.psStore.get('tabloNameBreakAfter', 1);
-    const textAlign = this.psStore.get('tabloTextAlign', 'center');
-    const students = personsData.filter(p => p.type !== 'teacher');
-    const teachers = personsData.filter(p => p.type === 'teacher');
-
-    const layers = [
-      ...students.map(p => ({
-        layerName: this.sanitizeNameForLayer(p.name, p.id),
-        displayText: this.breakName(p.name, breakAfter),
-        group: 'Students',
-      })),
-      ...teachers.map(p => ({
-        layerName: this.sanitizeNameForLayer(p.name, p.id),
-        displayText: this.breakName(p.name, breakAfter),
-        group: 'Teachers',
-      })),
-    ];
-
-    return {
-      layers,
-      textAlign,
-      stats: { students: students.length, teachers: teachers.length, total: personsData.length },
-    };
+    return _preparePersonsForJsx(personsData, this.psStore);
   }
 
   async prepareImageLayersForJsx(
@@ -282,132 +144,17 @@ export class JsxRunnerService {
     imageSizeCm: ImageSizeConfig,
     docDpi: number = 200,
   ): Promise<PreparedImageLayers> {
-    const students = personsData.filter(p => p.type !== 'teacher');
-    const teachers = personsData.filter(p => p.type === 'teacher');
-
-    const widthPx = Math.round((imageSizeCm.widthCm / 2.54) * docDpi);
-    const heightPx = Math.round((imageSizeCm.heightCm / 2.54) * docDpi);
-
-    const allPersons = [...students, ...teachers];
-    const downloadResults = await Promise.all(
-      allPersons.map(async (p) => {
-        if (!p.photoUrl) return null;
-        try {
-          const layerName = this.sanitizeNameForLayer(p.name, p.id);
-          const ext = p.photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
-          const fileName = `${layerName}.${ext}`;
-          return await this.downloadPhoto(p.photoUrl, fileName, { width: widthPx, height: heightPx });
-        } catch (err) {
-          log.warn(`Foto letoltes sikertelen (${p.name}):`, err);
-          return null;
-        }
-      }),
-    );
-
-    const layers = allPersons.map((p, idx) => ({
-      layerName: this.sanitizeNameForLayer(p.name, p.id),
-      group: p.type === 'teacher' ? 'Teachers' : 'Students',
-      widthPx,
-      heightPx,
-      photoPath: downloadResults[idx] || null,
-    }));
-
-    const withPhoto = downloadResults.filter(r => r !== null).length;
-
-    return {
-      layers,
-      stats: { students: students.length, teachers: teachers.length, total: personsData.length, withPhoto },
-      imageSizeCm,
-      studentSizeCm: imageSizeCm.studentSizeCm || 0,
-      teacherSizeCm: imageSizeCm.teacherSizeCm || 0,
-    };
-  }
-
-  // ---- Fotó letöltés ----
-
-  /** URL domain whitelist ellenőrzés (SSRF védelem) */
-  private isAllowedDownloadUrl(url: string): boolean {
-    try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
-      // Localhost csak dev módban engedélyezett
-      const allowedDomains = app.isPackaged ? PRODUCTION_DOWNLOAD_DOMAINS : DEV_DOWNLOAD_DOMAINS;
-      // Strict domain match — NEM enged subdomain bypass-t (pl. evil.localhost)
-      return allowedDomains.some((d) => parsed.hostname === d);
-    } catch {
-      return false;
-    }
+    return _prepareImageLayersForJsx(personsData, imageSizeCm, docDpi);
   }
 
   downloadPhoto(
     url: string,
     fileName: string,
     _targetSize?: unknown,
-    _redirectCount = 0,
+    _redirectCount?: number,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      // SSRF védelem: csak engedélyezett domainekről töltünk le
-      if (!this.isAllowedDownloadUrl(url)) {
-        reject(new Error(`Nem engedélyezett letöltési URL domain: ${url}`));
-        return;
-      }
-
-      // Path traversal védelem: csak a fájlnevet használjuk
-      const safeName = path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
-      if (!safeName || safeName === '.' || safeName === '..') {
-        reject(new Error(`Érvénytelen fájlnév: ${fileName}`));
-        return;
-      }
-
-      const tempDir = path.join(app.getPath('temp'), 'psd-photos');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      const rawPath = path.join(tempDir, safeName);
-
-      const protocol = url.startsWith('https') ? https : http;
-      const file = fs.createWriteStream(rawPath);
-
-      log.info(`Foto letoltese: ${url} → ${fileName}`);
-
-      protocol.get(url, (response) => {
-        if (response.statusCode === 301 || response.statusCode === 302) {
-          const redirectUrl = response.headers.location;
-          if (redirectUrl) {
-            file.close();
-            fs.unlinkSync(rawPath);
-            if (_redirectCount >= MAX_REDIRECTS) {
-              reject(new Error(`Túl sok átirányítás (max ${MAX_REDIRECTS})`));
-              return;
-            }
-            this.downloadPhoto(redirectUrl, safeName, undefined, _redirectCount + 1).then(resolve).catch(reject);
-            return;
-          }
-        }
-
-        if (response.statusCode !== 200) {
-          file.close();
-          fs.unlink(rawPath, () => {});
-          reject(new Error(`Foto letoltes sikertelen: HTTP ${response.statusCode}`));
-          return;
-        }
-
-        response.pipe(file);
-
-        file.on('finish', () => {
-          file.close();
-          log.info(`Foto letoltve: ${fileName}`);
-          resolve(rawPath);
-        });
-      }).on('error', (err) => {
-        fs.unlink(rawPath, () => {});
-        reject(err);
-      });
-    });
+    return _downloadPhoto(url, fileName, _targetSize, _redirectCount);
   }
-
-  // ---- JSX script összeállítás ----
 
   resolveJsxPath(scriptName: string): string {
     const workDir = this.psStore.get('workDirectory', null);
@@ -427,7 +174,6 @@ export class JsxRunnerService {
       return scriptContent;
     }
 
-    // A script base könyvtár: a munkakönytár/scripts vagy a beépített scripts
     const scriptBaseDir = this.getScriptBaseDir();
 
     return scriptContent.replace(
@@ -436,8 +182,6 @@ export class JsxRunnerService {
         const fullPath = path.resolve(scriptDir, includePath);
         const realPath = fs.existsSync(fullPath) ? fs.realpathSync(fullPath) : null;
 
-        // Path traversal védelem: az include-nak a script base-en belül kell lennie
-        // Strict check: path separator kötelező a base dir után (megelőzi /scripts-evil/ bypass-t)
         if (!realPath || !(realPath === scriptBaseDir || realPath.startsWith(scriptBaseDir + path.sep))) {
           log.warn(`JSX #include path traversal blokkolva: ${includePath} → ${fullPath}`);
           return `// HIBA: #include fajl nem engedelyezett: ${includePath}`;
@@ -517,11 +261,6 @@ export class JsxRunnerService {
       }
     }
 
-    // displayDialogs kezelés: MINDEN script saját maga kezeli a displayDialogs-t
-    // (flatten-export, add-group-layers, place-photos, stb. mind tartalmazzák).
-    // A runner NEM injektál displayDialogs/disablePSDCompression kódot,
-    // mert a rossz helyre kerülő restore kód elrontja a script kimenetét.
-
     return scriptContent;
   }
 
@@ -534,8 +273,6 @@ export class JsxRunnerService {
       'return _result',
     ].join('\n');
   }
-
-  // ---- JSX futtatás ----
 
   async runJsx(params: {
     scriptName: string;
@@ -640,7 +377,6 @@ export class JsxRunnerService {
     jsonData?: Record<string, unknown>;
     onLog?: (line: string, stream: 'stdout' | 'stderr') => void;
   }): Promise<JsxRunResult> {
-    // Streaming variant — delegates data prep to runJsx-like logic but uses spawn
     return this._runJsxInternal(params, true);
   }
 

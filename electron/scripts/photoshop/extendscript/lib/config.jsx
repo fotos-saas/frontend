@@ -4,10 +4,11 @@
  * Font, meret, szin konfiguracio a text layer-ekhez.
  * Minden action script #include-olja ezt.
  *
- * displayDialogs = NO: minden script dialog nelkul fut (New Layer, Save As, stb.)
- * Ha egy script AKAR dialogot, explicit visszaallithatja.
+ * FONTOS: displayDialogs NEM allitjuk itt globalissan!
+ * A createSmartObjectPlaceholder DialogModes.ERROR-t var,
+ * es a globalis NO elrontja az SO konverziot (140GB scratch).
+ * Minden script aminek kell, MAGA allitja be.
  */
-app.displayDialogs = DialogModes.NO;
 
 var CONFIG = {
   // Szoveg layer alapertelmezes

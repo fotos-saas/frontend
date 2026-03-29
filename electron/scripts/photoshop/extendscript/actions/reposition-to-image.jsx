@@ -162,12 +162,21 @@ function doReposition() {
         } catch (e2) {}
       }
     } else {
-      selectLayerById(sel.id);
+      // AM move — nincs selectLayerById, nincs Layers panel redraw
       try {
-        doc.activeLayer.translate(
-          new UnitValue(targetBounds.left - selBounds.left, "px"),
-          new UnitValue(targetBounds.top - selBounds.top, "px")
-        );
+        var mvDx = targetBounds.left - selBounds.left;
+        var mvDy = targetBounds.top - selBounds.top;
+        if (Math.abs(mvDx) > 0.5 || Math.abs(mvDy) > 0.5) {
+          var mvDesc = new ActionDescriptor();
+          var mvRef = new ActionReference();
+          mvRef.putIdentifier(charIDToTypeID("Lyr "), sel.id);
+          mvDesc.putReference(charIDToTypeID("null"), mvRef);
+          var mvOfs = new ActionDescriptor();
+          mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), mvDx);
+          mvOfs.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), mvDy);
+          mvDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), mvOfs);
+          executeAction(charIDToTypeID("move"), mvDesc, DialogModes.NO);
+        }
         moved++;
       } catch (e) {}
     }

@@ -84,21 +84,24 @@ function _doArrangeSubtitles() {
     var lyr = info.layer;
 
     try {
-      selectLayerById(lyr.id);
-      _doc.activeLayer = lyr;
-
       // Cel pozicio: vizszintesen kozepre, fuggoleges currentY-ra
       var targetX = Math.round((docW - info.width) / 2);
       var targetY = currentY;
 
-      // Bounds-alapu delta (minden layer tipusnal mukodik — text es nem-text)
-      // A translate delta-t a jelenlegi bounds-bol szamoljuk
       var curBounds = _getBoundsNoEffects(lyr);
       var dx = targetX - curBounds.left;
       var dy = targetY - curBounds.top;
 
       if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-        lyr.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+        var mvDesc = new ActionDescriptor();
+        var mvRef = new ActionReference();
+        mvRef.putIdentifier(charIDToTypeID("Lyr "), lyr.id);
+        mvDesc.putReference(charIDToTypeID("null"), mvRef);
+        var mvOfs = new ActionDescriptor();
+        mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);
+        mvOfs.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), dy);
+        mvDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), mvOfs);
+        executeAction(charIDToTypeID("move"), mvDesc, DialogModes.NO);
       }
 
       log("[JSX] Layer '" + lyr.name + "': X=" + targetX + ", Y=" + targetY + "px, h=" + info.height + "px");

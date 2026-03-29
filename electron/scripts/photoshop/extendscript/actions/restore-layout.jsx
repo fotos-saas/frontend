@@ -46,9 +46,8 @@ var _snapshotData = null;
 
 // --- Layer bounds EFFEKTEK NELKUL (boundsNoEffects) ---
 function _getBoundsNoEffects(layer) {
-  selectLayerById(layer.id);
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layer.id);
   var desc = executeActionGet(ref);
 
   var boundsKey = stringIDToTypeID("boundsNoEffects");
@@ -70,14 +69,19 @@ function _getBoundsNoEffects(layer) {
 // --- Layer poziciojanak visszaallitasa a mentett koordinatakra ---
 function _restoreLayerPosition(layer, targetX, targetY) {
   var bnfe = _getBoundsNoEffects(layer);
-  var currentX = Math.round(bnfe.left);
-  var currentY = Math.round(bnfe.top);
-
-  var dx = targetX - currentX;
-  var dy = targetY - currentY;
+  var dx = targetX - Math.round(bnfe.left);
+  var dy = targetY - Math.round(bnfe.top);
 
   if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
-    layer.translate(new UnitValue(dx, "px"), new UnitValue(dy, "px"));
+    var mvDesc = new ActionDescriptor();
+    var mvRef = new ActionReference();
+    mvRef.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+    mvDesc.putReference(charIDToTypeID("null"), mvRef);
+    var mvOfs = new ActionDescriptor();
+    mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);
+    mvOfs.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), dy);
+    mvDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), mvOfs);
+    executeAction(charIDToTypeID("move"), mvDesc, DialogModes.NO);
   }
 }
 

@@ -119,20 +119,21 @@ function _arrangeGroupGridPx(grp, photoWPx, photoHPx, marginPx, gapHPx, gapVPx, 
 
       var leftPx = offsetX + currentCol * (photoWPx + gapHPx);
 
-      // Layer kivalasztasa es pozicionalasa
-      selectLayerById(layer.id);
-      _doc.activeLayer = layer;
-
-      // Origoba mozgatas — boundsNoEffects-bol szamolva!
+      // Pozicionalas: bounds → cel pozicio delta, 1 AM move (nincs select)
       var bnfe = _getBoundsNoEffects(layer);
-      var dx = -bnfe.left;
-      var dy = -bnfe.top;
-      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-        layer.translate(new UnitValue(Math.round(dx), "px"), new UnitValue(Math.round(dy), "px"));
+      var totalDx = leftPx - bnfe.left;
+      var totalDy = topPx - bnfe.top;
+      if (Math.abs(totalDx) > 0.5 || Math.abs(totalDy) > 0.5) {
+        var mvDesc = new ActionDescriptor();
+        var mvRef = new ActionReference();
+        mvRef.putIdentifier(charIDToTypeID("Lyr "), layer.id);
+        mvDesc.putReference(charIDToTypeID("null"), mvRef);
+        var mvOfs = new ActionDescriptor();
+        mvOfs.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), totalDx);
+        mvOfs.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), totalDy);
+        mvDesc.putObject(charIDToTypeID("T   "), charIDToTypeID("Ofst"), mvOfs);
+        executeAction(charIDToTypeID("move"), mvDesc, DialogModes.NO);
       }
-
-      // Celpozicioba mozgatas
-      layer.translate(new UnitValue(leftPx, "px"), new UnitValue(topPx, "px"));
 
       // Kovetkezo pozicio
       currentCol++;

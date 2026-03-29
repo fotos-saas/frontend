@@ -154,10 +154,9 @@ function linkSelectedLayers() {
 // --- Layer translate (dx, dy) ActionManager-rel ---
 function translateLayer(layerId, dx, dy) {
   if (dx === 0 && dy === 0) return;
-  selectLayerById(layerId);
   var desc = new ActionDescriptor();
   var ref = new ActionReference();
-  ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+  ref.putIdentifier(charIDToTypeID("Lyr "), layerId);
   desc.putReference(charIDToTypeID("null"), ref);
   var offset = new ActionDescriptor();
   offset.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), dx);
